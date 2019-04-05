@@ -1,0 +1,9 @@
+/Builds
+/JuceLibraryCode
+/resources/fftw_osx
+/resources/fftw_win
+/Installers/
+/scripts
+.DS_Store
+.ttf
+.p12

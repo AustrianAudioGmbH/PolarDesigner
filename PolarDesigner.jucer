@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="LBcOQ9" name="PolarDesigner" projectType="audioplug" jucerVersion="5.4.3"
+              pluginManufacturer="Austrian Audio" pluginManufacturerCode="-AA-"
+              pluginCode="AAPD" aaxIdentifier="at.iem.aapolardesigner" pluginAUMainType="'aufx'"
+              version="1.0.6" companyName="Austrian Audio" companyCopyright="Austrian Audio"
+              companyWebsite="www.austrian.audio" bundleIdentifier="at.iem.aapolardesigner"
+              reportAppUsage="0" pluginFormats="buildAAX,buildAU,buildVST3"
+              pluginAAXCategory="8192" pluginVST3Category="Fx" pluginRTASCategory="8192"
+              pluginVSTCategory="kPlugCategEffect" pluginCharacteristicsValue="pluginAAXDisableMultiMono"
+              companyEmail="sayhello@austrianaudio.com">
+  <MAINGROUP id="nmXiNr" name="PolarDesigner">
+    <GROUP id="{D54BFC58-8ED6-1DEF-A2B9-DAAF16495BAC}" name="resources">
+      <GROUP id="{75BF05EC-024B-1F61-DA13-169C5FDE5119}" name="customComponents">
+        <FILE id="wQcMfW" name="AlertOverlay.h" compile="0" resource="0" file="resources/customComponents/AlertOverlay.h"/>
+        <FILE id="DfVGB4" name="DirectivityEQ.h" compile="0" resource="0" file="resources/customComponents/DirectivityEQ.h"/>
+        <FILE id="kmH60L" name="DirSlider.h" compile="0" resource="0" file="resources/customComponents/DirSlider.h"/>
+        <FILE id="hdLYyZ" name="FirstOrderDirectivityVisualizer.h" compile="0"
+              resource="0" file="resources/customComponents/FirstOrderDirectivityVisualizer.h"/>
+        <FILE id="c8udYZ" name="ImgPaths.h" compile="0" resource="0" file="resources/customComponents/ImgPaths.h"/>
+        <FILE id="hsRHaQ" name="MuteSoloButton.h" compile="0" resource="0"
+              file="resources/customComponents/MuteSoloButton.h"/>
+        <FILE id="iNtdZp" name="ReverseSlider.h" compile="0" resource="0" file="resources/customComponents/ReverseSlider.h"/>
+        <FILE id="oSCpWb" name="SimpleLabel.h" compile="0" resource="0" file="resources/customComponents/SimpleLabel.h"/>
+        <FILE id="TsqbxH" name="TitleBar.h" compile="0" resource="0" file="resources/customComponents/TitleBar.h"/>
+        <FILE id="tEUJke" name="TitleBarPaths.h" compile="0" resource="0" file="resources/customComponents/TitleBarPaths.h"/>
+      </GROUP>
+      <GROUP id="{B34229F2-BB07-9B3D-3A37-B1238050EA22}" name="lookAndFeel">
+        <FILE id="bTt83l" name="AA_LaF.h" compile="0" resource="0" file="resources/lookAndFeel/AA_LaF.h"/>
+        <FILE id="YpEjI4" name="BinaryFonts.cpp" compile="1" resource="0" file="resources/lookAndFeel/BinaryFonts.cpp"/>
+        <FILE id="JtOg8r" name="BinaryFonts.h" compile="0" resource="0" file="resources/lookAndFeel/BinaryFonts.h"/>
+      </GROUP>
+    </GROUP>
+    <GROUP id="{584F93AC-B642-0702-B166-7383B6313DFC}" name="Source">
+      <FILE id="NY7hn2" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="flIA3Z" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="h68AWH" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="G8tLdB" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="../../resources/fftw_osx"
+                       libraryPath="../../resources/fftw_osx" osxCompatibility="10.9 SDK"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="../../resources/fftw_osx"
+                       libraryPath="../../resources/fftw_osx" osxCompatibility="10.9 SDK"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_events" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../JUCE-develop/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+    <VS2017 targetFolder="Builds/VisualStudio2017" externalLibraries="libfftwf-3.3.lib">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="..\..\resources\fftw_win"
+                       libraryPath="..\..\resources\fftw_win" useRuntimeLibDLL="0"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="..\..\resources\fftw_win"
+                       libraryPath="..\..\resources\fftw_win" enablePluginBinaryCopyStep="0"
+                       useRuntimeLibDLL="0"/>
+        <CONFIGURATION isDebug="0" name="Release x32" headerPath="..\..\resources\fftw_win"
+                       libraryPath="..\..\resources\fftw_win\x32" enablePluginBinaryCopyStep="0"
+                       winArchitecture="Win32" useRuntimeLibDLL="0"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_events" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../JUCE-develop/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../JUCE-develop/modules"/>
+      </MODULEPATHS>
+    </VS2017>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <LIVE_SETTINGS>
+    <OSX/>
+    <WINDOWS/>
+  </LIVE_SETTINGS>
+  <JUCEOPTIONS JUCE_DSP_USE_STATIC_FFTW="1"/>
+</JUCERPROJECT>
