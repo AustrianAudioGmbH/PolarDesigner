@@ -436,13 +436,13 @@ public:
                     setValueAndSnapToGrid(handle, dirFactor);
                 
                 // change all bands by holding alt key
-    //            if (event.mods.isAltDown())
-    //            {
-    //                for (BandElements& elem : elements)
-    //                {
-    //                    if (elem.dirSlider != nullptr) setValueAndSnapToGrid(elem, dirFactor);
-    //                }
-    //            }
+                if (event.mods.isAltDown())
+                {
+                    for (BandElements& elem : elements)
+                    {
+                        if (elem.dirSlider != nullptr) setValueAndSnapToGrid(elem, dirFactor);
+                    }
+                }
                 
                 isDraggingDirPath = true;
             }
