@@ -292,7 +292,7 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     }
     
     // proximity compensation IIR
-    dsp::ProcessSpec specProx { currentSampleRate, static_cast<uint32> (currentBlockSize), 2 };
+    dsp::ProcessSpec specProx { currentSampleRate, static_cast<uint32> (currentBlockSize), 1 };
     proxCompIIR.prepare(specProx);
     
     proxCompIIR.reset();
@@ -327,16 +327,24 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
     ScopedNoDenormals noDenormals;
     int numSamples = buffer.getNumSamples();
     
-    // proximity compensation filter
-    if (!*zeroDelayMode && std::abs(*proxDistance) > 0.05)
-    {
-        dsp::AudioBlock<float> audioBlockProx(buffer);
-        dsp::ProcessContextReplacing<float> contextProx(audioBlockProx);
-        proxCompIIR.process(contextProx);
-    }
-    
     // create omni and eight signals
     createOmniAndEightSignals (buffer);
+    
+    // proximity compensation filter
+    if (!*zeroDelayMode && *proxDistance < -0.05) // reduce proximity effect only on figure-of-eight
+    {
+        dsp::AudioBlock<float> audioBlockProx(omniEightBuffer);
+        dsp::AudioBlock<float> eightBlock = audioBlockProx.getSingleChannelBlock(1);
+        dsp::ProcessContextReplacing<float> contextProx(eightBlock);
+        proxCompIIR.process(contextProx);
+    }
+    else if (!*zeroDelayMode && *proxDistance > 0.05) // apply proximity to omni
+    {
+        dsp::AudioBlock<float> audioBlockProx(omniEightBuffer);
+        dsp::AudioBlock<float> omniBlock = audioBlockProx.getSingleChannelBlock(0);
+        dsp::ProcessContextReplacing<float> contextProx(omniBlock);
+        proxCompIIR.process(contextProx);
+    }
     
     if (doEq == 1 && !*zeroDelayMode)
     {
@@ -1128,9 +1136,9 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients(float distance)
     
     // use logarithmic fader impact: equation is for fader between -1.0 .. 1.0
     // returns values between 1 .. 0.1
-    float a = (0.1f - 1.0f) / (-log10(1.1f) + log10(0.1f));
-    float b = 1 + a * log10(0.1f);
-    float r = -a * log10(std::abs(distance) + 0.1) + b;
+    float a = (0.05f - 1.0f) / (-log(1.1f) + log(0.1f));
+    float b = 1 + a * log(0.1f);
+    float r = -a * log(std::abs(distance) + 0.1) + b;
 
     float b0, b1, a0, a1;
     
@@ -1138,7 +1146,8 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients(float distance)
     if (distance <= 0) //bass cut
     {
         if (r < 0.01)
-            return;
+            r = 0.01;
+        
         b0 = c * (r - 1) / (fs * 4 * r) + 1;
         b1 = -exp(-c / (fs * 2 * r)) * (1 - c * (r - 1) / (fs * 4 * r));
         a0 = 1;
@@ -1147,14 +1156,15 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients(float distance)
     else // bass boost, careful: instable for r<0.05
     {
         if (r < 0.05)
-            return;
+            r = 0.05;
+        
         b0 = c * (1 - r) / (fs * 4 * r) + 1;
         b1 = -exp(-c / (fs * 2)) * (1 - c* (1 - r) / (fs * 4 * r));
         a0 = 1;
         a1 = -exp(-c / (fs * 2));
     }
 
-    *proxCompIIR.state = IIR::Coefficients<float>(b0,b1,a0,a1);
+    *proxCompIIR.coefficients = dsp::IIR::Coefficients<float>(b0,b1,a0,a1);
 }
 
 //==============================================================================

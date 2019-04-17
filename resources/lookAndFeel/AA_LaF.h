@@ -80,9 +80,9 @@ public:
 
     LaF()
     {
-        avenirLight = Typeface::createSystemTypefaceFor(BinaryFonts::AvenirNextUltraLight11_ttf, BinaryFonts::AvenirNextUltraLight11_ttfSize); //TODO: free this data
-        avenirMedium = Typeface::createSystemTypefaceFor(BinaryFonts::AvenirNextMedium06_ttf, BinaryFonts::AvenirNextMedium06_ttfSize);
-        avenirRegular = Typeface::createSystemTypefaceFor(BinaryFonts::AvenirNextRegular08_ttf, BinaryFonts::AvenirNextRegular08_ttfSize); //
+        avenirLight = Typeface::createSystemTypefaceFor(BinaryFonts::AAUltraLight_ttf, BinaryFonts::AAUltraLight_ttfSize); //TODO: free this data
+        avenirMedium = Typeface::createSystemTypefaceFor(BinaryFonts::AAMedium_ttf, BinaryFonts::AAMedium_ttfSize);
+        avenirRegular = Typeface::createSystemTypefaceFor(BinaryFonts::AARegular_ttf, BinaryFonts::AARegular_ttfSize); //
         terminator = Typeface::createSystemTypefaceFor(BinaryFonts::terminator_ttf, BinaryFonts::terminator_ttfSize);
 
         setColour (Slider::rotarySliderFillColourId, Colours::black);
