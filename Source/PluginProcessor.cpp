@@ -333,15 +333,15 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
     // proximity compensation filter
     if (!*zeroDelayMode && *proxDistance < -0.05) // reduce proximity effect only on figure-of-eight
     {
-        dsp::AudioBlock<float> audioBlockProx(omniEightBuffer);
-        dsp::AudioBlock<float> eightBlock = audioBlockProx.getSingleChannelBlock(1);
+        float* writePointerEight = omniEightBuffer.getWritePointer (1);
+        dsp::AudioBlock<float> eightBlock(&writePointerEight, 1, numSamples);
         dsp::ProcessContextReplacing<float> contextProx(eightBlock);
         proxCompIIR.process(contextProx);
     }
     else if (!*zeroDelayMode && *proxDistance > 0.05) // apply proximity to omni
     {
-        dsp::AudioBlock<float> audioBlockProx(omniEightBuffer);
-        dsp::AudioBlock<float> omniBlock = audioBlockProx.getSingleChannelBlock(0);
+        float* writePointerOmni = omniEightBuffer.getWritePointer (0);
+        dsp::AudioBlock<float> omniBlock(&writePointerOmni, 1, numSamples);
         dsp::ProcessContextReplacing<float> contextProx(omniBlock);
         proxCompIIR.process(contextProx);
     }
