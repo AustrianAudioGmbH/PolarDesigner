@@ -387,7 +387,7 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
     dsp::AudioBlock<float> filterBlk (filterBankBuffer);
     if (!*zeroDelayMode && nBands > 1)
     {
-        for (int i = 0; i < nBands; ++i)
+        for (int i = 0; i < 1; ++i)
         {
             // get stereo sub block
             dsp::AudioBlock<float> subBlk = filterBlk.getSubsetChannelBlock (2*i, 2);
