@@ -118,10 +118,6 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     soloActive(false), loadingFile(false), trackingActive(false), trackingDisturber(false),
     disturberRecorded(false), signalRecorded(false)
 {
-    for (int i = 0; i < 10; ++i) // mono convolvers!
-    {
-        convolvers.push_back(std::make_unique<dsp::Convolution>()); // low, lowmid, mid, highmid, high
-    }
     
     params.addParameterListener("xOverF1", this);
     params.addParameterListener("xOverF2", this);
@@ -260,7 +256,7 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     initAllConvolvers();
     for (auto &conv : convolvers)
     {
-        conv->reset();
+        conv.reset();
     }
     
     // diffuse field eq
@@ -392,12 +388,12 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
             // omni
             dsp::AudioBlock<float> subBlk = filterBlk.getSingleChannelBlock (2 * i);
             dsp::ProcessContextReplacing<float> filterCtx (subBlk);
-            convolvers[2 * i]->process (filterCtx); // mono processing
+            convolvers[2 * i].process (filterCtx); // mono processing
             
             // eight
             dsp::AudioBlock<float> subBlk2 = filterBlk.getSingleChannelBlock (2 * i + 1);
             dsp::ProcessContextReplacing<float> filterCtx2 (subBlk2);
-            convolvers[2 * i + 1]->process (filterCtx2); // mono processing
+            convolvers[2 * i + 1].process (filterCtx2); // mono processing
         }
     }
     
@@ -623,12 +619,12 @@ void PolarDesignerAudioProcessor::initAllConvolvers()
         dsp::AudioBlock<float> convSingleBlk = convBlk.getSingleChannelBlock (i);
 
         // omni convolver
-        convolvers[2 * i]->prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i]->copyAndLoadImpulseResponseFromBlock (convSingleBlk, currentSampleRate, false, false, false, FIR_LEN);
+        convolvers[2 * i].prepare (convSpec); // must be called before loading IR
+        convolvers[2 * i].copyAndLoadImpulseResponseFromBlock (convSingleBlk, currentSampleRate, false, false, false, FIR_LEN);
         
         // eight convolver
-        convolvers[2 * i + 1]->prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i + 1]->copyAndLoadImpulseResponseFromBlock (convSingleBlk, currentSampleRate, false, false, false, FIR_LEN);
+        convolvers[2 * i + 1].prepare (convSpec); // must be called before loading IR
+        convolvers[2 * i + 1].copyAndLoadImpulseResponseFromBlock (convSingleBlk, currentSampleRate, false, false, false, FIR_LEN);
     }
 }
 
@@ -644,12 +640,12 @@ void PolarDesignerAudioProcessor::initConvolver(int convNr)
         dsp::AudioBlock<float> convSingleBlk = convBlk.getSingleChannelBlock (i);
         
         // omni convolver
-        convolvers[2 * i]->prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i]->copyAndLoadImpulseResponseFromBlock (convSingleBlk, currentSampleRate, false, false, false, FIR_LEN);
+        convolvers[2 * i].prepare (convSpec); // must be called before loading IR
+        convolvers[2 * i].copyAndLoadImpulseResponseFromBlock (convSingleBlk, currentSampleRate, false, false, false, FIR_LEN);
         
         // eight convolver
-        convolvers[2 * i + 1]->prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i + 1]->copyAndLoadImpulseResponseFromBlock (convSingleBlk, currentSampleRate, false, false, false, FIR_LEN);
+        convolvers[2 * i + 1].prepare (convSpec); // must be called before loading IR
+        convolvers[2 * i + 1].copyAndLoadImpulseResponseFromBlock (convSingleBlk, currentSampleRate, false, false, false, FIR_LEN);
     }
 
 }
