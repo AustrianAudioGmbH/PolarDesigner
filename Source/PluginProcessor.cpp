@@ -1148,20 +1148,20 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients(float distance)
         if (r < 0.01)
             r = 0.01;
         
-        b0 = c * (r - 1) / (fs * 4 * r) + 1;
-        b1 = -exp(-c / (fs * 2 * r)) * (1 - c * (r - 1) / (fs * 4 * r));
+        b0 = c * (r - 1) / (fs * 2 * r) + 1;
+        b1 = -exp(-c / (fs * r)) * (1 - c * (r - 1) / (fs * 2 * r));
         a0 = 1;
-        a1 = -exp(-c / (fs * 2 * r));
+        a1 = -exp(-c / (fs * r));
     }
     else // bass boost, careful: instable for r<0.05
     {
         if (r < 0.05)
             r = 0.05;
         
-        b0 = c * (1 - r) / (fs * 4 * r) + 1;
-        b1 = -exp(-c / (fs * 2)) * (1 - c* (1 - r) / (fs * 4 * r));
+        b0 = c * (1 - r) / (fs * 2 * r) + 1;
+        b1 = -exp(-c / fs) * (1 - c * (1 - r) / (fs * 2 * r));
         a0 = 1;
-        a1 = -exp(-c / (fs * 2));
+        a1 = -exp(-c / fs);
     }
 
     *proxCompIIR.coefficients = dsp::IIR::Coefficients<float>(b0,b1,a0,a1);
