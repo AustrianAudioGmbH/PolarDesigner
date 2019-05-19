@@ -3,7 +3,7 @@
 <JUCERPROJECT id="LBcOQ9" name="PolarDesigner" projectType="audioplug" jucerVersion="5.4.3"
               pluginManufacturer="Austrian Audio" pluginManufacturerCode="-AA-"
               pluginCode="AAPD" aaxIdentifier="at.iem.aapolardesigner" pluginAUMainType="'aufx'"
-              version="1.0.7" companyName="Austrian Audio" companyCopyright="Austrian Audio"
+              version="1.0.8" companyName="Austrian Audio" companyCopyright="Austrian Audio"
               companyWebsite="www.austrian.audio" bundleIdentifier="at.iem.aapolardesigner"
               reportAppUsage="0" pluginFormats="buildAAX,buildAU,buildVST3"
               pluginAAXCategory="8192" pluginVST3Category="Fx" pluginRTASCategory="8192"
