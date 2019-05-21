@@ -127,7 +127,7 @@ private:
     
     // use odd FIR_LEN for even filter order (FIR_LEN = N+1)
     // (lowpass and highpass need even filter order to put a zero at f=0 and f=pi)
-    static const int FIR_LEN = 401;
+    int firLen;
         
     // free field / diffuse field eq
     dsp::Convolution dfEqOmniConv;
