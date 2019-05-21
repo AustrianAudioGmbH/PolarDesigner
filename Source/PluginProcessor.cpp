@@ -113,10 +113,11 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
                std::make_unique<AudioParameterBool>  ("zeroDelayMode", "Zero Latency", false, "",
                                                       [](bool value, int maximumStringLength) {return (value) ? "on" : "off";}, nullptr)
            }),
+    firLen(401),
     dfEqOmniBuffer(1, DF_EQ_LEN), dfEqEightBuffer(1, DF_EQ_LEN),
     ffEqOmniBuffer(1, FF_EQ_LEN), ffEqEightBuffer(1, FF_EQ_LEN), doEq(0),
     soloActive(false), loadingFile(false), trackingActive(false), trackingDisturber(false),
-    disturberRecorded(false), signalRecorded(false)
+    disturberRecorded(false), signalRecorded(false), currentSampleRate(48000)
 {
     
     params.addParameterListener("xOverF1", this);
@@ -167,7 +168,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     
     // set delay compensation to FIR_LEN/2-1 if FIR_LEN even and FIR_LEN/2 if odd
     if (!*zeroDelayMode)
-        setLatencySamples(std::ceilf(static_cast<float>(FIR_LEN)/2-1));
+        setLatencySamples(std::ceilf(static_cast<float>(firLen)/2-1));
     
     oldProxDistance = *proxDistance;
 }
@@ -241,13 +242,25 @@ void PolarDesignerAudioProcessor::changeProgramName (int index, const String& ne
 //==============================================================================
 void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    if (sampleRate != currentSampleRate)
+    {
+        firLen = std::ceil(401/48000.0f * sampleRate);
+        if (firLen % 2 == 0) // make sure firLen is odd
+            firLen++;
+        
+        if (!*zeroDelayMode)
+            setLatencySamples(std::ceilf(static_cast<float>(firLen)/2-1));
+    }
+    
     currentBlockSize = samplesPerBlock;
     currentSampleRate = sampleRate;
+    
+    
     
     // filter bank
     filterBankBuffer.setSize(N_CH_IN*5, currentBlockSize);
     filterBankBuffer.clear();
-    firFilterBuffer.setSize(5, FIR_LEN);
+    firFilterBuffer.setSize(5, firLen);
     firFilterBuffer.clear();
     omniEightBuffer.setSize(2, currentBlockSize);
     omniEightBuffer.clear();
@@ -501,7 +514,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const String &parameterID, f
     {
         if (newValue == 0)
         {
-            setLatencySamples(std::ceilf(static_cast<float>(FIR_LEN)/2-1));
+            setLatencySamples(std::ceilf(static_cast<float>(firLen)/2-1));
             params.getParameter ("proximity")->setValueNotifyingHost (params.getParameter("proximity")->convertTo0to1(oldProxDistance));
             zeroDelayModeChanged = true;
             computeAllFilterCoefficients();
@@ -575,23 +588,23 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients(int crossoverNr)
     // lowest band is simple lowpass
     if (crossoverNr == 0)
     {
-        dsp::FilterDesign<float>::FIRCoefficientsPtr lowpass = dsp::FilterDesign<float>::designFIRLowpassWindowMethod(hzFromZeroToOne(0, *xOverFreqs[0]), currentSampleRate, FIR_LEN - 1, dsp::WindowingFunction<float>::WindowingMethod::hamming);
+        dsp::FilterDesign<float>::FIRCoefficientsPtr lowpass = dsp::FilterDesign<float>::designFIRLowpassWindowMethod(hzFromZeroToOne(0, *xOverFreqs[0]), currentSampleRate, firLen - 1, dsp::WindowingFunction<float>::WindowingMethod::hamming);
         float* lpCoeffs = lowpass->getRawCoefficients();
-        firFilterBuffer.copyFrom(0, 0, lpCoeffs, FIR_LEN);
+        firFilterBuffer.copyFrom(0, 0, lpCoeffs, firLen);
     }
     
     // all the other bands are bandpass filters
     for (int i = std::max(1, crossoverNr); i < std::min(crossoverNr + 2, nBands - 1); ++i)
     {
         float halfBandwidth = (hzFromZeroToOne(i, *xOverFreqs[i]) - hzFromZeroToOne(i-1, *xOverFreqs[i-1]))/2;
-        dsp::FilterDesign<float>::FIRCoefficientsPtr lp2bp = dsp::FilterDesign<float>::designFIRLowpassWindowMethod(halfBandwidth, currentSampleRate, FIR_LEN - 1, dsp::WindowingFunction<float>::WindowingMethod::hamming);
+        dsp::FilterDesign<float>::FIRCoefficientsPtr lp2bp = dsp::FilterDesign<float>::designFIRLowpassWindowMethod(halfBandwidth, currentSampleRate, firLen - 1, dsp::WindowingFunction<float>::WindowingMethod::hamming);
         float* lp2bpCoeffs = lp2bp->getRawCoefficients();
         auto* filterBufferPointer = firFilterBuffer.getWritePointer(i);
-        for (int j=0; j<FIR_LEN; j++) // bandpass transform
+        for (int j=0; j<firLen; j++) // bandpass transform
         {
             float fCenter = halfBandwidth + hzFromZeroToOne(i-1, *xOverFreqs[i-1]);
             // write bandpass transformed fir coeffs to buffer
-            *(filterBufferPointer+j) = 2* *(lp2bpCoeffs+j) * std::cosf(MathConstants<float>::twoPi*fCenter/currentSampleRate*(j-(FIR_LEN-1)/2));
+            *(filterBufferPointer+j) = 2* *(lp2bpCoeffs+j) * std::cosf(MathConstants<float>::twoPi*fCenter/currentSampleRate*(j-(firLen-1)/2));
         }
     }
     
@@ -600,11 +613,11 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients(int crossoverNr)
         // highest band is highpass (via frequency transform)
         float hpBandwidth = currentSampleRate/2 - hzFromZeroToOne(nBands-2, *xOverFreqs[nBands-2]);
         auto* filterBufferPointer = firFilterBuffer.getWritePointer(nBands-1);
-        dsp::FilterDesign<float>::FIRCoefficientsPtr lp2hp = dsp::FilterDesign<float>::designFIRLowpassWindowMethod(hpBandwidth, currentSampleRate, FIR_LEN - 1, dsp::WindowingFunction<float>::WindowingMethod::hamming);
+        dsp::FilterDesign<float>::FIRCoefficientsPtr lp2hp = dsp::FilterDesign<float>::designFIRLowpassWindowMethod(hpBandwidth, currentSampleRate, firLen - 1, dsp::WindowingFunction<float>::WindowingMethod::hamming);
         float* lp2hpCoeffs = lp2hp->getRawCoefficients();
-        for (int i=0; i<FIR_LEN; ++i) // highpass transform
+        for (int i=0; i<firLen; ++i) // highpass transform
         {
-            *(filterBufferPointer+i) = *(lp2hpCoeffs+i) * std::cosf(MathConstants<float>::pi*(i-(FIR_LEN-1)/2));
+            *(filterBufferPointer+i) = *(lp2hpCoeffs+i) * std::cosf(MathConstants<float>::pi*(i-(firLen-1)/2));
         }
     }
     
@@ -618,16 +631,16 @@ void PolarDesignerAudioProcessor::initAllConvolvers()
     for (int i = 0; i < nBands; ++i) // prepare nBands mono convolvers
     {
         
-        AudioBuffer<float> convSingleBuff(1, FIR_LEN);
-        convSingleBuff.copyFrom(0, 0, firFilterBuffer, i, 0, FIR_LEN);
+        AudioBuffer<float> convSingleBuff(1, firLen);
+        convSingleBuff.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
 
         // omni convolver
         convolvers[2 * i].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, FIR_LEN);
+        convolvers[2 * i].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false,firLen);
         
         // eight convolver
         convolvers[2 * i + 1].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i + 1].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, FIR_LEN);
+        convolvers[2 * i + 1].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, firLen);
     }
 }
 
@@ -640,16 +653,16 @@ void PolarDesignerAudioProcessor::initConvolver(int convNr)
     // update two convolvers: if one crossover frequency changes, two neighbouring bands need new filtes
     for (int i = convNr; i < convNr + 2; ++i)
     {
-        AudioBuffer<float> convSingleBuff(1, FIR_LEN);
-        convSingleBuff.copyFrom(0, 0, firFilterBuffer, i, 0, FIR_LEN);
+        AudioBuffer<float> convSingleBuff(1, firLen);
+        convSingleBuff.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
         
         // omni convolver
         convolvers[2 * i].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, FIR_LEN);
+        convolvers[2 * i].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, firLen);
         
         // eight convolver
         convolvers[2 * i + 1].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i + 1].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, FIR_LEN);
+        convolvers[2 * i + 1].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, firLen);
     }
 
 }
@@ -1164,20 +1177,20 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients(float distance)
         if (r < 0.01)
             r = 0.01;
         
-        b0 = c * (r - 1) / (fs * 4 * r) + 1;
-        b1 = -exp(-c / (fs * 2 * r)) * (1 - c * (r - 1) / (fs * 4 * r));
+        b0 = c * (r - 1) / (fs * 2 * r) + 1;
+        b1 = -exp(-c / (fs * r)) * (1 - c * (r - 1) / (fs * 2 * r));
         a0 = 1;
-        a1 = -exp(-c / (fs * 2 * r));
+        a1 = -exp(-c / (fs * r));
     }
     else // bass boost, careful: instable for r<0.05
     {
         if (r < 0.05)
             r = 0.05;
         
-        b0 = c * (1 - r) / (fs * 4 * r) + 1;
-        b1 = -exp(-c / (fs * 2)) * (1 - c* (1 - r) / (fs * 4 * r));
+        b0 = c * (1 - r) / (fs * 2 * r) + 1;
+        b1 = -exp(-c / fs) * (1 - c * (1 - r) / (fs * 2 * r));
         a0 = 1;
-        a1 = -exp(-c / (fs * 2));
+        a1 = -exp(-c / fs);
     }
 
     *proxCompIIR.coefficients = dsp::IIR::Coefficients<float>(b0,b1,a0,a1);
