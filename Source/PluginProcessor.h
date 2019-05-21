@@ -170,7 +170,7 @@ private:
     AudioBuffer<float> filterBankBuffer; // holds filtered data, size: N_CH_IN*5
     AudioBuffer<float> firFilterBuffer; // holds filter coefficients, size: 5
     AudioBuffer<float> omniEightBuffer; // holds omni and fig-of-eight signals, size: 2
-    std::vector<std::unique_ptr<dsp::Convolution>> convolvers; // holds nBands (stereo) convolvers
+    dsp::Convolution convolvers[10]; // holds 2*nBands mono convolvers
     
     double currentSampleRate;
     int currentBlockSize;
