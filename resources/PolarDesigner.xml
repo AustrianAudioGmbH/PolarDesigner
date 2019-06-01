@@ -1,0 +1,898 @@
+<?xml version='1.0' encoding='US-ASCII' standalone='yes'?>
+<PageTables vers='1.0.0.0'>
+	<PageTableLayouts>
+		<Plugin manID='-AA-' prodID='AAPD' plugID='jccb'>
+			<Desc>PolarDesigner Stereo to Mono Native</Desc>
+			<Layout>PolarDesigner 2ch Layout</Layout>
+		</Plugin><!--manID='-AA-' prodID='AAPD' plugID='jccb'-->
+		<Plugin manID='-AA-' prodID='AAPD' plugID='jccc'>
+			<Desc>PolarDesigner Stereo Native</Desc>
+			<Layout>PolarDesigner 2ch Layout</Layout>
+		</Plugin><!--manID='-AA-' prodID='AAPD' plugID='jccc'-->
+		<PTLayout name='PolarDesigner 2ch Layout'>
+			<PageTable type='Av46' pgsz='72'>
+				<Page num='1'>
+					<ID>Polar1</ID>
+					<ID>Solo1</ID>
+					<ID>Mute1</ID>
+					<ID>Polar2</ID>
+					<ID>Solo2</ID>
+					<ID>Mute2</ID>
+					<ID>Polar3</ID>
+					<ID>Solo3</ID>
+					<ID>Mute3</ID>
+					<ID>Polar4</ID>
+					<ID>Solo4</ID>
+					<ID>Mute4</ID>
+					<ID>Polar5</ID>
+					<ID>Solo5</ID>
+					<ID>Mute5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Gain1</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Gain2</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Gain3</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Gain4</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Gain5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Xover1</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Xover2</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Xover3</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Xover4</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Proximity</ID>
+					<ID>Zero Latency</ID>
+					<ID>Master Bypass</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='1'-->
+			</PageTable><!--type='Av46' pgsz='72'-->
+			<PageTable type='Av48' pgsz='96'>
+				<Page num='1'>
+					<Cell row='1' col='1' knobID="Polar1" inOutButtonID="Solo1" selectButtonID="Mute1"/>
+					<Cell row='2' col='1' knobID="Gain1" inOutButtonID="" selectButtonID=""/>
+					<Cell row='3' col='1' knobID="Xover1" inOutButtonID="" selectButtonID=""/>
+					<Cell row='4' col='1' knobID="Proximity" inOutButtonID="Zero Latency" selectButtonID="Master Bypass"/>
+					<Cell row='1' col='2' knobID="Polar2" inOutButtonID="Solo2" selectButtonID="Mute2"/>
+					<Cell row='2' col='2' knobID="Gain2" inOutButtonID="" selectButtonID=""/>
+					<Cell row='3' col='2' knobID="Xover2" inOutButtonID="" selectButtonID=""/>
+					<Cell row='4' col='2' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='1' col='3' knobID="Polar3" inOutButtonID="Solo3" selectButtonID="Mute3"/>
+					<Cell row='2' col='3' knobID="Gain3" inOutButtonID="" selectButtonID=""/>
+					<Cell row='3' col='3' knobID="Xover3" inOutButtonID="" selectButtonID=""/>
+					<Cell row='4' col='3' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='1' col='4' knobID="Polar4" inOutButtonID="Solo4" selectButtonID="Mute4"/>
+					<Cell row='2' col='4' knobID="Gain4" inOutButtonID="" selectButtonID=""/>
+					<Cell row='3' col='4' knobID="Xover4" inOutButtonID="" selectButtonID=""/>
+					<Cell row='4' col='4' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='1' col='5' knobID="Polar5" inOutButtonID="Solo5" selectButtonID="Mute5"/>
+					<Cell row='2' col='5' knobID="Gain5" inOutButtonID="" selectButtonID=""/>
+					<Cell row='3' col='5' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='4' col='5' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='1' col='6' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='2' col='6' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='3' col='6' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='4' col='6' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='1' col='7' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='2' col='7' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='3' col='7' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='4' col='7' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='1' col='8' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='2' col='8' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='3' col='8' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='4' col='8' knobID="" inOutButtonID="" selectButtonID=""/>
+				</Page><!--num='1'-->
+			</PageTable><!--type='Av48' pgsz='96'-->
+			<PageTable type='Av81' pgsz='24'>
+				<Page num='1'>
+					<Cell row='1' col='1' knobID="Polar1" inOutButtonID="Solo1" selectButtonID="Mute1"/>
+					<Cell row='2' col='1' knobID="Polar2" inOutButtonID="Solo2" selectButtonID="Mute2"/>
+					<Cell row='3' col='1' knobID="Polar3" inOutButtonID="Solo3" selectButtonID="Mute3"/>
+					<Cell row='4' col='1' knobID="Polar4" inOutButtonID="Solo4" selectButtonID="Mute4"/>
+					<Cell row='5' col='1' knobID="Polar5" inOutButtonID="Solo5" selectButtonID="Mute5"/>
+					<Cell row='6' col='1' knobID="Proximity" inOutButtonID="" selectButtonID=""/>
+					<Cell row='7' col='1' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='8' col='1' knobID="" inOutButtonID="Master Bypass" selectButtonID="Zero Latency"/>
+				</Page><!--num='1'-->
+				<Page num='2'>
+					<Cell row='1' col='1' knobID="Xover1" inOutButtonID="" selectButtonID=""/>
+					<Cell row='2' col='1' knobID="Xover2" inOutButtonID="" selectButtonID=""/>
+					<Cell row='3' col='1' knobID="Xover3" inOutButtonID="" selectButtonID=""/>
+					<Cell row='4' col='1' knobID="Xover4" inOutButtonID="" selectButtonID=""/>
+					<Cell row='5' col='1' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='6' col='1' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='7' col='1' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='8' col='1' knobID="" inOutButtonID="" selectButtonID=""/>
+				</Page><!--num='2'-->
+				<Page num='3'>
+					<Cell row='1' col='1' knobID="Gain1" inOutButtonID="" selectButtonID=""/>
+					<Cell row='2' col='1' knobID="Gain2" inOutButtonID="" selectButtonID=""/>
+					<Cell row='3' col='1' knobID="Gain3" inOutButtonID="" selectButtonID=""/>
+					<Cell row='4' col='1' knobID="Gain4" inOutButtonID="" selectButtonID=""/>
+					<Cell row='5' col='1' knobID="Gain5" inOutButtonID="" selectButtonID=""/>
+					<Cell row='6' col='1' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='7' col='1' knobID="" inOutButtonID="" selectButtonID=""/>
+					<Cell row='8' col='1' knobID="" inOutButtonID="" selectButtonID=""/>
+				</Page><!--num='3'-->
+			</PageTable><!--type='Av81' pgsz='24'-->
+			<PageTable type='BkCS' pgsz='12'>
+				<Page num='1'>
+					<ID>Polar1</ID>
+					<ID>Polar2</ID>
+					<ID>Polar3</ID>
+					<ID>Polar4</ID>
+					<ID>Polar5</ID>
+					<ID>Proximity</ID>
+					<ID>Mute1</ID>
+					<ID>Mute2</ID>
+					<ID>Mute3</ID>
+					<ID>Mute4</ID>
+					<ID>Mute5</ID>
+					<ID>Zero Latency</ID>
+				</Page><!--num='1'-->
+				<Page num='2'>
+					<ID>Gain1</ID>
+					<ID>Gain2</ID>
+					<ID>Gain3</ID>
+					<ID>Gain4</ID>
+					<ID>Gain5</ID>
+					<ID> </ID>
+					<ID>Solo1</ID>
+					<ID>Solo2</ID>
+					<ID>Solo3</ID>
+					<ID>Solo4</ID>
+					<ID>Solo5</ID>
+					<ID>Master Bypass</ID>
+				</Page><!--num='2'-->
+				<Page num='3'>
+					<ID>Xover1</ID>
+					<ID>Xover2</ID>
+					<ID>Xover3</ID>
+					<ID>Xover4</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='3'-->
+			</PageTable><!--type='BkCS' pgsz='12'-->
+			<PageTable type='BkSF' pgsz='16'>
+				<Page num='1'>
+					<ID>Polar1</ID>
+					<ID>Polar2</ID>
+					<ID>Polar3</ID>
+					<ID>Polar4</ID>
+					<ID>Polar5</ID>
+					<ID>Proximity</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Mute1</ID>
+					<ID>Mute2</ID>
+					<ID>Mute3</ID>
+					<ID>Mute4</ID>
+					<ID>Mute5</ID>
+					<ID>Zero Latency</ID>
+					<ID>Master Bypass</ID>
+					<ID> </ID>
+				</Page><!--num='1'-->
+				<Page num='2'>
+					<ID>Gain1</ID>
+					<ID>Gain2</ID>
+					<ID>Gain3</ID>
+					<ID>Gain4</ID>
+					<ID>Gain5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Solo1</ID>
+					<ID>Solo2</ID>
+					<ID>Solo3</ID>
+					<ID>Solo4</ID>
+					<ID>Solo5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='2'-->
+				<Page num='3'>
+					<ID>Xover1</ID>
+					<ID>Xover2</ID>
+					<ID>Xover3</ID>
+					<ID>Xover4</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='3'-->
+			</PageTable><!--type='BkSF' pgsz='16'-->
+			<PageTable type='DgEQ' pgsz='43'>
+				<Page num='1'>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Mute1</ID>
+					<ID>Solo1</ID>
+					<ID>Gain1</ID>
+					<ID>Xover1</ID>
+					<ID>Polar1</ID>
+					<ID>Mute2</ID>
+					<ID>Solo2</ID>
+					<ID>Gain2</ID>
+					<ID>Xover2</ID>
+					<ID>Polar2</ID>
+					<ID>Mute3</ID>
+					<ID>Solo3</ID>
+					<ID>Gain3</ID>
+					<ID>Xover3</ID>
+					<ID>Polar3</ID>
+					<ID>Mute4</ID>
+					<ID>Solo4</ID>
+					<ID>Gain4</ID>
+					<ID>Xover4</ID>
+					<ID>Polar4</ID>
+					<ID>Mute5</ID>
+					<ID>Solo5</ID>
+					<ID>Gain5</ID>
+					<ID> </ID>
+					<ID>Polar5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='1'-->
+			</PageTable><!--type='DgEQ' pgsz='43'-->
+			<PageTable type='FrTL' pgsz='24'>
+				<Page num='1'>
+					<ID>Polar1</ID>
+					<ID>Polar2</ID>
+					<ID>Polar3</ID>
+					<ID>Polar4</ID>
+					<ID>Polar5</ID>
+					<ID>Proximity</ID>
+					<ID>Zero Latency</ID>
+					<ID>Master Bypass</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='1'-->
+				<Page num='2'>
+					<ID>Gain1</ID>
+					<ID>Gain2</ID>
+					<ID>Gain3</ID>
+					<ID>Gain4</ID>
+					<ID>Gain5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='2'-->
+				<Page num='3'>
+					<ID>Mute1</ID>
+					<ID>Mute2</ID>
+					<ID>Mute3</ID>
+					<ID>Mute4</ID>
+					<ID>Mute5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='3'-->
+				<Page num='4'>
+					<ID>Solo1</ID>
+					<ID>Solo2</ID>
+					<ID>Solo3</ID>
+					<ID>Solo4</ID>
+					<ID>Solo5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='4'-->
+				<Page num='5'>
+					<ID>Xover1</ID>
+					<ID>Xover2</ID>
+					<ID>Xover3</ID>
+					<ID>Xover4</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='5'-->
+			</PageTable><!--type='FrTL' pgsz='24'-->
+			<PageTable type='HgTL' pgsz='8'>
+				<Page num='1'>
+					<ID>Polar1</ID>
+					<ID>Polar2</ID>
+					<ID>Polar3</ID>
+					<ID>Polar4</ID>
+					<ID>Polar5</ID>
+					<ID>Proximity</ID>
+					<ID>Zero Latency</ID>
+					<ID>Master Bypass</ID>
+				</Page><!--num='1'-->
+				<Page num='2'>
+					<ID>Gain1</ID>
+					<ID>Gain2</ID>
+					<ID>Gain3</ID>
+					<ID>Gain4</ID>
+					<ID>Gain5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='2'-->
+				<Page num='3'>
+					<ID>Mute1</ID>
+					<ID>Mute2</ID>
+					<ID>Mute3</ID>
+					<ID>Mute4</ID>
+					<ID>Mute5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='3'-->
+				<Page num='4'>
+					<ID>Solo1</ID>
+					<ID>Solo2</ID>
+					<ID>Solo3</ID>
+					<ID>Solo4</ID>
+					<ID>Solo5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='4'-->
+				<Page num='5'>
+					<ID>Xover1</ID>
+					<ID>Xover2</ID>
+					<ID>Xover3</ID>
+					<ID>Xover4</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='5'-->
+			</PageTable><!--type='HgTL' pgsz='8'-->
+			<PageTable type='MkTL' pgsz='8'>
+				<Page num='1'>
+					<ID>Mute1</ID>
+					<ID>Mute2</ID>
+					<ID>Mute3</ID>
+					<ID>Mute4</ID>
+					<ID>Polar1</ID>
+					<ID>Polar2</ID>
+					<ID>Polar3</ID>
+					<ID>Polar4</ID>
+				</Page><!--num='1'-->
+				<Page num='2'>
+					<ID>Mute5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Polar5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='2'-->
+				<Page num='3'>
+					<ID>Solo1</ID>
+					<ID>Solo2</ID>
+					<ID>Solo3</ID>
+					<ID>Solo4</ID>
+					<ID>Gain1</ID>
+					<ID>Gain2</ID>
+					<ID>Gain3</ID>
+					<ID>Gain4</ID>
+				</Page><!--num='3'-->
+				<Page num='4'>
+					<ID>Solo5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Gain5</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='4'-->
+				<Page num='5'>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Xover1</ID>
+					<ID>Xover2</ID>
+					<ID>Xover3</ID>
+					<ID>Xover4</ID>
+				</Page><!--num='5'-->
+				<Page num='6'>
+					<ID> </ID>
+					<ID> </ID>
+					<ID>Zero Latency</ID>
+					<ID>Master Bypass</ID>
+					<ID>Proximity</ID>
+					<ID> </ID>
+					<ID> </ID>
+					<ID> </ID>
+				</Page><!--num='6'-->
+			</PageTable><!--type='MkTL' pgsz='8'-->
+			<PageTable type='PgTL' pgsz='1'>
+				<Page num='1'>
+					<ID>Xover1</ID>
+				</Page><!--num='1'-->
+				<Page num='2'>
+					<ID>Xover2</ID>
+				</Page><!--num='2'-->
+				<Page num='3'>
+					<ID>Xover3</ID>
+				</Page><!--num='3'-->
+				<Page num='4'>
+					<ID>Xover4</ID>
+				</Page><!--num='4'-->
+				<Page num='5'>
+					<ID>Polar1</ID>
+				</Page><!--num='5'-->
+				<Page num='6'>
+					<ID>Polar2</ID>
+				</Page><!--num='6'-->
+				<Page num='7'>
+					<ID>Polar3</ID>
+				</Page><!--num='7'-->
+				<Page num='8'>
+					<ID>Polar4</ID>
+				</Page><!--num='8'-->
+				<Page num='9'>
+					<ID>Polar5</ID>
+				</Page><!--num='9'-->
+				<Page num='10'>
+					<ID>Solo1</ID>
+				</Page><!--num='10'-->
+				<Page num='11'>
+					<ID>Solo2</ID>
+				</Page><!--num='11'-->
+				<Page num='12'>
+					<ID>Solo3</ID>
+				</Page><!--num='12'-->
+				<Page num='13'>
+					<ID>Solo4</ID>
+				</Page><!--num='13'-->
+				<Page num='14'>
+					<ID>Solo5</ID>
+				</Page><!--num='14'-->
+				<Page num='15'>
+					<ID>Mute1</ID>
+				</Page><!--num='15'-->
+				<Page num='16'>
+					<ID>Mute2</ID>
+				</Page><!--num='16'-->
+				<Page num='17'>
+					<ID>Mute3</ID>
+				</Page><!--num='17'-->
+				<Page num='18'>
+					<ID>Mute4</ID>
+				</Page><!--num='18'-->
+				<Page num='19'>
+					<ID>Mute5</ID>
+				</Page><!--num='19'-->
+				<Page num='20'>
+					<ID>Gain1</ID>
+				</Page><!--num='20'-->
+				<Page num='21'>
+					<ID>Gain2</ID>
+				</Page><!--num='21'-->
+				<Page num='22'>
+					<ID>Gain3</ID>
+				</Page><!--num='22'-->
+				<Page num='23'>
+					<ID>Gain4</ID>
+				</Page><!--num='23'-->
+				<Page num='24'>
+					<ID>Gain5</ID>
+				</Page><!--num='24'-->
+				<Page num='25'>
+					<ID>Nr. of Bands</ID>
+				</Page><!--num='25'-->
+				<Page num='26'>
+					<ID>Allow Reverse Patterns</ID>
+				</Page><!--num='26'-->
+				<Page num='27'>
+					<ID>Proximity</ID>
+				</Page><!--num='27'-->
+				<Page num='28'>
+					<ID>Zero Latency</ID>
+				</Page><!--num='28'-->
+				<Page num='29'>
+					<ID>Master Bypass</ID>
+				</Page><!--num='29'-->
+			</PageTable><!--type='PgTL' pgsz='1'-->
+		</PTLayout><!--name='PolarDesigner 2ch Layout'-->
+	</PageTableLayouts>
+	<ControlNamesVariations>
+		<Ctrl ID='Allow Reverse Patterns'>
+			<name typ='PgTL' sz='1'>A</name>
+			<name typ='PgTL' sz='2'>Al</name>
+			<name typ='PgTL' sz='3'>All</name>
+			<name typ='PgTL' sz='4'>Allo</name>
+			<name typ='PgTL' sz='5'>Allow</name>
+			<name typ='PgTL' sz='6'>Allow </name>
+			<name typ='PgTL' sz='7'>Allow R</name>
+			<name typ='PgTL' sz='8'>Allow Re</name>
+			<name typ='PgTL' sz='9'>Allow Rev</name>
+			<name typ='PgTL' sz='10'>Allow Reve</name>
+			<name typ='PgTL' sz='11'>Allow Rever</name>
+			<name typ='PgTL' sz='12'>Allow Revers</name>
+			<name typ='PgTL' sz='13'>Allow Reverse</name>
+			<name typ='PgTL' sz='14'>Allow Reverse </name>
+			<name typ='PgTL' sz='15'>Allow Reverse P</name>
+			<name typ='PgTL' sz='16'>Allow Reverse Pa</name>
+			<name typ='PgTL' sz='17'>Allow Reverse Pat</name>
+			<name typ='PgTL' sz='18'>Allow Reverse Patt</name>
+			<name typ='PgTL' sz='19'>Allow Reverse Patte</name>
+			<name typ='PgTL' sz='20'>Allow Reverse Patter</name>
+			<name typ='PgTL' sz='21'>Allow Reverse Pattern</name>
+		</Ctrl><!--ID='Allow Reverse Patterns'-->
+		<Ctrl ID='Gain1'>
+			<name typ='PgTL' sz='1'>G</name>
+			<name typ='PgTL' sz='2'>Ga</name>
+			<name typ='PgTL' sz='3'>Gai</name>
+			<name typ='PgTL' sz='4'>Ga 1</name>
+		</Ctrl><!--ID='Gain1'-->
+		<Ctrl ID='Gain2'>
+			<name typ='PgTL' sz='1'>G</name>
+			<name typ='PgTL' sz='2'>Ga</name>
+			<name typ='PgTL' sz='3'>Gai</name>
+			<name typ='PgTL' sz='4'>Ga 2</name>
+		</Ctrl><!--ID='Gain2'-->
+		<Ctrl ID='Gain3'>
+			<name typ='PgTL' sz='1'>G</name>
+			<name typ='PgTL' sz='2'>Ga</name>
+			<name typ='PgTL' sz='3'>Gai</name>
+			<name typ='PgTL' sz='4'>Ga 3</name>
+		</Ctrl><!--ID='Gain3'-->
+		<Ctrl ID='Gain4'>
+			<name typ='PgTL' sz='1'>G</name>
+			<name typ='PgTL' sz='2'>Ga</name>
+			<name typ='PgTL' sz='3'>Gai</name>
+			<name typ='PgTL' sz='4'>Ga 4</name>
+		</Ctrl><!--ID='Gain4'-->
+		<Ctrl ID='Gain5'>
+			<name typ='PgTL' sz='1'>G</name>
+			<name typ='PgTL' sz='2'>Ga</name>
+			<name typ='PgTL' sz='3'>Gai</name>
+			<name typ='PgTL' sz='4'>Ga 5</name>
+		</Ctrl><!--ID='Gain5'-->
+		<Ctrl ID='Master Bypass'>
+			<name typ='PgTL' sz='1'>M</name>
+			<name typ='PgTL' sz='2'>Ma</name>
+			<name typ='PgTL' sz='3'>Mas</name>
+			<name typ='PgTL' sz='4'>Bypa</name>
+			<name typ='PgTL' sz='5'>Maste</name>
+			<name typ='PgTL' sz='6'>Master</name>
+			<name typ='PgTL' sz='7'>Master </name>
+			<name typ='PgTL' sz='8'>MaBypass</name>
+			<name typ='PgTL' sz='9'>Master By</name>
+			<name typ='PgTL' sz='10'>Master Byp</name>
+			<name typ='PgTL' sz='11'>Master Bypa</name>
+			<name typ='PgTL' sz='12'>Master Bypas</name>
+		</Ctrl><!--ID='Master Bypass'-->
+		<Ctrl ID='Mute1'>
+			<name typ='PgTL' sz='1'>M</name>
+			<name typ='PgTL' sz='2'>Mu</name>
+			<name typ='PgTL' sz='3'>Mut</name>
+			<name typ='PgTL' sz='4'>Mu1 </name>
+		</Ctrl><!--ID='Mute1'-->
+		<Ctrl ID='Mute2'>
+			<name typ='PgTL' sz='1'>M</name>
+			<name typ='PgTL' sz='2'>Mu</name>
+			<name typ='PgTL' sz='3'>Mut</name>
+			<name typ='PgTL' sz='4'>Mu2 </name>
+		</Ctrl><!--ID='Mute2'-->
+		<Ctrl ID='Mute3'>
+			<name typ='PgTL' sz='1'>M</name>
+			<name typ='PgTL' sz='2'>Mu</name>
+			<name typ='PgTL' sz='3'>Mut</name>
+			<name typ='PgTL' sz='4'>Mu3 </name>
+		</Ctrl><!--ID='Mute3'-->
+		<Ctrl ID='Mute4'>
+			<name typ='PgTL' sz='1'>M</name>
+			<name typ='PgTL' sz='2'>Mu</name>
+			<name typ='PgTL' sz='3'>Mut</name>
+			<name typ='PgTL' sz='4'>Mu4 </name>
+		</Ctrl><!--ID='Mute4'-->
+		<Ctrl ID='Mute5'>
+			<name typ='PgTL' sz='1'>M</name>
+			<name typ='PgTL' sz='2'>Mu</name>
+			<name typ='PgTL' sz='3'>Mut</name>
+			<name typ='PgTL' sz='4'>Mu5 </name>
+		</Ctrl><!--ID='Mute5'-->
+		<Ctrl ID='Nr. of Bands'>
+			<name typ='PgTL' sz='1'>N</name>
+			<name typ='PgTL' sz='2'>Nr</name>
+			<name typ='PgTL' sz='3'>Nr.</name>
+			<name typ='PgTL' sz='4'>Nr.B</name>
+			<name typ='PgTL' sz='5'>Nr. o</name>
+			<name typ='PgTL' sz='6'>Nr.Ban</name>
+			<name typ='PgTL' sz='7'>Nr. of </name>
+			<name typ='PgTL' sz='8'>Nr.Bands</name>
+			<name typ='PgTL' sz='9'>Nr. of Ba</name>
+			<name typ='PgTL' sz='10'>Nr. of Ban</name>
+			<name typ='PgTL' sz='11'>Nr. of Band</name>
+		</Ctrl><!--ID='Nr. of Bands'-->
+		<Ctrl ID='Polar1'>
+			<name typ='PgTL' sz='1'>P</name>
+			<name typ='PgTL' sz='2'>Po</name>
+			<name typ='PgTL' sz='3'>Pol</name>
+			<name typ='PgTL' sz='4'>Pol1</name>
+			<name typ='PgTL' sz='5'>Polar</name>
+		</Ctrl><!--ID='Polar1'-->
+		<Ctrl ID='Polar2'>
+			<name typ='PgTL' sz='1'>P</name>
+			<name typ='PgTL' sz='2'>Po</name>
+			<name typ='PgTL' sz='3'>Pol</name>
+			<name typ='PgTL' sz='4'>Pol2</name>
+			<name typ='PgTL' sz='5'>Polar</name>
+		</Ctrl><!--ID='Polar2'-->
+		<Ctrl ID='Polar3'>
+			<name typ='PgTL' sz='1'>P</name>
+			<name typ='PgTL' sz='2'>Po</name>
+			<name typ='PgTL' sz='3'>Pol</name>
+			<name typ='PgTL' sz='4'>Pol3</name>
+			<name typ='PgTL' sz='5'>Polar</name>
+		</Ctrl><!--ID='Polar3'-->
+		<Ctrl ID='Polar4'>
+			<name typ='PgTL' sz='1'>P</name>
+			<name typ='PgTL' sz='2'>Po</name>
+			<name typ='PgTL' sz='3'>Pol</name>
+			<name typ='PgTL' sz='4'>Pol4</name>
+			<name typ='PgTL' sz='5'>Polar</name>
+		</Ctrl><!--ID='Polar4'-->
+		<Ctrl ID='Polar5'>
+			<name typ='PgTL' sz='1'>P</name>
+			<name typ='PgTL' sz='2'>Po</name>
+			<name typ='PgTL' sz='3'>Pol</name>
+			<name typ='PgTL' sz='4'>Pol5</name>
+			<name typ='PgTL' sz='5'>Polar</name>
+		</Ctrl><!--ID='Polar5'-->
+		<Ctrl ID='Proximity'>
+			<name typ='PgTL' sz='1'>P</name>
+			<name typ='PgTL' sz='2'>Pr</name>
+			<name typ='PgTL' sz='3'>Pro</name>
+			<name typ='PgTL' sz='4'>Prox</name>
+			<name typ='PgTL' sz='5'>Proxi</name>
+			<name typ='PgTL' sz='6'>Proxim</name>
+			<name typ='PgTL' sz='7'>Proximi</name>
+			<name typ='PgTL' sz='8'>Proximit</name>
+		</Ctrl><!--ID='Proximity'-->
+		<Ctrl ID='Solo1'>
+			<name typ='PgTL' sz='1'>S</name>
+			<name typ='PgTL' sz='2'>So</name>
+			<name typ='PgTL' sz='3'>Sol</name>
+			<name typ='PgTL' sz='4'>Sol1</name>
+		</Ctrl><!--ID='Solo1'-->
+		<Ctrl ID='Solo2'>
+			<name typ='PgTL' sz='1'>S</name>
+			<name typ='PgTL' sz='2'>So</name>
+			<name typ='PgTL' sz='3'>Sol</name>
+			<name typ='PgTL' sz='4'>Sol2</name>
+		</Ctrl><!--ID='Solo2'-->
+		<Ctrl ID='Solo3'>
+			<name typ='PgTL' sz='1'>S</name>
+			<name typ='PgTL' sz='2'>So</name>
+			<name typ='PgTL' sz='3'>Sol</name>
+			<name typ='PgTL' sz='4'>Sol3</name>
+		</Ctrl><!--ID='Solo3'-->
+		<Ctrl ID='Solo4'>
+			<name typ='PgTL' sz='1'>S</name>
+			<name typ='PgTL' sz='2'>So</name>
+			<name typ='PgTL' sz='3'>Sol</name>
+			<name typ='PgTL' sz='4'>Sol4</name>
+		</Ctrl><!--ID='Solo4'-->
+		<Ctrl ID='Solo5'>
+			<name typ='PgTL' sz='1'>S</name>
+			<name typ='PgTL' sz='2'>So</name>
+			<name typ='PgTL' sz='3'>Sol</name>
+			<name typ='PgTL' sz='4'>Sol5</name>
+		</Ctrl><!--ID='Solo5'-->
+		<Ctrl ID='Xover1'>
+			<name typ='PgTL' sz='1'>X</name>
+			<name typ='PgTL' sz='2'>Xo</name>
+			<name typ='PgTL' sz='3'>Xov</name>
+			<name typ='PgTL' sz='4'>Xo 1</name>
+			<name typ='PgTL' sz='5'>Xover</name>
+		</Ctrl><!--ID='Xover1'-->
+		<Ctrl ID='Xover2'>
+			<name typ='PgTL' sz='1'>X</name>
+			<name typ='PgTL' sz='2'>Xo</name>
+			<name typ='PgTL' sz='3'>Xov</name>
+			<name typ='PgTL' sz='4'>Xo 2</name>
+			<name typ='PgTL' sz='5'>Xover</name>
+		</Ctrl><!--ID='Xover2'-->
+		<Ctrl ID='Xover3'>
+			<name typ='PgTL' sz='1'>X</name>
+			<name typ='PgTL' sz='2'>Xo</name>
+			<name typ='PgTL' sz='3'>Xov</name>
+			<name typ='PgTL' sz='4'>Xo 3</name>
+			<name typ='PgTL' sz='5'>Xover</name>
+		</Ctrl><!--ID='Xover3'-->
+		<Ctrl ID='Xover4'>
+			<name typ='PgTL' sz='1'>X</name>
+			<name typ='PgTL' sz='2'>Xo</name>
+			<name typ='PgTL' sz='3'>Xov</name>
+			<name typ='PgTL' sz='4'>Xo 4</name>
+			<name typ='PgTL' sz='5'>Xover</name>
+		</Ctrl><!--ID='Xover4'-->
+		<Ctrl ID='Zero Latency'>
+			<name typ='PgTL' sz='1'>Z</name>
+			<name typ='PgTL' sz='2'>Ze</name>
+			<name typ='PgTL' sz='3'>Zer</name>
+			<name typ='PgTL' sz='4'>ZeLa</name>
+			<name typ='PgTL' sz='5'>Zero </name>
+			<name typ='PgTL' sz='6'>Zero L</name>
+			<name typ='PgTL' sz='7'>Zero La</name>
+			<name typ='PgTL' sz='8'>Zero Lat</name>
+			<name typ='PgTL' sz='9'>Zero Late</name>
+			<name typ='PgTL' sz='10'>Zero Laten</name>
+			<name typ='PgTL' sz='11'>Zero Latenc</name>
+		</Ctrl><!--ID='Zero Latency'-->
+	</ControlNamesVariations>
+	<Editor vers='1.3.7.1'>
+		<PluginList>
+			<TDM>
+			</TDM>
+			<RTAS>
+				<PluginID manID='-AA-' prodID='AAPD' plugID='jccc'>
+					<MenuStr>AAX Native: PolarDesigner 2ch</MenuStr>
+				</PluginID><!--manID='-AA-' prodID='AAPD' plugID='jccc'-->
+				<PluginID manID='-AA-' prodID='AAPD' plugID='jccb'>
+					<MenuStr>AAX Native: PolarDesigner 2x1ch</MenuStr>
+				</PluginID><!--manID='-AA-' prodID='AAPD' plugID='jccb'-->
+			</RTAS>
+		</PluginList>
+		<DiscCtrls>
+			<CtrlID>Allow Reverse Patterns</CtrlID>
+			<CtrlID>Master Bypass</CtrlID>
+			<CtrlID>Mute1</CtrlID>
+			<CtrlID>Mute2</CtrlID>
+			<CtrlID>Mute3</CtrlID>
+			<CtrlID>Mute4</CtrlID>
+			<CtrlID>Mute5</CtrlID>
+			<CtrlID>Solo1</CtrlID>
+			<CtrlID>Solo2</CtrlID>
+			<CtrlID>Solo3</CtrlID>
+			<CtrlID>Solo4</CtrlID>
+			<CtrlID>Solo5</CtrlID>
+			<CtrlID>Zero Latency</CtrlID>
+		</DiscCtrls>
+	</Editor><!--vers='1.3.7.1'-->
+</PageTables><!--vers='1.0.0.0'-->

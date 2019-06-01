@@ -30,6 +30,8 @@
         <FILE id="YpEjI4" name="BinaryFonts.cpp" compile="1" resource="0" file="resources/lookAndFeel/BinaryFonts.cpp"/>
         <FILE id="JtOg8r" name="BinaryFonts.h" compile="0" resource="0" file="resources/lookAndFeel/BinaryFonts.h"/>
       </GROUP>
+      <FILE id="UWXtmB" name="PolarDesigner.xml" compile="0" resource="0"
+            file="resources/PolarDesigner.xml" xcodeResource="1"/>
     </GROUP>
     <GROUP id="{584F93AC-B642-0702-B166-7383B6313DFC}" name="Source">
       <FILE id="NY7hn2" name="PluginProcessor.cpp" compile="1" resource="0"
