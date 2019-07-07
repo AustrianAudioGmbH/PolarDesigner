@@ -34,6 +34,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     alOverlaySignal(AlertOverlay::Type::signalTracking)
 {
     nActiveBands = processor.getNBands();
+    syncChannelIdx = processor.getSyncChannelIdx();
     
     setSize (EDITOR_WIDTH, EDITOR_HEIGHT);
     setLookAndFeel (&globalLaF);
@@ -83,6 +84,10 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     addAndMakeVisible (&grpProxComp);
     grpProxComp.setText ("proximity control");
     grpProxComp.setTextLabelPosition (Justification::centredLeft);
+    
+    addAndMakeVisible (&grpSync);
+    grpSync.setText ("sync to channel");
+    grpSync.setTextLabelPosition (Justification::centredLeft);
     
     Colour eqColours[5] = {
         Colour(0xFDBA4949),
@@ -191,6 +196,14 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     cbSetNrBands.setSelectedId (nActiveBands);
     cbSetNrBands.addListener (this);
     
+    addAndMakeVisible (&cbSyncChannel);
+    cbSyncChannelAtt = new ComboBoxAttachment (valueTreeState, "syncChannel", cbSyncChannel);
+    cbSyncChannel.setEditableText (false);
+    cbSyncChannel.addItemList (juce::StringArray ({"none","one","two","three","four"}), 1);
+    cbSyncChannel.setJustificationType (Justification::centred);
+    cbSyncChannel.setSelectedId (syncChannelIdx);
+    cbSyncChannel.addListener (this);
+    
     addAndMakeVisible (&slProximity);
     slProximityAtt = new ReverseSlider::SliderAttachment (valueTreeState, "proximity", slProximity);
     slProximity.setSliderStyle (Slider::LinearHorizontal);
@@ -258,6 +271,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     const int linearSliderHeight = 20;
     const int buttonHeight = 18;
     const int vSpace = 10;
+    const int vSpaceMain = 30;
     const int hSpace = 30;
     const int buttonVSpace = 5;
     const int loadButtonWidth = 110;
@@ -338,9 +352,15 @@ void PolarDesignerAudioProcessorEditor::resized()
     recordArea.removeFromTop(vSpace/2);
     tbRecordSignal.setBounds(recordArea.removeFromTop(loadButtonHeight).removeFromLeft(loadButtonWidth));
     
+    // set syncChannel
+    sideArea.removeFromTop(sideVSpace);
+    grpSync.setBounds(sideArea.removeFromTop(grpHeight));
+    Rectangle<int> syncArea = sideArea.removeFromTop(25);
+    cbSyncChannel.setBounds(syncArea.removeFromLeft(cbWidth));
+    
     // -------------- MAIN AREA -------------
     Rectangle<int> mainArea = area.removeFromTop(EDITOR_HEIGHT - headerHeight - footerHeight);
-    mainArea.removeFromTop(vSpace);
+    mainArea.removeFromTop(vSpaceMain);
     
     // dv
     Rectangle<int> dvRow = mainArea.removeFromTop(dvHeight);
@@ -352,13 +372,13 @@ void PolarDesignerAudioProcessorEditor::resized()
     }
     
     // dEq
-    Rectangle<int> filterArea = mainArea.removeFromTop (dEqHeight + 2 * dirSliderHeight + vSpace + buttonHeight);
+    Rectangle<int> filterArea = mainArea.removeFromTop (dEqHeight + 2 * dirSliderHeight + vSpaceMain + buttonHeight);
     dEQ.setBounds (filterArea.removeFromTop(dEqHeight));
     alOverlayError.setBounds (dEQ.getX() + 120, dEQ.getY() + 50, dEQ.getWidth() - 240, dEQ.getHeight() - 100);
     alOverlayDisturber.setBounds (dEQ.getX() + 120, dEQ.getY() + 50, dEQ.getWidth() - 240, dEQ.getHeight() - 100);
     alOverlaySignal.setBounds (dEQ.getX() + 120, dEQ.getY() + 50, dEQ.getWidth() - 240, dEQ.getHeight() - 100);
     
-    filterArea.removeFromTop(vSpace);
+    filterArea.removeFromTop(vSpaceMain);
     filterArea.removeFromLeft(hSpace);
     Rectangle<int> band0SliderArea = filterArea.removeFromLeft(linearSliderWidth);
     slDir[0].setBounds(band0SliderArea.removeFromTop(dirSliderHeight));
@@ -675,6 +695,7 @@ void PolarDesignerAudioProcessorEditor::onAlOverlayMaxSigToDist()
 void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
 {
     cbSetNrBands.setEnabled(set);
+    cbSyncChannel.setEnabled(set);
     tbLoadFile.setEnabled(set);
     tbSaveFile.setEnabled(set);
     tbEq[0].setEnabled(set);
@@ -689,7 +710,7 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
 void PolarDesignerAudioProcessorEditor::setEqMode()
 {
     int activeIdx = processor.getEqState();
-    tbEq[activeIdx].setToggleState(true, NotificationType::dontSendNotification);
+    tbEq[activeIdx].setToggleState(true, NotificationType::sendNotification);
 }
 
 void PolarDesignerAudioProcessorEditor::disableOverlay()
