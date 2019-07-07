@@ -111,13 +111,15 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
                                                      0.0f, "", AudioProcessorParameter::genericParameter,
                                                       [](float value, int maximumStringLength) { return std::abs(value) < 0.05f ? "off" : String(value, 2); }, nullptr),
                std::make_unique<AudioParameterBool>  ("zeroDelayMode", "Zero Latency", false, "",
-                                                      [](bool value, int maximumStringLength) {return (value) ? "on" : "off";}, nullptr)
+                                                      [](bool value, int maximumStringLength) {return (value) ? "on" : "off";}, nullptr),
+               std::make_unique<AudioParameterInt>   ("syncChannel", "Sync to Channel", 0, 4, 0, "",
+                                                      [](int value, int maximumStringLength) {return value == 0 ? "none" : String(value);}, nullptr)
            }),
     firLen(401),
     dfEqOmniBuffer(1, DF_EQ_LEN), dfEqEightBuffer(1, DF_EQ_LEN),
     ffEqOmniBuffer(1, FF_EQ_LEN), ffEqEightBuffer(1, FF_EQ_LEN), doEq(0),
-    soloActive(false), loadingFile(false), trackingActive(false), trackingDisturber(false),
-    disturberRecorded(false), signalRecorded(false), currentSampleRate(48000)
+    soloActive(false), loadingFile(false), readingSharedParams(false), trackingActive(false),
+    trackingDisturber(false), disturberRecorded(false), signalRecorded(false), currentSampleRate(48000)
 {
     
     params.addParameterListener("xOverF1", this);
@@ -150,8 +152,10 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     proxDistance = params.getRawParameterValue("proximity");
     params.addParameterListener("zeroDelayMode", this);
     zeroDelayMode = params.getRawParameterValue("zeroDelayMode");
+    params.addParameterListener("syncChannel", this);
+    syncChannelPtr = params.getRawParameterValue("syncChannel");
     
-    // properties file: saves user preset folder location, TODO: ADAPT
+    // properties file: saves user preset folder location
     PropertiesFile::Options options;
     options.applicationName     = "PolarDesigner";
     options.filenameSuffix      = "settings";
@@ -171,6 +175,8 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
         setLatencySamples(std::ceilf(static_cast<float>(firLen)/2-1));
     
     oldProxDistance = *proxDistance;
+    
+    startTimer(50);
 }
 
 PolarDesignerAudioProcessor::~PolarDesignerAudioProcessor()
@@ -527,6 +533,93 @@ void PolarDesignerAudioProcessor::parameterChanged (const String &parameterID, f
             params.getParameter ("proximity")->setValueNotifyingHost (params.getParameter("proximity")->convertTo0to1(0));
             zeroDelayModeChanged = true;
         }
+    }
+    else if (parameterID == "syncChannel" && *syncChannelPtr >= 0.5f)
+    {
+        int ch = (int) *syncChannelPtr - 1;
+        ParamsToSync& params = sharedParams.get().syncParams.getReference(ch);
+        
+        if (!params.paramsValid) // init all params
+        {
+            for (int i = 0; i < 5; ++i)
+            {
+                params.solo[i] = *soloBand[i];
+                params.mute[i] = *muteBand[i];
+                params.dirFactors[i] = *dirFactors[i];
+                params.gains[i] = *bandGains[i];
+                
+                if (i < 4)
+                    params.xOverFreqs[i] = *xOverFreqs[i];
+            }
+            
+            params.nrActiveBands = *nBandsPtr;
+            params.proximity = *proxDistance;
+            params.zeroDelayMode = *zeroDelayMode;
+            params.allowBackwardsPattern = *allowBackwardsPattern;
+            params.ffDfEq = doEq;
+        }
+    }
+    
+    // if parameters are synced -> set sharedParams
+    if (*syncChannelPtr >= 0.5f && !readingSharedParams)
+    {
+        int ch = (int) *syncChannelPtr - 1;
+        ParamsToSync& params = sharedParams.get().syncParams.getReference(ch);
+        
+        if (parameterID.startsWith("xOverF") && !loadingFile)
+        {
+            int idx = parameterID.getTrailingIntValue() - 1;
+            params.xOverFreqs[idx] = *xOverFreqs[idx];
+        }
+        else if (parameterID.startsWith("solo"))
+        {
+            int idx = parameterID.getTrailingIntValue() - 1;
+            params.solo[idx] = *soloBand[idx];
+        }
+        else if (parameterID.startsWith("mute"))
+        {
+            int idx = parameterID.getTrailingIntValue() - 1;
+            params.mute[idx] = *muteBand[idx];
+        }
+        else if (parameterID.startsWith("alpha"))
+        {
+            int idx = parameterID.getTrailingIntValue() - 1;
+            params.dirFactors[idx] = *dirFactors[idx];
+        }
+        else if (parameterID == "nrBands")
+        {
+            params.nrActiveBands = *nBandsPtr;
+        }
+        else if (parameterID == "proximity")
+        {
+            params.proximity = *proxDistance;
+        }
+        else if (parameterID == "zeroDelayMode")
+        {
+            params.zeroDelayMode = *zeroDelayMode;
+        }
+        else if (parameterID.startsWith("gain"))
+        {
+            int idx = parameterID.getTrailingIntValue() - 1;
+            params.gains[idx] = *bandGains[idx];
+        }
+        else if (parameterID == "allowBackwardsPattern")
+        {
+            params.allowBackwardsPattern = *allowBackwardsPattern;
+        }
+        
+    }
+}
+
+void PolarDesignerAudioProcessor::setEqState(int idx)
+{
+    doEq = idx;
+    
+    if (*syncChannelPtr >= 0.5f && !readingSharedParams)
+    {
+        int ch = (int) *syncChannelPtr - 1;
+        ParamsToSync& params = sharedParams.get().syncParams.getReference(ch);
+        params.ffDfEq = doEq;
     }
 }
 
@@ -1195,6 +1288,59 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients(float distance)
 
     *proxCompIIR.coefficients = dsp::IIR::Coefficients<float>(b0,b1,a0,a1);
 }
+
+void PolarDesignerAudioProcessor::timerCallback()
+{
+    if (*syncChannelPtr > 0.5f)
+    {
+        readingSharedParams = true;
+        
+        int ch = (int) *syncChannelPtr - 1;
+        ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference(ch);
+        
+        if (*nBandsPtr != paramsToSync.nrActiveBands)
+            params.getParameter ("nrBands")->setValueNotifyingHost (params.getParameterRange ("nrBands").convertTo0to1 (paramsToSync.nrActiveBands));
+        
+        for (int i = 0; i < 5; ++i)
+        {
+            if (*dirFactors[i] != paramsToSync.dirFactors[i])
+                params.getParameter ("alpha" + String(i+1))->setValueNotifyingHost (params.getParameterRange ("alpha" + String(i+1)).convertTo0to1 (paramsToSync.dirFactors[i]));
+            
+            if (*soloBand[i] != paramsToSync.solo[i])
+                params.getParameter ("solo" + String(i+1))->setValueNotifyingHost (params.getParameterRange ("solo" + String(i+1)).convertTo0to1 (paramsToSync.solo[i]));
+            
+            if (*muteBand[i] != paramsToSync.mute[i])
+                params.getParameter ("mute" + String(i+1))->setValueNotifyingHost (params.getParameterRange ("mute" + String(i+1)).convertTo0to1 (paramsToSync.mute[i]));
+            
+            if (*bandGains[i] != paramsToSync.gains[i])
+                params.getParameter ("gain" + String(i+1))->setValueNotifyingHost (params.getParameterRange ("gain" + String(i+1)).convertTo0to1 (paramsToSync.gains[i]));
+            
+            if (i < 4 && *xOverFreqs[i] != paramsToSync.xOverFreqs[i])
+                params.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (params.getParameterRange ("xOverF" + String(i+1)).convertTo0to1 (paramsToSync.xOverFreqs[i]));
+            
+
+        }
+        
+        if (*proxDistance != paramsToSync.proximity)
+            params.getParameter ("proximity")->setValueNotifyingHost (params.getParameterRange ("proximity").convertTo0to1 (paramsToSync.proximity));
+        
+        if (*zeroDelayMode != paramsToSync.zeroDelayMode)
+            params.getParameter ("zeroDelayMode")->setValueNotifyingHost (params.getParameterRange ("zeroDelayMode").convertTo0to1 (paramsToSync.zeroDelayMode));
+        
+        if (*allowBackwardsPattern != paramsToSync.allowBackwardsPattern)
+            params.getParameter ("allowBackwardsPattern")->setValueNotifyingHost (params.getParameterRange ("allowBackwardsPattern").convertTo0to1 (paramsToSync.allowBackwardsPattern));
+        
+        if (paramsToSync.ffDfEq != doEq)
+        {
+            setEqState(paramsToSync.ffDfEq);
+            ffDfEqChanged = true;
+        }
+        
+        readingSharedParams = false;
+    }
+}
+
+
 
 //==============================================================================
 // This creates new instances of the plugin..

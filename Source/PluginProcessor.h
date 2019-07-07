@@ -29,10 +29,29 @@
 #include <math.h>
 #include <fftw3.h>
 
+// these params can be synced between plugin instances
+struct ParamsToSync {
+    int nrActiveBands, ffDfEq;
+    float xOverFreqs[4], dirFactors[5], gains[5], proximity;
+    bool solo[5], mute[5], allowBackwardsPattern, zeroDelayMode;
+    bool paramsValid = false;
+};
+
+// use several channels to be syncable
+struct SharedParams {
+    SharedParams()
+    {
+        for (int i = 0; i < 4; ++i) // provide 4 channels to sync params between plugin instances
+            syncParams.add(ParamsToSync());
+    }
+    Array<ParamsToSync> syncParams;
+};
+
+
 //==============================================================================
 /**
 */
-class PolarDesignerAudioProcessor  : public AudioProcessor, public AudioProcessorValueTreeState::Listener
+class PolarDesignerAudioProcessor  : public AudioProcessor, public AudioProcessorValueTreeState::Listener, private Timer
 {
 public:
     //==============================================================================
@@ -85,6 +104,7 @@ public:
     void stopTracking(int applyOptimalPattern);
     
     int getNBands() {return nBands;}
+    int getSyncChannelIdx() {return static_cast<int>(*syncChannelPtr) + 1;}
     float getXoverSliderRangeStart (int sliderNum);
     float getXoverSliderRangeEnd (int sliderNum);
     Atomic<bool> repaintDEQ = true;
@@ -111,10 +131,12 @@ public:
     const float XOVER_RANGE_END_5B[4] = {200.0f, 1100.0f, 4000.0f, 12000.0f};
     
     int getEqState() {return doEq;}
-    void setEqState(int idx) {doEq = idx;}
+    void setEqState(int idx);
     float hzToZeroToOne(int idx, float hz);
     float hzFromZeroToOne(int idx, float val);
     bool zeroDelayModeActive() {return *zeroDelayMode != 0.0f;}
+    
+    void timerCallback() override;
     
 private:
     //==============================================================================
@@ -123,6 +145,8 @@ private:
     int nBands;
 
     AudioProcessorValueTreeState params;
+    SharedResourcePointer<SharedParams> sharedParams;
+
     static const int N_CH_IN = 2;
     
     // use odd FIR_LEN for even filter order (FIR_LEN = N+1)
@@ -143,6 +167,7 @@ private:
     dsp::IIR::Filter<float> proxCompIIR;
     
     float* nBandsPtr;
+    float* syncChannelPtr;
     float* xOverFreqs[4];
     float* dirFactors[5];
     float oldDirFactors[5];
@@ -158,6 +183,7 @@ private:
     float* soloBand[5];
     float* muteBand[5];
     bool loadingFile;
+    bool readingSharedParams;
     bool trackingActive;
     bool trackingDisturber;
     bool disturberRecorded;

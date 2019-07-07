@@ -65,12 +65,13 @@ public:
         
 private:
     static const int EDITOR_WIDTH = 990;
-    static const int EDITOR_HEIGHT = 570;
+    static const int EDITOR_HEIGHT = 630;
     String presetFilename;
     String errorMessage;
         
     const int nBands = 5;
     int nActiveBands;
+    int syncChannelIdx;
     
     bool loadingFile;
     bool recordingDisturber;
@@ -84,7 +85,7 @@ private:
     TooltipWindow tooltipWindow;
 
     // Groups
-    GroupComponent grpEq, grpPreset, grpDstC, grpProxComp, grpBands;
+    GroupComponent grpEq, grpPreset, grpDstC, grpProxComp, grpBands, grpSync;
     // Sliders
     ReverseSlider slBandGain[5], slXover[4], slProximity;
     DirSlider slDir[5];
@@ -96,13 +97,13 @@ private:
     // ToggleButtons
     ToggleButton tbEq[3], tbAllowBackwardsPattern;
     // Combox Boxes
-    ComboBox cbSetNrBands;
+    ComboBox cbSetNrBands, cbSyncChannel;
             
     // Pointers for value tree state
     ScopedPointer<ReverseSlider::SliderAttachment> slBandGainAtt[5], slXoverAtt[4], slProximityAtt;
     ScopedPointer<SliderAttachment> slDirAtt[5];
     ScopedPointer<ButtonAttachment> msbSoloAtt[5], msbMuteAtt[5], tbAllowBackwardsPatternAtt, tbZeroDelayAtt;
-    ScopedPointer<ComboBoxAttachment> cbSetNrBandsAtt;
+    ScopedPointer<ComboBoxAttachment> cbSetNrBandsAtt, cbSyncChannelAtt;
     
     DirectivityEQ dEQ;
     FirstOrderDirectivityVisualizer dv[5];
