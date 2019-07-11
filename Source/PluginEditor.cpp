@@ -86,7 +86,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     grpProxComp.setTextLabelPosition (Justification::centredLeft);
     
     addAndMakeVisible (&grpSync);
-    grpSync.setText ("sync to channel");
+    grpSync.setText ("sync-channel");
     grpSync.setTextLabelPosition (Justification::centredLeft);
     
     Colour eqColours[5] = {
