@@ -105,25 +105,25 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         // buttons
         msbSolo[i].setType (MuteSoloButton::Type::solo);
         addAndMakeVisible (&msbSolo[i]);
-        msbSoloAtt[i] = new ButtonAttachment (valueTreeState, "solo" + String(i+1), msbSolo[i]);
+        msbSoloAtt[i] = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "solo" + String(i+1), msbSolo[i]));
         msbSolo[i].addListener (this);
         msbSolo[i].setAlwaysOnTop (true);
         
         msbMute[i].setType (MuteSoloButton::Type::mute);
         addAndMakeVisible (&msbMute[i]);
-        msbMuteAtt[i] = new ButtonAttachment (valueTreeState, "mute" + String(i+1), msbMute[i]);
+        msbMuteAtt[i] = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "mute" + String(i+1), msbMute[i]));
         msbMute[i].addListener (this);
         msbMute[i].setAlwaysOnTop (true);
         
         // sliders
         addAndMakeVisible (&slDir[i]);
-        slDirAtt[i] = new SliderAttachment (valueTreeState, "alpha" + String(i+1), slDir[i]);
+        slDirAtt[i] = std::unique_ptr<SliderAttachment>(new SliderAttachment (valueTreeState, "alpha" + String(i+1), slDir[i]));
         slDir[i].setColour (Slider::thumbColourId, eqColours[i]); // colour of knob
         slDir[i].addListener (this);
         slDir[i].setTooltipEditable (true);
         
         addAndMakeVisible (&slBandGain[i]);
-        slBandGainAtt[i] = new ReverseSlider::SliderAttachment (valueTreeState, "gain" + String(i+1), slBandGain[i]);
+        slBandGainAtt[i] = std::unique_ptr<ReverseSlider::SliderAttachment>(new ReverseSlider::SliderAttachment (valueTreeState, "gain" + String(i+1), slBandGain[i]));
         slBandGain[i].setSliderStyle (Slider::LinearHorizontal);
         slBandGain[i].setColour (Slider::rotarySliderOutlineColourId, eqColours[i]);
         slBandGain[i].setColour (Slider::thumbColourId, eqColours[i]);
@@ -142,7 +142,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
             break; // there is one slXover less than bands
         
         addAndMakeVisible (&slXover[i]);
-        slXoverAtt[i] = new ReverseSlider::SliderAttachment (valueTreeState, "xOverF" + String(i+1), slXover[i]);
+        slXoverAtt[i] = std::unique_ptr<ReverseSlider::SliderAttachment>(new ReverseSlider::SliderAttachment (valueTreeState, "xOverF" + String(i+1), slXover[i]));
         slXover[i].setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
         slXover[i].addListener(this);
         slXover[i].setVisible(false);
@@ -167,7 +167,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbRecordSignal.addListener (this);
     
     addAndMakeVisible (&tbAllowBackwardsPattern);
-    tbAllowBackwardsPatternAtt = new ButtonAttachment (valueTreeState, "allowBackwardsPattern", tbAllowBackwardsPattern);
+    tbAllowBackwardsPatternAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "allowBackwardsPattern", tbAllowBackwardsPattern));
     tbAllowBackwardsPattern.setButtonText ("allow reverse patterns");
     tbAllowBackwardsPattern.addListener (this);
     
@@ -187,7 +187,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbEq[2].setRadioGroupId(1);
     
     addAndMakeVisible (&cbSetNrBands);
-    cbSetNrBandsAtt = new ComboBoxAttachment (valueTreeState, "nrBands", cbSetNrBands);
+    cbSetNrBandsAtt = std::unique_ptr<ComboBoxAttachment>(new ComboBoxAttachment (valueTreeState, "nrBands", cbSetNrBands));
     cbSetNrBands.setEditableText (false);
     cbSetNrBands.addItemList (juce::StringArray ({"one band","two bands",
                                                  "three bands","four bands",
@@ -197,7 +197,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     cbSetNrBands.addListener (this);
     
     addAndMakeVisible (&cbSyncChannel);
-    cbSyncChannelAtt = new ComboBoxAttachment (valueTreeState, "syncChannel", cbSyncChannel);
+    cbSyncChannelAtt = std::unique_ptr<ComboBoxAttachment>(new ComboBoxAttachment (valueTreeState, "syncChannel", cbSyncChannel));
     cbSyncChannel.setEditableText (false);
     cbSyncChannel.addItemList (juce::StringArray ({"none","one","two","three","four"}), 1);
     cbSyncChannel.setJustificationType (Justification::centred);
@@ -205,7 +205,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     cbSyncChannel.addListener (this);
     
     addAndMakeVisible (&slProximity);
-    slProximityAtt = new ReverseSlider::SliderAttachment (valueTreeState, "proximity", slProximity);
+    slProximityAtt = std::unique_ptr<ReverseSlider::SliderAttachment>(new ReverseSlider::SliderAttachment (valueTreeState, "proximity", slProximity));
     slProximity.setSliderStyle (Slider::LinearHorizontal);
     slProximity.setColour (Slider::thumbColourId, globalLaF.AARed);
     slProximity.setColour (Slider::rotarySliderOutlineColourId, globalLaF.AARed);
@@ -213,7 +213,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     slProximity.addListener (this);
     
     addAndMakeVisible (&tbZeroDelay);
-    tbZeroDelayAtt = new ButtonAttachment (valueTreeState, "zeroDelayMode", tbZeroDelay);
+    tbZeroDelayAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "zeroDelayMode", tbZeroDelay));
     tbZeroDelay.addListener (this);
     tbZeroDelay.setButtonText ("zero latency");
     tbZeroDelay.setToggleState(processor.zeroDelayModeActive(), NotificationType::dontSendNotification);

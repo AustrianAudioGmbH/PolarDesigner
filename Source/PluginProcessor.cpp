@@ -162,7 +162,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     options.folderName          = "AustrianAudio";
     options.osxLibrarySubFolder = "Preferences";
     
-    properties = new PropertiesFile (options);
+    properties = std::unique_ptr<PropertiesFile>(new PropertiesFile (options));
     lastDir = File(properties->getValue ("presetFolder"));
     
     dfEqOmniBuffer.copyFrom(0, 0, DFEQ_COEFFS_OMNI, DF_EQ_LEN);
@@ -443,7 +443,7 @@ void PolarDesignerAudioProcessor::getStateInformation (MemoryBlock& destData)
     // as intermediaries to make it easy to save and load complex data.
     params.state.setProperty("ffDfEq", var(doEq), nullptr);
     params.state.setProperty("oldProxDistance", var(oldProxDistance), nullptr);
-    ScopedPointer<XmlElement> xml (params.state.createXml());
+    std::unique_ptr<XmlElement> xml (params.state.createXml());
     copyXmlToBinary (*xml, destData);
 }
 
@@ -451,7 +451,7 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
-    ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (xmlState != nullptr)
     {
         if (xmlState->hasTagName (params.state.getType()))

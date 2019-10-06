@@ -100,10 +100,10 @@ private:
     ComboBox cbSetNrBands, cbSyncChannel;
             
     // Pointers for value tree state
-    ScopedPointer<ReverseSlider::SliderAttachment> slBandGainAtt[5], slXoverAtt[4], slProximityAtt;
-    ScopedPointer<SliderAttachment> slDirAtt[5];
-    ScopedPointer<ButtonAttachment> msbSoloAtt[5], msbMuteAtt[5], tbAllowBackwardsPatternAtt, tbZeroDelayAtt;
-    ScopedPointer<ComboBoxAttachment> cbSetNrBandsAtt, cbSyncChannelAtt;
+    std::unique_ptr<ReverseSlider::SliderAttachment> slBandGainAtt[5], slXoverAtt[4], slProximityAtt;
+    std::unique_ptr<SliderAttachment> slDirAtt[5];
+    std::unique_ptr<ButtonAttachment> msbSoloAtt[5], msbMuteAtt[5], tbAllowBackwardsPatternAtt, tbZeroDelayAtt;
+    std::unique_ptr<ComboBoxAttachment> cbSetNrBandsAtt, cbSyncChannelAtt;
     
     DirectivityEQ dEQ;
     FirstOrderDirectivityVisualizer dv[5];
