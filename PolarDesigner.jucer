@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="LBcOQ9" name="PolarDesigner" projectType="audioplug" jucerVersion="5.4.3"
+<JUCERPROJECT id="LBcOQ9" name="PolarDesigner" projectType="audioplug" jucerVersion="5.4.4"
               pluginManufacturer="Austrian Audio" pluginManufacturerCode="-AA-"
               pluginCode="AAPD" aaxIdentifier="at.iem.aapolardesigner" pluginAUMainType="'aufx'"
               version="1.1.0" companyName="Austrian Audio" companyCopyright="Austrian Audio"

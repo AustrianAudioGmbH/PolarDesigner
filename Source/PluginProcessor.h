@@ -217,7 +217,7 @@ private:
     
     // file handling
     File lastDir;
-    ScopedPointer<PropertiesFile> properties;
+    std::unique_ptr<PropertiesFile> properties;
     const String presetProperties[27] = {"nrActiveBands", "xOverF1", "xOverF2", "xOverF3", "xOverF4", "dirFactor1", "dirFactor2", "dirFactor3", "dirFactor4", "dirFactor5", "gain1", "gain2", "gain3", "gain4", "gain5", "solo1", "solo2", "solo3", "solo4", "solo5", "mute1", "mute2", "mute3", "mute4", "mute5","ffDfEq","proximity"};
     
     static const int DF_EQ_LEN = 512;
