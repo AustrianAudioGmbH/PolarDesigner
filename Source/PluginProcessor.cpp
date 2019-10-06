@@ -1181,7 +1181,7 @@ void PolarDesignerAudioProcessor::setMinimumDisturbancePattern()
                 minPowerAlpha = alpha;
             }
         }
-        if (disturberPower != 0.0f)
+        if (disturberPower != 0.0f) // do not apply changes, if playback is not active
         {
             params.getParameter ("alpha" + String(i+1))->setValueNotifyingHost (params.getParameter("alpha1")->convertTo0to1 (minPowerAlpha));
             disturberRecorded = true;
