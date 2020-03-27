@@ -166,22 +166,22 @@ private:
     // proximity compensation filter
     dsp::IIR::Filter<float> proxCompIIR;
     
-    float* nBandsPtr;
-    float* syncChannelPtr;
-    float* xOverFreqs[4];
-    float* dirFactors[5];
+    std::atomic<float>* nBandsPtr;
+    std::atomic<float>* syncChannelPtr;
+    std::atomic<float>* xOverFreqs[4];
+    std::atomic<float>* dirFactors[5];
     float oldDirFactors[5];
-    float* bandGains[5];
+    std::atomic<float>* bandGains[5];
     float oldBandGains[5];
-    float* allowBackwardsPattern;
+    std::atomic<float>* allowBackwardsPattern;
     int doEq;
-    float* proxDistance;
+    std::atomic<float>* proxDistance;
     float oldProxDistance;
-    float* zeroDelayMode;
-
+    std::atomic<float>* zeroDelayMode;
+    std::atomic<float>* soloBand[5];
+    std::atomic<float>* muteBand[5];
+    
     bool soloActive;
-    float* soloBand[5];
-    float* muteBand[5];
     bool loadingFile;
     bool readingSharedParams;
     bool trackingActive;
