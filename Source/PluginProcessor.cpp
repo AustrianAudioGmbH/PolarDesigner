@@ -117,7 +117,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
            }),
     firLen(401),
     dfEqOmniBuffer(1, DF_EQ_LEN), dfEqEightBuffer(1, DF_EQ_LEN),
-    ffEqOmniBuffer(1, FF_EQ_LEN), ffEqEightBuffer(1, FF_EQ_LEN), doEq(0),
+    ffEqOmniBuffer(1, FF_EQ_LEN), ffEqEightBuffer(1, FF_EQ_LEN), doEq(0), isBypassed(false),
     soloActive(false), loadingFile(false), readingSharedParams(false), trackingActive(false),
     trackingDisturber(false), disturberRecorded(false), signalRecorded(false), currentSampleRate(48000)
 {
@@ -170,9 +170,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     ffEqOmniBuffer.copyFrom(0, 0, FFEQ_COEFFS_OMNI, FF_EQ_LEN);
     ffEqEightBuffer.copyFrom(0, 0, FFEQ_COEFFS_EIGHT, FF_EQ_LEN);
     
-    // set delay compensation to FIR_LEN/2-1 if FIR_LEN even and FIR_LEN/2 if odd
-    if (!zeroDelayMode->load())
-        setLatencySamples(std::ceilf(static_cast<float>(firLen)/2-1));
+    updateLatency();
     
     oldProxDistance = proxDistance->load();
     
@@ -254,8 +252,7 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
         if (firLen % 2 == 0) // make sure firLen is odd
             firLen++;
         
-        if (!zeroDelayMode->load())
-            setLatencySamples(std::ceilf(static_cast<float>(firLen)/2-1));
+        updateLatency();
     }
     
     currentBlockSize = samplesPerBlock;
@@ -338,6 +335,12 @@ bool PolarDesignerAudioProcessor::isBusesLayoutSupported (const BusesLayout& lay
 void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
+    
+    if (isBypassed) {
+        isBypassed = false;
+        updateLatency();
+    }
+    
     int numSamples = buffer.getNumSamples();
     
     // create omni and eight signals
@@ -419,6 +422,19 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
         trackSignalEnergy();
     
     createPolarPatterns (buffer);
+}
+
+void PolarDesignerAudioProcessor::processBlockBypassed (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
+{
+    if (!isBypassed) {
+        isBypassed = true;
+        updateLatency();
+    }
+    
+    jassert (getLatencySamples() == 0);
+
+    for (int ch = getMainBusNumInputChannels(); ch < getTotalNumOutputChannels(); ++ch)
+        buffer.clear (ch, 0, buffer.getNumSamples());
 }
 
 //==============================================================================
@@ -517,9 +533,10 @@ void PolarDesignerAudioProcessor::parameterChanged (const String &parameterID, f
     }
     else if (parameterID == "zeroDelayMode")
     {
+        updateLatency();
+        
         if (newValue == 0)
         {
-            setLatencySamples(std::ceilf(static_cast<float>(firLen)/2-1));
             params.getParameter ("proximity")->setValueNotifyingHost (params.getParameter("proximity")->convertTo0to1(oldProxDistance));
             zeroDelayModeChanged = true;
             computeAllFilterCoefficients();
@@ -527,7 +544,6 @@ void PolarDesignerAudioProcessor::parameterChanged (const String &parameterID, f
         }
         else
         {
-            setLatencySamples(0);
             oldProxDistance = proxDistance->load();
             params.getParameter ("proximity")->setValueNotifyingHost (params.getParameter("proximity")->convertTo0to1(0));
             zeroDelayModeChanged = true;
@@ -1340,7 +1356,20 @@ void PolarDesignerAudioProcessor::timerCallback()
     }
 }
 
-
+void PolarDesignerAudioProcessor::updateLatency() {
+    if (isBypassed)
+    {
+        setLatencySamples(0);
+    }
+    else
+    {
+        // set delay compensation to FIR_LEN/2-1 if FIR_LEN even and FIR_LEN/2 if odd
+        if (!zeroDelayMode->load())
+            setLatencySamples(std::ceilf(static_cast<float>(firLen) / 2 - 1));
+        else
+            setLatencySamples(0);
+    }
+}
 
 //==============================================================================
 // This creates new instances of the plugin..

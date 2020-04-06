@@ -67,7 +67,7 @@ public:
    #endif
 
     void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
-
+    void processBlockBypassed (AudioBuffer<float>&, MidiBuffer&) override;
     //==============================================================================
     AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
@@ -181,6 +181,7 @@ private:
     std::atomic<float>* soloBand[5];
     std::atomic<float>* muteBand[5];
     
+    bool isBypassed;
     bool soloActive;
     bool loadingFile;
     bool readingSharedParams;
@@ -214,6 +215,7 @@ private:
     void setMinimumDisturbancePattern();
     void setMaximumSignalPattern();
     void maximizeSigToDistRatio();
+    void updateLatency();
     
     // file handling
     File lastDir;
