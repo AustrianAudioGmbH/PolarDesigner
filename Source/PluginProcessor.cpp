@@ -115,7 +115,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
                std::make_unique<AudioParameterInt>   ("syncChannel", "Sync to Channel", 0, 4, 0, "",
                                                       [](int value, int maximumStringLength) {return value == 0 ? "none" : String(value);}, nullptr)
            }),
-    firLen(401),
+    firLen(FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE),
     dfEqOmniBuffer(1, DF_EQ_LEN), dfEqEightBuffer(1, DF_EQ_LEN),
     ffEqOmniBuffer(1, FF_EQ_LEN), ffEqEightBuffer(1, FF_EQ_LEN), doEq(0), isBypassed(false),
     soloActive(false), loadingFile(false), readingSharedParams(false), trackingActive(false),
@@ -171,6 +171,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     ffEqEightBuffer.copyFrom(0, 0, FFEQ_COEFFS_EIGHT, FF_EQ_LEN);
     
     updateLatency();
+    delay.setDelayTime (std::ceilf(static_cast<float>(FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE) / 2 - 1) / FILTER_BANK_NATIVE_SAMPLE_RATE);
     
     oldProxDistance = proxDistance->load();
     
@@ -248,7 +249,7 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
 {
     if (sampleRate != currentSampleRate)
     {
-        firLen = std::ceil(401/48000.0f * sampleRate);
+        firLen = std::ceil(static_cast<float>(FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE) / FILTER_BANK_NATIVE_SAMPLE_RATE * sampleRate);
         if (firLen % 2 == 0) // make sure firLen is odd
             firLen++;
         
@@ -257,6 +258,9 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     
     currentBlockSize = samplesPerBlock;
     currentSampleRate = sampleRate;
+    
+    dsp::ProcessSpec delaySpec {currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
+    delay.prepare (delaySpec);
     
     // filter bank
     filterBankBuffer.setSize(N_CH_IN * 5, currentBlockSize);
@@ -347,14 +351,14 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
     createOmniAndEightSignals (buffer);
     
     // proximity compensation filter
-    if (!zeroDelayMode->load() && proxDistance->load() < -0.05) // reduce proximity effect only on figure-of-eight
+    if (zeroDelayMode->load() < 0.5f && proxDistance->load() < -0.05) // reduce proximity effect only on figure-of-eight
     {
         float* writePointerEight = omniEightBuffer.getWritePointer (1);
         dsp::AudioBlock<float> eightBlock(&writePointerEight, 1, numSamples);
         dsp::ProcessContextReplacing<float> contextProx(eightBlock);
         proxCompIIR.process(contextProx);
     }
-    else if (!zeroDelayMode->load() && proxDistance->load() > 0.05) // apply proximity to omni
+    else if (zeroDelayMode->load() < 0.5f && proxDistance->load() > 0.05) // apply proximity to omni
     {
         float* writePointerOmni = omniEightBuffer.getWritePointer (0);
         dsp::AudioBlock<float> omniBlock(&writePointerOmni, 1, numSamples);
@@ -362,7 +366,7 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
         proxCompIIR.process(contextProx);
     }
     
-    if (doEq == 1 && !zeroDelayMode->load())
+    if (doEq == 1 && zeroDelayMode->load() < 0.5f )
     {
         // free field equalization
         float* writePointerOmni = omniEightBuffer.getWritePointer (0);
@@ -375,7 +379,7 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
         dsp::ProcessContextReplacing<float> ffEqEightCtx (ffEqEightBlk);
         ffEqEightConv.process(ffEqEightCtx);
     }
-    else if (doEq == 2 && !zeroDelayMode->load())
+    else if (doEq == 2 && zeroDelayMode->load() < 0.5f )
     {
         // diffuse field equalization
         float* writePointerOmni = omniEightBuffer.getWritePointer (0);
@@ -390,7 +394,7 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
     }
     
     int nActiveBands = nBands;
-    if (zeroDelayMode->load())
+    if (zeroDelayMode->load() > 0.5f )
         nActiveBands = 1;
     
     for (int i = 0; i < nActiveBands; ++i)
@@ -400,7 +404,7 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
         filterBankBuffer.copyFrom (2*i+1, 0, omniEightBuffer, 1, 0, numSamples);
     }
     
-    if (!zeroDelayMode->load() && nBands > 1)
+    if (zeroDelayMode->load() < 0.5f && nBands > 1)
     {
         for (int i = 0; i < nBands; ++i)
         {
@@ -743,7 +747,7 @@ void PolarDesignerAudioProcessor::initAllConvolvers()
 
         // omni convolver
         convolvers[2 * i].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false,firLen);
+        convolvers[2 * i].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, firLen);
         
         // eight convolver
         convolvers[2 * i + 1].prepare (convSpec); // must be called before loading IR
@@ -757,7 +761,7 @@ void PolarDesignerAudioProcessor::initConvolver(int convNr)
     dsp::AudioBlock<float> convBlk (firFilterBuffer);
     dsp::ProcessSpec convSpec {currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
     
-    // update two convolvers: if one crossover frequency changes, two neighbouring bands need new filtes
+    // update two convolvers: if one crossover frequency changes, two neighbouring bands need new filters
     for (int i = convNr; i < convNr + 2; ++i)
     {
         AudioBuffer<float> convSingleBuff(1, firLen);
@@ -795,7 +799,7 @@ void PolarDesignerAudioProcessor::createPolarPatterns(AudioBuffer<float>& buffer
     buffer.clear();
     
     int nActiveBands = nBands;
-    if (zeroDelayMode->load())
+    if (zeroDelayMode->load() > 0.5f)
         nActiveBands = 1;
     
     for (int i = 0; i < nActiveBands; ++i)
@@ -821,6 +825,15 @@ void PolarDesignerAudioProcessor::createPolarPatterns(AudioBuffer<float>& buffer
         oldDirFactors[i] = dirFactors[i]->load();
         oldBandGains[i] = bandGains[i]->load();
     }
+    
+    // delay if only one band is active
+    if (nActiveBands == 1 && zeroDelayMode->load() < 0.5f) {
+        // delay w, x and y accordingly
+        dsp::AudioBlock<float> delayBlock(buffer);
+        dsp::ProcessContextReplacing<float> delayContext(delayBlock);
+        delay.process(delayContext);
+    }
+    
     // copy to second output channel -> this generates loud glitches in pro tools if mono output configuration is used
     // -> check getMainBusNumOutputChannels()
     if (buffer.getNumChannels() == 2 && getMainBusNumOutputChannels() == 2)
@@ -1364,7 +1377,7 @@ void PolarDesignerAudioProcessor::updateLatency() {
     else
     {
         // set delay compensation to FIR_LEN/2-1 if FIR_LEN even and FIR_LEN/2 if odd
-        if (!zeroDelayMode->load())
+        if (zeroDelayMode->load() < 0.5f)
             setLatencySamples(std::ceilf(static_cast<float>(firLen) / 2 - 1));
         else
             setLatencySamples(0);

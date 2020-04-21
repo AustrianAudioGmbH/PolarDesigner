@@ -28,6 +28,7 @@
 #include <memory> // for unique_ptr
 #include <math.h>
 #include <fftw3.h>
+#include "../resources/Delay.h"
 
 // these params can be synced between plugin instances
 struct ParamsToSync {
@@ -134,7 +135,7 @@ public:
     void setEqState(int idx);
     float hzToZeroToOne(int idx, float hz);
     float hzFromZeroToOne(int idx, float val);
-    bool zeroDelayModeActive() {return *zeroDelayMode != 0.0f;}
+    bool zeroDelayModeActive() { return zeroDelayMode->load() > 0.5f; }
     
     void timerCallback() override;
     
@@ -165,6 +166,9 @@ private:
     
     // proximity compensation filter
     dsp::IIR::Filter<float> proxCompIIR;
+    
+    // delay (in case of 1 active band)
+    Delay delay;
     
     std::atomic<float>* nBandsPtr;
     std::atomic<float>* syncChannelPtr;
@@ -221,6 +225,9 @@ private:
     File lastDir;
     std::unique_ptr<PropertiesFile> properties;
     const String presetProperties[27] = {"nrActiveBands", "xOverF1", "xOverF2", "xOverF3", "xOverF4", "dirFactor1", "dirFactor2", "dirFactor3", "dirFactor4", "dirFactor5", "gain1", "gain2", "gain3", "gain4", "gain5", "solo1", "solo2", "solo3", "solo4", "solo5", "mute1", "mute2", "mute3", "mute4", "mute5","ffDfEq","proximity"};
+    
+    static const int FILTER_BANK_NATIVE_SAMPLE_RATE = 48000;
+    static const int FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE = 401;
     
     static const int DF_EQ_LEN = 512;
     static const int FF_EQ_LEN = 512;
