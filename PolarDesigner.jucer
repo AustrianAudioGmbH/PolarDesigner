@@ -32,6 +32,7 @@
       </GROUP>
       <FILE id="UWXtmB" name="PolarDesigner.xml" compile="0" resource="0"
             file="resources/PolarDesigner.xml" xcodeResource="1"/>
+      <FILE id="ENqUJX" name="Delay.h" compile="0" resource="0" file="resources/Delay.h"/>
     </GROUP>
     <GROUP id="{584F93AC-B642-0702-B166-7383B6313DFC}" name="Source">
       <FILE id="NY7hn2" name="PluginProcessor.cpp" compile="1" resource="0"
