@@ -31,7 +31,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
            .withOutput ("Output", AudioChannelSet::stereo(), true)
            ),
     nBands(5),
-    params(*this, nullptr, "AAPolarDesigner",
+    vtsParams(*this, nullptr, "AAPolarDesigner",
            {
                std::make_unique<AudioParameterFloat> ("xOverF1", "Xover1", NormalisableRange<float>(0.0f, 1.0f, 0.0001f),
                                                       hzToZeroToOne(0, INIT_XOVER_FREQS_5B[0]), "",
@@ -122,38 +122,38 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     trackingDisturber(false), disturberRecorded(false), signalRecorded(false), currentSampleRate(48000)
 {
     
-    params.addParameterListener("xOverF1", this);
-    params.addParameterListener("xOverF2", this);
-    params.addParameterListener("xOverF3", this);
-    params.addParameterListener("xOverF4", this);
-    xOverFreqs[0] = params.getRawParameterValue("xOverF1");
-    xOverFreqs[1] = params.getRawParameterValue("xOverF2");
-    xOverFreqs[2] = params.getRawParameterValue("xOverF3");
-    xOverFreqs[3] = params.getRawParameterValue("xOverF4");
+    vtsParams.addParameterListener("xOverF1", this);
+    vtsParams.addParameterListener("xOverF2", this);
+    vtsParams.addParameterListener("xOverF3", this);
+    vtsParams.addParameterListener("xOverF4", this);
+    xOverFreqs[0] = vtsParams.getRawParameterValue("xOverF1");
+    xOverFreqs[1] = vtsParams.getRawParameterValue("xOverF2");
+    xOverFreqs[2] = vtsParams.getRawParameterValue("xOverF3");
+    xOverFreqs[3] = vtsParams.getRawParameterValue("xOverF4");
     for (int i = 0; i < 5; ++i)
     {
-        params.addParameterListener("alpha"+String(i+1), this);
-        dirFactors[i] = params.getRawParameterValue("alpha"+String(i+1));
+        vtsParams.addParameterListener("alpha"+String(i+1), this);
+        dirFactors[i] = vtsParams.getRawParameterValue("alpha"+String(i+1));
         
-        params.addParameterListener("solo"+String(i+1), this);
-        soloBand[i] = params.getRawParameterValue("solo"+String(i+1));
+        vtsParams.addParameterListener("solo"+String(i+1), this);
+        soloBand[i] = vtsParams.getRawParameterValue("solo"+String(i+1));
         
-        params.addParameterListener("mute"+String(i+1), this);
-        muteBand[i] = params.getRawParameterValue("mute"+String(i+1));
+        vtsParams.addParameterListener("mute"+String(i+1), this);
+        muteBand[i] = vtsParams.getRawParameterValue("mute"+String(i+1));
         
-        params.addParameterListener("gain"+String(i+1), this);
-        bandGains[i] = params.getRawParameterValue("gain"+String(i+1));
+        vtsParams.addParameterListener("gain"+String(i+1), this);
+        bandGains[i] = vtsParams.getRawParameterValue("gain"+String(i+1));
     }
-    params.addParameterListener("nrBands", this);
-    nBandsPtr = params.getRawParameterValue("nrBands");
-    params.addParameterListener("allowBackwardsPattern", this);
-    allowBackwardsPattern = params.getRawParameterValue("allowBackwardsPattern");
-    params.addParameterListener("proximity", this);
-    proxDistance = params.getRawParameterValue("proximity");
-    params.addParameterListener("zeroDelayMode", this);
-    zeroDelayMode = params.getRawParameterValue("zeroDelayMode");
-    params.addParameterListener("syncChannel", this);
-    syncChannelPtr = params.getRawParameterValue("syncChannel");
+    vtsParams.addParameterListener("nrBands", this);
+    nBandsPtr = vtsParams.getRawParameterValue("nrBands");
+    vtsParams.addParameterListener("allowBackwardsPattern", this);
+    allowBackwardsPattern = vtsParams.getRawParameterValue("allowBackwardsPattern");
+    vtsParams.addParameterListener("proximity", this);
+    proxDistance = vtsParams.getRawParameterValue("proximity");
+    vtsParams.addParameterListener("zeroDelayMode", this);
+    zeroDelayMode = vtsParams.getRawParameterValue("zeroDelayMode");
+    vtsParams.addParameterListener("syncChannel", this);
+    syncChannelPtr = vtsParams.getRawParameterValue("syncChannel");
     
     // properties file: saves user preset folder location
     PropertiesFile::Options options;
@@ -261,6 +261,8 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     
     dsp::ProcessSpec delaySpec {currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
     delay.prepare (delaySpec);
+    delayBuffer.clear();
+    delayBuffer.setSize(1, currentBlockSize);
     
     // filter bank
     filterBankBuffer.setSize(N_CH_IN * 5, currentBlockSize);
@@ -404,9 +406,9 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
         filterBankBuffer.copyFrom (2*i+1, 0, omniEightBuffer, 1, 0, numSamples);
     }
     
-    if (zeroDelayMode->load() < 0.5f && nBands > 1)
+    if (zeroDelayMode->load() < 0.5f && nActiveBands > 1)
     {
-        for (int i = 0; i < nBands; ++i)
+        for (int i = 0; i < nActiveBands; ++i)
         {
             // omni
             float* writePointerOmni = filterBankBuffer.getWritePointer (2 * i);
@@ -449,7 +451,7 @@ bool PolarDesignerAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* PolarDesignerAudioProcessor::createEditor()
 {
-    return new PolarDesignerAudioProcessorEditor (*this, params);
+    return new PolarDesignerAudioProcessorEditor (*this, vtsParams);
 }
 
 //==============================================================================
@@ -459,9 +461,9 @@ void PolarDesignerAudioProcessor::getStateInformation (MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    params.state.setProperty("ffDfEq", var(doEq), nullptr);
-    params.state.setProperty("oldProxDistance", var(oldProxDistance), nullptr);
-    std::unique_ptr<XmlElement> xml (params.state.createXml());
+    vtsParams.state.setProperty("ffDfEq", var(doEq), nullptr);
+    vtsParams.state.setProperty("oldProxDistance", var(oldProxDistance), nullptr);
+    std::unique_ptr<XmlElement> xml (vtsParams.state.createXml());
     copyXmlToBinary (*xml, destData);
 }
 
@@ -472,22 +474,22 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
     std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (xmlState != nullptr)
     {
-        if (xmlState->hasTagName (params.state.getType()))
+        if (xmlState->hasTagName (vtsParams.state.getType()))
         {
-            params.state = ValueTree::fromXml (*xmlState);
+            vtsParams.state = ValueTree::fromXml (*xmlState);
         }
     }
-    if (params.state.hasProperty("ffDfEq"))
+    if (vtsParams.state.hasProperty("ffDfEq"))
     {
-        Value val = params.state.getPropertyAsValue("ffDfEq", nullptr);
+        Value val = vtsParams.state.getPropertyAsValue("ffDfEq", nullptr);
         if (val.getValue().toString() != "")
         {
             doEq = static_cast<int>(val.getValue());
         }
     }
-    if (params.state.hasProperty("oldProxDistance"))
+    if (vtsParams.state.hasProperty("oldProxDistance"))
     {
-        Value val = params.state.getPropertyAsValue("oldProxDistance", nullptr);
+        Value val = vtsParams.state.getPropertyAsValue("oldProxDistance", nullptr);
         if (val.getValue().toString() != "")
         {
             oldProxDistance = static_cast<float>(val.getValue());
@@ -541,7 +543,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const String &parameterID, f
         
         if (newValue == 0)
         {
-            params.getParameter ("proximity")->setValueNotifyingHost (params.getParameter("proximity")->convertTo0to1(oldProxDistance));
+            vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistance));
             zeroDelayModeChanged = true;
             computeAllFilterCoefficients();
             initAllConvolvers();
@@ -549,33 +551,33 @@ void PolarDesignerAudioProcessor::parameterChanged (const String &parameterID, f
         else
         {
             oldProxDistance = proxDistance->load();
-            params.getParameter ("proximity")->setValueNotifyingHost (params.getParameter("proximity")->convertTo0to1(0));
+            vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(0));
             zeroDelayModeChanged = true;
         }
     }
     else if (parameterID == "syncChannel" && syncChannelPtr->load() >= 0.5f)
     {
         int ch = (int) syncChannelPtr->load() - 1;
-        ParamsToSync& params = sharedParams.get().syncParams.getReference(ch);
+        ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference(ch);
         
-        if (!params.paramsValid) // init all params
+        if (!paramsToSync.paramsValid) // init all params
         {
             for (int i = 0; i < 5; ++i)
             {
-                params.solo[i] = soloBand[i]->load();
-                params.mute[i] = muteBand[i]->load();
-                params.dirFactors[i] = dirFactors[i]->load();
-                params.gains[i] = bandGains[i]->load();
+                paramsToSync.solo[i] = soloBand[i]->load();
+                paramsToSync.mute[i] = muteBand[i]->load();
+                paramsToSync.dirFactors[i] = dirFactors[i]->load();
+                paramsToSync.gains[i] = bandGains[i]->load();
                 
                 if (i < 4)
-                    params.xOverFreqs[i] = xOverFreqs[i]->load();
+                    paramsToSync.xOverFreqs[i] = xOverFreqs[i]->load();
             }
             
-            params.nrActiveBands = nBandsPtr->load();
-            params.proximity = proxDistance->load();
-            params.zeroDelayMode = zeroDelayMode->load();
-            params.allowBackwardsPattern = allowBackwardsPattern->load();
-            params.ffDfEq = doEq;
+            paramsToSync.nrActiveBands = nBandsPtr->load();
+            paramsToSync.proximity = proxDistance->load();
+            paramsToSync.zeroDelayMode = zeroDelayMode->load();
+            paramsToSync.allowBackwardsPattern = allowBackwardsPattern->load();
+            paramsToSync.ffDfEq = doEq;
         }
     }
     
@@ -583,48 +585,48 @@ void PolarDesignerAudioProcessor::parameterChanged (const String &parameterID, f
     if (syncChannelPtr->load() >= 0.5f && !readingSharedParams)
     {
         int ch = (int) syncChannelPtr->load() - 1;
-        ParamsToSync& params = sharedParams.get().syncParams.getReference(ch);
+        ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference(ch);
         
         if (parameterID.startsWith("xOverF") && !loadingFile)
         {
             int idx = parameterID.getTrailingIntValue() - 1;
-            params.xOverFreqs[idx] = xOverFreqs[idx]->load();
+            paramsToSync.xOverFreqs[idx] = xOverFreqs[idx]->load();
         }
         else if (parameterID.startsWith("solo"))
         {
             int idx = parameterID.getTrailingIntValue() - 1;
-            params.solo[idx] = soloBand[idx]->load();
+            paramsToSync.solo[idx] = soloBand[idx]->load();
         }
         else if (parameterID.startsWith("mute"))
         {
             int idx = parameterID.getTrailingIntValue() - 1;
-            params.mute[idx] = muteBand[idx]->load();
+            paramsToSync.mute[idx] = muteBand[idx]->load();
         }
         else if (parameterID.startsWith("alpha"))
         {
             int idx = parameterID.getTrailingIntValue() - 1;
-            params.dirFactors[idx] = dirFactors[idx]->load();
+            paramsToSync.dirFactors[idx] = dirFactors[idx]->load();
         }
         else if (parameterID == "nrBands")
         {
-            params.nrActiveBands = nBandsPtr->load();
+            paramsToSync.nrActiveBands = nBandsPtr->load();
         }
         else if (parameterID == "proximity")
         {
-            params.proximity = proxDistance->load();
+            paramsToSync.proximity = proxDistance->load();
         }
         else if (parameterID == "zeroDelayMode")
         {
-            params.zeroDelayMode = zeroDelayMode->load();
+            paramsToSync.zeroDelayMode = zeroDelayMode->load();
         }
         else if (parameterID.startsWith("gain"))
         {
             int idx = parameterID.getTrailingIntValue() - 1;
-            params.gains[idx] = bandGains[idx]->load();
+            paramsToSync.gains[idx] = bandGains[idx]->load();
         }
         else if (parameterID == "allowBackwardsPattern")
         {
-            params.allowBackwardsPattern = allowBackwardsPattern->load();
+            paramsToSync.allowBackwardsPattern = allowBackwardsPattern->load();
         }
         
     }
@@ -637,8 +639,8 @@ void PolarDesignerAudioProcessor::setEqState(int idx)
     if (syncChannelPtr->load() >= 0.5f && !readingSharedParams)
     {
         int ch = (int) syncChannelPtr->load() - 1;
-        ParamsToSync& params = sharedParams.get().syncParams.getReference(ch);
-        params.ffDfEq = doEq;
+        ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference(ch);
+        paramsToSync.ffDfEq = doEq;
     }
 }
 
@@ -651,28 +653,28 @@ void PolarDesignerAudioProcessor::resetXoverFreqs()
         case 2:
             for (int i = 0; i < nBands - 1; ++i)
             {
-                params.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (hzToZeroToOne(i, INIT_XOVER_FREQS_2B[i]));
+                vtsParams.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (hzToZeroToOne(i, INIT_XOVER_FREQS_2B[i]));
             }
             break;
             
         case 3:
             for (int i = 0; i < nBands - 1; ++i)
             {
-                params.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (hzToZeroToOne(i, INIT_XOVER_FREQS_3B[i]));
+                vtsParams.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (hzToZeroToOne(i, INIT_XOVER_FREQS_3B[i]));
             }
             break;
             
         case 4:
             for (int i = 0; i < nBands - 1; ++i)
             {
-                params.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (hzToZeroToOne(i, INIT_XOVER_FREQS_4B[i]));
+                vtsParams.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (hzToZeroToOne(i, INIT_XOVER_FREQS_4B[i]));
             }
             break;
             
         case 5:
             for (int i = 0; i < nBands - 1; ++i)
             {
-                params.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (hzToZeroToOne(i, INIT_XOVER_FREQS_5B[i]));
+                vtsParams.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (hzToZeroToOne(i, INIT_XOVER_FREQS_5B[i]));
             }
             break;
             
@@ -826,12 +828,14 @@ void PolarDesignerAudioProcessor::createPolarPatterns(AudioBuffer<float>& buffer
         oldBandGains[i] = bandGains[i]->load();
     }
     
-    // delay if only one band is active
+    // delay needs to be running constantly to prevent clicks
+    delayBuffer.copyFrom(0, 0, buffer, 0, 0, numSamples);
+    dsp::AudioBlock<float> delayBlock(delayBuffer);
+    dsp::ProcessContextReplacing<float> delayContext(delayBlock);
+    delay.process(delayContext);
+    
     if (nActiveBands == 1 && zeroDelayMode->load() < 0.5f) {
-        // delay w, x and y accordingly
-        dsp::AudioBlock<float> delayBlock(buffer);
-        dsp::ProcessContextReplacing<float> delayContext(delayBlock);
-        delay.process(delayContext);
+        buffer.copyFrom(0, 0, delayBuffer, 0, 0, numSamples);
     }
     
     // copy to second output channel -> this generates loud glitches in pro tools if mono output configuration is used
@@ -867,37 +871,37 @@ Result PolarDesignerAudioProcessor::loadPreset(const File& presetFile)
     loadingFile = true;
     
     float x = parsedJson.getProperty ("nrActiveBands", parsedJson);
-    params.getParameter ("nrBands")->setValueNotifyingHost (params.getParameter ("nrBands")->convertTo0to1(x - 1));
+    vtsParams.getParameter ("nrBands")->setValueNotifyingHost (vtsParams.getParameter ("nrBands")->convertTo0to1(x - 1));
     
     for (int i = 0; i < 4; ++i)
     {
         x = parsedJson.getProperty ("xOverF" + String(i+1), parsedJson);
-        params.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (hzToZeroToOne(i, x));
+        vtsParams.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (hzToZeroToOne(i, x));
     }
     
-    NormalisableRange<float> dfRange = params.getParameter("alpha1")->getNormalisableRange();
+    NormalisableRange<float> dfRange = vtsParams.getParameter("alpha1")->getNormalisableRange();
     
     for (int i = 0; i < 5; ++i)
     {
         x = parsedJson.getProperty ("dirFactor" + String(i+1), parsedJson);
         if (x < dfRange.start || x > dfRange.end)
             return Result::fail ("DirFactor" + String(i+1) + " needs to be between " + String(dfRange.start) + " and " + String(dfRange.end) + ".");
-        params.getParameter ("alpha" + String(i+1))->setValueNotifyingHost (dfRange.convertTo0to1(x));
+        vtsParams.getParameter ("alpha" + String(i+1))->setValueNotifyingHost (dfRange.convertTo0to1(x));
         
         x = parsedJson.getProperty ("gain" + String(i+1), parsedJson);
-        params.getParameter ("gain" + String(i+1))->setValueNotifyingHost (params.getParameter("gain1")->convertTo0to1(x));
+        vtsParams.getParameter ("gain" + String(i+1))->setValueNotifyingHost (vtsParams.getParameter("gain1")->convertTo0to1(x));
         
         x = parsedJson.getProperty ("solo" + String(i+1), parsedJson);
-        params.getParameter ("solo" + String(i+1))->setValueNotifyingHost (params.getParameter("solo1")->convertTo0to1(x));
+        vtsParams.getParameter ("solo" + String(i+1))->setValueNotifyingHost (vtsParams.getParameter("solo1")->convertTo0to1(x));
         
         x = parsedJson.getProperty ("mute" + String(i+1), parsedJson);
-        params.getParameter ("mute" + String(i+1))->setValueNotifyingHost (params.getParameter("solo1")->convertTo0to1(x));
+        vtsParams.getParameter ("mute" + String(i+1))->setValueNotifyingHost (vtsParams.getParameter("solo1")->convertTo0to1(x));
     }
     
     doEq = parsedJson.getProperty ("ffDfEq", parsedJson);
     
     x = parsedJson.getProperty ("proximity", parsedJson);
-    params.getParameter ("proximity")->setValueNotifyingHost (params.getParameter("proximity")->convertTo0to1(x));
+    vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(x));
     
     loadingFile = false;
     
@@ -1211,7 +1215,7 @@ void PolarDesignerAudioProcessor::setMinimumDisturbancePattern()
         }
         if (disturberPower != 0.0f) // do not apply changes, if playback is not active
         {
-            params.getParameter ("alpha" + String(i+1))->setValueNotifyingHost (params.getParameter("alpha1")->convertTo0to1 (minPowerAlpha));
+            vtsParams.getParameter ("alpha" + String(i+1))->setValueNotifyingHost (vtsParams.getParameter("alpha1")->convertTo0to1 (minPowerAlpha));
             disturberRecorded = true;
         }
     }
@@ -1238,7 +1242,7 @@ void PolarDesignerAudioProcessor::setMaximumSignalPattern()
         }
         if (signalPower != 0.0f)
         {
-            params.getParameter ("alpha" + String(i+1))->setValueNotifyingHost (params.getParameter("alpha1")->convertTo0to1 (maxPowerAlpha));
+            vtsParams.getParameter ("alpha" + String(i+1))->setValueNotifyingHost (vtsParams.getParameter("alpha1")->convertTo0to1 (maxPowerAlpha));
             signalRecorded = true;
         }
     }
@@ -1271,7 +1275,7 @@ void PolarDesignerAudioProcessor::maximizeSigToDistRatio()
             }
         }
         if (distToSigRatio != 0.0f)
-            params.getParameter ("alpha" + String(i+1))->setValueNotifyingHost (params.getParameter("alpha1")->convertTo0to1 (maxDistToSigAlpha));
+            vtsParams.getParameter ("alpha" + String(i+1))->setValueNotifyingHost (vtsParams.getParameter("alpha1")->convertTo0to1 (maxDistToSigAlpha));
     }
 }
 
@@ -1328,36 +1332,36 @@ void PolarDesignerAudioProcessor::timerCallback()
         ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference(ch);
         
         if (nBandsPtr->load() != paramsToSync.nrActiveBands)
-            params.getParameter ("nrBands")->setValueNotifyingHost (params.getParameterRange ("nrBands").convertTo0to1 (paramsToSync.nrActiveBands));
+            vtsParams.getParameter ("nrBands")->setValueNotifyingHost (vtsParams.getParameterRange ("nrBands").convertTo0to1 (paramsToSync.nrActiveBands));
         
         for (int i = 0; i < 5; ++i)
         {
             if (dirFactors[i]->load() != paramsToSync.dirFactors[i])
-                params.getParameter ("alpha" + String(i+1))->setValueNotifyingHost (params.getParameterRange ("alpha" + String(i+1)).convertTo0to1 (paramsToSync.dirFactors[i]));
+                vtsParams.getParameter ("alpha" + String(i+1))->setValueNotifyingHost (vtsParams.getParameterRange ("alpha" + String(i+1)).convertTo0to1 (paramsToSync.dirFactors[i]));
             
             if (soloBand[i]->load() != paramsToSync.solo[i])
-                params.getParameter ("solo" + String(i+1))->setValueNotifyingHost (params.getParameterRange ("solo" + String(i+1)).convertTo0to1 (paramsToSync.solo[i]));
+                vtsParams.getParameter ("solo" + String(i+1))->setValueNotifyingHost (vtsParams.getParameterRange ("solo" + String(i+1)).convertTo0to1 (paramsToSync.solo[i]));
             
             if (muteBand[i]->load() != paramsToSync.mute[i])
-                params.getParameter ("mute" + String(i+1))->setValueNotifyingHost (params.getParameterRange ("mute" + String(i+1)).convertTo0to1 (paramsToSync.mute[i]));
+                vtsParams.getParameter ("mute" + String(i+1))->setValueNotifyingHost (vtsParams.getParameterRange ("mute" + String(i+1)).convertTo0to1 (paramsToSync.mute[i]));
             
             if (bandGains[i]->load() != paramsToSync.gains[i])
-                params.getParameter ("gain" + String(i+1))->setValueNotifyingHost (params.getParameterRange ("gain" + String(i+1)).convertTo0to1 (paramsToSync.gains[i]));
+                vtsParams.getParameter ("gain" + String(i+1))->setValueNotifyingHost (vtsParams.getParameterRange ("gain" + String(i+1)).convertTo0to1 (paramsToSync.gains[i]));
             
             if (i < 4 && xOverFreqs[i]->load() != paramsToSync.xOverFreqs[i])
-                params.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (params.getParameterRange ("xOverF" + String(i+1)).convertTo0to1 (paramsToSync.xOverFreqs[i]));
+                vtsParams.getParameter ("xOverF" + String(i+1))->setValueNotifyingHost (vtsParams.getParameterRange ("xOverF" + String(i+1)).convertTo0to1 (paramsToSync.xOverFreqs[i]));
             
 
         }
         
         if (proxDistance->load() != paramsToSync.proximity)
-            params.getParameter ("proximity")->setValueNotifyingHost (params.getParameterRange ("proximity").convertTo0to1 (paramsToSync.proximity));
+            vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameterRange ("proximity").convertTo0to1 (paramsToSync.proximity));
         
         if (zeroDelayMode->load() != paramsToSync.zeroDelayMode)
-            params.getParameter ("zeroDelayMode")->setValueNotifyingHost (params.getParameterRange ("zeroDelayMode").convertTo0to1 (paramsToSync.zeroDelayMode));
+            vtsParams.getParameter ("zeroDelayMode")->setValueNotifyingHost (vtsParams.getParameterRange ("zeroDelayMode").convertTo0to1 (paramsToSync.zeroDelayMode));
         
         if (allowBackwardsPattern->load() != paramsToSync.allowBackwardsPattern)
-            params.getParameter ("allowBackwardsPattern")->setValueNotifyingHost (params.getParameterRange ("allowBackwardsPattern").convertTo0to1 (paramsToSync.allowBackwardsPattern));
+            vtsParams.getParameter ("allowBackwardsPattern")->setValueNotifyingHost (vtsParams.getParameterRange ("allowBackwardsPattern").convertTo0to1 (paramsToSync.allowBackwardsPattern));
         
         if (paramsToSync.ffDfEq != doEq)
         {

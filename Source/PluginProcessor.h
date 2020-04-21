@@ -145,7 +145,7 @@ private:
     
     int nBands;
 
-    AudioProcessorValueTreeState params;
+    AudioProcessorValueTreeState vtsParams;
     SharedResourcePointer<SharedParams> sharedParams;
 
     static const int N_CH_IN = 2;
@@ -169,6 +169,7 @@ private:
     
     // delay (in case of 1 active band)
     Delay delay;
+    AudioBuffer<float> delayBuffer;
     
     std::atomic<float>* nBandsPtr;
     std::atomic<float>* syncChannelPtr;
