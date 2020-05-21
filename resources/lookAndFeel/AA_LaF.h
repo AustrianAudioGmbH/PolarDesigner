@@ -73,16 +73,16 @@ public:
         Colour(0xFF00CAFF), Colour(0xFF4FFF00), Colour(0xFFFF9F00), Colour(0xFFD0011B)
     };
 
-    Typeface::Ptr avenirLight, avenirRegular, avenirMedium, terminator;
+    Typeface::Ptr aaLight, aaRegular, aaMedium, terminator;
 
     //float sliderThumbDiameter = 14.0f;
     float sliderBarSize = 8.0f;
 
     LaF()
     {
-        avenirLight = Typeface::createSystemTypefaceFor(BinaryFonts::AAUltraLight_ttf, BinaryFonts::AAUltraLight_ttfSize); //TODO: free this data
-        avenirMedium = Typeface::createSystemTypefaceFor(BinaryFonts::AAMedium_ttf, BinaryFonts::AAMedium_ttfSize);
-        avenirRegular = Typeface::createSystemTypefaceFor(BinaryFonts::AARegular_ttf, BinaryFonts::AARegular_ttfSize); //
+        aaLight = Typeface::createSystemTypefaceFor(BinaryFonts::NunitoSansLight_ttf, BinaryFonts::NunitoSansLight_ttfSize);
+        aaMedium = Typeface::createSystemTypefaceFor(BinaryFonts::NunitoSansRegular_ttf, BinaryFonts::NunitoSansRegular_ttfSize);
+        aaRegular = Typeface::createSystemTypefaceFor(BinaryFonts::NunitoSansSemiBold_ttf, BinaryFonts::NunitoSansSemiBold_ttfSize);
         terminator = Typeface::createSystemTypefaceFor(BinaryFonts::terminator_ttf, BinaryFonts::terminator_ttfSize);
 
         setColour (Slider::rotarySliderFillColourId, Colours::black);
@@ -111,36 +111,36 @@ public:
     {
         switch (f.getStyleFlags()) {
 
-            case 2: return avenirLight;
-            case 1: return avenirMedium;
-            default: return avenirRegular;
+            case 2: return aaLight;
+            case 1: return aaMedium;
+            default: return aaRegular;
         }
     }
     Font getLabelFont (Label& label) override
     {
         //return label.getFont();
-        Font font(avenirRegular);
+        Font font(aaRegular);
         font.setHeight(18.0f);
         return font;
     }
 
     Font getPopupMenuFont() override
     {
-        Font font(avenirRegular);
+        Font font(aaRegular);
         font.setHeight(12.0f);
         return font;
     }
 
     Font getTextButtonFont (TextButton& button, int height) override
     {
-        Font font(avenirRegular);
+        Font font(aaRegular);
         font.setHeight(18.0f);
         return font;
     }
 
     Font getAlertWindowMessageFont() override
     {
-        Font font(avenirRegular);
+        Font font(aaRegular);
         font.setHeight(16.0f);
         return font;
     }
@@ -245,7 +245,7 @@ public:
         if (! label.isBeingEdited())
         {
             const float alpha = label.isEnabled() ? 1.0f : 0.5f;
-            const Font font (avenirRegular);
+            const Font font (aaRegular);
 
             //g.setColour (ClText.withMultipliedAlpha (alpha));
             g.setColour (ClText.withMultipliedAlpha(alpha));
@@ -369,7 +369,7 @@ public:
         }
 
         g.setColour (header.findColour (TableHeaderComponent::textColourId));
-        g.setFont (avenirRegular);
+        g.setFont (aaRegular);
         g.setFont (height * 0.6f);
         g.drawFittedText (columnName, area, Justification::centred, 1);
     }
@@ -726,7 +726,7 @@ public:
                 g.setColour (button.findColour(ToggleButton::tickColourId).withMultipliedAlpha(isButtonDown ? 0.8f : 0.6f));
                 g.strokePath(outline,PathStrokeType(isButtonDown ? 1.0f : 0.8f));
             }
-            g.setFont(avenirRegular);
+            g.setFont(aaRegular);
             g.setFont(height-1);
             g.setColour (isOn ? button.findColour(ToggleButton::tickColourId) : Colours::white);
             g.drawText(isOn ? "ON" : "OFF" , 0, 0, width, height, Justification::centred);
@@ -753,7 +753,7 @@ public:
             if (! button.isEnabled())
                 g.setOpacity (0.5f);
 
-            g.setFont(avenirRegular);
+            g.setFont(aaRegular);
             g.setFont(18.0f);
             g.drawFittedText (button.getButtonText(),
                               button.getLocalBounds().withTrimmedLeft (roundToInt (tickWidth) + 10)
@@ -809,7 +809,7 @@ public:
     {
         Rectangle<int> r(6,0,width-6,15);
         g.setColour(ClText);
-        g.setFont(avenirRegular);
+        g.setFont(aaRegular);
         g.setFont(20.0f);
         g.drawFittedText (text, r, position,1,0.f);
 
@@ -822,7 +822,7 @@ public:
                          box.getWidth() - box.getHeight(),
                          box.getHeight());
 
-        Font font(avenirRegular);
+        Font font(aaRegular);
         font.setHeight(18.0f);
         label.setFont(font);
     }
@@ -852,7 +852,7 @@ public:
 
     void drawPopupMenuSectionHeader (Graphics& g, const Rectangle<int>& area, const String& sectionName) override
     {
-        g.setFont (avenirRegular);
+        g.setFont (aaRegular);
         g.setFont(18.0f);
         g.setColour (findColour (PopupMenu::headerTextColourId));
 

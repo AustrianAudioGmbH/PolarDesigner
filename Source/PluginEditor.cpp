@@ -41,7 +41,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     
     addAndMakeVisible (&title);
     title.setTitle (String("AustrianAudio"),String("PolarDesigner"));
-    title.setFont (globalLaF.avenirMedium,globalLaF.avenirRegular);
+    title.setFont (globalLaF.aaMedium,globalLaF.aaRegular);
     
     addAndMakeVisible (&footer);
     
