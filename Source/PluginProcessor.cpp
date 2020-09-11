@@ -282,19 +282,19 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     // diffuse field eq
     dsp::ProcessSpec eqSpec {currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
     dfEqOmniConv.prepare (eqSpec); // must be called before loading an ir
-    dfEqOmniConv.copyAndLoadImpulseResponseFromBuffer (dfEqOmniBuffer, EQ_SAMPLE_RATE, false, false, false, DF_EQ_LEN);
+    dfEqOmniConv.loadImpulseResponse(std::move(dfEqOmniBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
     
 	dsp::ProcessSpec eqSpec2{ currentSampleRate, static_cast<uint32>(currentBlockSize), 1 };
     dfEqEightConv.prepare (eqSpec2);
-    dfEqEightConv.copyAndLoadImpulseResponseFromBuffer (dfEqEightBuffer, EQ_SAMPLE_RATE, false, false, false, DF_EQ_LEN);
+    dfEqOmniConv.loadImpulseResponse(std::move(dfEqEightBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
     
 	dsp::ProcessSpec eqSpec3{ currentSampleRate, static_cast<uint32>(currentBlockSize), 1 };
     ffEqOmniConv.prepare (eqSpec3); // must be called before loading an ir
-    ffEqOmniConv.copyAndLoadImpulseResponseFromBuffer (ffEqOmniBuffer, EQ_SAMPLE_RATE, false, false, false, FF_EQ_LEN);
+    dfEqOmniConv.loadImpulseResponse(std::move(ffEqOmniBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
     
 	dsp::ProcessSpec eqSpec4{ currentSampleRate, static_cast<uint32>(currentBlockSize), 1 };
     ffEqEightConv.prepare (eqSpec4);
-    ffEqEightConv.copyAndLoadImpulseResponseFromBuffer (ffEqEightBuffer, EQ_SAMPLE_RATE, false, false, false, FF_EQ_LEN);
+    dfEqOmniConv.loadImpulseResponse(std::move(dfEqEightBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
     
     dfEqOmniConv.reset();
     dfEqEightConv.reset();
@@ -744,16 +744,19 @@ void PolarDesignerAudioProcessor::initAllConvolvers()
     dsp::ProcessSpec convSpec {currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
     for (int i = 0; i < nBands; ++i) // prepare nBands mono convolvers
     {
-        AudioBuffer<float> convSingleBuff(1, firLen);
-        convSingleBuff.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
+        AudioBuffer<float> convSingleBuffOmni(1, firLen);
+        convSingleBuffOmni.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
+        
+        AudioBuffer<float> convSingleBuffEight(1, firLen);
+        convSingleBuffEight.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
 
         // omni convolver
         convolvers[2 * i].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, firLen);
+        convolvers[2 * i].loadImpulseResponse(std::move(convSingleBuffOmni), currentSampleRate, Convolution::Stereo::no, Convolution::Trim::no, Convolution::Normalise::no);
         
         // eight convolver
         convolvers[2 * i + 1].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i + 1].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, firLen);
+        convolvers[2 * i + 1].loadImpulseResponse(std::move(convSingleBuffEight), currentSampleRate, Convolution::Stereo::no, Convolution::Trim::no, Convolution::Normalise::no);
     }
 }
 
@@ -766,16 +769,19 @@ void PolarDesignerAudioProcessor::initConvolver(int convNr)
     // update two convolvers: if one crossover frequency changes, two neighbouring bands need new filters
     for (int i = convNr; i < convNr + 2; ++i)
     {
-        AudioBuffer<float> convSingleBuff(1, firLen);
-        convSingleBuff.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
+        AudioBuffer<float> convSingleBuffOmni(1, firLen);
+        convSingleBuffOmni.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
+        
+        AudioBuffer<float> convSingleBuffEight(1, firLen);
+        convSingleBuffEight.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
         
         // omni convolver
         convolvers[2 * i].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, firLen);
+        convolvers[2 * i].loadImpulseResponse(std::move(convSingleBuffOmni), currentSampleRate, Convolution::Stereo::no, Convolution::Trim::no, Convolution::Normalise::no);
         
         // eight convolver
         convolvers[2 * i + 1].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i + 1].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, firLen);
+        convolvers[2 * i + 1].loadImpulseResponse(std::move(convSingleBuffEight), currentSampleRate, Convolution::Stereo::no, Convolution::Trim::no, Convolution::Normalise::no);
     }
 }
 
