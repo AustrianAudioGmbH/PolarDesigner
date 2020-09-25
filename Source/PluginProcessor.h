@@ -115,6 +115,18 @@ public:
     bool getDisturberRecorded() {return disturberRecorded;}
     bool getSignalRecorded() {return signalRecorded;}
     
+    void changeAbLayerState();
+    bool abLayerState = 1; // 1 = A is active, 0 = B is active
+    ValueTree layerA;
+    ValueTree layerB;
+    int doEq;
+    int doEqA = 0;
+    int doEqB = 0;
+    float oldProxDistance;
+    float oldProxDistanceA = 0;
+    float oldProxDistanceB = 0;
+    bool abLayerChanged = false;
+    
     // initial xover frequencies for several numbers of bands
     const float INIT_XOVER_FREQS_2B[1] = {1000.0f};
     const float INIT_XOVER_FREQS_3B[2] = {250.0f,3000.0f};
@@ -179,9 +191,9 @@ private:
     std::atomic<float>* bandGains[5];
     float oldBandGains[5];
     std::atomic<float>* allowBackwardsPattern;
-    int doEq;
+    
     std::atomic<float>* proxDistance;
-    float oldProxDistance;
+    
     std::atomic<float>* zeroDelayMode;
     std::atomic<float>* soloBand[5];
     std::atomic<float>* muteBand[5];
