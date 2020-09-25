@@ -93,7 +93,7 @@ private:
     // Solo Buttons
     MuteSoloButton msbSolo[5], msbMute[5];
     // Text Buttons
-    TextButton tbLoadFile, tbSaveFile, tbRecordDisturber, tbRecordSignal, tbZeroDelay;
+    TextButton tbLoadFile, tbSaveFile, tbRecordDisturber, tbRecordSignal, tbZeroDelay, tbAbButton[2];
     // ToggleButtons
     ToggleButton tbEq[3], tbAllowBackwardsPattern;
     // Combox Boxes

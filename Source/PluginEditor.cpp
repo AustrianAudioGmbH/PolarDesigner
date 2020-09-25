@@ -186,6 +186,21 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbEq[2].setButtonText ("diffuse field");
     tbEq[2].setRadioGroupId(1);
     
+    addAndMakeVisible (&tbAbButton[0]);
+    tbAbButton[0].addListener (this);
+    tbAbButton[0].setButtonText("A");
+    tbAbButton[0].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
+    tbAbButton[0].setClickingTogglesState(true);
+    tbAbButton[0].setAlpha(processor.abLayerState * 0.7 + 0.3);
+    tbAbButton[0].setRadioGroupId(2);
+    
+    addAndMakeVisible (&tbAbButton[1]);
+    tbAbButton[1].addListener(this);
+    tbAbButton[1].setButtonText("B");
+    tbAbButton[1].setClickingTogglesState(true);
+    tbAbButton[1].setAlpha(!processor.abLayerState * 0.7 + 0.3);
+    tbAbButton[1].setRadioGroupId(2);
+
     addAndMakeVisible (&cbSetNrBands);
     cbSetNrBandsAtt = std::unique_ptr<ComboBoxAttachment>(new ComboBoxAttachment (valueTreeState, "nrBands", cbSetNrBands));
     cbSetNrBands.setEditableText (false);
@@ -301,6 +316,12 @@ void PolarDesignerAudioProcessorEditor::resized()
     Rectangle<int> zDArea = headerArea.removeFromRight(90);
     zDArea.removeFromTop(headerHeight/2 - loadButtonHeight/2);
     tbZeroDelay.setBounds(zDArea.removeFromTop(loadButtonHeight));
+    
+    Rectangle<int> abArea = headerArea.removeFromRight(3 * loadButtonHeight);
+    abArea.removeFromTop(headerHeight/2 - loadButtonHeight/2);
+    tbAbButton[0].setBounds(abArea.getX(), abArea.getY(), loadButtonHeight, loadButtonHeight);
+    tbAbButton[1].setBounds(abArea.getX() + 1.5 * loadButtonHeight, abArea.getY(), loadButtonHeight, loadButtonHeight);
+    
     
     // --------- SIDE AREA ------------
     Rectangle<int> sideArea (area.removeFromLeft(sideAreaWidth));
@@ -466,6 +487,28 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     {
         bool isToggled = button->getToggleState();
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
+    }
+    else if (button == &tbAbButton[0])
+    {
+        bool isToggled = button->getToggleState();
+        if (isToggled < 0.5f)
+        {
+            button->setAlpha(isToggled * 0.7f + 0.3f);
+            tbAbButton[1].setAlpha(!isToggled * 0.7f + 0.3f);
+            processor.abLayerState = 1;
+            processor.changeAbLayerState();
+        }
+    }
+    else if (button == &tbAbButton[1])
+    {
+        bool isToggled = button->getToggleState();
+        if (isToggled < 0.5f)
+        {
+            button->setAlpha(isToggled * 0.7f + 0.3f);
+            tbAbButton[0].setAlpha(!isToggled * 0.7f + 0.3f);
+            processor.abLayerState = 0;
+            processor.changeAbLayerState();
+        }
     }
     else // muteSoloButton!
     {

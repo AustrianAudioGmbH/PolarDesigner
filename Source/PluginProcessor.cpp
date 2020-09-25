@@ -247,6 +247,9 @@ void PolarDesignerAudioProcessor::changeProgramName (int index, const String& ne
 //==============================================================================
 void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    layerA = vtsParams.copyState();
+    layerB = vtsParams.copyState();
+    
     if (sampleRate != currentSampleRate)
     {
         firLen = std::ceil(static_cast<float>(FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE) / FILTER_BANK_NATIVE_SAMPLE_RATE * sampleRate);
@@ -543,14 +546,28 @@ void PolarDesignerAudioProcessor::parameterChanged (const String &parameterID, f
         
         if (newValue == 0)
         {
-            vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistance));
+            if (abLayerState == 1)
+            {
+                vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistanceB));
+            }
+            else
+            {
+                vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistanceA));
+            }
             zeroDelayModeChanged = true;
             computeAllFilterCoefficients();
             initAllConvolvers();
         }
         else
         {
-            oldProxDistance = proxDistance->load();
+            if (abLayerState == 1 && proxDistance->load() != 0)
+            {
+                oldProxDistanceB = proxDistance->load();
+            }
+            else if (abLayerState == 0 && proxDistance->load() != 0)
+            {
+                oldProxDistanceA = proxDistance->load();
+            }
             vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(0));
             zeroDelayModeChanged = true;
         }
@@ -1391,6 +1408,42 @@ void PolarDesignerAudioProcessor::updateLatency() {
             setLatencySamples(std::ceilf(static_cast<float>(firLen) / 2 - 1));
         else
             setLatencySamples(0);
+    }
+}
+
+void PolarDesignerAudioProcessor::changeAbLayerState()
+{
+    
+    if (abLayerState == 1)
+    {
+        abLayerChanged = true;
+        ffDfEqChanged = true;
+        layerA = vtsParams.copyState();
+        doEqA = doEq;
+        if (proxDistance->load() != 0) { oldProxDistanceA = proxDistance->load(); }
+        
+        vtsParams.replaceState(layerB);
+        doEq = doEqB;
+        if (zeroDelayModeActive()) { oldProxDistance = 0; }
+        else { oldProxDistance = oldProxDistanceB; }
+        vtsParams.state.setProperty("ffDfEq", var(doEq), nullptr);
+        vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistance));
+    }
+    
+    if (abLayerState == 0)
+    {
+        abLayerChanged = true;
+        ffDfEqChanged = true;
+        layerB = vtsParams.copyState();
+        doEqB = doEq;
+        if (proxDistance->load() != 0) { oldProxDistanceB = proxDistance->load(); }
+        
+        vtsParams.replaceState(layerA);
+        doEq = doEqA;
+        if (zeroDelayModeActive()) { oldProxDistance = 0; }
+        else { oldProxDistance = oldProxDistanceA; };
+        vtsParams.state.setProperty("ffDfEq", var(doEq), nullptr);
+        vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistance));
     }
 }
 
