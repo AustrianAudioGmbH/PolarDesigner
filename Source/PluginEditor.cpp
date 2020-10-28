@@ -197,6 +197,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     addAndMakeVisible (&tbAbButton[1]);
     tbAbButton[1].addListener(this);
     tbAbButton[1].setButtonText("B");
+    tbAbButton[1].setToggleState(!processor.abLayerState, NotificationType::dontSendNotification);
     tbAbButton[1].setClickingTogglesState(true);
     tbAbButton[1].setAlpha(!processor.abLayerState * 0.7 + 0.3);
     tbAbButton[1].setRadioGroupId(2);
@@ -495,7 +496,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         {
             button->setAlpha(isToggled * 0.7f + 0.3f);
             tbAbButton[1].setAlpha(!isToggled * 0.7f + 0.3f);
-            processor.abLayerState = 1;
+            processor.abLayerState = 0;
             processor.changeAbLayerState();
         }
     }
@@ -506,7 +507,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         {
             button->setAlpha(isToggled * 0.7f + 0.3f);
             tbAbButton[0].setAlpha(!isToggled * 0.7f + 0.3f);
-            processor.abLayerState = 0;
+            processor.abLayerState = 1;
             processor.changeAbLayerState();
         }
     }
