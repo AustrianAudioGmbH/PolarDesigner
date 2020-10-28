@@ -34,7 +34,7 @@
 struct ParamsToSync {
     int nrActiveBands, ffDfEq;
     float xOverFreqs[4], dirFactors[5], gains[5], proximity;
-    bool solo[5], mute[5], allowBackwardsPattern, zeroDelayMode;
+    bool solo[5], mute[5], allowBackwardsPattern, zeroDelayMode, abLayer;
     bool paramsValid = false;
 };
 
@@ -117,15 +117,20 @@ public:
     
     void changeAbLayerState();
     bool abLayerState = 1; // 1 = A is active, 0 = B is active
+    Identifier saveTree = "save";
+    Identifier nodeA = "layerA";
+    Identifier nodeB = "layerB";
+    Identifier nodeParams = "vtsParams";
     ValueTree layerA;
     ValueTree layerB;
+    ValueTree saveStates;
     int doEq;
-    int doEqA = 0;
-    int doEqB = 0;
+    int doEqA;
+    int doEqB;
     float oldProxDistance;
-    float oldProxDistanceA = 0;
-    float oldProxDistanceB = 0;
-    bool abLayerChanged = false;
+    float oldProxDistanceA;
+    float oldProxDistanceB;
+    Atomic<bool> abLayerChanged = true;
     
     // initial xover frequencies for several numbers of bands
     const float INIT_XOVER_FREQS_2B[1] = {1000.0f};
@@ -145,6 +150,7 @@ public:
     
     int getEqState() {return doEq;}
     void setEqState(int idx);
+    void setAbLayer(bool state);
     float hzToZeroToOne(int idx, float hz);
     float hzFromZeroToOne(int idx, float val);
     bool zeroDelayModeActive() { return zeroDelayMode->load() > 0.5f; }
