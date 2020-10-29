@@ -494,10 +494,9 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         bool isToggled = button->getToggleState();
         if (isToggled < 0.5f)
         {
+            processor.setAbLayer(0);
             button->setAlpha(isToggled * 0.7f + 0.3f);
             tbAbButton[1].setAlpha(!isToggled * 0.7f + 0.3f);
-            processor.abLayerState = 0;
-            processor.changeAbLayerState();
         }
     }
     else if (button == &tbAbButton[1])
@@ -505,10 +504,9 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         bool isToggled = button->getToggleState();
         if (isToggled < 0.5f)
         {
+            processor.setAbLayer(1);
             button->setAlpha(isToggled * 0.7f + 0.3f);
             tbAbButton[0].setAlpha(!isToggled * 0.7f + 0.3f);
-            processor.abLayerState = 1;
-            processor.changeAbLayerState();
         }
     }
     else // muteSoloButton!
@@ -756,6 +754,14 @@ void PolarDesignerAudioProcessorEditor::setEqMode()
     int activeIdx = processor.getEqState();
     tbEq[activeIdx].setToggleState(true, NotificationType::sendNotification);
 }
+
+void PolarDesignerAudioProcessorEditor::setAbMode(bool buttonIdx)
+{
+    tbAbButton[buttonIdx].setAlpha(0.3f);
+    tbAbButton[!buttonIdx].setAlpha(1.0f);
+    processor.setAbLayer(buttonIdx);
+}
+
 
 void PolarDesignerAudioProcessorEditor::disableOverlay()
 {

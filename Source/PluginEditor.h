@@ -60,6 +60,7 @@ public:
     void onAlOverlayCancelRecord();
     void onAlOverlayMaxSigToDist();
     void setEqMode();
+    void setAbMode(bool buttonIdx);
     
     int getControlParameterIndex (Component& control) override;
         
@@ -72,6 +73,7 @@ private:
     const int nBands = 5;
     int nActiveBands;
     int syncChannelIdx;
+    int oldAbLayerState;
     
     bool loadingFile;
     bool recordingDisturber;

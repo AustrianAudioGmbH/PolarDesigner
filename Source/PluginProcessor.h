@@ -130,7 +130,7 @@ public:
     float oldProxDistance;
     float oldProxDistanceA;
     float oldProxDistanceB;
-    Atomic<bool> abLayerChanged = true;
+    Atomic<bool> abLayerChanged = false;
     
     // initial xover frequencies for several numbers of bands
     const float INIT_XOVER_FREQS_2B[1] = {1000.0f};
@@ -191,6 +191,7 @@ private:
     
     std::atomic<float>* nBandsPtr;
     std::atomic<float>* syncChannelPtr;
+    float oldSyncChannelPtr;
     std::atomic<float>* xOverFreqs[4];
     std::atomic<float>* dirFactors[5];
     float oldDirFactors[5];
