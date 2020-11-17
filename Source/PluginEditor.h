@@ -1,7 +1,7 @@
 /*
  ==============================================================================
  PluginEditor.h
- Author: Thomas Deppisch
+ Author: Thomas Deppisch & Simon Beck
  
  Copyright (c) 2019 - Austrian Audio GmbH
  www.austrian.audio
@@ -60,7 +60,7 @@ public:
     void onAlOverlayCancelRecord();
     void onAlOverlayMaxSigToDist();
     void setEqMode();
-    void setAbMode(bool buttonIdx);
+    float getABButtonAlphaFromLayerState(int layerState);
     
     int getControlParameterIndex (Component& control) override;
         

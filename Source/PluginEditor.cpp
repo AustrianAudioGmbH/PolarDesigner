@@ -1,7 +1,7 @@
 /*
  ==============================================================================
  PluginEditor.cpp
- Author: Thomas Deppisch
+ Author: Thomas Deppisch & Simon Beck
  
  Copyright (c) 2019 - Austrian Audio GmbH
  www.austrian.audio
@@ -191,7 +191,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbAbButton[0].setButtonText("A");
     tbAbButton[0].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
     tbAbButton[0].setClickingTogglesState(true);
-    tbAbButton[0].setAlpha(processor.abLayerState * 0.7 + 0.3);
+    tbAbButton[0].setAlpha(getABButtonAlphaFromLayerState(processor.abLayerState));
     tbAbButton[0].setRadioGroupId(2);
     
     addAndMakeVisible (&tbAbButton[1]);
@@ -199,7 +199,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbAbButton[1].setButtonText("B");
     tbAbButton[1].setToggleState(!processor.abLayerState, NotificationType::dontSendNotification);
     tbAbButton[1].setClickingTogglesState(true);
-    tbAbButton[1].setAlpha(!processor.abLayerState * 0.7 + 0.3);
+    tbAbButton[1].setAlpha(getABButtonAlphaFromLayerState(!processor.abLayerState));
     tbAbButton[1].setRadioGroupId(2);
 
     addAndMakeVisible (&cbSetNrBands);
@@ -495,8 +495,8 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         if (isToggled < 0.5f)
         {
             processor.setAbLayer(0);
-            button->setAlpha(isToggled * 0.7f + 0.3f);
-            tbAbButton[1].setAlpha(!isToggled * 0.7f + 0.3f);
+            button->setAlpha(getABButtonAlphaFromLayerState(isToggled));
+            tbAbButton[1].setAlpha(getABButtonAlphaFromLayerState(!isToggled));
         }
     }
     else if (button == &tbAbButton[1])
@@ -505,8 +505,8 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         if (isToggled < 0.5f)
         {
             processor.setAbLayer(1);
-            button->setAlpha(isToggled * 0.7f + 0.3f);
-            tbAbButton[0].setAlpha(!isToggled * 0.7f + 0.3f);
+            button->setAlpha(getABButtonAlphaFromLayerState(isToggled));
+            tbAbButton[0].setAlpha(getABButtonAlphaFromLayerState(!isToggled));
         }
     }
     else // muteSoloButton!
@@ -519,6 +519,11 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
             vis.repaint();
         }
     }
+}
+
+float PolarDesignerAudioProcessorEditor::getABButtonAlphaFromLayerState(int layerState)
+{
+    return layerState * 0.7f + 0.3f;
 }
 
 bool PolarDesignerAudioProcessorEditor::getSoloActive()
@@ -753,13 +758,6 @@ void PolarDesignerAudioProcessorEditor::setEqMode()
 {
     int activeIdx = processor.getEqState();
     tbEq[activeIdx].setToggleState(true, NotificationType::sendNotification);
-}
-
-void PolarDesignerAudioProcessorEditor::setAbMode(bool buttonIdx)
-{
-    tbAbButton[buttonIdx].setAlpha(0.3f);
-    tbAbButton[!buttonIdx].setAlpha(1.0f);
-    processor.setAbLayer(buttonIdx);
 }
 
 

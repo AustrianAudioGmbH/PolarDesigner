@@ -1,7 +1,7 @@
 /*
  ==============================================================================
  PluginProcessor.h
- Author: Thomas Deppisch
+ Author: Thomas Deppisch & Simon Beck
  
  Copyright (c) 2019 - Austrian Audio GmbH
  www.austrian.audio
@@ -128,8 +128,8 @@ public:
     int doEqA;
     int doEqB;
     float oldProxDistance;
-    float oldProxDistanceA;
-    float oldProxDistanceB;
+    float oldProxDistanceA = 0;
+    float oldProxDistanceB = 0;
     Atomic<bool> abLayerChanged = false;
     
     // initial xover frequencies for several numbers of bands
