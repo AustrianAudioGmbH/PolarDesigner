@@ -412,6 +412,11 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
     
     if (zeroDelayMode->load() < 0.5f && nActiveBands > 1)
     {
+        if (!convolversReady)
+        {
+            return;
+        }
+        
         for (int i = 0; i < nActiveBands; ++i)
         {
             // omni
@@ -426,6 +431,7 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
             dsp::ProcessContextReplacing<float> filterCtx2 (subBlk2);
             convolvers[2 * i + 1].process (filterCtx2); // mono processing
         }
+        convolversReady = true;
     }
     
     if (trackingActive)
@@ -509,10 +515,14 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
         if (xmlState->hasTagName (saveStates.getType()))
         {
             saveStates = ValueTree::fromXml (*xmlState);
+            vtsParams.replaceState(saveStates.getChild(1));
+        }
+        else if (xmlState->hasTagName (vtsParams.state.getType()))
+        {
+            vtsParams.state = ValueTree::fromXml (*xmlState);
         }
     }
     
-    vtsParams.replaceState(saveStates.getChild(1));
     layerB = saveStates.getChild(2).createCopy();
 
     if (vtsParams.state.hasProperty("ffDfEq"))
@@ -817,6 +827,8 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients(int crossoverNr)
 
 void PolarDesignerAudioProcessor::initAllConvolvers()
 {
+    convolversReady = false;
+    
     // build filters and fill firFilterBuffer
     dsp::AudioBlock<float> convBlk (firFilterBuffer);
     dsp::ProcessSpec convSpec {currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
@@ -836,10 +848,13 @@ void PolarDesignerAudioProcessor::initAllConvolvers()
         convolvers[2 * i + 1].prepare (convSpec); // must be called before loading IR
         convolvers[2 * i + 1].loadImpulseResponse(std::move(convSingleBuffEight), currentSampleRate, Convolution::Stereo::no, Convolution::Trim::no, Convolution::Normalise::no);
     }
+    convolversReady = true;
 }
 
 void PolarDesignerAudioProcessor::initConvolver(int convNr)
 {
+    convolversReady = false;
+    
     // build filters and fill firFilterBuffer
     dsp::AudioBlock<float> convBlk (firFilterBuffer);
     dsp::ProcessSpec convSpec {currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
@@ -861,6 +876,7 @@ void PolarDesignerAudioProcessor::initConvolver(int convNr)
         convolvers[2 * i + 1].prepare (convSpec); // must be called before loading IR
         convolvers[2 * i + 1].loadImpulseResponse(std::move(convSingleBuffEight), currentSampleRate, Convolution::Stereo::no, Convolution::Trim::no, Convolution::Normalise::no);
     }
+    convolversReady = true;
 }
 
 void PolarDesignerAudioProcessor::createOmniAndEightSignals (AudioBuffer<float>& buffer)

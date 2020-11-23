@@ -89,13 +89,11 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     grpSync.setText ("sync-channel");
     grpSync.setTextLabelPosition (Justification::centredLeft);
     
-    Colour eqColours[5] = {
-        Colour(0xFDBA4949),
-        Colour(0xFDBA6F49),
-        Colour(0xFDBAAF49),
-        Colour(0xFD8CBA49),
-        Colour(0xFD49BA64)
-    };
+    eqColours[0] = Colour(0xFDBA4949);
+    eqColours[1] = Colour(0xFDBA6F49);
+    eqColours[2] = Colour(0xFDBAAF49);
+    eqColours[3] = Colour(0xFD8CBA49);
+    eqColours[4] = Colour(0xFD49BA64);
     
     // directivity eq
     addAndMakeVisible (&dEQ);
@@ -136,7 +134,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         dv[i].setMuteSoloButtons (&msbSolo[i], &msbMute[i]);
         dv[i].setColour (eqColours[i]);
         
-        dEQ.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slXover[i - 1] : nullptr, (i < nBands - 1) ? &slXover[i] : nullptr, &msbSolo[i], &msbMute[i]);
+        dEQ.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slXover[i - 1] : nullptr, (i < nBands - 1) ? &slXover[i] : nullptr, &msbSolo[i], &msbMute[i], &slBandGain[i]);
         
         if (i == nBands - 1)
             break; // there is one slXover less than bands
@@ -561,6 +559,7 @@ void PolarDesignerAudioProcessorEditor::sliderValueChanged(Slider* slider)
                 dv[i].setDirWeight(slider->getValue());
         }
     }
+    dEQ.repaint();
 }
 
 void PolarDesignerAudioProcessorEditor::loadFile()
@@ -669,6 +668,7 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
 {
     tbZeroDelay.setToggleState(processor.zeroDelayModeActive(), NotificationType::dontSendNotification);
     
+    nActiveBands = cbSetNrBands.getSelectedId();
     int nActive = nActiveBands;
     
     if (processor.zeroDelayModeActive())
