@@ -132,6 +132,8 @@ public:
     float oldProxDistanceB = 0;
     Atomic<bool> abLayerChanged = false;
     
+    bool convolversReady;
+    
     // initial xover frequencies for several numbers of bands
     const float INIT_XOVER_FREQS_2B[1] = {1000.0f};
     const float INIT_XOVER_FREQS_3B[2] = {250.0f,3000.0f};

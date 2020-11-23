@@ -61,6 +61,7 @@ public:
     void onAlOverlayMaxSigToDist();
     void setEqMode();
     float getABButtonAlphaFromLayerState(int layerState);
+    void changeDvColour(float gain);
     
     int getControlParameterIndex (Component& control) override;
         
@@ -77,6 +78,8 @@ private:
     
     bool loadingFile;
     bool recordingDisturber;
+    
+    Colour eqColours[5];
     
     TitleBar<AALogo, NoIOWidget> title;
     Footer footer;
