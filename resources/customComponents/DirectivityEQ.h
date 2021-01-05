@@ -705,11 +705,11 @@ public:
     {
         float maxGain = std::max(elem.gainSlider->getMaximum(), std::abs(elem.gainSlider->getMinimum()));
         float absRange = elem.gainSlider->getMaximum() + std::abs(elem.gainSlider->getMinimum());
-        float gain = ((float) elem.gainSlider->getValue() + maxGain) / (2 * absRange) + 0.5f;
+        float gain = ((float) elem.gainSlider->getValue() + maxGain) / (7.0f/5.0f * absRange) + 2.0f/7.0f;
         
         if (!active)
         {
-            return 0.3f;
+            return 2.0f/7.0f;
         }
         else if ((elem.soloButton == nullptr || !soloActive) && (elem.muteButton == nullptr || !elem.muteButton->getToggleState()))
         {
@@ -721,7 +721,7 @@ public:
         }
         else
         {
-            return 0.3f;
+            return 2.0f/7.0f;
         }
     }
     
