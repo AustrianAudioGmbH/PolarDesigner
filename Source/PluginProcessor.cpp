@@ -1,7 +1,7 @@
 /*
  ==============================================================================
  PluginProcessor.cpp
- Author: Thomas Deppisch
+ Author: Thomas Deppisch & Simon Beck
  
  Copyright (c) 2019 - Austrian Audio GmbH
  www.austrian.audio
@@ -30,6 +30,10 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
            .withInput  ("Input",  AudioChannelSet::stereo(), true)
            .withOutput ("Output", AudioChannelSet::stereo(), true)
            ),
+    layerA(nodeA),
+    layerB(nodeB),
+    saveStates(saveTree),
+    doEq(0), doEqA(0), doEqB(0),
     nBands(5),
     vtsParams(*this, nullptr, "AAPolarDesigner",
            {
@@ -117,7 +121,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
            }),
     firLen(FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE),
     dfEqOmniBuffer(1, DF_EQ_LEN), dfEqEightBuffer(1, DF_EQ_LEN),
-    ffEqOmniBuffer(1, FF_EQ_LEN), ffEqEightBuffer(1, FF_EQ_LEN), doEq(0), isBypassed(false),
+    ffEqOmniBuffer(1, FF_EQ_LEN), ffEqEightBuffer(1, FF_EQ_LEN), isBypassed(false),
     soloActive(false), loadingFile(false), readingSharedParams(false), trackingActive(false),
     trackingDisturber(false), disturberRecorded(false), signalRecorded(false), currentSampleRate(48000)
 {
@@ -282,19 +286,19 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     // diffuse field eq
     dsp::ProcessSpec eqSpec {currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
     dfEqOmniConv.prepare (eqSpec); // must be called before loading an ir
-    dfEqOmniConv.copyAndLoadImpulseResponseFromBuffer (dfEqOmniBuffer, EQ_SAMPLE_RATE, false, false, false, DF_EQ_LEN);
+    dfEqOmniConv.loadImpulseResponse(std::move(dfEqOmniBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
     
 	dsp::ProcessSpec eqSpec2{ currentSampleRate, static_cast<uint32>(currentBlockSize), 1 };
     dfEqEightConv.prepare (eqSpec2);
-    dfEqEightConv.copyAndLoadImpulseResponseFromBuffer (dfEqEightBuffer, EQ_SAMPLE_RATE, false, false, false, DF_EQ_LEN);
+    dfEqOmniConv.loadImpulseResponse(std::move(dfEqEightBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
     
 	dsp::ProcessSpec eqSpec3{ currentSampleRate, static_cast<uint32>(currentBlockSize), 1 };
     ffEqOmniConv.prepare (eqSpec3); // must be called before loading an ir
-    ffEqOmniConv.copyAndLoadImpulseResponseFromBuffer (ffEqOmniBuffer, EQ_SAMPLE_RATE, false, false, false, FF_EQ_LEN);
+    dfEqOmniConv.loadImpulseResponse(std::move(ffEqOmniBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
     
 	dsp::ProcessSpec eqSpec4{ currentSampleRate, static_cast<uint32>(currentBlockSize), 1 };
     ffEqEightConv.prepare (eqSpec4);
-    ffEqEightConv.copyAndLoadImpulseResponseFromBuffer (ffEqEightBuffer, EQ_SAMPLE_RATE, false, false, false, FF_EQ_LEN);
+    dfEqOmniConv.loadImpulseResponse(std::move(dfEqEightBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
     
     dfEqOmniConv.reset();
     dfEqEightConv.reset();
@@ -357,15 +361,15 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
     {
         float* writePointerEight = omniEightBuffer.getWritePointer (1);
         dsp::AudioBlock<float> eightBlock(&writePointerEight, 1, numSamples);
-        dsp::ProcessContextReplacing<float> contextProx(eightBlock);
-        proxCompIIR.process(contextProx);
+        dsp::ProcessContextReplacing<float> contextProxEight(eightBlock);
+        proxCompIIR.process(contextProxEight);
     }
     else if (zeroDelayMode->load() < 0.5f && proxDistance->load() > 0.05) // apply proximity to omni
     {
         float* writePointerOmni = omniEightBuffer.getWritePointer (0);
         dsp::AudioBlock<float> omniBlock(&writePointerOmni, 1, numSamples);
-        dsp::ProcessContextReplacing<float> contextProx(omniBlock);
-        proxCompIIR.process(contextProx);
+        dsp::ProcessContextReplacing<float> contextProxOmni(omniBlock);
+        proxCompIIR.process(contextProxOmni);
     }
     
     if (doEq == 1 && zeroDelayMode->load() < 0.5f )
@@ -408,6 +412,11 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
     
     if (zeroDelayMode->load() < 0.5f && nActiveBands > 1)
     {
+        if (!convolversReady)
+        {
+            return;
+        }
+        
         for (int i = 0; i < nActiveBands; ++i)
         {
             // omni
@@ -422,6 +431,7 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
             dsp::ProcessContextReplacing<float> filterCtx2 (subBlk2);
             convolvers[2 * i + 1].process (filterCtx2); // mono processing
         }
+        convolversReady = true;
     }
     
     if (trackingActive)
@@ -463,7 +473,35 @@ void PolarDesignerAudioProcessor::getStateInformation (MemoryBlock& destData)
     // as intermediaries to make it easy to save and load complex data.
     vtsParams.state.setProperty("ffDfEq", var(doEq), nullptr);
     vtsParams.state.setProperty("oldProxDistance", var(oldProxDistance), nullptr);
-    std::unique_ptr<XmlElement> xml (vtsParams.state.createXml());
+    
+    if (abLayerState == 1)
+    {
+        layerA = vtsParams.copyState();
+        doEqA = doEq;
+        if (proxDistance->load() != 0) { oldProxDistanceA = proxDistance->load(); }
+    }
+    if (abLayerState == 0)
+    {
+        layerB = vtsParams.copyState();
+        doEqB = doEq;
+        if (proxDistance->load() != 0) { oldProxDistanceB = proxDistance->load(); }
+    }
+
+    layerA.setProperty("ffDfEq", var(doEqA), nullptr);
+    layerA.setProperty("oldProxDistance", var(oldProxDistanceA), nullptr);
+    layerB.setProperty("ffDfEq", var(doEqB), nullptr);
+    layerB.setProperty("oldProxDistance", var(oldProxDistanceB), nullptr);
+    
+    ValueTree vtsState = vtsParams.copyState();
+    ValueTree AState = layerA.createCopy();
+    ValueTree BState = layerB.createCopy();
+    
+    saveStates.removeAllChildren(nullptr);
+    saveStates.addChild(vtsState, 0, nullptr);
+    saveStates.addChild(AState, 1, nullptr);
+    saveStates.addChild(BState, 2, nullptr);
+    
+    std::unique_ptr<XmlElement> xml (saveStates.createXml());
     copyXmlToBinary (*xml, destData);
 }
 
@@ -474,11 +512,19 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
     std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (xmlState != nullptr)
     {
-        if (xmlState->hasTagName (vtsParams.state.getType()))
+        if (xmlState->hasTagName (saveStates.getType()))
+        {
+            saveStates = ValueTree::fromXml (*xmlState);
+            vtsParams.replaceState(saveStates.getChild(1));
+        }
+        else if (xmlState->hasTagName (vtsParams.state.getType()))
         {
             vtsParams.state = ValueTree::fromXml (*xmlState);
         }
     }
+    
+    layerB = saveStates.getChild(2).createCopy();
+
     if (vtsParams.state.hasProperty("ffDfEq"))
     {
         Value val = vtsParams.state.getPropertyAsValue("ffDfEq", nullptr);
@@ -493,6 +539,23 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
         if (val.getValue().toString() != "")
         {
             oldProxDistance = static_cast<float>(val.getValue());
+        }
+    }
+    
+    if (layerB.hasProperty("ffDfEq"))
+    {
+        Value val = layerB.getPropertyAsValue("ffDfEq", nullptr);
+        if (val.getValue().toString() != "")
+        {
+            doEqB = static_cast<int>(val.getValue());
+        }
+    }
+    if (layerB.hasProperty("oldProxDistance"))
+    {
+        Value val = layerB.getPropertyAsValue("oldProxDistance", nullptr);
+        if (val.getValue().toString() != "")
+        {
+            oldProxDistanceB = static_cast<float>(val.getValue());
         }
     }
     nBands = static_cast<int>(nBandsPtr->load()) + 1;
@@ -543,14 +606,28 @@ void PolarDesignerAudioProcessor::parameterChanged (const String &parameterID, f
         
         if (newValue == 0)
         {
-            vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistance));
+            if (abLayerState == 0)
+            {
+                vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistanceB));
+            }
+            else
+            {
+                vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistanceA));
+            }
             zeroDelayModeChanged = true;
             computeAllFilterCoefficients();
             initAllConvolvers();
         }
         else
         {
-            oldProxDistance = proxDistance->load();
+            if (abLayerState == 0 && !abLayerChanged.get())
+            {
+                oldProxDistanceB = proxDistance->load();
+            }
+            else if (abLayerState == 1 && !abLayerChanged.get())
+            {
+                oldProxDistanceA = proxDistance->load();
+            }
             vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(0));
             zeroDelayModeChanged = true;
         }
@@ -575,9 +652,14 @@ void PolarDesignerAudioProcessor::parameterChanged (const String &parameterID, f
             
             paramsToSync.nrActiveBands = nBandsPtr->load();
             paramsToSync.proximity = proxDistance->load();
-            paramsToSync.zeroDelayMode = zeroDelayMode->load();
+            
             paramsToSync.allowBackwardsPattern = allowBackwardsPattern->load();
-            paramsToSync.ffDfEq = doEq;
+            
+            if(!readingSharedParams)
+            {
+                paramsToSync.zeroDelayMode = zeroDelayMode->load();
+                paramsToSync.ffDfEq = doEq;
+            }
         }
     }
     
@@ -642,6 +724,12 @@ void PolarDesignerAudioProcessor::setEqState(int idx)
         ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference(ch);
         paramsToSync.ffDfEq = doEq;
     }
+}
+
+void PolarDesignerAudioProcessor::setAbLayer(bool state)
+{
+    abLayerState = state;
+    changeAbLayerState();
 }
 
 void PolarDesignerAudioProcessor::resetXoverFreqs()
@@ -739,26 +827,34 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients(int crossoverNr)
 
 void PolarDesignerAudioProcessor::initAllConvolvers()
 {
+    convolversReady = false;
+    
     // build filters and fill firFilterBuffer
     dsp::AudioBlock<float> convBlk (firFilterBuffer);
     dsp::ProcessSpec convSpec {currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
     for (int i = 0; i < nBands; ++i) // prepare nBands mono convolvers
     {
-        AudioBuffer<float> convSingleBuff(1, firLen);
-        convSingleBuff.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
+        AudioBuffer<float> convSingleBuffOmni(1, firLen);
+        convSingleBuffOmni.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
+        
+        AudioBuffer<float> convSingleBuffEight(1, firLen);
+        convSingleBuffEight.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
 
         // omni convolver
         convolvers[2 * i].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, firLen);
+        convolvers[2 * i].loadImpulseResponse(std::move(convSingleBuffOmni), currentSampleRate, Convolution::Stereo::no, Convolution::Trim::no, Convolution::Normalise::no);
         
         // eight convolver
         convolvers[2 * i + 1].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i + 1].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, firLen);
+        convolvers[2 * i + 1].loadImpulseResponse(std::move(convSingleBuffEight), currentSampleRate, Convolution::Stereo::no, Convolution::Trim::no, Convolution::Normalise::no);
     }
+    convolversReady = true;
 }
 
 void PolarDesignerAudioProcessor::initConvolver(int convNr)
 {
+    convolversReady = false;
+    
     // build filters and fill firFilterBuffer
     dsp::AudioBlock<float> convBlk (firFilterBuffer);
     dsp::ProcessSpec convSpec {currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
@@ -766,17 +862,21 @@ void PolarDesignerAudioProcessor::initConvolver(int convNr)
     // update two convolvers: if one crossover frequency changes, two neighbouring bands need new filters
     for (int i = convNr; i < convNr + 2; ++i)
     {
-        AudioBuffer<float> convSingleBuff(1, firLen);
-        convSingleBuff.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
+        AudioBuffer<float> convSingleBuffOmni(1, firLen);
+        convSingleBuffOmni.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
+        
+        AudioBuffer<float> convSingleBuffEight(1, firLen);
+        convSingleBuffEight.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
         
         // omni convolver
         convolvers[2 * i].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, firLen);
+        convolvers[2 * i].loadImpulseResponse(std::move(convSingleBuffOmni), currentSampleRate, Convolution::Stereo::no, Convolution::Trim::no, Convolution::Normalise::no);
         
         // eight convolver
         convolvers[2 * i + 1].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i + 1].copyAndLoadImpulseResponseFromBuffer (convSingleBuff, currentSampleRate, false, false, false, firLen);
+        convolvers[2 * i + 1].loadImpulseResponse(std::move(convSingleBuffEight), currentSampleRate, Convolution::Stereo::no, Convolution::Trim::no, Convolution::Normalise::no);
     }
+    convolversReady = true;
 }
 
 void PolarDesignerAudioProcessor::createOmniAndEightSignals (AudioBuffer<float>& buffer)
@@ -1386,6 +1486,39 @@ void PolarDesignerAudioProcessor::updateLatency() {
         else
             setLatencySamples(0);
     }
+}
+
+void PolarDesignerAudioProcessor::changeAbLayerState()
+{
+    abLayerChanged = true;
+    ffDfEqChanged = true;
+    if (abLayerState == 0)
+    {
+        layerA = vtsParams.copyState();
+        doEqA = doEq;
+        if (!zeroDelayModeActive()) { oldProxDistanceA = proxDistance->load(); }
+        readingSharedParams = true;
+        
+        vtsParams.state = layerB.createCopy();
+        
+        doEq = doEqB;
+        zeroDelayModeActive() ? oldProxDistance = 0 : oldProxDistance = oldProxDistanceB;
+    }
+    else
+    {
+        layerB = vtsParams.copyState();
+        doEqB = doEq;
+        if (!zeroDelayModeActive()) { oldProxDistanceB = proxDistance->load(); }
+        readingSharedParams = true;
+        
+        vtsParams.state = layerA.createCopy();
+        
+        doEq = doEqA;
+        zeroDelayModeActive() ? oldProxDistance = 0 : oldProxDistance = oldProxDistanceA;
+    }
+    vtsParams.state.setProperty("ffDfEq", var(doEq), nullptr);
+    vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistance));
+    abLayerChanged = false;
 }
 
 //==============================================================================

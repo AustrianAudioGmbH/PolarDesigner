@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="LBcOQ9" name="PolarDesigner" projectType="audioplug" jucerVersion="5.4.7"
-              pluginManufacturer="Austrian Audio" pluginManufacturerCode="-AA-"
-              pluginCode="AAPD" aaxIdentifier="at.iem.aapolardesigner" pluginAUMainType="'aufx'"
-              version="1.1.2" companyName="Austrian Audio" companyCopyright="Austrian Audio"
-              companyWebsite="www.austrian.audio" bundleIdentifier="at.iem.aapolardesigner"
-              reportAppUsage="0" pluginFormats="buildAAX,buildAU,buildVST3"
-              pluginAAXCategory="8192" pluginVST3Category="Fx" pluginRTASCategory="8192"
-              pluginVSTCategory="kPlugCategEffect" pluginCharacteristicsValue="pluginAAXDisableMultiMono"
-              companyEmail="sayhello@austrianaudio.com">
+<JUCERPROJECT id="LBcOQ9" name="PolarDesigner" projectType="audioplug" pluginManufacturer="Austrian Audio"
+              pluginManufacturerCode="-AA-" pluginCode="AAPD" aaxIdentifier="at.iem.aapolardesigner"
+              pluginAUMainType="'aufx'" version="2.0.0" companyName="Austrian Audio"
+              companyCopyright="Austrian Audio" companyWebsite="www.austrian.audio"
+              bundleIdentifier="at.iem.aapolardesigner" reportAppUsage="0"
+              pluginFormats="buildAAX,buildAU,buildVST3" pluginAAXCategory="8192"
+              pluginVST3Category="Fx" pluginRTASCategory="8192" pluginVSTCategory="kPlugCategEffect"
+              pluginCharacteristicsValue="pluginAAXDisableMultiMono" companyEmail="sayhello@austrianaudio.com"
+              jucerFormatVersion="1">
   <MAINGROUP id="nmXiNr" name="PolarDesigner">
     <GROUP id="{D54BFC58-8ED6-1DEF-A2B9-DAAF16495BAC}" name="resources">
       <GROUP id="{75BF05EC-024B-1F61-DA13-169C5FDE5119}" name="customComponents">

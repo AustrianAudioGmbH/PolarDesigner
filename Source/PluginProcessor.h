@@ -1,7 +1,7 @@
 /*
  ==============================================================================
  PluginProcessor.h
- Author: Thomas Deppisch
+ Author: Thomas Deppisch & Simon Beck
  
  Copyright (c) 2019 - Austrian Audio GmbH
  www.austrian.audio
@@ -34,7 +34,7 @@
 struct ParamsToSync {
     int nrActiveBands, ffDfEq;
     float xOverFreqs[4], dirFactors[5], gains[5], proximity;
-    bool solo[5], mute[5], allowBackwardsPattern, zeroDelayMode;
+    bool solo[5], mute[5], allowBackwardsPattern, zeroDelayMode, abLayer;
     bool paramsValid = false;
 };
 
@@ -115,6 +115,25 @@ public:
     bool getDisturberRecorded() {return disturberRecorded;}
     bool getSignalRecorded() {return signalRecorded;}
     
+    void changeAbLayerState();
+    bool abLayerState = 1; // 1 = A is active, 0 = B is active
+    Identifier saveTree = "save";
+    Identifier nodeA = "layerA";
+    Identifier nodeB = "layerB";
+    Identifier nodeParams = "vtsParams";
+    ValueTree layerA;
+    ValueTree layerB;
+    ValueTree saveStates;
+    int doEq;
+    int doEqA;
+    int doEqB;
+    float oldProxDistance;
+    float oldProxDistanceA = 0;
+    float oldProxDistanceB = 0;
+    Atomic<bool> abLayerChanged = false;
+    
+    bool convolversReady;
+    
     // initial xover frequencies for several numbers of bands
     const float INIT_XOVER_FREQS_2B[1] = {1000.0f};
     const float INIT_XOVER_FREQS_3B[2] = {250.0f,3000.0f};
@@ -133,6 +152,7 @@ public:
     
     int getEqState() {return doEq;}
     void setEqState(int idx);
+    void setAbLayer(bool state);
     float hzToZeroToOne(int idx, float hz);
     float hzFromZeroToOne(int idx, float val);
     bool zeroDelayModeActive() { return zeroDelayMode->load() > 0.5f; }
@@ -173,15 +193,16 @@ private:
     
     std::atomic<float>* nBandsPtr;
     std::atomic<float>* syncChannelPtr;
+    float oldSyncChannelPtr;
     std::atomic<float>* xOverFreqs[4];
     std::atomic<float>* dirFactors[5];
     float oldDirFactors[5];
     std::atomic<float>* bandGains[5];
     float oldBandGains[5];
     std::atomic<float>* allowBackwardsPattern;
-    int doEq;
+    
     std::atomic<float>* proxDistance;
-    float oldProxDistance;
+    
     std::atomic<float>* zeroDelayMode;
     std::atomic<float>* soloBand[5];
     std::atomic<float>* muteBand[5];

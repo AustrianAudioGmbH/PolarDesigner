@@ -1,7 +1,7 @@
 /*
  ==============================================================================
  PluginEditor.h
- Author: Thomas Deppisch
+ Author: Thomas Deppisch & Simon Beck
  
  Copyright (c) 2019 - Austrian Audio GmbH
  www.austrian.audio
@@ -60,6 +60,8 @@ public:
     void onAlOverlayCancelRecord();
     void onAlOverlayMaxSigToDist();
     void setEqMode();
+    float getABButtonAlphaFromLayerState(int layerState);
+    void changeDvColour(float gain);
     
     int getControlParameterIndex (Component& control) override;
         
@@ -72,9 +74,12 @@ private:
     const int nBands = 5;
     int nActiveBands;
     int syncChannelIdx;
+    int oldAbLayerState;
     
     bool loadingFile;
     bool recordingDisturber;
+    
+    Colour eqColours[5];
     
     TitleBar<AALogo, NoIOWidget> title;
     Footer footer;
@@ -93,7 +98,7 @@ private:
     // Solo Buttons
     MuteSoloButton msbSolo[5], msbMute[5];
     // Text Buttons
-    TextButton tbLoadFile, tbSaveFile, tbRecordDisturber, tbRecordSignal, tbZeroDelay;
+    TextButton tbLoadFile, tbSaveFile, tbRecordDisturber, tbRecordSignal, tbZeroDelay, tbAbButton[2];
     // ToggleButtons
     ToggleButton tbEq[3], tbAllowBackwardsPattern;
     // Combox Boxes
