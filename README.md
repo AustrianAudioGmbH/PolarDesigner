@@ -1,10 +1,10 @@
 # PolarDesigner
-Our open-source plug-in developed by [Thomas](https://github.com/thomasdeppisch), [IEM](https://iem.kug.ac.at/en/) and [AA](https://austrian.audio/).
+Our open-source plug-in developed by [Thomas](https://github.com/thomasdeppisch), [Simon](https://github.com/becksimon), [IEM](https://iem.kug.ac.at/en/) and [AA](https://austrian.audio/).
 
 PolarDesigner allows you to control the polar pattern of your OC818 microphone in up to five frequency bands.  
 Available as VST3, AAX and AU. Get installers for Windows and Mac at [austrian.audio](https://austrian.audio/).
 
-<img width="1102" alt="PolarDesigner Screenshot" src="https://user-images.githubusercontent.com/18114953/83127074-01b25300-a0da-11ea-9e91-8035f2645530.png">
+<img width="990" alt="Screenshot_PD" src="https://user-images.githubusercontent.com/70842242/117307438-dce56480-ae80-11eb-8952-5d386b3285b8.png">
 
 ## Building PolarDesigner
 PolarDesigner is based on [JUCE](https://juce.com/). To build PolarDesigner, get a recent version of JUCE and open PolarDesigner.jucer in Projucer. Select an exporter of your choice (e.g. Visual Studio or XCode) to create and open a project file in your IDE.
