@@ -49,11 +49,11 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" headerPath="/opt/homebrew/opt/fftw/include&#10;../../../SDKs/vstsdk2.4"
-                       libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="10.9 SDK"
-                       macOSDeploymentTarget="10.9"/>
+                       libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="11.4 SDK"
+                       macOSDeploymentTarget="11.4"/>
         <CONFIGURATION isDebug="0" name="Release" headerPath="/opt/homebrew/opt/fftw/include&#10;../../../SDKs/vstsdk2.4"
-                       libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="10.9 SDK"
-                       macOSDeploymentTarget="10.9"/>
+                       libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="11.4 SDK"
+                       macOSDeploymentTarget="11.4"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../JUCE-develop/modules"/>
