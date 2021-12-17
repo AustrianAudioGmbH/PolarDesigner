@@ -8,7 +8,8 @@
               pluginFormats="buildAAX,buildAU,buildVST3" pluginAAXCategory="8192"
               pluginVST3Category="Fx" pluginRTASCategory="8192" pluginVSTCategory="kPlugCategEffect"
               pluginCharacteristicsValue="pluginAAXDisableMultiMono" companyEmail="sayhello@austrianaudio.com"
-              jucerFormatVersion="1">
+              jucerFormatVersion="1" displaySplashScreen="1" defines="JUCE_MODAL_LOOPS_PERMITTED=1"
+              headerPath="/opt/homebrew/opt/fftw/include/">
   <MAINGROUP id="nmXiNr" name="PolarDesigner">
     <GROUP id="{D54BFC58-8ED6-1DEF-A2B9-DAAF16495BAC}" name="resources">
       <GROUP id="{75BF05EC-024B-1F61-DA13-169C5FDE5119}" name="customComponents">
@@ -47,10 +48,12 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" headerPath="../../resources/fftw_osx"
-                       libraryPath="../../resources/fftw_osx" osxCompatibility="10.7 SDK"/>
-        <CONFIGURATION isDebug="0" name="Release" headerPath="../../resources/fftw_osx"
-                       libraryPath="../../resources/fftw_osx" osxCompatibility="10.7 SDK"/>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="/opt/homebrew/opt/fftw/include"
+                       libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="10.9 SDK"
+                       macOSDeploymentTarget="10.9"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="/opt/homebrew/opt/fftw/include"
+                       libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="10.9 SDK"
+                       macOSDeploymentTarget="10.9"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../JUCE-develop/modules"/>
