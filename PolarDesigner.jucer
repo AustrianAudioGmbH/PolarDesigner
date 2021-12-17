@@ -48,10 +48,10 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" headerPath="/opt/homebrew/opt/fftw/include"
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="/opt/homebrew/opt/fftw/include&#10;../../../SDKs/vstsdk2.4"
                        libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="10.9 SDK"
                        macOSDeploymentTarget="10.9"/>
-        <CONFIGURATION isDebug="0" name="Release" headerPath="/opt/homebrew/opt/fftw/include"
+        <CONFIGURATION isDebug="0" name="Release" headerPath="/opt/homebrew/opt/fftw/include&#10;../../../SDKs/vstsdk2.4"
                        libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="10.9 SDK"
                        macOSDeploymentTarget="10.9"/>
       </CONFIGURATIONS>
