@@ -400,6 +400,8 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
     }
     
     int nActiveBands = nBands;
+    
+    // 1-band EQ
     if (zeroDelayMode->load() > 0.5f )
         nActiveBands = 1;
     
@@ -410,12 +412,15 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
         filterBankBuffer.copyFrom (2*i+1, 0, omniEightBuffer, 1, 0, numSamples);
     }
     
+    // 5-band EQ
     if (zeroDelayMode->load() < 0.5f && nActiveBands > 1)
     {
         if (!convolversReady)
         {
             return;
         }
+        
+        // CODEREVIEW TODO: evaluate convolver use of FFT in JUCE::dsp to determine latency effects - Can we Replace with our own convolver code?
         
         for (int i = 0; i < nActiveBands; ++i)
         {
