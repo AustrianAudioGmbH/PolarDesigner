@@ -27,7 +27,6 @@
 #include <vector>
 #include <memory> // for unique_ptr
 #include <math.h>
-#include <fftw3.h>
 #include "../resources/Delay.h"
 
 // these params can be synced between plugin instances

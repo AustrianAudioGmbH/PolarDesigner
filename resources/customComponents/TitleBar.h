@@ -257,7 +257,7 @@ public:
     };
 
 private:
-    ScopedPointer<ComboBox> cbChannels;
+    std::unique_ptr<ComboBox> cbChannels;
     Path WaveformPath;
     int availableChannels {64};
     int channelSizeIfNotSelectable = maxChannels;
