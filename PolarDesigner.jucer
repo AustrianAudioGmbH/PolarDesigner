@@ -4,13 +4,8 @@
               pluginManufacturerCode="OIDA" pluginCode="AAPD" aaxIdentifier="audio.austrian.plugins.aax.polardesigner"
               pluginAUMainType="'aufx'" version="2.0.0" companyName="Austrian Audio"
               companyCopyright="Austrian Audio" companyWebsite="www.austrian.audio"
-<<<<<<< HEAD
-              bundleIdentifier="at.iem.aapolardesigner" reportAppUsage="0"
-              pluginFormats="buildAAX,buildAU,buildAUv3,buildStandalone,buildVST3,enableIAA"
-=======
               bundleIdentifier="audio.austrian.plugins.polardesigner" reportAppUsage="0"
-              pluginFormats="buildAU,buildAUv3,buildStandalone,buildVST3,enableIAA"
->>>>>>> 0a29b27 (AUV3: Prep for AUV3 build, new bundle Id, etc.)
+              pluginFormats="buildAAX,buildAU,buildAUv3,buildStandalone,buildVST3,enableIAA"
               pluginAAXCategory="8192" pluginVST3Category="Fx" pluginRTASCategory="8192"
               pluginVSTCategory="kPlugCategEffect" pluginCharacteristicsValue="pluginAAXDisableMultiMono,pluginIsMidiEffectPlugin"
               companyEmail="sayhello@austrianaudio.com" jucerFormatVersion="1"
