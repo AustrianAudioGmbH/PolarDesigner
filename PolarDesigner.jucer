@@ -5,9 +5,9 @@
               pluginAUMainType="'aufx'" version="2.0.0" companyName="Austrian Audio"
               companyCopyright="Austrian Audio" companyWebsite="www.austrian.audio"
               bundleIdentifier="at.iem.aapolardesigner" reportAppUsage="0"
-              pluginFormats="buildAU,buildAUv3,buildVST3,enableIAA" pluginAAXCategory="8192"
-              pluginVST3Category="Fx" pluginRTASCategory="8192" pluginVSTCategory="kPlugCategEffect"
-              pluginCharacteristicsValue="pluginAAXDisableMultiMono,pluginIsMidiEffectPlugin"
+              pluginFormats="buildAAX,buildAU,buildAUv3,buildStandalone,buildVST3,enableIAA"
+              pluginAAXCategory="8192" pluginVST3Category="Fx" pluginRTASCategory="8192"
+              pluginVSTCategory="kPlugCategEffect" pluginCharacteristicsValue="pluginAAXDisableMultiMono,pluginIsMidiEffectPlugin"
               companyEmail="sayhello@austrianaudio.com" jucerFormatVersion="1"
               displaySplashScreen="1" defines="JUCE_MODAL_LOOPS_PERMITTED=1"
               headerPath="/opt/homebrew/opt/fftw/include/">
