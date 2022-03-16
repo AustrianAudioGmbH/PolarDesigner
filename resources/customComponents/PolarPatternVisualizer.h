@@ -55,14 +55,18 @@
 /*
 */
 using namespace dsp;
-class FirstOrderDirectivityVisualizer : public Component
+class PolarPatternVisualizer : public Component
 {
     const float deg2rad = M_PI / 180.0f;
     const int degStep = 4;
     const int nLookUpSamples = 360;
 
+#ifdef AA_DO_DEBUG_PATH
+    Path debugPath; // !J! used for the purpose of debugging UI elements only
+#endif
+    
 public:
-    FirstOrderDirectivityVisualizer()
+    PolarPatternVisualizer()
     {
         isActive = true;
         soloButton = nullptr;
@@ -96,7 +100,7 @@ public:
 
     }
 
-    ~FirstOrderDirectivityVisualizer()
+    ~PolarPatternVisualizer()
     {
     }
 
@@ -139,6 +143,10 @@ public:
         path.closeSubPath();
         path.applyTransform(transform);
         g.strokePath(path, PathStrokeType(2.0f));
+
+#ifdef AA_DO_DEBUG_PATH
+        g.strokePath (debugPath, PathStrokeType (2.0f)); // !J! for debug purposes only
+#endif
     }
 
     void resized() override
@@ -156,8 +164,18 @@ public:
 
         transform = AffineTransform::fromTargetPoints((float) centre.x, (float) centre.y, (float)  centre.x, bounds.getY(), bounds.getX(), centre.y);
 
-
         plotArea = bounds;
+
+#ifdef AA_DO_DEBUG_PATH
+        { // !J! for debug purposes only
+            debugPath.clear();
+            debugPath.addStar(centre.toFloat(), 4, 10, 20);
+            debugPath.startNewSubPath(bounds.getX(), bounds.getY());
+            debugPath.lineTo(bounds.getRight(), bounds.getBottom());
+            debugPath.addRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+        }
+#endif
+        
     }
     
     void setDirWeight(float weight)
@@ -220,5 +238,5 @@ private:
     Colour colour;
 
     Array<Point<float>> pointsOnCircle;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FirstOrderDirectivityVisualizer)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarPatternVisualizer)
 };

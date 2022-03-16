@@ -31,7 +31,7 @@
 #include "../resources/customComponents/MuteSoloButton.h"
 #include "../resources/customComponents/ReverseSlider.h"
 #include "../resources/customComponents/DirSlider.h"
-#include "../resources/customComponents/FirstOrderDirectivityVisualizer.h"
+#include "../resources/customComponents/PolarPatternVisualizer.h"
 #include "../resources/customComponents/DirectivityEQ.h"
 #include "../resources/customComponents/AlertOverlay.h"
 
@@ -110,13 +110,14 @@ private:
     std::unique_ptr<ButtonAttachment> msbSoloAtt[5], msbMuteAtt[5], tbAllowBackwardsPatternAtt, tbZeroDelayAtt;
     std::unique_ptr<ComboBoxAttachment> cbSetNrBandsAtt, cbSyncChannelAtt;
     
-    DirectivityEQ dEQ;
-    FirstOrderDirectivityVisualizer dv[5];
+    DirectivityEQ directivityEqualiser;
+    PolarPatternVisualizer polarPatterVisualizers[5];
     AlertOverlay alOverlayError;
     AlertOverlay alOverlayDisturber;
     AlertOverlay alOverlaySignal;
 
     Path sideBorderPath;
+    Path debugPath;
     //==========================================================================
     void nActiveBandsChanged();
     void loadFile();

@@ -10,15 +10,15 @@
               pluginVSTCategory="kPlugCategEffect" pluginCharacteristicsValue="pluginAAXDisableMultiMono"
               companyEmail="sayhello@austrianaudio.com" jucerFormatVersion="1"
               displaySplashScreen="1" defines="JUCE_MODAL_LOOPS_PERMITTED=1"
-              headerPath="/opt/homebrew/opt/fftw/include/">
+              headerPath="/opt/homebrew/opt/fftw/include/" pluginAUIsSandboxSafe="1">
   <MAINGROUP id="nmXiNr" name="PolarDesigner">
     <GROUP id="{D54BFC58-8ED6-1DEF-A2B9-DAAF16495BAC}" name="resources">
       <GROUP id="{75BF05EC-024B-1F61-DA13-169C5FDE5119}" name="customComponents">
         <FILE id="wQcMfW" name="AlertOverlay.h" compile="0" resource="0" file="resources/customComponents/AlertOverlay.h"/>
         <FILE id="DfVGB4" name="DirectivityEQ.h" compile="0" resource="0" file="resources/customComponents/DirectivityEQ.h"/>
         <FILE id="kmH60L" name="DirSlider.h" compile="0" resource="0" file="resources/customComponents/DirSlider.h"/>
-        <FILE id="hdLYyZ" name="FirstOrderDirectivityVisualizer.h" compile="0"
-              resource="0" file="resources/customComponents/FirstOrderDirectivityVisualizer.h"/>
+        <FILE id="hdLYyZ" name="PolarPatternVisualizer.h" compile="0"
+              resource="0" file="resources/customComponents/PolarPatternVisualizer.h"/>
         <FILE id="c8udYZ" name="ImgPaths.h" compile="0" resource="0" file="resources/customComponents/ImgPaths.h"/>
         <FILE id="hsRHaQ" name="MuteSoloButton.h" compile="0" resource="0"
               file="resources/customComponents/MuteSoloButton.h"/>
@@ -104,7 +104,8 @@
       </MODULEPATHS>
     </VS2017>
     <XCODE_IPHONE targetFolder="Builds/iOS" iosDevelopmentTeamID="VJWZDURA42" bundleIdentifier="audio.austrian.software.plugins.polardesigner"
-                  iosBackgroundBle="1" iosBluetoothPermissionNeeded="1" customXcassetsFolder="resources/Images.xcassets">
+                  iosBackgroundBle="1" iosBluetoothPermissionNeeded="1" customXcassetsFolder="resources/Images.xcassets"
+                  customLaunchStoryboard="resources/LaunchScreen">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug"/>
         <CONFIGURATION isDebug="0" name="Release"/>

@@ -29,7 +29,7 @@
 PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesignerAudioProcessor& p,
                                                           AudioProcessorValueTreeState& vts)
     : AudioProcessorEditor (&p), loadingFile(false), processor (p), valueTreeState(vts),
-    dEQ (p), alOverlayError(AlertOverlay::Type::errorMessage),
+    directivityEqualiser (p), alOverlayError(AlertOverlay::Type::errorMessage),
     alOverlayDisturber(AlertOverlay::Type::disturberTracking),
     alOverlaySignal(AlertOverlay::Type::signalTracking)
 {
@@ -96,30 +96,32 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     eqColours[4] = Colour(0xFD49BA64);
     
     // directivity eq
-    addAndMakeVisible (&dEQ);
+    addAndMakeVisible (&directivityEqualiser);
     
     for (int i = 0; i < nBands; ++i)
     {
-        // buttons
+        // SOLO button
         msbSolo[i].setType (MuteSoloButton::Type::solo);
         addAndMakeVisible (&msbSolo[i]);
         msbSoloAtt[i] = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "solo" + String(i+1), msbSolo[i]));
         msbSolo[i].addListener (this);
         msbSolo[i].setAlwaysOnTop (true);
         
+        // MUTE button
         msbMute[i].setType (MuteSoloButton::Type::mute);
         addAndMakeVisible (&msbMute[i]);
         msbMuteAtt[i] = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "mute" + String(i+1), msbMute[i]));
         msbMute[i].addListener (this);
         msbMute[i].setAlwaysOnTop (true);
         
-        // sliders
+        // Direction slider
         addAndMakeVisible (&slDir[i]);
         slDirAtt[i] = std::unique_ptr<SliderAttachment>(new SliderAttachment (valueTreeState, "alpha" + String(i+1), slDir[i]));
         slDir[i].setColour (Slider::thumbColourId, eqColours[i]); // colour of knob
         slDir[i].addListener (this);
         slDir[i].setTooltipEditable (true);
         
+        // Band Gain slider
         addAndMakeVisible (&slBandGain[i]);
         slBandGainAtt[i] = std::unique_ptr<ReverseSlider::SliderAttachment>(new ReverseSlider::SliderAttachment (valueTreeState, "gain" + String(i+1), slBandGain[i]));
         slBandGain[i].setSliderStyle (Slider::LinearHorizontal);
@@ -128,13 +130,14 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         slBandGain[i].setTextBoxStyle (Slider::TextBoxAbove, false, 50, 15);
         slBandGain[i].addListener (this);
         
-        // directivity visualizer
-        addAndMakeVisible (&dv[i]);
-        dv[i].setDirWeight (slDir[i].getValue());
-        dv[i].setMuteSoloButtons (&msbSolo[i], &msbMute[i]);
-        dv[i].setColour (eqColours[i]);
-        
-        dEQ.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slXover[i - 1] : nullptr, (i < nBands - 1) ? &slXover[i] : nullptr, &msbSolo[i], &msbMute[i], &slBandGain[i]);
+        // First-Order directivity visualizer (The "O"verhead view)
+        addAndMakeVisible (&polarPatterVisualizers[i]);
+        polarPatterVisualizers[i].setDirWeight (slDir[i].getValue());
+        polarPatterVisualizers[i].setMuteSoloButtons (&msbSolo[i], &msbMute[i]);
+        polarPatterVisualizers[i].setColour (eqColours[i]);
+
+        // main directivity Equaliser section
+        directivityEqualiser.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slXover[i - 1] : nullptr, (i < nBands - 1) ? &slXover[i] : nullptr, &msbSolo[i], &msbMute[i], &slBandGain[i], &polarPatterVisualizers[i]);
         
         if (i == nBands - 1)
             break; // there is one slXover less than bands
@@ -146,7 +149,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         slXover[i].setVisible(false);
     }
     
-    dEQ.initValueBox();
+    directivityEqualiser.initValueBox();
     
     addAndMakeVisible (&tbLoadFile);
     tbLoadFile.setButtonText ("load preset");
@@ -232,8 +235,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbZeroDelay.setButtonText ("zero latency");
     tbZeroDelay.setToggleState(processor.zeroDelayModeActive(), NotificationType::dontSendNotification);
     
-    dEQ.setSoloActive (getSoloActive());
-    for (auto& vis : dv)
+    directivityEqualiser.setSoloActive (getSoloActive());
+    for (auto& vis : polarPatterVisualizers)
     {
         vis.setSoloActive (getSoloActive());
     }
@@ -272,6 +275,11 @@ PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
 void PolarDesignerAudioProcessorEditor::paint (Graphics& g)
 {
     g.fillAll (globalLaF.ClBackground);
+
+#ifdef AA_DO_DEBUG_PATH
+    g.strokePath (debugPath, PathStrokeType (15.0f));
+#endif
+    
 }
 
 void PolarDesignerAudioProcessorEditor::resized()
@@ -293,23 +301,26 @@ void PolarDesignerAudioProcessorEditor::resized()
     const int loadButtonMargin = 5;
     const int cbWidth = 140;
     const int dEqHeight = 280;
-    const int dvHeight = 120;
-    const int dvSpacing = 25;
+    const int pvHeight = 120;
+    const int pvSpacing = 25;
     const int lbWidth = 120;
     const int sideAreaWidth = 180;
     const int sideAreaRightMargin = 20;
     const int sideVSpace = 20;
     const int grpHeight = 25;
-    
+        
     Rectangle<int> area (getLocalBounds());
-    
+   
     Rectangle<int> footerArea (area.removeFromBottom(footerHeight));
     footer.setBounds (footerArea);
     
     area.removeFromLeft(leftRightMargin);
     area.removeFromRight(leftRightMargin);
+    
     Rectangle<int> headerArea = area.removeFromTop(headerHeight);
-    title.setTitleCentreX (headerArea.withLeft(sideAreaWidth).getX() + 0.5 * headerArea.withLeft(sideAreaWidth).getWidth() - 8);
+    
+    title.setTitleCentreX (headerArea.withLeft(sideAreaWidth).getX() + 0.5 *
+                           headerArea.withLeft(sideAreaWidth).getWidth() - 8);
     title.setBounds (headerArea);
     
     Rectangle<int> zDArea = headerArea.removeFromRight(90);
@@ -381,22 +392,44 @@ void PolarDesignerAudioProcessorEditor::resized()
     // -------------- MAIN AREA -------------
     Rectangle<int> mainArea = area.removeFromTop(EDITOR_HEIGHT - headerHeight - footerHeight);
     mainArea.removeFromTop(vSpaceMain);
-    
-    // dv
-    Rectangle<int> dvRow = mainArea.removeFromTop(dvHeight);
-    dvRow.removeFromLeft(hSpace);
-    for (auto& vis : dv)
-    {
-        vis.setBounds(dvRow.removeFromLeft(dvHeight));
-        dvRow.removeFromLeft(dvSpacing);
+
+#ifdef AA_DO_DEBUG_PATH
+    { // !J! for debugging purposes only
+        debugPath.clear();
+        debugPath.addRectangle(mainArea);
     }
+#endif
     
+    // polar Visualizers
+    Rectangle<int> pvRow = mainArea.removeFromTop(pvHeight);
+    pvRow.removeFromLeft(hSpace);
+    
+    for (auto& pVis : polarPatterVisualizers)
+    {
+#ifdef AA_DO_DEBUG_PATH
+        {
+            debugPath.addStar(pvRow.getTopLeft().toFloat(), 5, 5, 15);
+            debugPath.addRectangle(pvRow);
+        }
+#endif
+        pVis.setBounds(pvRow.removeFromLeft(pvHeight));
+        pvRow.removeFromLeft(pvSpacing);
+    }
+
     // dEq
     Rectangle<int> filterArea = mainArea.removeFromTop (dEqHeight + 2 * dirSliderHeight + vSpaceMain + buttonHeight);
-    dEQ.setBounds (filterArea.removeFromTop(dEqHeight));
-    alOverlayError.setBounds (dEQ.getX() + 120, dEQ.getY() + 50, dEQ.getWidth() - 240, dEQ.getHeight() - 100);
-    alOverlayDisturber.setBounds (dEQ.getX() + 120, dEQ.getY() + 50, dEQ.getWidth() - 240, dEQ.getHeight() - 100);
-    alOverlaySignal.setBounds (dEQ.getX() + 120, dEQ.getY() + 50, dEQ.getWidth() - 240, dEQ.getHeight() - 100);
+    directivityEqualiser.setBounds (filterArea.removeFromTop(dEqHeight));
+    alOverlayError.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
+    alOverlayDisturber.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
+    alOverlaySignal.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
+    
+#ifdef AA_DO_DEBUG_PATH
+    { // !J! for debugging purposes only
+        debugPath.startNewSubPath(directivityEqualiser.getX(), directivityEqualiser.getY());
+        debugPath.lineTo(directivityEqualiser.getRight(), directivityEqualiser.getBottom());
+        debugPath.addRectangle(directivityEqualiser.getX(), directivityEqualiser.getY(), directivityEqualiser.getWidth(), directivityEqualiser.getHeight());
+    }
+#endif
     
     filterArea.removeFromTop(vSpaceMain);
     filterArea.removeFromLeft(hSpace);
@@ -414,7 +447,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     msbMute[1].setBounds(band1SliderArea.getRight() - buttonHeight, band1SliderArea.getY(), buttonHeight, buttonHeight);
     band1SliderArea.removeFromTop(2);
     slBandGain[1].setBounds(band1SliderArea);
-    
+
     filterArea.removeFromLeft(linearSliderSpacing);
     Rectangle<int> band2SliderArea = filterArea.removeFromLeft(linearSliderWidth);
     slDir[2].setBounds(band2SliderArea.removeFromTop(dirSliderHeight));
@@ -438,6 +471,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     msbMute[4].setBounds(band4SliderArea.getRight() - buttonHeight, band4SliderArea.getY(), buttonHeight, buttonHeight);
     band4SliderArea.removeFromTop(2);
     slBandGain[4].setBounds(band4SliderArea);
+    
 }
 
 void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
@@ -509,9 +543,9 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     }
     else // muteSoloButton!
     {
-        dEQ.setSoloActive(getSoloActive());
-        dEQ.repaint();
-        for (auto& vis : dv)
+        directivityEqualiser.setSoloActive(getSoloActive());
+        directivityEqualiser.repaint();
+        for (auto& vis : polarPatterVisualizers)
         {
             vis.setSoloActive(getSoloActive());
             vis.repaint();
@@ -556,10 +590,10 @@ void PolarDesignerAudioProcessorEditor::sliderValueChanged(Slider* slider)
         for (int i = 0; i < 5; i++)
         {
             if (slider == &slDir[i])
-                dv[i].setDirWeight(slider->getValue());
+                polarPatterVisualizers[i].setDirWeight(slider->getValue());
         }
     }
-    dEQ.repaint();
+    directivityEqualiser.repaint();
 }
 
 void PolarDesignerAudioProcessorEditor::loadFile()
@@ -621,7 +655,7 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
             slBandGain[i].setEnabled(true);
             msbSolo[i].setEnabled(true);
             msbMute[i].setEnabled(true);
-            dv[i].setActive(true);
+            polarPatterVisualizers[i].setActive(true);
         }
         else
         {
@@ -631,12 +665,12 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
             msbSolo[i].setToggleState(false, NotificationType::sendNotification);
             msbMute[i].setEnabled(false);
             msbMute[i].setToggleState(false, NotificationType::sendNotification);
-            dv[i].setActive(false);
+            polarPatterVisualizers[i].setActive(false);
         }
     }
 
-    dEQ.resetTooltipTexts();
-    dEQ.repaint();
+    directivityEqualiser.resetTooltipTexts();
+    directivityEqualiser.repaint();
         
 }
 
@@ -645,7 +679,7 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
     if (processor.repaintDEQ.get())
     {
         processor.repaintDEQ = false;
-        dEQ.repaint();
+        directivityEqualiser.repaint();
     }
     if (processor.nActiveBandsChanged.get())
     {
@@ -684,7 +718,7 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
             slBandGain[i].setEnabled(true);
             msbSolo[i].setEnabled(true);
             msbMute[i].setEnabled(true);
-            dv[i].setActive(true);
+            polarPatterVisualizers[i].setActive(true);
         }
         else
         {
@@ -694,24 +728,24 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
             msbSolo[i].setToggleState(false, NotificationType::sendNotification);
             msbMute[i].setEnabled(false);
             msbMute[i].setToggleState(false, NotificationType::sendNotification);
-            dv[i].setActive(false);
+            polarPatterVisualizers[i].setActive(false);
         }
     }
     
-    dEQ.resetTooltipTexts();
-    dEQ.repaint();
+    directivityEqualiser.resetTooltipTexts();
+    directivityEqualiser.repaint();
 }
 
 void PolarDesignerAudioProcessorEditor::disableMainArea()
 {
-    dEQ.setActive(false);
+    directivityEqualiser.setActive(false);
     for (int i = 0; i < 5; i++)
     {
         slDir[i].setEnabled(false);
         slBandGain[i].setEnabled(false);
         msbSolo[i].setEnabled(false);
         msbMute[i].setEnabled(false);
-        dv[i].setActive(false);
+        polarPatterVisualizers[i].setActive(false);
     }
     tbZeroDelay.setEnabled(false);
 }
@@ -766,7 +800,7 @@ void PolarDesignerAudioProcessorEditor::disableOverlay()
     alOverlayError.setVisible(false);
     alOverlayDisturber.setVisible(false);
     alOverlaySignal.setVisible(false);
-    dEQ.setActive(true);
+    directivityEqualiser.setActive(true);
     nActiveBandsChanged();
     setSideAreaEnabled(true);
     tbZeroDelay.setEnabled(true);
@@ -775,23 +809,23 @@ void PolarDesignerAudioProcessorEditor::disableOverlay()
 // implement this for AAX automation shortchut
 int PolarDesignerAudioProcessorEditor::getControlParameterIndex (Component& control)
 {
-    if (&control == &dEQ.getBandlimitPathComponent(0) && nActiveBands > 1)
+    if (&control == &directivityEqualiser.getBandlimitPathComponent(0) && nActiveBands > 1)
         return 0;
-    else if (&control == &dEQ.getBandlimitPathComponent(1) && nActiveBands > 2)
+    else if (&control == &directivityEqualiser.getBandlimitPathComponent(1) && nActiveBands > 2)
         return 1;
-    else if (&control == &dEQ.getBandlimitPathComponent(2) && nActiveBands > 3)
+    else if (&control == &directivityEqualiser.getBandlimitPathComponent(2) && nActiveBands > 3)
         return 2;
-    else if (&control == &dEQ.getBandlimitPathComponent(3) && nActiveBands > 4)
+    else if (&control == &directivityEqualiser.getBandlimitPathComponent(3) && nActiveBands > 4)
         return 3;
-    else if (&control == &slDir[0] || &control == &dEQ.getDirPathComponent(0))
+    else if (&control == &slDir[0] || &control == &directivityEqualiser.getDirPathComponent(0))
         return 4;
-    else if ((&control == &slDir[1] || &control == &dEQ.getDirPathComponent(1)) && nActiveBands > 1)
+    else if ((&control == &slDir[1] || &control == &directivityEqualiser.getDirPathComponent(1)) && nActiveBands > 1)
         return 5;
-    else if ((&control == &slDir[2] || &control == &dEQ.getDirPathComponent(2)) && nActiveBands > 2)
+    else if ((&control == &slDir[2] || &control == &directivityEqualiser.getDirPathComponent(2)) && nActiveBands > 2)
         return 6;
-    else if ((&control == &slDir[3] || &control == &dEQ.getDirPathComponent(3)) && nActiveBands > 3)
+    else if ((&control == &slDir[3] || &control == &directivityEqualiser.getDirPathComponent(3)) && nActiveBands > 3)
         return 7;
-    else if ((&control == &slDir[4] || &control == &dEQ.getDirPathComponent(4)) && nActiveBands > 4)
+    else if ((&control == &slDir[4] || &control == &directivityEqualiser.getDirPathComponent(4)) && nActiveBands > 4)
         return 8;
     else if (&control == &msbSolo[0])
         return 9;
