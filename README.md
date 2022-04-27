@@ -5,6 +5,7 @@ PolarDesigner allows you to control the polar pattern of your OC818 microphone i
 Available as VST3, AAX and AU. Get installers for Windows and Mac at [austrian.audio](https://austrian.audio/).
 
 <img width="990" alt="Screenshot_PD" src="https://github.com/AustrianAudioGmbH/PolarDesigner/blob/master/docs/PolarDesigner.png">
+Image: PolarDesigner running on iPad ...
 
 ## Requirements
 * A copy of the JUCE source repository is needed, as these plugins refer to JUCE modules.  An example for how you would
