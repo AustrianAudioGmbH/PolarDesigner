@@ -5,19 +5,22 @@
 //  Created by Jay Vaughan on 23.02.22.
 //  Copyright © 2022 Austrian Audio. All rights reserved.
 //
+// This Component implements an 'endless slider', which can be useful for implementing
+// 'trim' controls, i.e. for applying trim to a set of EQ's, volume sliders, etc.
+//
+// To adjust the rate of trim, use the EndlessSlider.step value in the slider inc/dec
+// callbacks.
 
 #ifndef EndlessSlider_h
 #define EndlessSlider_h
 
-
 class EndlessSlider : public Slider {
 public:
     EndlessSlider () :
-    Slider(),
-    patternStripSize(12)
+    Slider()
     {
         setChangeNotificationOnlyOnRelease(false);
-        scrollImage = getImageFromAssets("scrollImage.png");
+        sliderImage = getImageFromAssets("scrollImage.png");
         setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
         setSliderStyle (Slider::LinearBarVertical);
         setScrollWheelEnabled(true);
@@ -30,6 +33,7 @@ public:
     std::function<void()> sliderIncremented;
     std::function<void()> sliderDecremented;
     
+    // calculate whether to callback to an increment or decrement, and update UI
     void mouseDrag(const MouseEvent &e) override
     {
         int currentMoved;
@@ -37,8 +41,8 @@ public:
 
         if (e.mouseWasDraggedSinceMouseDown()) {
             currentMoved = e.getDistanceFromDragStartY();
-            scrollImageTransform = (AffineTransform::translation ((float) (scrollImage.getWidth()),
-                                                                 (float) (scrollImage.getHeight()) + currentMoved)
+            sliderImageTransform = (AffineTransform::translation ((float) (sliderImage.getWidth()),
+                                                                 (float) (sliderImage.getHeight()) + currentMoved)
                                       .followedBy (getTransform()));
             
             if ((currentMoved > lastMoved)){
@@ -60,20 +64,11 @@ public:
         Path endlessPath;
         g.setColour(getRandomColour());
 
-        g.setFillType(juce::FillType(scrollImage, scrollImageTransform));
+        g.setFillType(juce::FillType(sliderImage, sliderImageTransform));
         g.fillRect(bounds);
         
     }
-        
-    // utility functions
-    static juce::Colour getRandomColour()
-    {
-        auto& random = juce::Random::getSystemRandom();
-        
-        return juce::Colour ((juce::uint8) random.nextInt (256),
-                             (juce::uint8) random.nextInt (256),
-                             (juce::uint8) random.nextInt (256));
-    }
+
     void mouseExit (const MouseEvent& e) override
     {
         repaint();
@@ -88,18 +83,26 @@ public:
         auto layout = lf.getSliderLayout (*this);
         
         sliderRect = layout.sliderBounds;
-        sliderRect.removeFromTop(patternStripSize);
         
-        dirPatternBounds = getLocalBounds().removeFromTop(patternStripSize);
     }
+
     
 private:
     Rectangle<int> sliderRect;
-    Rectangle<int> dirPatternBounds;
-    float patternStripSize;
-    Image scrollImage;
-    AffineTransform scrollImageTransform;
+    Image sliderImage;
+    AffineTransform sliderImageTransform;
     
+    // utility functions - from DemoRunner utilities
+    static juce::Colour getRandomColour()
+    {
+        auto& random = juce::Random::getSystemRandom();
+        
+        return juce::Colour ((juce::uint8) random.nextInt (256),
+                             (juce::uint8) random.nextInt (256),
+                             (juce::uint8) random.nextInt (256));
+    }
+
+    // creats a usable image asset from a file stream
     inline std::unique_ptr<InputStream> createAssetInputStream (const char* resourcePath)
     {
 #if JUCE_ANDROID
@@ -118,10 +121,10 @@ private:
 #endif
     }
     
-    
+    // creates an image asset from cache if possible
     inline Image getImageFromAssets (const char* assetName)
     {
-        auto hashCode = (String (assetName) + "@polar_plugin_assets").hashCode64();
+        auto hashCode = (String (assetName) + "@endless_slider_assets").hashCode64();
         auto img = ImageCache::getFromHashCode (hashCode);
         
         if (img.isNull())
@@ -140,6 +143,5 @@ private:
     }
     
 };
-
 
 #endif /* EndlessSlider_h */

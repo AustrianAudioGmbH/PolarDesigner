@@ -119,7 +119,7 @@ private:
     std::unique_ptr<ComboBoxAttachment> cbSetNrBandsAtt, cbSyncChannelAtt;
     
     DirectivityEQ directivityEqualiser;
-    PolarPatternVisualizer polarPatterVisualizers[5];
+    PolarPatternVisualizer polarPatternVisualizers[5];
     AlertOverlay alOverlayError;
     AlertOverlay alOverlayDisturber;
     AlertOverlay alOverlaySignal;

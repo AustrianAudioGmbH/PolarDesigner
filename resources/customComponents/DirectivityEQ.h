@@ -54,7 +54,7 @@
 // !J! On iOS we make the knobs fatter for touchscreen ease-of-use
 #ifdef JUCE_IOS
 static const float POLAR_DESIGNER_KNOBS_SIZE              = 40.0f;
-static const float POLAR_DESIGNER_BANDLIMIT_DIVIDER_SIZE  =  6.0f;
+static const float POLAR_DESIGNER_BANDLIMIT_DIVIDER_SIZE  =  8.0f;
 #else
 static const float POLAR_DESIGNER_KNOBS_SIZE              = 20.0f;
 static const float POLAR_DESIGNER_BANDLIMIT_DIVIDER_SIZE  =  4.0f;
@@ -162,8 +162,6 @@ public:
             addAndMakeVisible (&dirPathRects[i]);
             dirPathRects[i].addMouseListener(this, true);
         }
-        
-
         
     };
 

@@ -133,13 +133,13 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         slBandGain[i].addListener (this);
         
         // First-Order directivity visualizer (The "O"verhead view)
-        addAndMakeVisible (&polarPatterVisualizers[i]);
-        polarPatterVisualizers[i].setDirWeight (slDir[i].getValue());
-        polarPatterVisualizers[i].setMuteSoloButtons (&msbSolo[i], &msbMute[i]);
-        polarPatterVisualizers[i].setColour (eqColours[i]);
+        addAndMakeVisible (&polarPatternVisualizers[i]);
+        polarPatternVisualizers[i].setDirWeight (slDir[i].getValue());
+        polarPatternVisualizers[i].setMuteSoloButtons (&msbSolo[i], &msbMute[i]);
+        polarPatternVisualizers[i].setColour (eqColours[i]);
 
         // main directivity Equaliser section
-        directivityEqualiser.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slCrossoverPosition[i - 1] : nullptr, (i < nBands - 1) ? &slCrossoverPosition[i] : nullptr, &msbSolo[i], &msbMute[i], &slBandGain[i], &polarPatterVisualizers[i]);
+        directivityEqualiser.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slCrossoverPosition[i - 1] : nullptr, (i < nBands - 1) ? &slCrossoverPosition[i] : nullptr, &msbSolo[i], &msbMute[i], &slBandGain[i], &polarPatternVisualizers[i]);
         
         if (i == nBands - 1)
             break; // there is one slCrossoverPosition less than bands
@@ -238,7 +238,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbZeroDelay.setToggleState(processor.zeroDelayModeActive(), NotificationType::dontSendNotification);
     
     directivityEqualiser.setSoloActive (getSoloActive());
-    for (auto& vis : polarPatterVisualizers)
+    for (auto& vis : polarPatternVisualizers)
     {
         vis.setSoloActive (getSoloActive());
     }
@@ -258,7 +258,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     alOverlaySignal.setOnRatioCallback ([this]() { onAlOverlayMaxSigToDist(); });
     
     addAndMakeVisible(&trimSlider);
-//    trimSlider.addListener(this); // !J! not needed, use slider inc / dec callbacks instead
+
     trimSlider.sliderIncremented = [this] { incrementTrim(); };
     trimSlider.sliderDecremented = [this] { decrementTrim(); };
     
@@ -269,14 +269,14 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
 // Handle the trimSlider increment/decrement calls
 void PolarDesignerAudioProcessorEditor::incrementTrim() {
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < nActiveBands; i++)
     {
         slDir[i].setValue(slDir[i].getValue() + trimSlider.step);
     }
 }
 
 void PolarDesignerAudioProcessorEditor::decrementTrim() {
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < nActiveBands; i++)
     {
         slDir[i].setValue(slDir[i].getValue() - trimSlider.step);
     }
@@ -291,8 +291,6 @@ PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
         onAlOverlayCancelRecord();
     
     setLookAndFeel (nullptr);
-
-//    openGLContext.detach();
 
 }
 
@@ -431,7 +429,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     Rectangle<int> pvRow = mainArea.removeFromTop(pvHeight);
     pvRow.removeFromLeft(hSpace);
     
-    for (auto& pVis : polarPatterVisualizers)
+    for (auto& pVis : polarPatternVisualizers)
     {
         pVis.setBounds(pvRow.removeFromLeft(pvHeight));
         pvRow.removeFromLeft(pvSpacing);
@@ -462,8 +460,6 @@ void PolarDesignerAudioProcessorEditor::resized()
     
     filterArea.removeFromTop(vSpaceMain);
     filterArea.removeFromLeft(hSpace);
-
-    
     
     Rectangle<int> band0SliderArea = filterArea.removeFromLeft(linearSliderWidth);
     slDir[0].setBounds(band0SliderArea.removeFromTop(dirSliderHeight));
@@ -503,8 +499,6 @@ void PolarDesignerAudioProcessorEditor::resized()
     msbMute[4].setBounds(band4SliderArea.getRight() - buttonHeight, band4SliderArea.getY(), buttonHeight, buttonHeight);
     band4SliderArea.removeFromTop(2);
     slBandGain[4].setBounds(band4SliderArea);
-    
-
     
 }
 
@@ -579,7 +573,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     {
         directivityEqualiser.setSoloActive(getSoloActive());
         directivityEqualiser.repaint();
-        for (auto& vis : polarPatterVisualizers)
+        for (auto& vis : polarPatternVisualizers)
         {
             vis.setSoloActive(getSoloActive());
             vis.repaint();
@@ -628,7 +622,7 @@ void PolarDesignerAudioProcessorEditor::sliderValueChanged(Slider* slider)
         for (int i = 0; i < 5; i++)
         {
             if (slider == &slDir[i])
-                polarPatterVisualizers[i].setDirWeight(slider->getValue());
+                polarPatternVisualizers[i].setDirWeight(slider->getValue());
         }
     }
     directivityEqualiser.repaint();
@@ -693,7 +687,8 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
             slBandGain[i].setEnabled(true);
             msbSolo[i].setEnabled(true);
             msbMute[i].setEnabled(true);
-            polarPatterVisualizers[i].setActive(true);
+            polarPatternVisualizers[i].setActive(true);
+            polarPatternVisualizers[i].setVisible(true);
         }
         else
         {
@@ -703,7 +698,8 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
             msbSolo[i].setToggleState(false, NotificationType::sendNotification);
             msbMute[i].setEnabled(false);
             msbMute[i].setToggleState(false, NotificationType::sendNotification);
-            polarPatterVisualizers[i].setActive(false);
+            polarPatternVisualizers[i].setActive(false);
+            polarPatternVisualizers[i].setVisible(false);
         }
     }
 
@@ -756,7 +752,7 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
             slBandGain[i].setEnabled(true);
             msbSolo[i].setEnabled(true);
             msbMute[i].setEnabled(true);
-            polarPatterVisualizers[i].setActive(true);
+            polarPatternVisualizers[i].setActive(true);
         }
         else
         {
@@ -766,7 +762,7 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
             msbSolo[i].setToggleState(false, NotificationType::sendNotification);
             msbMute[i].setEnabled(false);
             msbMute[i].setToggleState(false, NotificationType::sendNotification);
-            polarPatterVisualizers[i].setActive(false);
+            polarPatternVisualizers[i].setActive(false);
         }
     }
     
@@ -783,7 +779,7 @@ void PolarDesignerAudioProcessorEditor::disableMainArea()
         slBandGain[i].setEnabled(false);
         msbSolo[i].setEnabled(false);
         msbMute[i].setEnabled(false);
-        polarPatterVisualizers[i].setActive(false);
+        polarPatternVisualizers[i].setActive(false);
     }
     tbZeroDelay.setEnabled(false);
 }
