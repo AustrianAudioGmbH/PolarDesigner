@@ -19,11 +19,13 @@ check things out for development might be thus:
 * The JUCE repo should be checked out 'alongside' the Plugin sources, so that your folder structure might look
 like this (if you've checked out all of our other plugins as well, which also have this requirement):
 
+<pre>
 .
 ├── AmbiCreator
 ├── JUCE
 ├── PolarDesigner
 └── StereoCreator
+</pre>
 
 ## Requirements
 * For building AAX plugins you need to add the [AAX SDK](http://developer.avid.com/) location to your Projucer paths.
