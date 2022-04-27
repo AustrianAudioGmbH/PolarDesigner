@@ -37,21 +37,18 @@ public:
 
         if (e.mouseWasDraggedSinceMouseDown()) {
             currentMoved = e.getDistanceFromDragStartY();
-            scrollImageTransform= (AffineTransform::translation ((float) (scrollImage.getWidth()),
+            scrollImageTransform = (AffineTransform::translation ((float) (scrollImage.getWidth()),
                                                                  (float) (scrollImage.getHeight()) + currentMoved)
                                       .followedBy (getTransform()));
-
-            std::cout << "Current Moved: " << currentMoved << " last moved: " << lastMoved << "\n";
             
-            if ((currentMoved > 0) && (currentMoved >= lastMoved)){
+            if ((currentMoved > lastMoved)){
                 sliderDecremented();
-                lastMoved = currentMoved;
             } else
-            if ((currentMoved < 0) && (currentMoved < lastMoved)) {
+            if (currentMoved < lastMoved) {
                 sliderIncremented();
-                lastMoved = currentMoved;
             }
 
+            lastMoved = currentMoved;
 
             repaint();
         }
@@ -109,17 +106,9 @@ private:
         ZipFile apkZip (File::getSpecialLocation (File::invokedExecutableFile));
         return std::unique_ptr<InputStream> (apkZip.createStreamForEntry (apkZip.getIndexOfFileName ("assets/" + String (resourcePath))));
 #else
-#if JUCE_IOS
+#if JUCE_IOS || JUCE_MAC
         auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
             .getParentDirectory().getChildFile ("Assets");
-#elif JUCE_MAC
-        auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
-            .getParentDirectory().getParentDirectory().getChildFile ("Resources").getChildFile ("Assets");
-        
-        if (! assetsDir.exists())
-            assetsDir = getExamplesDirectory().getChildFile ("Assets");
-#else
-        auto assetsDir = getExamplesDirectory().getChildFile ("Assets");
 #endif
         
         auto resourceFile = assetsDir.getChildFile (resourcePath);

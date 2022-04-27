@@ -333,7 +333,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     const int sideAreaRightMargin = 20;
     const int sideVSpace = 20;
     const int grpHeight = 25;
-    const int trimSliderWidth = 25;
+    const int trimSliderWidth = 30;
         
     Rectangle<int> area (getLocalBounds());
    
