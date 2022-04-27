@@ -33,6 +33,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     alOverlayDisturber(AlertOverlay::Type::disturberTracking),
     alOverlaySignal(AlertOverlay::Type::signalTracking)
 {
+//    openGLContext.attachTo (*getTopLevelComponent());
+    
     nActiveBands = processor.getNBands();
     syncChannelIdx = processor.getSyncChannelIdx();
     
@@ -137,16 +139,16 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         polarPatterVisualizers[i].setColour (eqColours[i]);
 
         // main directivity Equaliser section
-        directivityEqualiser.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slXover[i - 1] : nullptr, (i < nBands - 1) ? &slXover[i] : nullptr, &msbSolo[i], &msbMute[i], &slBandGain[i], &polarPatterVisualizers[i]);
+        directivityEqualiser.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slCrossoverPosition[i - 1] : nullptr, (i < nBands - 1) ? &slCrossoverPosition[i] : nullptr, &msbSolo[i], &msbMute[i], &slBandGain[i], &polarPatterVisualizers[i]);
         
         if (i == nBands - 1)
-            break; // there is one slXover less than bands
+            break; // there is one slCrossoverPosition less than bands
         
-        addAndMakeVisible (&slXover[i]);
-        slXoverAtt[i] = std::unique_ptr<ReverseSlider::SliderAttachment>(new ReverseSlider::SliderAttachment (valueTreeState, "xOverF" + String(i+1), slXover[i]));
-        slXover[i].setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
-        slXover[i].addListener(this);
-        slXover[i].setVisible(false);
+        addAndMakeVisible (&slCrossoverPosition[i]);
+        slCrossoverAtt[i] = std::unique_ptr<ReverseSlider::SliderAttachment>(new ReverseSlider::SliderAttachment (valueTreeState, "xOverF" + String(i+1), slCrossoverPosition[i]));
+        slCrossoverPosition[i].setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
+        slCrossoverPosition[i].addListener(this);
+        slCrossoverPosition[i].setVisible(false);
     }
     
     directivityEqualiser.initValueBox();
@@ -255,9 +257,29 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     alOverlaySignal.setOnCancelCallback ([this]() { onAlOverlayCancelRecord(); });
     alOverlaySignal.setOnRatioCallback ([this]() { onAlOverlayMaxSigToDist(); });
     
+    addAndMakeVisible(&trimSlider);
+//    trimSlider.addListener(this); // !J! not needed, use slider inc / dec callbacks instead
+    trimSlider.sliderIncremented = [this] { incrementTrim(); };
+    trimSlider.sliderDecremented = [this] { decrementTrim(); };
+    
     startTimer (30);
     
     setEqMode();
+}
+
+// Handle the trimSlider increment/decrement calls
+void PolarDesignerAudioProcessorEditor::incrementTrim() {
+    for (int i = 0; i < 5; i++)
+    {
+        slDir[i].setValue(slDir[i].getValue() + trimSlider.step);
+    }
+}
+
+void PolarDesignerAudioProcessorEditor::decrementTrim() {
+    for (int i = 0; i < 5; i++)
+    {
+        slDir[i].setValue(slDir[i].getValue() - trimSlider.step);
+    }
 }
 
 PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
@@ -269,13 +291,16 @@ PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
         onAlOverlayCancelRecord();
     
     setLookAndFeel (nullptr);
+
+//    openGLContext.detach();
+
 }
 
 //==============================================================================
 void PolarDesignerAudioProcessorEditor::paint (Graphics& g)
 {
     g.fillAll (globalLaF.ClBackground);
-
+        
 #ifdef AA_DO_DEBUG_PATH
     g.strokePath (debugPath, PathStrokeType (15.0f));
 #endif
@@ -308,6 +333,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     const int sideAreaRightMargin = 20;
     const int sideVSpace = 20;
     const int grpHeight = 25;
+    const int trimSliderWidth = 25;
         
     Rectangle<int> area (getLocalBounds());
    
@@ -317,6 +343,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     area.removeFromLeft(leftRightMargin);
     area.removeFromRight(leftRightMargin);
     
+   
     Rectangle<int> headerArea = area.removeFromTop(headerHeight);
     
     title.setTitleCentreX (headerArea.withLeft(sideAreaWidth).getX() + 0.5 *
@@ -399,30 +426,32 @@ void PolarDesignerAudioProcessorEditor::resized()
         debugPath.addRectangle(mainArea);
     }
 #endif
-    
+   
     // polar Visualizers
     Rectangle<int> pvRow = mainArea.removeFromTop(pvHeight);
     pvRow.removeFromLeft(hSpace);
     
     for (auto& pVis : polarPatterVisualizers)
     {
-#ifdef AA_DO_DEBUG_PATH
-        {
-            debugPath.addStar(pvRow.getTopLeft().toFloat(), 5, 5, 15);
-            debugPath.addRectangle(pvRow);
-        }
-#endif
         pVis.setBounds(pvRow.removeFromLeft(pvHeight));
         pvRow.removeFromLeft(pvSpacing);
     }
 
     // dEq
     Rectangle<int> filterArea = mainArea.removeFromTop (dEqHeight + 2 * dirSliderHeight + vSpaceMain + buttonHeight);
+
+    Rectangle<int> trimSliderArea = filterArea.removeFromRight(trimSliderWidth);
+    trimSliderArea.removeFromBottom(dirSliderHeight + buttonHeight + 2);
+
     directivityEqualiser.setBounds (filterArea.removeFromTop(dEqHeight));
+
     alOverlayError.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
     alOverlayDisturber.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
     alOverlaySignal.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
-    
+
+    trimSliderArea.setHeight(directivityEqualiser.getHeight());
+    trimSlider.setBounds(trimSliderArea);
+
 #ifdef AA_DO_DEBUG_PATH
     { // !J! for debugging purposes only
         debugPath.startNewSubPath(directivityEqualiser.getX(), directivityEqualiser.getY());
@@ -433,6 +462,9 @@ void PolarDesignerAudioProcessorEditor::resized()
     
     filterArea.removeFromTop(vSpaceMain);
     filterArea.removeFromLeft(hSpace);
+
+    
+    
     Rectangle<int> band0SliderArea = filterArea.removeFromLeft(linearSliderWidth);
     slDir[0].setBounds(band0SliderArea.removeFromTop(dirSliderHeight));
     msbSolo[0].setBounds(band0SliderArea.getX(), band0SliderArea.getY(), buttonHeight, buttonHeight);
@@ -471,6 +503,8 @@ void PolarDesignerAudioProcessorEditor::resized()
     msbMute[4].setBounds(band4SliderArea.getRight() - buttonHeight, band4SliderArea.getY(), buttonHeight, buttonHeight);
     band4SliderArea.removeFromTop(2);
     slBandGain[4].setBounds(band4SliderArea);
+    
+
     
 }
 
@@ -579,7 +613,11 @@ void PolarDesignerAudioProcessorEditor::comboBoxChanged (ComboBox* cb)
 
 void PolarDesignerAudioProcessorEditor::sliderValueChanged(Slider* slider)
 {
-    if (slider == &slXover[0] || slider == &slXover[1] || slider == &slXover[2] || slider == &slXover[3])
+    if (slider == &trimSlider) {
+        return;
+    }
+    else
+    if (slider == &slCrossoverPosition[0] || slider == &slCrossoverPosition[1] || slider == &slCrossoverPosition[2] || slider == &slCrossoverPosition[3])
     {
         // xOverSlider
         return;

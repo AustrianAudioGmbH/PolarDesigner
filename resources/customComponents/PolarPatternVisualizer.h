@@ -61,10 +61,6 @@ class PolarPatternVisualizer : public Component
     const int degStep = 4;
     const int nLookUpSamples = 360;
 
-#ifdef AA_DO_DEBUG_PATH
-    Path debugPath; // !J! used for the purpose of debugging UI elements only
-#endif
-    
 public:
     PolarPatternVisualizer()
     {
@@ -144,9 +140,6 @@ public:
         path.applyTransform(transform);
         g.strokePath(path, PathStrokeType(2.0f));
 
-#ifdef AA_DO_DEBUG_PATH
-        g.strokePath (debugPath, PathStrokeType (2.0f)); // !J! for debug purposes only
-#endif
     }
 
     void resized() override
@@ -166,15 +159,6 @@ public:
 
         plotArea = bounds;
 
-#ifdef AA_DO_DEBUG_PATH
-        { // !J! for debug purposes only
-            debugPath.clear();
-            debugPath.addStar(centre.toFloat(), 4, 10, 20);
-            debugPath.startNewSubPath(bounds.getX(), bounds.getY());
-            debugPath.lineTo(bounds.getRight(), bounds.getBottom());
-            debugPath.addRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
-        }
-#endif
         
     }
     

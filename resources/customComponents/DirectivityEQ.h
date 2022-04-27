@@ -53,17 +53,19 @@
 
 // !J! On iOS we make the knobs fatter for touchscreen ease-of-use
 #ifdef JUCE_IOS
-static const float POLAR_DESIGNER_KNOBS_SIZE    = 40.0f;
-static const float POLAR_DESIGNER_DIVIDER_SIZE  =  6.0f;
+static const float POLAR_DESIGNER_KNOBS_SIZE              = 40.0f;
+static const float POLAR_DESIGNER_BANDLIMIT_DIVIDER_SIZE  =  6.0f;
 #else
-static const float POLAR_DESIGNER_KNOBS_SIZE    = 20.0f;
-static const float POLAR_DESIGNER_DIVIDER_SIZE  =  4.0f;
+static const float POLAR_DESIGNER_KNOBS_SIZE              = 20.0f;
+static const float POLAR_DESIGNER_BANDLIMIT_DIVIDER_SIZE  =  4.0f;
 #endif
 
 class  DirectivityEQ : public Component, private Slider::Listener, private Label::Listener
 {
 
+//#define AA_DO_DEBUG_PATH
 #ifdef AA_DO_DEBUG_PATH
+#warning "AUSTRIANAUDIO: DEBUG PATHS ARE TURNED ON!"
     Path debugPath; // !J! used for the purpose of debugging UI elements only
 #endif
     
@@ -101,6 +103,7 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
         PathComponent() : Component() {
             setAlwaysOnTop(true);
             setName("PathComponent");
+            path.preallocateSpace(1000);    // !J! Arbitrary Magic Number
         };
         ~PathComponent() {};
         
@@ -159,6 +162,9 @@ public:
             addAndMakeVisible (&dirPathRects[i]);
             dirPathRects[i].addMouseListener(this, true);
         }
+        
+
+        
     };
 
     void init ()
@@ -167,10 +173,12 @@ public:
         zero = s.yMax / dyn;
     }
     
-    ~DirectivityEQ() {};
+    ~DirectivityEQ() {
+    };
 
     void paint (Graphics& g) override
     {
+        
         nrActiveBands = processor.getNBands();
         
         if (processor.zeroDelayModeActive())
@@ -195,7 +203,7 @@ public:
             }
         }
         
-        // dir labels
+        // directivity labels
         int height = getHeight();
         int dirImgSize = 20;
         int smallImgSize = 15;
@@ -288,6 +296,11 @@ public:
         {
             p.clear();
         }
+       
+#ifdef AA_DO_DEBUG_PATH
+        debugPath.clear();      // !J! Used only for debugging UI elements
+#endif
+
         
         float lastRightBound;
         float lastCircY;
@@ -299,20 +312,49 @@ public:
         for (int i = 0; i < nrActiveBands; ++i)
         {
             BandElements& handle(elements.getReference(i));
-            float rightBound = (handle.upperFrequencySlider == nullptr || nrActiveBands == i + 1) ? hzToX(s.fMax) : hzToX (processor.hzFromZeroToOne(i, handle.upperFrequencySlider->getValue()));
+            
+            float rightBound = (handle.upperFrequencySlider == nullptr || nrActiveBands == i + 1) ?
+                                hzToX(s.fMax) : hzToX (processor.hzFromZeroToOne(i, handle.upperFrequencySlider->getValue()));
+            
             float circY = handle.dirSlider == nullptr ? dirToY(0.0f) : dirToY(handle.dirSlider->getValue());
             
             // paint band limits
             if (i != nrActiveBands - 1)
             {
                 Path& blPath = bandLimitPaths[i].getPath();
+                
                 blPath.startNewSubPath (rightBound, dirToY(s.yMax)-OH);
+                
                 blPath.lineTo (rightBound, dirToY(s.yMin)+OH);
+                
+//blPath.addRectangle(rightBound - 20.0, dirToY(s.yMin)+OH - 20, 40, 40);
+                
                 g.setColour (Colours::steelblue.withMultipliedAlpha(activeBandLimitPath == i ? 1.0f : 0.8f));
 
-                g.strokePath (blPath, PathStrokeType (POLAR_DESIGNER_DIVIDER_SIZE));
-                
+                g.strokePath (blPath, PathStrokeType (POLAR_DESIGNER_BANDLIMIT_DIVIDER_SIZE));
+
+
+#ifdef AA_DO_DEBUG_PATH
+#if 0
+                { // !J! for debug purposes only
+                    
+                    debugPath.startNewSubPath(bandLimitPaths[i].getBounds().getX(),
+                                              bandLimitPaths[i].getBounds().getY());
+
+                    debugPath.lineTo(bandLimitPaths[i].getBounds().getRight(),
+                                     bandLimitPaths[i].getBounds().getBottom());
+
+                    debugPath.addRectangle(bandLimitPaths[i].getBounds().getX(), bandLimitPaths[i].getBounds().getY(),
+                                           bandLimitPaths[i].getBounds().getWidth(), bandLimitPaths[i].getBounds().getHeight());
+
+//                    debugPath.addStar(bandLimitPaths[i].getScreenPosition().toFloat(), 8, 10, 20);
+                    
+                }
+#endif
+#endif
+
                 bandLimitPaths[i].setBounds();
+
             }
             
             // dirPath
@@ -373,10 +415,6 @@ public:
         }
 
 
-#ifdef AA_DO_DEBUG_PATH
-        debugPath.clear();      // !J! Used only for debugging UI elements
-#endif
-        
         // band handle knobs
         for (int i = 0; i < nrActiveBands; ++i)
         {
@@ -426,27 +464,27 @@ public:
                                                      handle.polarPatternVisualizer->getWidth(),
                                                      handle.polarPatternVisualizer->getHeight());
 
-#ifdef AA_DO_DEBUG_PATH
-            { // !J! for debug purposes only
-
-                debugPath.addStar(handle.polarPatternVisualizer->getScreenPosition().toFloat(), 8, 10, 20);
-                debugPath.startNewSubPath(handle.polarPatternVisualizer->getBounds().getX(),
-                                      handle.polarPatternVisualizer->getBounds().getY());
-
-                debugPath.lineTo(handle.polarPatternVisualizer->getBounds().getRight(),
-                             handle.polarPatternVisualizer->getBounds().getBottom());
-                
-                debugPath.addRectangle(handle.polarPatternVisualizer->getBounds().getX(), handle.polarPatternVisualizer->getBounds().getY(),
-                                       handle.polarPatternVisualizer->getBounds().getWidth(), handle.polarPatternVisualizer->getBounds().getHeight());
-            }
-         
-            { // !J! for debug purposes only
-
-                debugPath.startNewSubPath(handle.handlePos.getX(),
-                                          handle.handlePos.getY());
-                debugPath.addStar(handle.handlePos.toFloat(), 6, 5, 10);
-            }
-#endif
+//#ifdef AA_DO_DEBUG_PATH
+//            { // !J! for debug purposes only
+//
+//                debugPath.addStar(handle.polarPatternVisualizer->getScreenPosition().toFloat(), 8, 10, 20);
+//                debugPath.startNewSubPath(handle.polarPatternVisualizer->getBounds().getX(),
+//                                      handle.polarPatternVisualizer->getBounds().getY());
+//
+//                debugPath.lineTo(handle.polarPatternVisualizer->getBounds().getRight(),
+//                             handle.polarPatternVisualizer->getBounds().getBottom());
+//
+//                debugPath.addRectangle(handle.polarPatternVisualizer->getBounds().getX(), handle.polarPatternVisualizer->getBounds().getY(),
+//                                       handle.polarPatternVisualizer->getBounds().getWidth(), handle.polarPatternVisualizer->getBounds().getHeight());
+//            }
+//
+//            { // !J! for debug purposes only
+//
+//                debugPath.startNewSubPath(handle.handlePos.getX(),
+//                                          handle.handlePos.getY());
+//                debugPath.addStar(handle.handlePos.toFloat(), 6, 5, 10);
+//            }
+//#endif
 
             if (i < nrActiveBands - 1)
             {

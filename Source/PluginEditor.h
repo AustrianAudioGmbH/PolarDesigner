@@ -34,6 +34,7 @@
 #include "../resources/customComponents/PolarPatternVisualizer.h"
 #include "../resources/customComponents/DirectivityEQ.h"
 #include "../resources/customComponents/AlertOverlay.h"
+#include "../resources/customComponents/EndlessSlider.h"
 
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
@@ -55,6 +56,7 @@ public:
     void buttonClicked (Button* button) override;
     void comboBoxChanged (ComboBox* cb) override;
     void sliderValueChanged (Slider* slider) override;
+    
     void onAlOverlayErrorOkay();
     void onAlOverlayApplyPattern();
     void onAlOverlayCancelRecord();
@@ -63,6 +65,9 @@ public:
     float getABButtonAlphaFromLayerState(int layerState);
     void changeDvColour(float gain);
     
+    void incrementTrim();
+    void decrementTrim();
+
     int getControlParameterIndex (Component& control) override;
         
 private:
@@ -92,8 +97,11 @@ private:
     // Groups
     GroupComponent grpEq, grpPreset, grpDstC, grpProxComp, grpBands, grpSync;
     // Sliders
-    ReverseSlider slBandGain[5], slXover[4], slProximity;
+    ReverseSlider slBandGain[5], slCrossoverPosition[4], slProximity;
     DirSlider slDir[5];
+    
+    // a slider to use to 'trim' the EQ's
+    EndlessSlider trimSlider;
     
     // Solo Buttons
     MuteSoloButton msbSolo[5], msbMute[5];
@@ -105,7 +113,7 @@ private:
     ComboBox cbSetNrBands, cbSyncChannel;
             
     // Pointers for value tree state
-    std::unique_ptr<ReverseSlider::SliderAttachment> slBandGainAtt[5], slXoverAtt[4], slProximityAtt;
+    std::unique_ptr<ReverseSlider::SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4], slProximityAtt;
     std::unique_ptr<SliderAttachment> slDirAtt[5];
     std::unique_ptr<ButtonAttachment> msbSoloAtt[5], msbMuteAtt[5], tbAllowBackwardsPatternAtt, tbZeroDelayAtt;
     std::unique_ptr<ComboBoxAttachment> cbSetNrBandsAtt, cbSyncChannelAtt;
@@ -117,7 +125,11 @@ private:
     AlertOverlay alOverlaySignal;
 
     Path sideBorderPath;
+    
+#ifdef AA_DO_DEBUG_PATH
     Path debugPath;
+#endif
+    
     //==========================================================================
     void nActiveBandsChanged();
     void loadFile();
@@ -128,6 +140,8 @@ private:
     void setSideAreaEnabled(bool set);
     void disableOverlay();
     void zeroDelayModeChange();
+    
+    OpenGLContext openGLContext;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarDesignerAudioProcessorEditor)
 };
