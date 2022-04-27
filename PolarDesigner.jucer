@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="LBcOQ9" name="PolarDesigner" projectType="audioplug" pluginManufacturer="Austrian Audio"
               pluginManufacturerCode="OIDA" pluginCode="AAPD" aaxIdentifier="audio.austrian.plugins.aax.polardesigner"
-              pluginAUMainType="'aufx'" version="2.0.0" companyName="Austrian Audio"
+              pluginAUMainType="'aufx'" version="2.1.0" companyName="Austrian Audio"
               companyCopyright="Austrian Audio" companyWebsite="www.austrian.audio"
               bundleIdentifier="audio.austrian.plugins.polardesigner" reportAppUsage="0"
               pluginFormats="buildAAX,buildAU,buildAUv3,buildStandalone,buildVST3,enableIAA"
