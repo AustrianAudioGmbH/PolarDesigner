@@ -443,7 +443,8 @@ public:
                            circY - (POLAR_DESIGNER_KNOBS_SIZE / 2),
                            POLAR_DESIGNER_KNOBS_SIZE,
                            POLAR_DESIGNER_KNOBS_SIZE);
-            
+
+
             // align elements
             handle.dirSlider->setBounds(circX + (handle.dirSlider->getWidth() + POLAR_DESIGNER_KNOBS_SIZE),
                                         handle.dirSlider->getY(),
@@ -458,9 +459,14 @@ public:
                                                   handle.soloButton->getWidth(),
                                                   handle.soloButton->getY());
 
-            handle.polarPatternVisualizer->setBounds(handle.gainSlider->getScreenX(), handle.polarPatternVisualizer->getY(),
+            handle.polarPatternVisualizer->setBounds(handle.gainSlider->getX(), handle.polarPatternVisualizer->getY(),
                                                      handle.polarPatternVisualizer->getWidth(),
                                                      handle.polarPatternVisualizer->getHeight());
+
+            
+#if 1
+        std::cout << "ppVis bounds: " << handle.polarPatternVisualizer->getBounds().getX() << ", " << handle.polarPatternVisualizer->getBounds().getY() << "\n";
+#endif
 
 //#ifdef AA_DO_DEBUG_PATH
 //            { // !J! for debug purposes only

@@ -243,9 +243,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         vis.setSoloActive (getSoloActive());
     }
     
-    nActiveBandsChanged();
-    zeroDelayModeChange();
-    
+
     // set overlay callbacks
     alOverlayError.setOnOkayCallback ([this]() { onAlOverlayErrorOkay(); });
     
@@ -261,7 +259,10 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
     trimSlider.sliderIncremented = [this] { incrementTrim(); };
     trimSlider.sliderDecremented = [this] { decrementTrim(); };
-    
+
+    nActiveBandsChanged();
+    zeroDelayModeChange();
+
     startTimer (30);
     
     setEqMode();
@@ -428,6 +429,10 @@ void PolarDesignerAudioProcessorEditor::resized()
     // polar Visualizers
     Rectangle<int> pvRow = mainArea.removeFromTop(pvHeight);
     pvRow.removeFromLeft(hSpace);
+
+#ifdef AA_DO_DEBUG_PATH
+    debugPath.addRectangle(pvRow);
+#endif
     
     for (auto& pVis : polarPatternVisualizers)
     {
@@ -450,13 +455,13 @@ void PolarDesignerAudioProcessorEditor::resized()
     trimSliderArea.setHeight(directivityEqualiser.getHeight());
     trimSlider.setBounds(trimSliderArea);
 
-#ifdef AA_DO_DEBUG_PATH
-    { // !J! for debugging purposes only
-        debugPath.startNewSubPath(directivityEqualiser.getX(), directivityEqualiser.getY());
-        debugPath.lineTo(directivityEqualiser.getRight(), directivityEqualiser.getBottom());
-        debugPath.addRectangle(directivityEqualiser.getX(), directivityEqualiser.getY(), directivityEqualiser.getWidth(), directivityEqualiser.getHeight());
-    }
-#endif
+//#ifdef AA_DO_DEBUG_PATH
+//    { // !J! for debugging purposes only
+//        debugPath.startNewSubPath(directivityEqualiser.getX(), directivityEqualiser.getY());
+//        debugPath.lineTo(directivityEqualiser.getRight(), directivityEqualiser.getBottom());
+//        debugPath.addRectangle(directivityEqualiser.getX(), directivityEqualiser.getY(), directivityEqualiser.getWidth(), directivityEqualiser.getHeight());
+//    }
+//#endif
     
     filterArea.removeFromTop(vSpaceMain);
     filterArea.removeFromLeft(hSpace);
@@ -688,7 +693,13 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
             msbSolo[i].setEnabled(true);
             msbMute[i].setEnabled(true);
             polarPatternVisualizers[i].setActive(true);
+            
             polarPatternVisualizers[i].setVisible(true);
+            
+            slDir[i].setVisible(true);
+            slBandGain[i].setVisible(true);
+            msbSolo[i].setVisible(true);
+            msbMute[i].setVisible(true);
         }
         else
         {
@@ -700,6 +711,13 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
             msbMute[i].setToggleState(false, NotificationType::sendNotification);
             polarPatternVisualizers[i].setActive(false);
             polarPatternVisualizers[i].setVisible(false);
+
+            slDir[i].setVisible(false);
+            slBandGain[i].setVisible(false);
+            msbSolo[i].setVisible(false);
+            msbMute[i].setVisible(false);
+
+
         }
     }
 

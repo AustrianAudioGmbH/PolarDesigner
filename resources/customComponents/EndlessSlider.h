@@ -102,6 +102,7 @@ private:
                              (juce::uint8) random.nextInt (256));
     }
 
+    
     // creats a usable image asset from a file stream
     inline std::unique_ptr<InputStream> createAssetInputStream (const char* resourcePath)
     {
@@ -109,9 +110,12 @@ private:
         ZipFile apkZip (File::getSpecialLocation (File::invokedExecutableFile));
         return std::unique_ptr<InputStream> (apkZip.createStreamForEntry (apkZip.getIndexOfFileName ("assets/" + String (resourcePath))));
 #else
-#if JUCE_IOS || JUCE_MAC
-        auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
-            .getParentDirectory().getChildFile ("Assets");
+#if JUCE_IOS
+ auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
+                       .getParentDirectory().getChildFile ("Assets");
+#elif JUCE_MAC
+ auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
+                       .getParentDirectory().getParentDirectory().getChildFile ("Resources").getChildFile ("Assets");
 #endif
         
         auto resourceFile = assetsDir.getChildFile (resourcePath);
@@ -129,6 +133,7 @@ private:
         
         if (img.isNull())
         {
+                        
             std::unique_ptr<InputStream> juceIconStream (createAssetInputStream (assetName));
             
             if (juceIconStream == nullptr)

@@ -156,9 +156,8 @@ public:
         bounds.setCentre(centre);
 
         transform = AffineTransform::fromTargetPoints((float) centre.x, (float) centre.y, (float)  centre.x, bounds.getY(), bounds.getX(), centre.y);
-
+      
         plotArea = bounds;
-
         
     }
     
