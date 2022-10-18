@@ -68,6 +68,7 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
         MuteSoloButton* soloButton = nullptr;
         MuteSoloButton* muteButton = nullptr;
         Colour colour;
+        Slider* gainSlider = nullptr;
         Point<int> handlePos;
     };
 
@@ -676,9 +677,9 @@ public:
         initValueBox();
     }
 
-    void addSliders(Colour newColour, Slider* dirSlider = nullptr, Slider* lowerFrequencySlider = nullptr, Slider* upperFrequencySlider = nullptr, MuteSoloButton* soloButton = nullptr, MuteSoloButton* muteButton = nullptr)
+    void addSliders(Colour newColour, Slider* dirSlider = nullptr, Slider* lowerFrequencySlider = nullptr, Slider* upperFrequencySlider = nullptr, MuteSoloButton* soloButton = nullptr, MuteSoloButton* muteButton = nullptr, Slider* gainSlider = nullptr)
     {
-        elements.add({dirSlider, lowerFrequencySlider, upperFrequencySlider, soloButton, muteButton, newColour});
+        elements.add({dirSlider, lowerFrequencySlider, upperFrequencySlider, soloButton, muteButton, newColour, gainSlider});
     }
     
     void setValueAndSnapToGrid(BandElements& elem, float dirFact)
@@ -702,21 +703,25 @@ public:
     
     float calcAlphaOfDirPath(BandElements& elem)
     {
+        float maxGain = std::max(elem.gainSlider->getMaximum(), std::abs(elem.gainSlider->getMinimum()));
+        float absRange = elem.gainSlider->getMaximum() + std::abs(elem.gainSlider->getMinimum());
+        float gain = ((float) elem.gainSlider->getValue() + maxGain) / (7.0f/5.0f * absRange) + 2.0f/7.0f;
+        
         if (!active)
         {
-            return 0.5f;
+            return 2.0f/7.0f;
         }
         else if ((elem.soloButton == nullptr || !soloActive) && (elem.muteButton == nullptr || !elem.muteButton->getToggleState()))
         {
-            return 1.0f;
+            return gain;
         }
         else if ((soloActive && elem.soloButton->getToggleState()) || (!soloActive && !elem.muteButton->getToggleState()))
         {
-            return 1.0f;
+            return gain;
         }
         else
         {
-            return 0.5f;
+            return 2.0f/7.0f;
         }
     }
     

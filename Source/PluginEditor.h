@@ -1,7 +1,7 @@
 /*
  ==============================================================================
  PluginEditor.h
- Author: Thomas Deppisch
+ Author: Thomas Deppisch & Simon Beck
  
  Copyright (c) 2019 - Austrian Audio GmbH
  www.austrian.audio
@@ -60,7 +60,8 @@ public:
     void onAlOverlayCancelRecord();
     void onAlOverlayMaxSigToDist();
     void setEqMode();
-    void setAbMode(bool buttonIdx);
+    float getABButtonAlphaFromLayerState(int layerState);
+    void changeDvColour(float gain);
     
     int getControlParameterIndex (Component& control) override;
         
@@ -77,6 +78,8 @@ private:
     
     bool loadingFile;
     bool recordingDisturber;
+    
+    Colour eqColours[5];
     
     TitleBar<AALogo, NoIOWidget> title;
     Footer footer;
