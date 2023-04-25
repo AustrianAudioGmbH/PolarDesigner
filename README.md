@@ -7,6 +7,18 @@ Available as VST3, AAX and AU. Get installers for Windows and Mac at [austrian.a
 <img width="990" alt="Screenshot_PD" src="https://github.com/AustrianAudioGmbH/PolarDesigner/blob/master/docs/PolarDesigner.png">
 Image: PolarDesigner running on iPad ...
 
+## Release Downloads
+
+Availabler here:
+
+    https://austrian.audio/polardesigner/
+
+## User Manual
+
+Polar Designer has a user manual - developers/contributors are encouraged to use it:
+
+https://austrian.audio/partner/polardesigner_manual/?attachment_id=1021&download_file=1
+
 ## Requirements
 * A copy of the JUCE source repository is needed, as these plugins refer to JUCE modules.  An example for how you would
 check things out for development might be thus:
@@ -35,6 +47,14 @@ PolarDesigner is based on [JUCE](https://juce.com/). To build PolarDesigner, get
 
 ## Related repositories
 Parts of the code are based on the [IEM Plugin Suite](https://git.iem.at/audioplugins/IEMPluginSuite) - check it out, it's awesome!
+
+## Plugin Setup Videos:
+
+Austrian Audio Polar Designer - Overview And Manual Setup
+    https://www.youtube.com/watch?v=t0ydtS6XCKM
+
+Austrian Audio Polar Designer - Automatic Pattern selection
+    https://www.youtube.com/watch?v=mbC0igNkpxA
 
 ## Plugin Demo Videos:
 
