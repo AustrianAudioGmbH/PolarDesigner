@@ -23,11 +23,13 @@ https://austrian.audio/partner/polardesigner_manual/?attachment_id=1021&download
 * A copy of the JUCE source repository is needed, as these plugins refer to JUCE modules.  An example for how you would
 check things out for development might be thus:
 
+<pre>
     $ mkdir AustrianAudioPlugins ;cd AustrianAudioPlugins
     $ git clone https://github.com/juce-framework/JUCE.git
     $ git clone https://github.com/AustrianAudioGmbH/AmbiCreator
     $ git clone https://github.com/AustrianAudioGmbH/PolarDesigner
     $ git clone https://github.com/AustrianAudioGmbH/StereoCreator
+</pre>
 
 * The JUCE repo should be checked out 'alongside' the Plugin sources, so that your folder structure might look
 like this (if you've checked out all of our other plugins as well, which also have this requirement):
