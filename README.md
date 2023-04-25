@@ -35,3 +35,28 @@ PolarDesigner is based on [JUCE](https://juce.com/). To build PolarDesigner, get
 
 ## Related repositories
 Parts of the code are based on the [IEM Plugin Suite](https://git.iem.at/audioplugins/IEMPluginSuite) - check it out, it's awesome!
+
+## Plugin Demo Videos:
+
+Adrian Hall using the Austrian OC818 and PolarDesigner Plugin on a drum track:
+    https://www.youtube.com/watch?v=6FQQ4QaiJaM
+
+Adrian Hall using the Austrian OC818 and PolarDesigner Plugin on a String Ensemble recording:
+    https://www.youtube.com/watch?v=kx4dtXh_6wg
+
+How to use the Austrian Audio PolarDesigner plugin:
+    https://www.youtube.com/watch?v=RrlsqG3dZSo
+
+Austrian Audio's PolarDesigner PlugIn explained by Christoph Frank / Snr. Acoustic Engineer:
+    https://www.youtube.com/watch?v=EHBV5hgBzsU
+
+Austrian Audio PolarDesigner. Free Open Source Polar Pattern Plugin for OC818. Now with AI! #3 of 3:
+    https://www.youtube.com/watch?v=4dvPbVjbu4o
+
+Austrian Audio Polar Designer - Automatic Pattern selection:
+        https://www.youtube.com/watch?v=mbC0igNkpxA
+
+WAIT .. this can do WHAT? || Austrian Audio OC818: 	(PolarPilot)
+	https://www.youtube.com/watch?v=g_s23-RnjqQ
+
+
