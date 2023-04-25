@@ -55,14 +55,14 @@
 /*
 */
 using namespace dsp;
-class FirstOrderDirectivityVisualizer : public Component
+class PolarPatternVisualizer : public Component
 {
     const float deg2rad = M_PI / 180.0f;
     const int degStep = 4;
     const int nLookUpSamples = 360;
 
 public:
-    FirstOrderDirectivityVisualizer()
+    PolarPatternVisualizer()
     {
         isActive = true;
         soloButton = nullptr;
@@ -96,7 +96,7 @@ public:
 
     }
 
-    ~FirstOrderDirectivityVisualizer()
+    ~PolarPatternVisualizer()
     {
     }
 
@@ -139,6 +139,7 @@ public:
         path.closeSubPath();
         path.applyTransform(transform);
         g.strokePath(path, PathStrokeType(2.0f));
+
     }
 
     void resized() override
@@ -156,8 +157,9 @@ public:
 
         transform = AffineTransform::fromTargetPoints((float) centre.x, (float) centre.y, (float)  centre.x, bounds.getY(), bounds.getX(), centre.y);
 
-
         plotArea = bounds;
+
+        
     }
     
     void setDirWeight(float weight)
@@ -220,5 +222,5 @@ private:
     Colour colour;
 
     Array<Point<float>> pointsOnCircle;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FirstOrderDirectivityVisualizer)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarPatternVisualizer)
 };

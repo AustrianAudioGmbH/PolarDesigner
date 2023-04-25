@@ -22,7 +22,7 @@
 */
 
 #pragma once
-#include "FirstOrderDirectivityVisualizer.h"
+#include "PolarPatternVisualizer.h"
 
 class  AlertOverlay :  public Component, private Button::Listener, private Timer
 {
@@ -72,10 +72,10 @@ public:
             tbCancel->setColour (TextButton::buttonColourId, buttonColour);
             tbCancel->setMouseCursor (MouseCursor::StandardCursorType::CrosshairCursor);
             
-            dirVis = new FirstOrderDirectivityVisualizer();
-            addAndMakeVisible (dirVis);
-            dirVis->setColour (buttonColour);
-            dirVis->setMouseCursor (MouseCursor::StandardCursorType::CrosshairCursor);
+            ppVisualizer = new PolarPatternVisualizer();
+            addAndMakeVisible (ppVisualizer);
+            ppVisualizer->setColour (buttonColour);
+            ppVisualizer->setMouseCursor (MouseCursor::StandardCursorType::CrosshairCursor);
             
             setMouseCursor (MouseCursor::StandardCursorType::CrosshairCursor);
             
@@ -105,10 +105,10 @@ public:
             tbCancel->setColour (TextButton::buttonColourId, buttonColour);
             tbCancel->setMouseCursor (MouseCursor::StandardCursorType::CrosshairCursor);
             
-            dirVis = new FirstOrderDirectivityVisualizer();
-            addAndMakeVisible (dirVis);
-            dirVis->setColour (buttonColour);
-            dirVis->setMouseCursor (MouseCursor::StandardCursorType::CrosshairCursor);
+            ppVisualizer = new PolarPatternVisualizer();
+            addAndMakeVisible (ppVisualizer);
+            ppVisualizer->setColour (buttonColour);
+            ppVisualizer->setMouseCursor (MouseCursor::StandardCursorType::CrosshairCursor);
             
             setMouseCursor (MouseCursor::StandardCursorType::CrosshairCursor);
             
@@ -125,7 +125,7 @@ public:
             delete tbCancel;
             delete tbRatio;
             stopTimer();
-            delete dirVis;
+            delete ppVisualizer;
         }
     };
     
@@ -171,7 +171,7 @@ public:
             tbOkay->setBounds(mL + dvWidth + horSpace, height - buttonHeight - mB, trackingButtonWidth, buttonHeight);
             tbRatio->setBounds(mL + dvWidth + trackingButtonWidth + buttonMargin + horSpace, height - buttonHeight - mB, trackingButtonWidth, buttonHeight);
             tbCancel->setBounds(mL + dvWidth + 2 * trackingButtonWidth + 2 * buttonMargin + horSpace, height - buttonHeight - mB, trackingButtonWidth, buttonHeight);
-            dirVis->setBounds(mL, mT + titleHeight + textMargin - 10.0f, dvWidth, dvWidth);
+            ppVisualizer->setBounds(mL, mT + titleHeight + textMargin - 10.0f, dvWidth, dvWidth);
         }
     }
     
@@ -244,13 +244,13 @@ public:
             tbOkay->setColour (TextButton::buttonColourId, buttonColour);
             tbRatio->setColour (TextButton::buttonColourId, buttonColour);
             tbCancel->setColour (TextButton::buttonColourId, buttonColour);
-            dirVis->setColour (buttonColour);
+            ppVisualizer->setColour (buttonColour);
         }
     }
     
     void timerCallback() override
     {
-        if (dirVis != nullptr)
+        if (ppVisualizer != nullptr)
         {
             if (dirWeight >= 1.0f)
                 goDown = true;
@@ -262,7 +262,7 @@ public:
             else
                 dirWeight += 0.01f;
             
-            dirVis->setDirWeight(dirWeight);
+            ppVisualizer->setDirWeight(dirWeight);
         }
     }
     
@@ -283,7 +283,7 @@ private:
     TextButton* tbCancel;
     TextButton* tbRatio;
     
-    FirstOrderDirectivityVisualizer* dirVis;
+    PolarPatternVisualizer* ppVisualizer;
     
     Type type;
     String title;

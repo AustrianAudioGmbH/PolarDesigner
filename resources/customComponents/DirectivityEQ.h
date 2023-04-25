@@ -51,8 +51,24 @@
 #pragma once
 #include "ImgPaths.h"
 
+// !J! On iOS we make the knobs fatter for touchscreen ease-of-use
+#ifdef JUCE_IOS
+static const float POLAR_DESIGNER_KNOBS_SIZE              = 40.0f;
+static const float POLAR_DESIGNER_BANDLIMIT_DIVIDER_SIZE  =  8.0f;
+#else
+static const float POLAR_DESIGNER_KNOBS_SIZE              = 20.0f;
+static const float POLAR_DESIGNER_BANDLIMIT_DIVIDER_SIZE  =  4.0f;
+#endif
+
 class  DirectivityEQ : public Component, private Slider::Listener, private Label::Listener
 {
+
+//#define AA_DO_DEBUG_PATH
+#ifdef AA_DO_DEBUG_PATH
+#warning "AUSTRIANAUDIO: DEBUG PATHS ARE TURNED ON!"
+    Path debugPath; // !J! used for the purpose of debugging UI elements only
+#endif
+    
     struct Settings {
         float fMin = 20.0f;    // minimum displayed frequency
         float fMax = 20000.0f; // maximum displayed frequency
@@ -69,6 +85,8 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
         MuteSoloButton* muteButton = nullptr;
         Colour colour;
         Slider* gainSlider = nullptr;
+        PolarPatternVisualizer* polarPatternVisualizer = nullptr;
+
         Point<int> handlePos;
     };
 
@@ -85,6 +103,7 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
         PathComponent() : Component() {
             setAlwaysOnTop(true);
             setName("PathComponent");
+            path.preallocateSpace(1000);    // !J! Arbitrary Magic Number
         };
         ~PathComponent() {};
         
@@ -143,6 +162,7 @@ public:
             addAndMakeVisible (&dirPathRects[i]);
             dirPathRects[i].addMouseListener(this, true);
         }
+        
     };
 
     void init ()
@@ -151,10 +171,12 @@ public:
         zero = s.yMax / dyn;
     }
     
-    ~DirectivityEQ() {};
+    ~DirectivityEQ() {
+    };
 
     void paint (Graphics& g) override
     {
+        
         nrActiveBands = processor.getNBands();
         
         if (processor.zeroDelayModeActive())
@@ -179,7 +201,7 @@ public:
             }
         }
         
-        // dir labels
+        // directivity labels
         int height = getHeight();
         int dirImgSize = 20;
         int smallImgSize = 15;
@@ -242,7 +264,7 @@ public:
 
             if (drawText)
             {
-                g.drawText (axislabel, xpos - 10, dirToY(s.yMin) + OH + 0.0f, 20, 12, Justification::centred, false);
+                g.drawText (axislabel, xpos - 10, dirToY(s.yMin) + OH + 0.0f, 30, 12, Justification::centred, true);
             }
         }
 
@@ -272,6 +294,11 @@ public:
         {
             p.clear();
         }
+       
+#ifdef AA_DO_DEBUG_PATH
+        debugPath.clear();      // !J! Used only for debugging UI elements
+#endif
+
         
         float lastRightBound;
         float lastCircY;
@@ -283,19 +310,49 @@ public:
         for (int i = 0; i < nrActiveBands; ++i)
         {
             BandElements& handle(elements.getReference(i));
-            float rightBound = (handle.upperFrequencySlider == nullptr || nrActiveBands == i + 1) ? hzToX(s.fMax) : hzToX (processor.hzFromZeroToOne(i, handle.upperFrequencySlider->getValue()));
+            
+            float rightBound = (handle.upperFrequencySlider == nullptr || nrActiveBands == i + 1) ?
+                                hzToX(s.fMax) : hzToX (processor.hzFromZeroToOne(i, handle.upperFrequencySlider->getValue()));
+            
             float circY = handle.dirSlider == nullptr ? dirToY(0.0f) : dirToY(handle.dirSlider->getValue());
             
             // paint band limits
             if (i != nrActiveBands - 1)
             {
                 Path& blPath = bandLimitPaths[i].getPath();
-                blPath.startNewSubPath (rightBound, dirToY(s.yMax)-OH);
-                blPath.lineTo (rightBound, dirToY(s.yMin)+OH);
-                g.setColour (Colours::steelblue.withMultipliedAlpha(activeBandLimitPath == i ? 1.0f : 0.8f));
-                g.strokePath (blPath, PathStrokeType (4.0f));
                 
+                blPath.startNewSubPath (rightBound, dirToY(s.yMax)-OH);
+                
+                blPath.lineTo (rightBound, dirToY(s.yMin)+OH);
+                
+//blPath.addRectangle(rightBound - 20.0, dirToY(s.yMin)+OH - 20, 40, 40);
+                
+                g.setColour (Colours::steelblue.withMultipliedAlpha(activeBandLimitPath == i ? 1.0f : 0.8f));
+
+                g.strokePath (blPath, PathStrokeType (POLAR_DESIGNER_BANDLIMIT_DIVIDER_SIZE));
+
+
+#ifdef AA_DO_DEBUG_PATH
+#if 0
+                { // !J! for debug purposes only
+                    
+                    debugPath.startNewSubPath(bandLimitPaths[i].getBounds().getX(),
+                                              bandLimitPaths[i].getBounds().getY());
+
+                    debugPath.lineTo(bandLimitPaths[i].getBounds().getRight(),
+                                     bandLimitPaths[i].getBounds().getBottom());
+
+                    debugPath.addRectangle(bandLimitPaths[i].getBounds().getX(), bandLimitPaths[i].getBounds().getY(),
+                                           bandLimitPaths[i].getBounds().getWidth(), bandLimitPaths[i].getBounds().getHeight());
+
+//                    debugPath.addStar(bandLimitPaths[i].getScreenPosition().toFloat(), 8, 10, 20);
+                    
+                }
+#endif
+#endif
+
                 bandLimitPaths[i].setBounds();
+
             }
             
             // dirPath
@@ -354,7 +411,8 @@ public:
             lastRightBound = rightBound;
             lastCircY = circY;
         }
-        
+
+
         // band handle knobs
         for (int i = 0; i < nrActiveBands; ++i)
         {
@@ -364,14 +422,68 @@ public:
             float circX = (rightBound + leftBound) / 2;
             float circY = handle.dirSlider == nullptr ? dirToY (0.0f) : dirToY (handle.dirSlider->getValue());
             handle.handlePos.setXY(circX,circY);
+                        
             // paint band handles
             g.setColour (Colour (0xFF191919));
-            g.drawEllipse (circX - 5.0f, circY - 5.0f , 10.0f, 10.0f, 3.0f);
-            g.setColour (handle.colour);
-            g.drawEllipse (circX - 5.0f, circY - 5.0f , 10.0f, 10.0f, 1.0f);
-            g.setColour (activeElem == i ? handle.colour.withSaturation(0.8) : handle.colour.withSaturation (0.2).withMultipliedAlpha (calcAlphaOfDirPath(handle)));
-            g.fillEllipse (circX - 5.0f, circY - 5.0f , 10.0f, 10.0f);
             
+            g.drawEllipse (circX - (POLAR_DESIGNER_KNOBS_SIZE / 2),
+                           circY - (POLAR_DESIGNER_KNOBS_SIZE / 2) ,
+                           POLAR_DESIGNER_KNOBS_SIZE,
+                           POLAR_DESIGNER_KNOBS_SIZE, 3.0f);
+            
+            g.setColour (handle.colour);
+            
+            g.drawEllipse (circX - (POLAR_DESIGNER_KNOBS_SIZE / 2),
+                           circY - (POLAR_DESIGNER_KNOBS_SIZE / 2),
+                           POLAR_DESIGNER_KNOBS_SIZE,
+                           POLAR_DESIGNER_KNOBS_SIZE, 1.0f);
+            
+            g.setColour (activeElem == i ? handle.colour.withSaturation(0.8) : handle.colour.withSaturation (0.2).withMultipliedAlpha (calcAlphaOfDirPath(handle)));
+            g.fillEllipse (circX - (POLAR_DESIGNER_KNOBS_SIZE / 2),
+                           circY - (POLAR_DESIGNER_KNOBS_SIZE / 2),
+                           POLAR_DESIGNER_KNOBS_SIZE,
+                           POLAR_DESIGNER_KNOBS_SIZE);
+            
+            // align elements
+            handle.dirSlider->setBounds(circX + (handle.dirSlider->getWidth() + POLAR_DESIGNER_KNOBS_SIZE),
+                                        handle.dirSlider->getY(),
+                                        handle.dirSlider->getWidth(), handle.dirSlider->getHeight());
+            handle.gainSlider->setBounds(circX + (handle.gainSlider->getWidth() + POLAR_DESIGNER_KNOBS_SIZE),
+                                         handle.gainSlider->getY(),
+                                         handle.gainSlider->getWidth(), handle.gainSlider->getHeight());
+            
+            handle.muteButton->setTopLeftPosition(handle.gainSlider->getX(), handle.muteButton->getY());
+            handle.soloButton->setTopLeftPosition(handle.gainSlider->getX() +
+                                                  handle.gainSlider->getWidth() -
+                                                  handle.soloButton->getWidth(),
+                                                  handle.soloButton->getY());
+
+            handle.polarPatternVisualizer->setBounds(handle.gainSlider->getScreenX(), handle.polarPatternVisualizer->getY(),
+                                                     handle.polarPatternVisualizer->getWidth(),
+                                                     handle.polarPatternVisualizer->getHeight());
+
+//#ifdef AA_DO_DEBUG_PATH
+//            { // !J! for debug purposes only
+//
+//                debugPath.addStar(handle.polarPatternVisualizer->getScreenPosition().toFloat(), 8, 10, 20);
+//                debugPath.startNewSubPath(handle.polarPatternVisualizer->getBounds().getX(),
+//                                      handle.polarPatternVisualizer->getBounds().getY());
+//
+//                debugPath.lineTo(handle.polarPatternVisualizer->getBounds().getRight(),
+//                             handle.polarPatternVisualizer->getBounds().getBottom());
+//
+//                debugPath.addRectangle(handle.polarPatternVisualizer->getBounds().getX(), handle.polarPatternVisualizer->getBounds().getY(),
+//                                       handle.polarPatternVisualizer->getBounds().getWidth(), handle.polarPatternVisualizer->getBounds().getHeight());
+//            }
+//
+//            { // !J! for debug purposes only
+//
+//                debugPath.startNewSubPath(handle.handlePos.getX(),
+//                                          handle.handlePos.getY());
+//                debugPath.addStar(handle.handlePos.toFloat(), 6, 5, 10);
+//            }
+//#endif
+
             if (i < nrActiveBands - 1)
             {
                 // draw tooltip showing frequency
@@ -383,6 +495,11 @@ public:
         }
         
         oldNrActiveBands = nrActiveBands;
+
+#ifdef AA_DO_DEBUG_PATH
+        g.strokePath (debugPath, PathStrokeType (5.0f)); // !J!
+#endif
+
     }
 
     float dirToY(const float dir)
@@ -507,7 +624,7 @@ public:
             {
                 BandElements& handle(elements.getReference(i));
                 
-                if (pos.getDistanceSquaredFrom(handle.handlePos) < 70)
+                if (pos.getDistanceSquaredFrom(handle.handlePos) < 140)
                 {
                     activeElem = i;
                     break;
@@ -677,9 +794,10 @@ public:
         initValueBox();
     }
 
-    void addSliders(Colour newColour, Slider* dirSlider = nullptr, Slider* lowerFrequencySlider = nullptr, Slider* upperFrequencySlider = nullptr, MuteSoloButton* soloButton = nullptr, MuteSoloButton* muteButton = nullptr, Slider* gainSlider = nullptr)
+    void addSliders(Colour newColour, Slider* dirSlider = nullptr, Slider* lowerFrequencySlider = nullptr, Slider* upperFrequencySlider = nullptr, MuteSoloButton* soloButton = nullptr, MuteSoloButton* muteButton = nullptr, Slider* gainSlider = nullptr, PolarPatternVisualizer* directivityVis = nullptr
+                    )
     {
-        elements.add({dirSlider, lowerFrequencySlider, upperFrequencySlider, soloButton, muteButton, newColour, gainSlider});
+        elements.add({dirSlider, lowerFrequencySlider, upperFrequencySlider, soloButton, muteButton, newColour, gainSlider, directivityVis});
     }
     
     void setValueAndSnapToGrid(BandElements& elem, float dirFact)
