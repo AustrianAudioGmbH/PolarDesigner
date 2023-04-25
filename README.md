@@ -9,9 +9,9 @@ Image: PolarDesigner running on iPad ...
 
 ## Release Downloads
 
-Availabler here:
+Available here:
 
-    https://austrian.audio/polardesigner/
+https://austrian.audio/polardesigner/
 
 ## User Manual
 
