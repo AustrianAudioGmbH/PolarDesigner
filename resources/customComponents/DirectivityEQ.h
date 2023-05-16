@@ -176,7 +176,6 @@ public:
 
     void paint (Graphics& g) override
     {
-        
         nrActiveBands = processor.getNBands();
         
         if (processor.zeroDelayModeActive())
@@ -445,22 +444,7 @@ public:
                            POLAR_DESIGNER_KNOBS_SIZE);
             
             // align elements
-            handle.dirSlider->setBounds(circX + (handle.dirSlider->getWidth() + POLAR_DESIGNER_KNOBS_SIZE),
-                                        handle.dirSlider->getY(),
-                                        handle.dirSlider->getWidth(), handle.dirSlider->getHeight());
-            handle.gainSlider->setBounds(circX + (handle.gainSlider->getWidth() + POLAR_DESIGNER_KNOBS_SIZE),
-                                         handle.gainSlider->getY(),
-                                         handle.gainSlider->getWidth(), handle.gainSlider->getHeight());
-            
-            handle.muteButton->setTopLeftPosition(handle.gainSlider->getX(), handle.muteButton->getY());
-            handle.soloButton->setTopLeftPosition(handle.gainSlider->getX() +
-                                                  handle.gainSlider->getWidth() -
-                                                  handle.soloButton->getWidth(),
-                                                  handle.soloButton->getY());
-
-            handle.polarPatternVisualizer->setBounds(handle.gainSlider->getScreenX(), handle.polarPatternVisualizer->getY(),
-                                                     handle.polarPatternVisualizer->getWidth(),
-                                                     handle.polarPatternVisualizer->getHeight());
+            handle.polarPatternVisualizer->getParentComponent()->resized();
 
 //#ifdef AA_DO_DEBUG_PATH
 //            { // !J! for debug purposes only

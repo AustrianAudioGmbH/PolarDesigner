@@ -64,11 +64,11 @@ class PolarPatternVisualizer : public Component
 public:
     PolarPatternVisualizer()
     {
-        isActive = true;
+        isActive = false;
         soloButton = nullptr;
         muteButton = nullptr;
         soloActive = false;
-        
+
         colour = Colour(0xFFD0011B);
         
         for (int phi = -180; phi <= 180; phi += degStep)
@@ -93,7 +93,6 @@ public:
         subGrid.addPath(line, AffineTransform().rotation(0.25f * M_PI));
         subGrid.addPath(line, AffineTransform().rotation(0.5f * M_PI));
         subGrid.addPath(line, AffineTransform().rotation(0.75f * M_PI));
-
     }
 
     ~PolarPatternVisualizer()
@@ -158,10 +157,8 @@ public:
         transform = AffineTransform::fromTargetPoints((float) centre.x, (float) centre.y, (float)  centre.x, bounds.getY(), bounds.getX(), centre.y);
 
         plotArea = bounds;
-
-        
     }
-    
+
     void setDirWeight(float weight)
     {
         dirWeight = weight;
@@ -176,7 +173,12 @@ public:
             repaint();
         }
     }
-    
+
+    bool isPvisActive()
+    {
+        return isActive;
+    }
+
     void setMuteSoloButtons(MuteSoloButton* solo, MuteSoloButton* mute)
     {
         soloButton = solo;

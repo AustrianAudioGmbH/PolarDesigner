@@ -63,7 +63,8 @@ public:
     void onAlOverlayMaxSigToDist();
     void setEqMode();
     float getABButtonAlphaFromLayerState(int layerState);
-    void changeDvColour(float gain);
+    // Helper method to calculate flex on the base of bandlimitPathComponents
+    std::vector<float> getBandLimitWidthVector(float sizeDirectionalEQ, float offsetPolarVisualizer);
     
     void incrementTrim();
     void decrementTrim();
@@ -85,8 +86,12 @@ private:
     bool recordingDisturber;
     
     Colour eqColours[5];
-    
-    TitleBar<AALogo, NoIOWidget> title;
+ 
+    AALogo logoAA;
+    TitleBarAAText titleAA;
+    TitleBarPDText titlePD;
+    TitleLine titleLine;
+
     Footer footer;
     LaF globalLaF;
     

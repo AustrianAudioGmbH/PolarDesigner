@@ -773,7 +773,7 @@ public:
     {
         const float boxSize = w * 0.8f;
 
-        Rectangle<float> buttonArea(x + (w - boxSize) * 0.5f, y + (h - boxSize) * 0.5f, boxSize, boxSize);
+        Rectangle<float> buttonArea(x, y, w, h);
 
         g.setColour(component.findColour(ToggleButton::tickColourId).withMultipliedAlpha(!isEnabled ? 0.1f : ticked ? 1.0f : isMouseOverButton ? 0.7f : 0.5f) );
 

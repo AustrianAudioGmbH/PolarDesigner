@@ -148,12 +148,11 @@ public:
     void setMaxSize (int maxSize) override {};
     void paint (Graphics& g) override
     {
-        aaLogoPath.applyTransform (aaLogoPath.getTransformToScaleToFit (0, 0, 39, 39, true, Justification::centred));
+        aaLogoPath.applyTransform (aaLogoPath.getTransformToScaleToFit (getLocalBounds().toFloat(), true, Justification::centred));
         // Colour AARed = Colour(155,35,35);
         g.setColour (Colours::white);
         g.strokePath (aaLogoPath, PathStrokeType (0.1f));
         g.fillPath (aaLogoPath);
-        
     };
     
 private:
@@ -344,132 +343,87 @@ private:
     Path DirectivityPath;
 };
 
-// ======================================================== TITLEBAR =========================
-template <class Tin, class Tout>
-class  TitleBar :  public Component
+class  TitleBarAAText : public Component
 {
 public:
-    TitleBar() : Component(), useTitlePath(true), centreSetExternally(false) {
-        addAndMakeVisible(&inputWidget);
-        addAndMakeVisible(&outputWidget);
-        titlePath.loadPathFromData (aaFontData, sizeof (aaFontData));
+    TitleBarAAText() {
+        titlePath.loadPathFromData(aaFontData, sizeof(aaFontData));
     };
-    ~TitleBar() {};
+    ~TitleBarAAText() {};
 
-    Tin* getInputWidgetPtr() { return &inputWidget; }
-    Tout* getOutputWidgetPtr() { return &outputWidget; }
+    void resized() override
+    {
+        repaint();
+    }
 
+    void paint(Graphics& g) override
+    {
+        Rectangle<int> bounds = getLocalBounds();
+        g.setColour(Colours::white);
+        titlePath.applyTransform(titlePath.getTransformToScaleToFit(getLocalBounds().toFloat(), true, Justification::left));
+        g.strokePath(titlePath, PathStrokeType(0.1f));
+        g.fillPath(titlePath);
+    };
 
-    void setTitle (String newBoldText, String newRegularText) {
-        boldText = newBoldText;
+private:
+    Path titlePath;
+};
+
+class  TitleBarPDText : public Component
+{
+public:
+    TitleBarPDText() {};
+    ~TitleBarPDText() {};
+
+    void setTitle(String newRegularText) {
         regularText = newRegularText;
     }
 
-    void setFont (Typeface::Ptr newBoldFont, Typeface::Ptr newRegularFont) {
-        boldFont = newBoldFont;
+    void setFont(Typeface::Ptr newRegularFont) {
         regularFont = newRegularFont;
     }
 
-    void resized () override
+    void resized() override
     {
-        const int leftWidth = inputWidget.getComponentSize();
-        const int rightWidth = outputWidget.getComponentSize();
-        Rectangle<int> bounds = getLocalBounds();
-
-        inputWidget.setBounds(bounds.getX(), bounds.getY() + 10, leftWidth, leftWidth);
-        outputWidget.setBounds(getLocalBounds().removeFromRight(rightWidth).reduced(0,15));
-        
-        centreY = bounds.getY() + bounds.getHeight() * 0.5f;
-        if (!centreSetExternally)
-        {
-            centreX = bounds.getX() + bounds.getWidth() * 0.5f;
-        }
         repaint();
     }
-    void setMaxSize (int inputSize, int outputSize)
-    {
-        inputWidget.setMaxSize(inputSize);
-        outputWidget.setMaxSize(outputSize);
-    }
 
-    void paint (Graphics& g) override
+    void paint(Graphics& g) override
     {
         Rectangle<int> bounds = getLocalBounds();
-        const float boldHeight = 30.f;
-        const float regularHeight = 30.f;
-        const int leftWidth = inputWidget.getComponentSize();
-        const int rightWidth = outputWidget.getComponentSize();
+        regularFont.setHeight(bounds.getHeight()/1.5f);
 
-        boldFont.setHeight(boldHeight);
-        regularFont.setHeight(regularHeight);
-
-        float boldWidth;
-        if (useTitlePath)
-        {
-            float pathWidth = titlePath.getBounds().getWidth();
-            float pathHeight = titlePath.getBounds().getHeight();
-            boldWidth = pathWidth * regularFont.getAscent() / pathHeight * 0.76;
-        }
-        else
-        {
-            boldWidth = boldFont.getStringWidth(boldText);
-        }
-            
-        const float regularWidth = regularFont.getStringWidth(regularText);
-
-        int hSpace = 6;
-        Rectangle<float> textArea (0, 0, boldWidth + regularWidth + hSpace, jmax(boldHeight, regularHeight));
-        textArea.setCentre(centreX,centreY);
-
-        if (textArea.getX() < leftWidth) textArea.setX(leftWidth);
-        if (textArea.getRight() > bounds.getRight() - rightWidth) textArea.setRight(bounds.getRight() - rightWidth);
-        
         g.setColour(Colours::white);
-        if (useTitlePath)
-        {
-            Rectangle<float> imgBounds = textArea.removeFromLeft(boldWidth);
-            imgBounds.removeFromBottom(regularFont.getDescent() - 0.6f);
-            
-            titlePath.applyTransform (titlePath.getTransformToScaleToFit (imgBounds, true, Justification::centredBottom));
-            g.strokePath (titlePath, PathStrokeType (0.1f));
-            g.fillPath (titlePath);
-            
-            textArea.removeFromLeft(hSpace);
-            g.setFont(regularFont);
-            g.drawFittedText(regularText, textArea.toNearestInt(), Justification::bottom, 1);
-        }
-        else
-        {
-            g.setFont(boldFont);
-            g.drawFittedText(boldText, textArea.removeFromLeft(boldWidth).toNearestInt(), Justification::bottom, 1);
-            g.setFont(regularFont);
-            g.drawFittedText(regularText, textArea.toNearestInt(), Justification::bottom, 1);
-        }
-
-        g.setColour((Colours::white).withMultipliedAlpha(0.5));
-        g.drawLine(bounds.getX(),bounds.getY()+bounds.getHeight()-1, bounds.getX()+bounds.getWidth(), bounds.getY()+bounds.getHeight()-1);
+        g.setFont(regularFont);
+        g.drawFittedText(regularText, bounds.toNearestInt(), Justification::left, 1);
     };
-    
-    void setTitleCentreX(float x)
-    {
-        centreX = x;
-        centreSetExternally = true;
-    }
 
 private:
-    Tin inputWidget;
-    Tout outputWidget;
-    Font boldFont = Font(25.f);
     Font regularFont = Font(25.f);
-    juce::String boldText = "Bold";
     juce::String regularText = "Regular";
-    Path titlePath;
-    bool useTitlePath;
-    float centreX;
-    float centreY;
-    bool centreSetExternally;
 };
 
+class  TitleLine : public Component
+{
+public:
+    TitleLine() {};
+    ~TitleLine() {};
+
+    void resized() override
+    {
+        repaint();
+    }
+
+    void paint(Graphics& g) override
+    {
+        Rectangle<int> bounds = getLocalBounds();
+
+        g.setColour((Colours::white).withMultipliedAlpha(0.5));
+        g.fillAll();
+    };
+
+private:
+};
 
 class IEMLogo : public Component
 {
