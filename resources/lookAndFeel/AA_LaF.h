@@ -773,7 +773,7 @@ public:
     {
         const float boxSize = w * 0.8f;
 
-        Rectangle<float> buttonArea(x + (w - boxSize) * 0.5f, y + (h - boxSize) * 0.5f, boxSize, boxSize);
+        Rectangle<float> buttonArea(x, y, w, h);
 
         g.setColour(component.findColour(ToggleButton::tickColourId).withMultipliedAlpha(!isEnabled ? 0.1f : ticked ? 1.0f : isMouseOverButton ? 0.7f : 0.5f) );
 
@@ -975,4 +975,24 @@ public:
         g.setColour (Colours::white.withAlpha(0.8f));
         g.strokePath (path, PathStrokeType (1.0f));
     }
+    
+
 };
+
+class LaF2 : public LookAndFeel_V2
+{
+public:
+    Component* getParentComponentForMenuOptions (const PopupMenu::Options& options) override
+    {
+    #if JUCE_IOS
+        if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_AudioUnitv3)
+        {
+            if (options.getParentComponent() == nullptr && options.getTargetComponent() != nullptr)
+                return options.getTargetComponent()->getTopLevelComponent();
+        }
+    #endif
+        
+        return LookAndFeel_V2::getParentComponentForMenuOptions (options);
+    }
+};
+    

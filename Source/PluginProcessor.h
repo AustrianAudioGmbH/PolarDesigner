@@ -108,7 +108,7 @@ public:
     float getXoverSliderRangeStart (int sliderNum);
     float getXoverSliderRangeEnd (int sliderNum);
     Atomic<bool> repaintDEQ = true;
-    Atomic<bool> nActiveBandsChanged = true;
+    Atomic<bool> didNRActiveBandsChange = true;
     Atomic<bool> zeroDelayModeChanged = true;
     Atomic<bool> ffDfEqChanged = true;
     bool getDisturberRecorded() {return disturberRecorded;}
@@ -162,7 +162,7 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarDesignerAudioProcessor)
     
-    int nBands;
+    int nBands = 5;
 
     AudioProcessorValueTreeState vtsParams;
     SharedResourcePointer<SharedParams> sharedParams;

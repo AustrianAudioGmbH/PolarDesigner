@@ -64,11 +64,11 @@ class PolarPatternVisualizer : public Component
 public:
     PolarPatternVisualizer()
     {
-        isActive = true;
+        isActive = false;
         soloButton = nullptr;
         muteButton = nullptr;
         soloActive = false;
-        
+
         colour = Colour(0xFFD0011B);
         
         for (int phi = -180; phi <= 180; phi += degStep)
@@ -93,7 +93,6 @@ public:
         subGrid.addPath(line, AffineTransform().rotation(0.25f * M_PI));
         subGrid.addPath(line, AffineTransform().rotation(0.5f * M_PI));
         subGrid.addPath(line, AffineTransform().rotation(0.75f * M_PI));
-
     }
 
     ~PolarPatternVisualizer()
@@ -139,6 +138,15 @@ public:
         path.closeSubPath();
         path.applyTransform(transform);
         g.strokePath(path, PathStrokeType(2.0f));
+        
+        //debug
+#ifdef AA_DO_DEBUG_PATH
+        Rectangle<int> bounds = getLocalBounds();
+        juce::Rectangle<int> area (bounds); // [1]
+        g.setColour (juce::Colours::orange);
+        g.drawRect (area);
+#endif
+        
 
     }
 
@@ -153,6 +161,7 @@ public:
             bounds.setWidth(bounds.getHeight());
         else
             bounds.setHeight(bounds.getWidth());
+        
         bounds.setCentre(centre);
 
         transform = AffineTransform::fromTargetPoints((float) centre.x, (float) centre.y, (float)  centre.x, bounds.getY(), bounds.getX(), centre.y);
@@ -175,7 +184,12 @@ public:
             repaint();
         }
     }
-    
+
+    bool isPvisActive()
+    {
+        return isActive;
+    }
+
     void setMuteSoloButtons(MuteSoloButton* solo, MuteSoloButton* mute)
     {
         soloButton = solo;

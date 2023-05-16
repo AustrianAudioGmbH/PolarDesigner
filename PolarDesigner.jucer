@@ -9,8 +9,9 @@
               pluginAAXCategory="8192" pluginVST3Category="Fx" pluginRTASCategory="8192"
               pluginVSTCategory="kPlugCategEffect" pluginCharacteristicsValue="pluginAAXDisableMultiMono"
               companyEmail="sayhello@austrianaudio.com" jucerFormatVersion="1"
-              displaySplashScreen="1" defines="JUCE_MODAL_LOOPS_PERMITTED=1"
-              headerPath="/opt/homebrew/opt/fftw/include/" pluginAUIsSandboxSafe="1">
+              displaySplashScreen="1" defines="JUCE_MODAL_LOOPS_PERMITTED=1&#10;&#10;"
+              headerPath="/opt/homebrew/opt/fftw/include/&#10;/Users/jayvaughan/Documents/Development/Plugins/SDKs/Protools_Developer_Resources/aax-sdk-2-4-1/Interfaces&#10;/Users/jayvaughan/Documents/Development/Plugins/SDKs/Protools_Developer_Resources/aax-sdk-2-4-1/Interfaces/ACF&#10;"
+              pluginAUIsSandboxSafe="1">
   <MAINGROUP id="nmXiNr" name="PolarDesigner">
     <GROUP id="{D54BFC58-8ED6-1DEF-A2B9-DAAF16495BAC}" name="resources">
       <GROUP id="{75BF05EC-024B-1F61-DA13-169C5FDE5119}" name="customComponents">
@@ -48,7 +49,7 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f" aaxFolder="../SDKs/aax-sdk-2-4-0/"
+    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f" aaxFolder="/Users/jayvaughan/Documents/Development/Plugins/SDKs/Protools_Developer_Resources/aax-sdk-2-4-1/"
                customXcodeResourceFolders="Assets/">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" headerPath="/opt/homebrew/opt/fftw/include&#10;../../../SDKs/vstsdk2.4"
@@ -109,7 +110,7 @@
                   iosBackgroundBle="1" iosBluetoothPermissionNeeded="1" customXcassetsFolder="resources/Images.xcassets"
                   customLaunchStoryboard="resources/LaunchScreen" microphonePermissionNeeded="1"
                   UIStatusBarHidden="1" UIRequiresFullScreen="1" iPadScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight"
-                  customXcodeResourceFolders="Assets/&#10;">
+                  customXcodeResourceFolders="Assets/&#10;" extraLinkerFlags="-L/Users/jayvaughan/Documents/Development/Plugins/SDKs/Protools_Developer_Resources/aax-sdk-2-4-1/Libs/Release&#10;-L/Users/jayvaughan/Documents/Development/Plugins/SDKs/Protools_Developer_Resources/aax-sdk-2-4-1/Libs/Debug&#10;">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug"/>
         <CONFIGURATION isDebug="0" name="Release"/>

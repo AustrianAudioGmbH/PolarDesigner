@@ -63,7 +63,6 @@ static const float POLAR_DESIGNER_BANDLIMIT_DIVIDER_SIZE  =  4.0f;
 class  DirectivityEQ : public Component, private Slider::Listener, private Label::Listener
 {
 
-//#define AA_DO_DEBUG_PATH
 #ifdef AA_DO_DEBUG_PATH
 #warning "AUSTRIANAUDIO: DEBUG PATHS ARE TURNED ON!"
     Path debugPath; // !J! used for the purpose of debugging UI elements only
@@ -176,7 +175,6 @@ public:
 
     void paint (Graphics& g) override
     {
-        
         nrActiveBands = processor.getNBands();
         
         if (processor.zeroDelayModeActive())
@@ -333,7 +331,6 @@ public:
 
 
 #ifdef AA_DO_DEBUG_PATH
-#if 0
                 { // !J! for debug purposes only
                     
                     debugPath.startNewSubPath(bandLimitPaths[i].getBounds().getX(),
@@ -346,9 +343,7 @@ public:
                                            bandLimitPaths[i].getBounds().getWidth(), bandLimitPaths[i].getBounds().getHeight());
 
 //                    debugPath.addStar(bandLimitPaths[i].getScreenPosition().toFloat(), 8, 10, 20);
-                    
                 }
-#endif
 #endif
 
                 bandLimitPaths[i].setBounds();
@@ -462,11 +457,9 @@ public:
             handle.polarPatternVisualizer->setBounds(handle.gainSlider->getX(), handle.polarPatternVisualizer->getY(),
                                                      handle.polarPatternVisualizer->getWidth(),
                                                      handle.polarPatternVisualizer->getHeight());
-
             
-#if 1
-        std::cout << "ppVis bounds: " << handle.polarPatternVisualizer->getBounds().getX() << ", " << handle.polarPatternVisualizer->getBounds().getY() << "\n";
-#endif
+            handle.polarPatternVisualizer->setActive(true);
+
 
 //#ifdef AA_DO_DEBUG_PATH
 //            { // !J! for debug purposes only

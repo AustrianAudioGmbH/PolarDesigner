@@ -23,6 +23,9 @@
 
 #pragma once
 
+//#define AA_DO_DEBUG_PATH
+
+
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 #include "../resources/lookAndFeel/AA_LaF.h"
@@ -39,6 +42,8 @@
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 typedef AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
+typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
+
 //==============================================================================
 /**
 */
@@ -53,6 +58,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     
+    void buttonStateChanged(Button* button) override;
     void buttonClicked (Button* button) override;
     void comboBoxChanged (ComboBox* cb) override;
     void sliderValueChanged (Slider* slider) override;
@@ -63,10 +69,11 @@ public:
     void onAlOverlayMaxSigToDist();
     void setEqMode();
     float getABButtonAlphaFromLayerState(int layerState);
-    void changeDvColour(float gain);
+    // Helper method to calculate flex on the base of bandlimitPathComponents
+    std::vector<float> getBandLimitWidthVector(float sizeDirectionalEQ, float offsetPolarVisualizer);
     
-    void incrementTrim();
-    void decrementTrim();
+    void incrementTrim(int nBands);
+    void decrementTrim(int nBands);
 
     int getControlParameterIndex (Component& control) override;
         
@@ -76,7 +83,7 @@ private:
     String presetFilename;
     String errorMessage;
         
-    const int nBands = 5;
+    const int maxNumberBands = 5;
     int nActiveBands;
     int syncChannelIdx;
     int oldAbLayerState;
@@ -85,10 +92,15 @@ private:
     bool recordingDisturber;
     
     Colour eqColours[5];
-    
-    TitleBar<AALogo, NoIOWidget> title;
+ 
+    AALogo logoAA;
+    TitleBarAAText titleAA;
+    TitleBarPDText titlePD;
+    TitleLine titleLine;
+
     Footer footer;
     LaF globalLaF;
+//    LaF2 comboBoxLaF;       // only for ComboBox
     
     PolarDesignerAudioProcessor& processor;
     AudioProcessorValueTreeState& valueTreeState;
@@ -111,6 +123,8 @@ private:
     ToggleButton tbEq[3], tbAllowBackwardsPattern;
     // Combox Boxes
     ComboBox cbSetNrBands, cbSyncChannel;
+    TextButton tbSetNrBands[5];
+    TextButton tbSyncChannel[5];
             
     // Pointers for value tree state
     std::unique_ptr<ReverseSlider::SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4], slProximityAtt;
