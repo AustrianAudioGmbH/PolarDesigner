@@ -341,6 +341,9 @@ alOverlaySignal(AlertOverlay::Type::signalTracking)
     nActiveBandsChanged();
     zeroDelayModeChange();
     
+    trimSlider.sliderIncremented = [this] { incrementTrim(this->nActiveBands); };
+    trimSlider.sliderDecremented = [this] { decrementTrim(this->nActiveBands); };
+
     startTimer (30);
     
     setEqMode();
@@ -388,226 +391,217 @@ void PolarDesignerAudioProcessorEditor::paint (Graphics& g)
 
 void PolarDesignerAudioProcessorEditor::resized()
 {
-    const int leftRightMargin = 30;
-    const int headerHeight = 60;
-    const int footerHeight = 25;
-    const int dirSliderHeight = 30;
-    const int linearSliderWidth = 115;
-    const int linearSliderSpacing = 32;
-    const int linearSliderHeight = 20;
-    const int buttonHeight = 18;
-    const int vSpace = 10;
-    const int vSpaceMain = 30;
-    const int hSpace = 30;
-    const int buttonVSpace = 5;
-    const int loadButtonWidth = 110;
-    const int loadButtonHeight = 28;
-    const int loadButtonMargin = 5;
-    const int cbWidth = 140;
-    const int tbWidth = 210;
-    const int dEqHeight = 280;
-    const int pvHeight = 120;
-    const int pvSpacing = 25;
-    const int lbWidth = 120;
-    const int sideAreaWidth = 180;
-    const int sideAreaRightMargin = 20;
-    const int sideVSpace = 20;
-    const int grpHeight = 25;
-    const int trimSliderWidth = 30;
-    
+
     Rectangle<int> area (getLocalBounds());
-    
-    Rectangle<int> footerArea (area.removeFromBottom(footerHeight));
-    footer.setBounds (footerArea);
-    
-    area.removeFromLeft(leftRightMargin);
-    area.removeFromRight(leftRightMargin);
-    
-    
-    Rectangle<int> headerArea = area.removeFromTop(headerHeight);
-    
-    title.setTitleCentreX (headerArea.withLeft(sideAreaWidth).getX() + 0.5 *
-                           headerArea.withLeft(sideAreaWidth).getWidth() - 8);
-    title.setBounds (headerArea);
-    
-    Rectangle<int> zDArea = headerArea.removeFromRight(90);
-    zDArea.removeFromTop(headerHeight/2 - loadButtonHeight/2);
-    tbZeroDelay.setBounds(zDArea.removeFromTop(loadButtonHeight));
-    
-    Rectangle<int> abArea = headerArea.removeFromRight(3 * loadButtonHeight);
-    abArea.removeFromTop(headerHeight/2 - loadButtonHeight/2);
-    tbAbButton[0].setBounds(abArea.getX(), abArea.getY(), loadButtonHeight, loadButtonHeight);
-    tbAbButton[1].setBounds(abArea.getX() + 1.5 * loadButtonHeight, abArea.getY(), loadButtonHeight, loadButtonHeight);
-    
-    
-    // --------- SIDE AREA ------------
-    Rectangle<int> sideArea (area.removeFromLeft(sideAreaWidth));
-    sideArea.removeFromRight(sideAreaRightMargin);
-    sideArea.removeFromTop(vSpace);
-    sideBorderPath.startNewSubPath(sideArea.getRight(), sideArea.getY());
-    sideBorderPath.lineTo(sideArea.getRight(), sideArea.getBottom());
-    sideArea.removeFromRight(leftRightMargin/2);
-    
-    // set Bands Combobox
-    grpBands.setBounds(sideArea.removeFromTop(grpHeight));
-    Rectangle<int> changeBandsArea = sideArea.removeFromTop(25);
-    
-    // set Bands Toolbar
-    Rectangle<int> toolbarRectangle = changeBandsArea; //.removeFromLeft(tbWidth);
-    cbSetNrBands.setBounds(toolbarRectangle); // !J! TODO: remove (also cbWidth)
-    
-    for(int i=0;i<maxNumberBands;i++) {
-        tbSetNrBands[i].setButtonText(String (i + 1));
-        tbSetNrBands[i].setBounds (toolbarRectangle.removeFromLeft(cbWidth / maxNumberBands));
-    }
-    
-    
-    // load file button
-    sideArea.removeFromTop(sideVSpace);
-    grpPreset.setBounds(sideArea.removeFromTop(grpHeight));
-    Rectangle<int> fileLoadArea = sideArea.removeFromTop(loadButtonHeight);
-    fileLoadArea.removeFromLeft(loadButtonMargin);
-    tbLoadFile.setBounds(fileLoadArea.removeFromLeft(loadButtonWidth));
-    
-    // save file button
-    sideArea.removeFromTop(vSpace/2);
-    Rectangle<int> fileSaveArea = sideArea.removeFromTop(loadButtonHeight);
-    fileSaveArea.removeFromLeft(loadButtonMargin);
-    tbSaveFile.setBounds(fileSaveArea.removeFromLeft(loadButtonWidth));
-    
-    // ff/df equalization
-    sideArea.removeFromTop(sideVSpace);
-    grpEq.setBounds(sideArea.removeFromTop(grpHeight));
-    Rectangle<int> eqArea = sideArea.removeFromTop(3*buttonHeight + 2*buttonVSpace);
-    tbEq[0].setBounds(eqArea.getX(), eqArea.getY(), buttonHeight + lbWidth, buttonHeight);
-    tbEq[1].setBounds(eqArea.getX(), eqArea.getY() + buttonHeight, buttonHeight + lbWidth, buttonHeight);
-    tbEq[2].setBounds(eqArea.getX(), eqArea.getY() + 2 * buttonHeight, buttonHeight + lbWidth, buttonHeight);
-    
-    // proximity compensation
-    sideArea.removeFromTop(sideVSpace);
-    grpProxComp.setBounds(sideArea.removeFromTop(grpHeight));
-    slProximity.setBounds(sideArea.removeFromTop(linearSliderHeight));
-    
-    // disturber cancellation
-    sideArea.removeFromTop(sideVSpace);
-    grpDstC.setBounds(sideArea.removeFromTop(grpHeight));
-    Rectangle<int> recordArea = sideArea.removeFromTop(buttonHeight + 2 * loadButtonHeight + vSpace);
-    tbAllowBackwardsPattern.setBounds(recordArea.removeFromTop(buttonHeight).removeFromLeft(buttonHeight + lbWidth));
-    recordArea.removeFromTop(vSpace/2);
-    recordArea.removeFromLeft(loadButtonMargin);
-    tbRecordDisturber.setBounds(recordArea.removeFromTop(loadButtonHeight).removeFromLeft(loadButtonWidth));
-    recordArea.removeFromTop(vSpace/2);
-    tbRecordSignal.setBounds(recordArea.removeFromTop(loadButtonHeight).removeFromLeft(loadButtonWidth));
-    
-    // set syncChannel
-    sideArea.removeFromTop(sideVSpace);
-    grpSync.setBounds(sideArea.removeFromTop(grpHeight));
-    Rectangle<int> syncArea = sideArea.removeFromTop(25);
-    //    cbSyncChannel.setBounds(syncArea.removeFromLeft(cbWidth));
-    
-    for(int i=0;i<maxNumberBands;i++) {
-        
-        if (i == 0) {
-            tbSyncChannel[i].setButtonText(String ("X"));
-        }
-        else {
-            tbSyncChannel[i].setButtonText(String (i));
-        }
-        
-        tbSyncChannel[i].setBounds (syncArea.removeFromLeft(cbWidth / maxNumberBands));
-    }
-    
-    
-    // -------------- MAIN AREA -------------
-    Rectangle<int> mainArea = area.removeFromTop(EDITOR_HEIGHT - headerHeight - footerHeight);
-    mainArea.removeFromTop(vSpaceMain);
-    
-#ifdef AA_DO_DEBUG_PATH
-    { // !J! for debugging purposes only
-        debugPath.clear();
-        debugPath.addRectangle(mainArea);
-    }
-#endif
-    
-    // polar Visualizers
-    Rectangle<int> pvRow = mainArea.removeFromTop(pvHeight);
-    pvRow.removeFromLeft(hSpace);
-    
-#ifdef AA_DO_DEBUG_PATH
-    debugPath.addRectangle(pvRow);
-#endif
-    
-    for (auto& pVis : polarPatternVisualizers)
+
+    juce::FlexBox fb;
+    fb.flexDirection = FlexBox::Direction::column;
+    fb.justifyContent = juce::FlexBox::JustifyContent::center;
+    fb.alignContent = juce::FlexBox::AlignContent::center;
+
+    juce::FlexBox topComponent;
+    topComponent.flexDirection = FlexBox::Direction::row;
+    topComponent.justifyContent = juce::FlexBox::JustifyContent::center;
+    topComponent.alignContent = juce::FlexBox::AlignContent::center;
+
+    const float marginFlex = 0.01f;
+    const float topComponentTitleFlex = 0.4f;
+    const float topComponentButtonsFlex = 0.05f;
+    const float topComponentSpacingFlex = topComponentButtonsFlex/2;
+    const float topComponentButtonsMargin = 5;
+
+    topComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    topComponent.items.add(juce::FlexItem(logoAA).withFlex(topComponentButtonsFlex));
+    topComponent.items.add(juce::FlexItem().withFlex(topComponentSpacingFlex));
+    topComponent.items.add(juce::FlexItem(titleAA).withFlex(topComponentTitleFlex));
+    topComponent.items.add(juce::FlexItem().withFlex(topComponentSpacingFlex));
+    topComponent.items.add(juce::FlexItem(titlePD).withFlex(topComponentTitleFlex));
+    topComponent.items.add(juce::FlexItem(tbAbButton[0]).withFlex(topComponentButtonsFlex).withMargin(topComponentButtonsMargin));
+    topComponent.items.add(juce::FlexItem().withFlex(topComponentSpacingFlex/2));
+    topComponent.items.add(juce::FlexItem(tbAbButton[1]).withFlex(topComponentButtonsFlex).withMargin(topComponentButtonsMargin));
+    topComponent.items.add(juce::FlexItem().withFlex(topComponentSpacingFlex));
+    topComponent.items.add(juce::FlexItem(tbZeroDelay).withFlex(topComponentButtonsFlex*3).withMargin(5));
+    topComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+
+    juce::FlexBox topComponentLine;
+    topComponentLine.flexDirection = FlexBox::Direction::row;
+    topComponentLine.justifyContent = juce::FlexBox::JustifyContent::center;
+    topComponentLine.alignContent = juce::FlexBox::AlignContent::center;
+    topComponentLine.items.add(juce::FlexItem().withFlex(marginFlex));
+    topComponentLine.items.add(juce::FlexItem(titleLine).withFlex(1.f - 2 * marginFlex));
+    topComponentLine.items.add(juce::FlexItem().withFlex(marginFlex));
+
+    const float sideComponentItemFlex = 0.05f;
+
+    juce::FlexBox sideComponent;
+    sideComponent.flexDirection = FlexBox::Direction::column;
+    sideComponent.justifyContent = juce::FlexBox::JustifyContent::center;
+    sideComponent.alignContent = juce::FlexBox::AlignContent::center;
+    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    sideComponent.items.add(juce::FlexItem(grpBands).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(cbSetNrBands).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    sideComponent.items.add(juce::FlexItem(grpPreset).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(tbLoadFile).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(tbSaveFile).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    sideComponent.items.add(juce::FlexItem(grpEq).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(tbEq[0]).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(tbEq[1]).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(tbEq[2]).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    sideComponent.items.add(juce::FlexItem(grpProxComp).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(slProximity).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    sideComponent.items.add(juce::FlexItem(grpDstC).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(tbAllowBackwardsPattern).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(tbRecordDisturber).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(tbRecordSignal).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    sideComponent.items.add(juce::FlexItem(grpSync).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(cbSyncChannel).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+
+    // Margins are fixed value because DirectivityEQ component has fixed margins
+    const float polarVisualizersComponentLeftMargin = 33;
+    const float polarVisualizersComponentRightMargin = 10;
+
+    juce::FlexBox polarVisualizersComponent;
+    polarVisualizersComponent.flexDirection = FlexBox::Direction::row;
+    polarVisualizersComponent.justifyContent = juce::FlexBox::JustifyContent::center;
+    polarVisualizersComponent.alignContent = juce::FlexBox::AlignContent::center;
+    polarVisualizersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin));
+
+    juce::FlexBox muteSoloModule;
+    muteSoloModule.flexDirection = FlexBox::Direction::row;
+    muteSoloModule.justifyContent = juce::FlexBox::JustifyContent::center;
+    muteSoloModule.alignContent = juce::FlexBox::AlignContent::center;
+    muteSoloModule.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin));
+
+    const float muteSoloComponentButtonsFlex = 0.14f;
+
+    juce::FlexBox muteSoloComponent[5];
+    for (int i = 0; i < 5; i++)
     {
-        pVis.setBounds(pvRow.removeFromLeft(pvHeight));
-        pvRow.removeFromLeft(pvSpacing);
+        muteSoloComponent[i].flexDirection = FlexBox::Direction::row;
+        muteSoloComponent[i].justifyContent = juce::FlexBox::JustifyContent::center;
+        muteSoloComponent[i].alignContent = juce::FlexBox::AlignContent::center;
+        muteSoloComponent[i].items.add(juce::FlexItem().withFlex(marginFlex));
+        muteSoloComponent[i].items.add(juce::FlexItem(msbMute[i]).withFlex(muteSoloComponentButtonsFlex));
+        muteSoloComponent[i].items.add(juce::FlexItem().withFlex(1.f - 2 * marginFlex - 2 * muteSoloComponentButtonsFlex));
+        muteSoloComponent[i].items.add(juce::FlexItem(msbSolo[i]).withFlex(muteSoloComponentButtonsFlex));
+        muteSoloComponent[i].items.add(juce::FlexItem().withFlex(marginFlex));
     }
+
+    juce::FlexBox dirSlidersComponent;
+    dirSlidersComponent.flexDirection = FlexBox::Direction::row;
+    dirSlidersComponent.justifyContent = juce::FlexBox::JustifyContent::center;
+    dirSlidersComponent.alignContent = juce::FlexBox::AlignContent::center;
+    dirSlidersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin));
+
+    juce::FlexBox gainBandSlidersComponent;
+    gainBandSlidersComponent.flexDirection = FlexBox::Direction::row;
+    gainBandSlidersComponent.justifyContent = juce::FlexBox::JustifyContent::center;
+    gainBandSlidersComponent.alignContent = juce::FlexBox::AlignContent::center;
+    gainBandSlidersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin));
+
+    //Dynamic layout for polarVisualizers and dirSlider components
+    //offsetDirEQ and offsetPolVis are fixed values because DirectivityEQ component has fixed margins
+    const float offsetDirEQ = 42;
+    const float offsetPolVis = 29;
+
+    const float dirEqSize = directivityEqualiser.getWidth() - offsetDirEQ;
+    auto bandLimitWidth = getBandLimitWidthVector(dirEqSize, offsetPolVis);
+
+    //pVisflex - value used for components spacing across given area i.e 0.65 (maximum 1.0 means full space)
+    float pVisflex = 0;
+
+    if (nActiveBands < 2)
+    {
+        if (polarPatternVisualizers[0].isPvisActive())
+        {
+            pVisflex = bandLimitWidth[0] / dirEqSize;
+            polarVisualizersComponent.items.add(juce::FlexItem(polarPatternVisualizers[0]).withFlex(pVisflex));
+            dirSlidersComponent.items.add(juce::FlexItem(slDir[0]).withFlex(pVisflex));
+            muteSoloModule.items.add(juce::FlexItem(muteSoloComponent[0]).withFlex(pVisflex));
+            gainBandSlidersComponent.items.add(juce::FlexItem(slBandGain[0]).withFlex(pVisflex));
+        }
+    }
+    else
+    {
+        for (int i = 0; i < nActiveBands; i++)
+        {
+            if (polarPatternVisualizers[i].isPvisActive())
+            {
+                //TODO: modify the function so that there is no danger of going outside the array --> i+1
+                pVisflex = bandLimitWidth[i+1] / dirEqSize;
+                polarVisualizersComponent.items.add(juce::FlexItem(polarPatternVisualizers[i]).withFlex(pVisflex));
+                dirSlidersComponent.items.add(juce::FlexItem(slDir[i]).withFlex(pVisflex));
+                muteSoloModule.items.add(juce::FlexItem(muteSoloComponent[i]).withFlex(pVisflex));
+                gainBandSlidersComponent.items.add(juce::FlexItem(slBandGain[i]).withFlex(pVisflex));
+            }
+        }
+    }
+
+    polarVisualizersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentRightMargin));
+    dirSlidersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentRightMargin));
+    muteSoloModule.items.add(juce::FlexItem().withWidth(polarVisualizersComponentRightMargin));
+    gainBandSlidersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentRightMargin));
+
+    const float middleComponentFlex = 0.05f;
+
+    juce::FlexBox middleComponent;
+    middleComponent.flexDirection = FlexBox::Direction::column;
+    middleComponent.justifyContent = juce::FlexBox::JustifyContent::center;
+    middleComponent.alignContent = juce::FlexBox::AlignContent::center;
+    middleComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    middleComponent.items.add(juce::FlexItem(polarVisualizersComponent).withFlex(middleComponentFlex*4));
+    middleComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    middleComponent.items.add(juce::FlexItem(directivityEqualiser).withFlex(middleComponentFlex*10));
+    middleComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    middleComponent.items.add(juce::FlexItem(dirSlidersComponent).withFlex(middleComponentFlex));
+    middleComponent.items.add(juce::FlexItem(muteSoloModule).withFlex(middleComponentFlex));
+    middleComponent.items.add(juce::FlexItem(gainBandSlidersComponent).withFlex(middleComponentFlex));
+    middleComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+
+    const float trimSliderComponentFlex = 0.5f;
+    const float trimSliderComponentMarginOffset = 0.03f;
+
+    juce::FlexBox trimSliderComponent;
+    trimSliderComponent.flexDirection = FlexBox::Direction::column;
+    trimSliderComponent.justifyContent = juce::FlexBox::JustifyContent::center;
+    trimSliderComponent.alignContent = juce::FlexBox::AlignContent::center;
+    trimSliderComponent.items.add(juce::FlexItem().withFlex(trimSliderComponentFlex/2 + trimSliderComponentMarginOffset));
+    trimSliderComponent.items.add(juce::FlexItem(trimSlider).withFlex(trimSliderComponentFlex));
+    trimSliderComponent.items.add(juce::FlexItem().withFlex(trimSliderComponentFlex/2 - trimSliderComponentMarginOffset));
     
-    // dEq
-    Rectangle<int> filterArea = mainArea.removeFromTop (dEqHeight + 2 * dirSliderHeight + vSpaceMain + buttonHeight);
-    
-    Rectangle<int> trimSliderArea = filterArea.removeFromRight(trimSliderWidth);
-    trimSliderArea.removeFromBottom(dirSliderHeight + buttonHeight + 2);
-    
-    directivityEqualiser.setBounds (filterArea.removeFromTop(dEqHeight));
-    
+    juce::FlexBox mainComponent;
+    mainComponent.flexDirection = FlexBox::Direction::row;
+    mainComponent.justifyContent = juce::FlexBox::JustifyContent::center;
+    mainComponent.alignContent = juce::FlexBox::AlignContent::center;
+    mainComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    mainComponent.items.add(juce::FlexItem(sideComponent).withFlex(marginFlex*15));
+    mainComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    mainComponent.items.add(juce::FlexItem(middleComponent).withFlex(marginFlex*75));
+    mainComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    mainComponent.items.add(juce::FlexItem(trimSliderComponent).withFlex(marginFlex*2));
+    mainComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+
+    fb.items.add(juce::FlexItem().withFlex(marginFlex));
+    fb.items.add(juce::FlexItem(topComponent).withFlex(marginFlex*10));
+    fb.items.add(juce::FlexItem().withFlex(marginFlex/2));
+    fb.items.add(juce::FlexItem(topComponentLine).withFlex(marginFlex/5));
+    fb.items.add(juce::FlexItem().withFlex(marginFlex));
+    fb.items.add(juce::FlexItem(mainComponent).withFlex(marginFlex*75));
+    fb.items.add(juce::FlexItem(footer).withFlex(marginFlex*5));
+
+    fb.performLayout(area);
+
+    /*
     alOverlayError.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
     alOverlayDisturber.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
     alOverlaySignal.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
-    
-    trimSliderArea.setHeight(directivityEqualiser.getHeight());
-    trimSlider.setBounds(trimSliderArea);
-    
-    //#ifdef AA_DO_DEBUG_PATH
-    //    { // !J! for debugging purposes only
-    //        debugPath.startNewSubPath(directivityEqualiser.getX(), directivityEqualiser.getY());
-    //        debugPath.lineTo(directivityEqualiser.getRight(), directivityEqualiser.getBottom());
-    //        debugPath.addRectangle(directivityEqualiser.getX(), directivityEqualiser.getY(), directivityEqualiser.getWidth(), directivityEqualiser.getHeight());
-    //    }
-    //#endif
-    
-    filterArea.removeFromTop(vSpaceMain);
-    filterArea.removeFromLeft(hSpace);
-    
-    Rectangle<int> band0SliderArea = filterArea.removeFromLeft(linearSliderWidth);
-    slDir[0].setBounds(band0SliderArea.removeFromTop(dirSliderHeight));
-    msbSolo[0].setBounds(band0SliderArea.getX(), band0SliderArea.getY(), buttonHeight, buttonHeight);
-    msbMute[0].setBounds(band0SliderArea.getRight() - buttonHeight, band0SliderArea.getY(), buttonHeight, buttonHeight);
-    band0SliderArea.removeFromTop(2);
-    slBandGain[0].setBounds(band0SliderArea);
-    
-    filterArea.removeFromLeft(linearSliderSpacing);
-    Rectangle<int> band1SliderArea = filterArea.removeFromLeft(linearSliderWidth);
-    slDir[1].setBounds(band1SliderArea.removeFromTop(dirSliderHeight));
-    msbSolo[1].setBounds(band1SliderArea.getX(), band1SliderArea.getY(), buttonHeight, buttonHeight);
-    msbMute[1].setBounds(band1SliderArea.getRight() - buttonHeight, band1SliderArea.getY(), buttonHeight, buttonHeight);
-    band1SliderArea.removeFromTop(2);
-    slBandGain[1].setBounds(band1SliderArea);
-    
-    filterArea.removeFromLeft(linearSliderSpacing);
-    Rectangle<int> band2SliderArea = filterArea.removeFromLeft(linearSliderWidth);
-    slDir[2].setBounds(band2SliderArea.removeFromTop(dirSliderHeight));
-    msbSolo[2].setBounds(band2SliderArea.getX(), band2SliderArea.getY(), buttonHeight, buttonHeight);
-    msbMute[2].setBounds(band2SliderArea.getRight() - buttonHeight, band2SliderArea.getY(), buttonHeight, buttonHeight);
-    band2SliderArea.removeFromTop(2);
-    slBandGain[2].setBounds(band2SliderArea);
-    
-    filterArea.removeFromLeft(linearSliderSpacing);
-    Rectangle<int> band3SliderArea = filterArea.removeFromLeft(linearSliderWidth);
-    slDir[3].setBounds(band3SliderArea.removeFromTop(dirSliderHeight));
-    msbSolo[3].setBounds(band3SliderArea.getX(), band3SliderArea.getY(), buttonHeight, buttonHeight);
-    msbMute[3].setBounds(band3SliderArea.getRight() - buttonHeight, band3SliderArea.getY(), buttonHeight, buttonHeight);
-    band3SliderArea.removeFromTop(2);
-    slBandGain[3].setBounds(band3SliderArea);
-    
-    filterArea.removeFromLeft(linearSliderSpacing);
-    Rectangle<int> band4SliderArea = filterArea.removeFromLeft(linearSliderWidth);
-    slDir[4].setBounds(band4SliderArea.removeFromTop(dirSliderHeight));
-    msbSolo[4].setBounds(band4SliderArea.getX(), band4SliderArea.getY(), buttonHeight, buttonHeight);
-    msbMute[4].setBounds(band4SliderArea.getRight() - buttonHeight, band4SliderArea.getY(), buttonHeight, buttonHeight);
-    band4SliderArea.removeFromTop(2);
-    slBandGain[4].setBounds(band4SliderArea);
-    
+    */
 }
 
 void PolarDesignerAudioProcessorEditor::buttonStateChanged(Button* button)

@@ -167,9 +167,8 @@ public:
         transform = AffineTransform::fromTargetPoints((float) centre.x, (float) centre.y, (float)  centre.x, bounds.getY(), bounds.getX(), centre.y);
       
         plotArea = bounds;
-        
     }
-    
+
     void setDirWeight(float weight)
     {
         dirWeight = weight;

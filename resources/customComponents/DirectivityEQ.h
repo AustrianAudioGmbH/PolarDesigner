@@ -441,6 +441,7 @@ public:
 
 
             // align elements
+#if 0 // !J! mergefix
             handle.dirSlider->setBounds(circX + (handle.dirSlider->getWidth() + POLAR_DESIGNER_KNOBS_SIZE),
                                         handle.dirSlider->getY(),
                                         handle.dirSlider->getWidth(), handle.dirSlider->getHeight());
@@ -459,6 +460,8 @@ public:
                                                      handle.polarPatternVisualizer->getHeight());
             
             handle.polarPatternVisualizer->setActive(true);
+#endif
+            handle.polarPatternVisualizer->getParentComponent()->resized();
 
 
 //#ifdef AA_DO_DEBUG_PATH
