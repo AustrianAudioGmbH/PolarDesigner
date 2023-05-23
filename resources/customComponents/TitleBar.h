@@ -358,7 +358,6 @@ public:
 
     void paint(Graphics& g) override
     {
-        Rectangle<int> bounds = getLocalBounds();
         g.setColour(Colours::white);
         titlePath.applyTransform(titlePath.getTransformToScaleToFit(getLocalBounds().toFloat(), true, Justification::left));
         g.strokePath(titlePath, PathStrokeType(0.1f));
@@ -416,7 +415,6 @@ public:
 
     void paint(Graphics& g) override
     {
-        Rectangle<int> bounds = getLocalBounds();
 
         g.setColour((Colours::white).withMultipliedAlpha(0.5));
         g.fillAll();

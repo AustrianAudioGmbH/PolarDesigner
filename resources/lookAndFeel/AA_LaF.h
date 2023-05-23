@@ -771,7 +771,6 @@ public:
                       bool isMouseOverButton,
                       bool isButtonDown) override
     {
-        const float boxSize = w * 0.8f;
 
         Rectangle<float> buttonArea(x, y, w, h);
 
