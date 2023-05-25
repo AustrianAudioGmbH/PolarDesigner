@@ -715,9 +715,9 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
         processor.repaintDEQ = false;
         directivityEqualiser.repaint();
     }
-    if (processor.nActiveBandsChanged.get())
+    if (processor.activeBandsChanged.get())
     {
-        processor.nActiveBandsChanged = false;
+        processor.activeBandsChanged = false;
         nActiveBandsChanged();
     }
     if (processor.zeroDelayModeChanged.get())
