@@ -104,7 +104,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     // directivity eq
     addAndMakeVisible (&directivityEqualiser);
     
-    for (int i = 0; i < nBands; ++i)
+    for (int i = 0; i < maxNumberBands; ++i)
     {
         // SOLO button
         msbSolo[i].setType (MuteSoloButton::Type::solo);
@@ -144,9 +144,9 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         polarPatternVisualizers[i].setColour (eqColours[i]);
 
         // main directivity Equaliser section
-        directivityEqualiser.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slCrossoverPosition[i - 1] : nullptr, (i < nBands - 1) ? &slCrossoverPosition[i] : nullptr, &msbSolo[i], &msbMute[i], &slBandGain[i], &polarPatternVisualizers[i]);
+        directivityEqualiser.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slCrossoverPosition[i - 1] : nullptr, (i < maxNumberBands - 1) ? &slCrossoverPosition[i] : nullptr, &msbSolo[i], &msbMute[i], &slBandGain[i], &polarPatternVisualizers[i]);
         
-        if (i == nBands - 1)
+        if (i == maxNumberBands - 1)
             break; // there is one slCrossoverPosition less than bands
         
         addAndMakeVisible (&slCrossoverPosition[i]);
@@ -209,17 +209,52 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbAbButton[1].setClickingTogglesState(true);
     tbAbButton[1].setAlpha(getABButtonAlphaFromLayerState(!processor.abLayerState));
     tbAbButton[1].setRadioGroupId(2);
-
-    addAndMakeVisible (&cbSetNrBands);
-    cbSetNrBandsAtt = std::unique_ptr<ComboBoxAttachment>(new ComboBoxAttachment (valueTreeState, "nrBands", cbSetNrBands));
-    cbSetNrBands.setEditableText (false);
-    cbSetNrBands.addItemList (juce::StringArray ({"one band","two bands",
-                                                 "three bands","four bands",
-                                                 "five bands"}), 1);
-    cbSetNrBands.setJustificationType (Justification::centred);
-    cbSetNrBands.setSelectedId (nActiveBands);
-    cbSetNrBands.addListener (this);
     
+    
+#if 0
+    {
+        //    cbSetNrBands.setLookAndFeel(&comboBoxLaF);
+        
+        addAndMakeVisible (&cbSetNrBands);
+        cbSetNrBandsAtt = std::unique_ptr<ComboBoxAttachment>(new ComboBoxAttachment (valueTreeState, "nrBands", cbSetNrBands));
+        cbSetNrBands.setEditableText (false);
+        cbSetNrBands.addItemList (juce::StringArray ({"one band","two bands",
+            "three bands","four bands",
+            "five bands"}), 1);
+        cbSetNrBands.setJustificationType (Justification::centred);
+        cbSetNrBands.setSelectedId (nActiveBands);
+        cbSetNrBands.addListener (this);
+    }
+#endif
+    
+    // TODO: Replace cbSetNrBands with this:
+    for (int i = 0; i < maxNumberBands; ++i)
+    {
+        //        tbSetNrBands[i].setTitle(String (i + 1));
+        addAndMakeVisible(tbSetNrBands[i]);
+        //        tbSetNrBandsAtt[i] = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "nrBands", tbSetNrBands[i]));
+        
+        tbSetNrBands[i].setClickingTogglesState (true);
+        tbSetNrBands[i].setRadioGroupId (34567);
+        
+        //        tbSetNrBands[i].setColour (TextButton::textColourOffId,  Colours::black);
+        tbSetNrBands[i].setColour (TextButton::textColourOnId,   Colours::powderblue);
+        //        tbSetNrBands[i].setColour (TextButton::buttonColourId,   Colours::white);
+        tbSetNrBands[i].setColour (TextButton::buttonOnColourId, Colours::blueviolet.brighter());
+        
+        tbSetNrBands[i].setConnectedEdges (((i != 0) ? Button::ConnectedOnLeft : 0)
+                                           | ((i != 3) ? Button::ConnectedOnRight : 0));
+        
+        
+        tbSetNrBands[i].addListener(this);
+        
+        if (i == (nActiveBands - 1)) {
+            tbSetNrBands[i].setToggleState (true, NotificationType::dontSendNotification);
+            
+        }
+    }
+    
+#if 0
     addAndMakeVisible (&cbSyncChannel);
     cbSyncChannelAtt = std::unique_ptr<ComboBoxAttachment>(new ComboBoxAttachment (valueTreeState, "syncChannel", cbSyncChannel));
     cbSyncChannel.setEditableText (false);
@@ -227,6 +262,42 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     cbSyncChannel.setJustificationType (Justification::centred);
     cbSyncChannel.setSelectedId (syncChannelIdx);
     cbSyncChannel.addListener (this);
+#endif
+    
+    // TODO: Replace cbSyncChannel with this:
+    for (int i = 0; i < 5; ++i)
+    {
+        
+        //        if (i == 0) {
+        //            tbSyncChannel[i].setTitle(String ("X"));
+        //        }
+        //        else {
+        //            tbSyncChannel[i].setTitle(String (i));
+        //        }
+        
+        addAndMakeVisible(tbSyncChannel[i]);
+        
+        tbSyncChannel[i].setClickingTogglesState (true);
+        tbSyncChannel[i].setRadioGroupId (76543);
+        
+        tbSyncChannel[i].setColour (TextButton::textColourOnId,   Colours::powderblue);
+        tbSyncChannel[i].setColour (TextButton::buttonOnColourId, Colours::blueviolet.brighter());
+        
+        tbSyncChannel[i].setConnectedEdges (((i != 0) ? Button::ConnectedOnLeft : 0)
+                                            | ((i != 3) ? Button::ConnectedOnRight : 0));
+        
+        
+        tbSyncChannel[i].addListener(this);
+        
+        if (i == syncChannelIdx - 1) {
+            tbSyncChannel[i].setToggleState (true, NotificationType::dontSendNotification);
+            
+        }
+    }
+    
+    
+    
+    
     
     addAndMakeVisible (&slProximity);
     slProximityAtt = std::unique_ptr<ReverseSlider::SliderAttachment>(new ReverseSlider::SliderAttachment (valueTreeState, "proximity", slProximity));
@@ -262,25 +333,30 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     alOverlaySignal.setOnCancelCallback ([this]() { onAlOverlayCancelRecord(); });
     alOverlaySignal.setOnRatioCallback ([this]() { onAlOverlayMaxSigToDist(); });
     
+    trimSlider.sliderIncremented = [this] { incrementTrim(nActiveBands); };
+    trimSlider.sliderDecremented = [this] { decrementTrim(nActiveBands); };
+    
+    nActiveBandsChanged();
+    zeroDelayModeChange();
+    
     addAndMakeVisible(&trimSlider);
+    
 
-    trimSlider.sliderIncremented = [this] { incrementTrim(); };
-    trimSlider.sliderDecremented = [this] { decrementTrim(); };
     startTimer (30);
     
     setEqMode();
 }
 
 // Handle the trimSlider increment/decrement calls
-void PolarDesignerAudioProcessorEditor::incrementTrim() {
-    for (int i = 0; i < nActiveBands; i++)
+void PolarDesignerAudioProcessorEditor::incrementTrim(int nBands) {
+    for (int i = 0; i < nBands; i++)
     {
         slDir[i].setValue(slDir[i].getValue() + trimSlider.step);
     }
 }
 
-void PolarDesignerAudioProcessorEditor::decrementTrim() {
-    for (int i = 0; i < nActiveBands; i++)
+void PolarDesignerAudioProcessorEditor::decrementTrim(int nBands) {
+    for (int i = 0; i < nBands; i++)
     {
         slDir[i].setValue(slDir[i].getValue() - trimSlider.step);
     }
@@ -523,8 +599,57 @@ void PolarDesignerAudioProcessorEditor::resized()
     */
 }
 
+void PolarDesignerAudioProcessorEditor::buttonStateChanged(Button* button)
+{
+    //    std::cout << "button:::" << button;
+    
+}
+
 void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
 {
+    if ((button == &tbSetNrBands[0]) && (button->getToggleState() > 0.5f))
+    {
+        valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((0)));
+    }
+    if ((button == &tbSetNrBands[1]) && (button->getToggleState() > 0.5f))
+    {
+        valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((1)));
+    }
+    if ((button == &tbSetNrBands[2]) && (button->getToggleState() > 0.5f))
+    {
+        valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((2)));
+    }
+    if ((button == &tbSetNrBands[3]) && (button->getToggleState() > 0.5f))
+    {
+        valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((3)));
+    }
+    if ((button == &tbSetNrBands[4]) && (button->getToggleState() > 0.5f))
+    {
+        valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((4)));
+    }
+    
+    if ((button == &tbSyncChannel[0]) && (button->getToggleState() > 0.5f))
+    {
+        valueTreeState.getParameter("syncChannel")->setValueNotifyingHost(valueTreeState.getParameter("syncChannel")->convertTo0to1((1)));
+    }
+    if ((button == &tbSyncChannel[1]) && (button->getToggleState() > 0.5f))
+    {
+        valueTreeState.getParameter("syncChannel")->setValueNotifyingHost(valueTreeState.getParameter("syncChannel")->convertTo0to1((2)));
+    }
+    if ((button == &tbSyncChannel[2]) && (button->getToggleState() > 0.5f))
+    {
+        valueTreeState.getParameter("syncChannel")->setValueNotifyingHost(valueTreeState.getParameter("syncChannel")->convertTo0to1((3)));
+    }
+    if ((button == &tbSyncChannel[3]) && (button->getToggleState() > 0.5f))
+    {
+        valueTreeState.getParameter("syncChannel")->setValueNotifyingHost(valueTreeState.getParameter("syncChannel")->convertTo0to1((4)));
+    }
+    if ((button == &tbSyncChannel[4]) && (button->getToggleState() > 0.5f))
+    {
+        valueTreeState.getParameter("syncChannel")->setValueNotifyingHost(valueTreeState.getParameter("syncChannel")->convertTo0to1((5)));
+    }
+
+    
     if (button == &tbLoadFile)
     {
         loadFile();
@@ -755,6 +880,12 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
             msbMute[i].setEnabled(true);
             polarPatternVisualizers[i].setActive(true);
             polarPatternVisualizers[i].setVisible(true);
+            
+            slDir[i].setVisible(true);
+            slBandGain[i].setVisible(true);
+            msbSolo[i].setVisible(true);
+            msbMute[i].setVisible(true);
+            
         }
         else
         {
@@ -766,9 +897,26 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
             msbMute[i].setToggleState(false, NotificationType::sendNotification);
             polarPatternVisualizers[i].setActive(false);
             polarPatternVisualizers[i].setVisible(false);
+            
+            slDir[i].setVisible(false);
+            slBandGain[i].setVisible(false);
+            msbSolo[i].setVisible(false);
+            msbMute[i].setVisible(false);
+            
+
+        }
+        // sync Channel
+        if (i <= nActiveBands) {
+            tbSyncChannel[i].setEnabled(true);
+        }
+        else {
+            tbSyncChannel[i].setEnabled(false);
+
         }
     }
-
+    
+    tbSyncChannel[0].setToggleState(true,  NotificationType::sendNotification);
+    
     directivityEqualiser.resetTooltipTexts();
     directivityEqualiser.repaint();
         
@@ -875,8 +1023,20 @@ void PolarDesignerAudioProcessorEditor::onAlOverlayMaxSigToDist()
 
 void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
 {
-    cbSetNrBands.setEnabled(set);
-    cbSyncChannel.setEnabled(set);
+    tbSetNrBands[0].setEnabled(set);
+    tbSetNrBands[1].setEnabled(set);
+    tbSetNrBands[2].setEnabled(set);
+    tbSetNrBands[3].setEnabled(set);
+    tbSetNrBands[4].setEnabled(set);
+    tbSyncChannel[0].setEnabled(set);
+    tbSyncChannel[1].setEnabled(set);
+    tbSyncChannel[2].setEnabled(set);
+    tbSyncChannel[3].setEnabled(set);
+    tbSyncChannel[4].setEnabled(set);
+    tbSyncChannel[5].setEnabled(set);
+    
+    //    cbSetNrBands.setEnabled(set);
+    //    cbSyncChannel.setEnabled(set);
     tbLoadFile.setEnabled(set);
     tbSaveFile.setEnabled(set);
     tbEq[0].setEnabled(set);
