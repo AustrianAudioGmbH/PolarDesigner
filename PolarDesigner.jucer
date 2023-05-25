@@ -48,7 +48,8 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f" aaxFolder="../SDKs/aax-sdk-2-4-0/">
+    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f" aaxFolder="../SDKs/aax-sdk-2-4-0/"
+               customXcodeResourceFolders="Assets/&#10;">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" headerPath="/opt/homebrew/opt/fftw/include&#10;../../../SDKs/vstsdk2.4"
                        libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="11.4 SDK"
