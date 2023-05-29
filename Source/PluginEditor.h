@@ -41,14 +41,13 @@
 
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
-typedef AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
 typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
 */
 class PolarDesignerAudioProcessorEditor  : public AudioProcessorEditor, private Button::Listener,
-                                     private ComboBox::Listener, private Slider::Listener, private Timer
+                                           private Slider::Listener, private Timer
 {
 public:
     PolarDesignerAudioProcessorEditor (PolarDesignerAudioProcessor&, AudioProcessorValueTreeState&);
@@ -60,7 +59,6 @@ public:
     
     void buttonStateChanged(Button* button) override;
     void buttonClicked (Button* button) override;
-    void comboBoxChanged (ComboBox* cb) override;
     void sliderValueChanged (Slider* slider) override;
     
     void onAlOverlayErrorOkay();
@@ -82,15 +80,15 @@ private:
     static const int EDITOR_HEIGHT = 630;
     String presetFilename;
     String errorMessage;
-        
+
     const int maxNumberBands = 5;
     int nActiveBands;
     int syncChannelIdx;
     int oldAbLayerState;
-    
+
     bool loadingFile;
     bool recordingDisturber;
-    
+
     Colour eqColours[5];
  
     AALogo logoAA;
@@ -100,7 +98,7 @@ private:
 
     Footer footer;
     LaF globalLaF;
-    
+
     PolarDesignerAudioProcessor& processor;
     AudioProcessorValueTreeState& valueTreeState;
     TooltipWindow tooltipWindow;
@@ -110,26 +108,21 @@ private:
     // Sliders
     ReverseSlider slBandGain[5], slCrossoverPosition[4], slProximity;
     DirSlider slDir[5];
-    
+
     // a slider to use to 'trim' the EQ's
     EndlessSlider trimSlider;
-    
+
     // Solo Buttons
     MuteSoloButton msbSolo[5], msbMute[5];
     // Text Buttons
-    TextButton tbLoadFile, tbSaveFile, tbRecordDisturber, tbRecordSignal, tbZeroDelay, tbAbButton[2];
+    TextButton tbLoadFile, tbSaveFile, tbRecordDisturber, tbRecordSignal, tbZeroDelay, tbAbButton[2], tbSetNrBands[5], tbSyncChannel[5];
     // ToggleButtons
     ToggleButton tbEq[3], tbAllowBackwardsPattern;
-    // Combox Boxes
-    ComboBox cbSetNrBands, cbSyncChannel;
-    TextButton tbSetNrBands[5];
-    TextButton tbSyncChannel[5];
-            
+
     // Pointers for value tree state
     std::unique_ptr<ReverseSlider::SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4], slProximityAtt;
     std::unique_ptr<SliderAttachment> slDirAtt[5];
     std::unique_ptr<ButtonAttachment> msbSoloAtt[5], msbMuteAtt[5], tbAllowBackwardsPatternAtt, tbZeroDelayAtt;
-    std::unique_ptr<ComboBoxAttachment> cbSetNrBandsAtt, cbSyncChannelAtt;
     
     DirectivityEQ directivityEqualiser;
     PolarPatternVisualizer polarPatternVisualizers[5];
