@@ -404,6 +404,8 @@ void PolarDesignerAudioProcessorEditor::resized()
     const float topComponentButtonsFlex = 0.05f;
     const float topComponentSpacingFlex = topComponentButtonsFlex/2;
     const float topComponentButtonsMargin = 5;
+    const float radioButonsFlex = 0.18f;
+    const float radioButonsSpaceFlex = 0.025f;
 
     topComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     topComponent.items.add(juce::FlexItem(logoAA).withFlex(topComponentButtonsFlex));
@@ -426,6 +428,25 @@ void PolarDesignerAudioProcessorEditor::resized()
     topComponentLine.items.add(juce::FlexItem(titleLine).withFlex(1.f - 2 * marginFlex));
     topComponentLine.items.add(juce::FlexItem().withFlex(marginFlex));
 
+    juce::FlexBox bandNumbersComponent;
+    bandNumbersComponent.flexDirection = FlexBox::Direction::row;
+    bandNumbersComponent.justifyContent = juce::FlexBox::JustifyContent::center;
+    bandNumbersComponent.alignContent = juce::FlexBox::AlignContent::center;
+
+    juce::FlexBox syncChannelComponent;
+    syncChannelComponent.flexDirection = FlexBox::Direction::row;
+    syncChannelComponent.justifyContent = juce::FlexBox::JustifyContent::center;
+    syncChannelComponent.alignContent = juce::FlexBox::AlignContent::center;
+
+    for (int i = 0; i < 5; i++)
+    {
+        bandNumbersComponent.items.add(juce::FlexItem(tbSetNrBands[i]).withFlex(radioButonsFlex));
+        if (i < 4) bandNumbersComponent.items.add(juce::FlexItem().withFlex(radioButonsSpaceFlex));
+
+        syncChannelComponent.items.add(juce::FlexItem(tbSyncChannel[i]).withFlex(radioButonsFlex));
+        if (i < 4) syncChannelComponent.items.add(juce::FlexItem().withFlex(radioButonsSpaceFlex));
+    }
+
     const float sideComponentItemFlex = 0.05f;
 
     juce::FlexBox sideComponent;
@@ -434,7 +455,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     sideComponent.alignContent = juce::FlexBox::AlignContent::center;
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     sideComponent.items.add(juce::FlexItem(grpBands).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(cbSetNrBands).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(bandNumbersComponent).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     sideComponent.items.add(juce::FlexItem(grpPreset).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem(tbLoadFile).withFlex(sideComponentItemFlex));
@@ -454,7 +475,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     sideComponent.items.add(juce::FlexItem(tbRecordSignal).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     sideComponent.items.add(juce::FlexItem(grpSync).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(cbSyncChannel).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(syncChannelComponent).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
 
     // Margins are fixed value because DirectivityEQ component has fixed margins
