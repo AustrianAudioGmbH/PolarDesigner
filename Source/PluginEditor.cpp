@@ -837,15 +837,7 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
             msbSolo[i].setVisible(false);
             msbMute[i].setVisible(false);
         }
-        // sync Channel
-        if (i <= nActiveBands) {
-            tbSyncChannel[i].setEnabled(true);
-        }
-        else {
-            tbSyncChannel[i].setEnabled(false);
-        }
     }
-
     tbSyncChannel[0].setToggleState(true,  NotificationType::sendNotification);
     
     directivityEqualiser.resetTooltipTexts();
