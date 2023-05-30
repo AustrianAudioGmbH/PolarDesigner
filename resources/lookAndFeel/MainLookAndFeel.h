@@ -32,11 +32,19 @@ public:
         bool isMouseOverButton, bool isButtonDown) override
     {
         Rectangle<float> buttonArea(0.0f, 0.0f, button.getWidth(), button.getHeight());
-        buttonArea.reduce(3.0f, 3.0f);
-        if (button.getToggleState() == true)
+
+        if (button.getButtonText() == "Zero latency")
         {
             g.setColour(textButtonActiveFrameColor);
             g.drawRect(buttonArea, 1);
+        }
+        else
+        {
+            if (button.getToggleState() == true)
+            {
+                g.setColour(textButtonActiveFrameColor);
+                g.drawRect(buttonArea.reduced(3.0f, 3.0f), 1);
+            }
         }
     }
 };

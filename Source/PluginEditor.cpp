@@ -259,7 +259,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     addAndMakeVisible (&tbZeroDelay);
     tbZeroDelayAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "zeroDelayMode", tbZeroDelay));
     tbZeroDelay.addListener (this);
-    tbZeroDelay.setButtonText ("zero latency");
+    tbZeroDelay.setButtonText ("Zero latency");
     tbZeroDelay.setToggleState(processor.zeroDelayModeActive(), NotificationType::dontSendNotification);
     
     directivityEqualiser.setSoloActive (getSoloActive());
@@ -359,15 +359,15 @@ void PolarDesignerAudioProcessorEditor::resized()
     topComponent.items.add(juce::FlexItem().withFlex(0.063f));
     topComponent.items.add(juce::FlexItem(titleCompare).withFlex(0.063f));
     topComponent.items.add(juce::FlexItem().withFlex(0.016f));
-    topComponent.items.add(juce::FlexItem(tmbABButton).withFlex(0.077f).withMargin(4));
-    /*
-    topComponent.items.add(juce::FlexItem().withFlex(topComponentSpacingFlex/2));
-    topComponent.items.add(juce::FlexItem(tbAbButton[1]).withFlex(topComponentButtonsFlex).withMargin(topComponentButtonsMargin));
-    topComponent.items.add(juce::FlexItem().withFlex(topComponentSpacingFlex));
-    topComponent.items.add(juce::FlexItem(tbZeroDelay).withFlex(topComponentButtonsFlex*3).withMargin(5));
-    topComponent.items.add(juce::FlexItem().withFlex(marginFlex));
-    */
-    topComponent.items.add(juce::FlexItem().withFlex(0.579f));
+    topComponent.items.add(juce::FlexItem(tmbABButton).withFlex(0.077f).withMargin(2));
+    topComponent.items.add(juce::FlexItem().withFlex(0.042f));
+    topComponent.items.add(juce::FlexItem(tbZeroDelay).withFlex(0.1f).withMargin(2));
+    topComponent.items.add(juce::FlexItem().withFlex(0.25f));
+
+    topComponent.items.add(juce::FlexItem(/*Load preset button*/).withFlex(0.1f).withMargin(2));
+    topComponent.items.add(juce::FlexItem().withFlex(0.012f));
+    topComponent.items.add(juce::FlexItem(/*Download button*/).withFlex(0.03f).withMargin(2));
+    topComponent.items.add(juce::FlexItem().withFlex(0.043f));
 
     juce::FlexBox bandNumbersComponent;
     bandNumbersComponent.flexDirection = FlexBox::Direction::row;
