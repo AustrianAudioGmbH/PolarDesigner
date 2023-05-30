@@ -39,6 +39,7 @@
 #include "../resources/customComponents/DirectivityEQ.h"
 #include "../resources/customComponents/AlertOverlay.h"
 #include "../resources/customComponents/EndlessSlider.h"
+#include "../resources/customComponents/MultiTextButton.h"
 
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
@@ -119,6 +120,8 @@ private:
     TextButton tbLoadFile, tbSaveFile, tbRecordDisturber, tbRecordSignal, tbZeroDelay, tbAbButton[2], tbSetNrBands[5], tbSyncChannel[5];
     // ToggleButtons
     ToggleButton tbEq[3], tbAllowBackwardsPattern;
+
+    TextMultiButton tmbABButton;
 
     // Pointers for value tree state
     std::unique_ptr<ReverseSlider::SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4], slProximityAtt;

@@ -54,6 +54,25 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     titleCompare.setFont(mainLaF.normalFont);
     titleCompare.setCompareTextColour(mainLaF.mainTextColor);
 
+    addAndMakeVisible(&tmbABButton);
+    tmbABButton.setButtonsNumber(2);
+
+    tmbABButton[0].addListener(this);
+    tmbABButton[0].setButtonText("A");
+    tmbABButton[0].setClickingTogglesState(true);
+    tmbABButton[0].setColour(TextButton::textColourOnId, Colours::powderblue);
+    tmbABButton[0].setColour(TextButton::buttonOnColourId, Colours::blueviolet.brighter());
+    tmbABButton[0].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
+    tmbABButton[0].setRadioGroupId(3344);
+
+    tmbABButton[1].addListener(this);
+    tmbABButton[1].setButtonText("B");
+    tmbABButton[1].setClickingTogglesState(true);
+    tmbABButton[1].setColour(TextButton::textColourOnId, Colours::powderblue);
+    tmbABButton[1].setColour(TextButton::buttonOnColourId, Colours::blueviolet.brighter());
+    tmbABButton[1].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
+    tmbABButton[1].setRadioGroupId(3344);
+
     addAndMakeVisible (&footer);
     
     addAndMakeVisible (&alOverlayError);
@@ -198,22 +217,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbEq[2].addListener (this);
     tbEq[2].setButtonText ("diffuse field");
     tbEq[2].setRadioGroupId(1);
-    
-    addAndMakeVisible (&tbAbButton[0]);
-    tbAbButton[0].addListener (this);
-    tbAbButton[0].setButtonText("A");
-    tbAbButton[0].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
-    tbAbButton[0].setClickingTogglesState(true);
-    tbAbButton[0].setAlpha(getABButtonAlphaFromLayerState(processor.abLayerState));
-    tbAbButton[0].setRadioGroupId(2);
-    
-    addAndMakeVisible (&tbAbButton[1]);
-    tbAbButton[1].addListener(this);
-    tbAbButton[1].setButtonText("B");
-    tbAbButton[1].setToggleState(!processor.abLayerState, NotificationType::dontSendNotification);
-    tbAbButton[1].setClickingTogglesState(true);
-    tbAbButton[1].setAlpha(getABButtonAlphaFromLayerState(!processor.abLayerState));
-    tbAbButton[1].setRadioGroupId(2);
 
     for (int i = 0; i < maxNumberBands; ++i)
     {
@@ -360,7 +363,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     topComponent.items.add(juce::FlexItem().withFlex(0.063f));
     topComponent.items.add(juce::FlexItem(titleCompare).withFlex(0.063f));
     topComponent.items.add(juce::FlexItem().withFlex(0.016f));
-    topComponent.items.add(juce::FlexItem(tbAbButton[0]).withFlex(topComponentButtonsFlex));
+    topComponent.items.add(juce::FlexItem(tmbABButton).withFlex(0.077f));
     /*
     topComponent.items.add(juce::FlexItem().withFlex(topComponentSpacingFlex/2));
     topComponent.items.add(juce::FlexItem(tbAbButton[1]).withFlex(topComponentButtonsFlex).withMargin(topComponentButtonsMargin));
