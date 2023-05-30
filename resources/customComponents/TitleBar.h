@@ -146,17 +146,23 @@ public:
     ~AALogo() {};
     const int getComponentSize() override { return 40; }
     void setMaxSize (int maxSize) override {};
+
+    void setLogoColour(Colour logoColour) {
+        logoColour_ = logoColour;
+        repaint();
+    }
+
     void paint (Graphics& g) override
     {
         aaLogoPath.applyTransform (aaLogoPath.getTransformToScaleToFit (getLocalBounds().toFloat(), true, Justification::centred));
-        // Colour AARed = Colour(155,35,35);
-        g.setColour (Colours::white);
+        g.setColour (logoColour_);
         g.strokePath (aaLogoPath, PathStrokeType (0.1f));
         g.fillPath (aaLogoPath);
     };
     
 private:
     Path aaLogoPath;
+    Colour logoColour_ = Colour(Colours::white);
 };
 
 
@@ -343,31 +349,6 @@ private:
     Path DirectivityPath;
 };
 
-class  TitleBarAAText : public Component
-{
-public:
-    TitleBarAAText() {
-        titlePath.loadPathFromData(aaFontData, sizeof(aaFontData));
-    };
-    ~TitleBarAAText() {};
-
-    void resized() override
-    {
-        repaint();
-    }
-
-    void paint(Graphics& g) override
-    {
-        g.setColour(Colours::white);
-        titlePath.applyTransform(titlePath.getTransformToScaleToFit(getLocalBounds().toFloat(), true, Justification::left));
-        g.strokePath(titlePath, PathStrokeType(0.1f));
-        g.fillPath(titlePath);
-    };
-
-private:
-    Path titlePath;
-};
-
 class  TitleBarPDText : public Component
 {
 public:
@@ -382,6 +363,11 @@ public:
         regularFont = newRegularFont;
     }
 
+    void setPDTextColour(Colour textColour) {
+        textColour_ = textColour;
+        repaint();
+    }
+
     void resized() override
     {
         repaint();
@@ -390,23 +376,37 @@ public:
     void paint(Graphics& g) override
     {
         Rectangle<int> bounds = getLocalBounds();
-        regularFont.setHeight(bounds.getHeight()/1.5f);
+        regularFont.setHeight(bounds.getHeight()*0.75f);
 
-        g.setColour(Colours::white);
+        g.setColour(textColour_);
         g.setFont(regularFont);
         g.drawFittedText(regularText, bounds.toNearestInt(), Justification::left, 1);
     };
 
 private:
-    Font regularFont = Font(25.f);
+    Font regularFont = Font(22.f);
     juce::String regularText = "Regular";
+    Colour textColour_ = Colour(Colours::white);
 };
 
-class  TitleLine : public Component
+class  TitleBarCompareText : public Component
 {
 public:
-    TitleLine() {};
-    ~TitleLine() {};
+    TitleBarCompareText() {};
+    ~TitleBarCompareText() {};
+
+    void setTitle(String newRegularText) {
+        regularText = newRegularText;
+    }
+
+    void setFont(Typeface::Ptr newRegularFont) {
+        regularFont = newRegularFont;
+    }
+
+    void setCompareTextColour(Colour textColour) {
+        textColour_ = textColour;
+        repaint();
+    }
 
     void resized() override
     {
@@ -415,12 +415,18 @@ public:
 
     void paint(Graphics& g) override
     {
+        Rectangle<int> bounds = getLocalBounds();
+        regularFont.setHeight(bounds.getHeight() * 0.55f);
 
-        g.setColour((Colours::white).withMultipliedAlpha(0.5));
-        g.fillAll();
+        g.setColour(textColour_);
+        g.setFont(regularFont);
+        g.drawFittedText(regularText, bounds.toNearestInt(), Justification::left, 1);
     };
 
 private:
+    Font regularFont = Font(16.f);
+    juce::String regularText = "Regular";
+    Colour textColour_ = Colour(Colours::white);
 };
 
 class IEMLogo : public Component

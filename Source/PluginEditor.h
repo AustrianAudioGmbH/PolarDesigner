@@ -29,6 +29,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 #include "../resources/lookAndFeel/AA_LaF.h"
+#include "../resources/lookAndFeel/MainLookAndFeel.h"
 #include "../resources/customComponents/TitleBar.h"
 #include "../resources/customComponents/SimpleLabel.h"
 #include "../resources/customComponents/MuteSoloButton.h"
@@ -76,8 +77,8 @@ public:
     int getControlParameterIndex (Component& control) override;
         
 private:
-    static const int EDITOR_WIDTH = 990;
-    static const int EDITOR_HEIGHT = 630;
+    static const int EDITOR_WIDTH = 1194;
+    static const int EDITOR_HEIGHT = 834;
     String presetFilename;
     String errorMessage;
 
@@ -92,12 +93,12 @@ private:
     Colour eqColours[5];
  
     AALogo logoAA;
-    TitleBarAAText titleAA;
     TitleBarPDText titlePD;
-    TitleLine titleLine;
+    TitleBarCompareText titleCompare;
 
     Footer footer;
     LaF globalLaF;
+    MainLookAndFeel mainLaF;
 
     PolarDesignerAudioProcessor& processor;
     AudioProcessorValueTreeState& valueTreeState;

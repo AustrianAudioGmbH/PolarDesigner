@@ -42,12 +42,17 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     setSize(EDITOR_WIDTH, EDITOR_HEIGHT);
     setLookAndFeel(&globalLaF);
 
+    logoAA.setLogoColour(mainLaF.mainTextColor);
     addAndMakeVisible(&logoAA);
-    addAndMakeVisible (&titleAA);
+
     addAndMakeVisible(&titlePD);
     titlePD.setTitle(String("PolarDesigner"));
-    titlePD.setFont(globalLaF.aaRegular);
-    addAndMakeVisible(&titleLine);
+    titlePD.setFont(mainLaF.normalFont);
+    titlePD.setPDTextColour(mainLaF.mainTextColor);
+    addAndMakeVisible(&titleCompare);
+    titleCompare.setTitle(String("Compare"));
+    titleCompare.setFont(mainLaF.normalFont);
+    titleCompare.setCompareTextColour(mainLaF.mainTextColor);
 
     addAndMakeVisible (&footer);
     
@@ -285,7 +290,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     zeroDelayModeChange();
     
     addAndMakeVisible(&trimSlider);
-    
 
     startTimer (30);
     
@@ -311,23 +315,20 @@ PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
 {
     if (alOverlayDisturber.isVisible())
         onAlOverlayCancelRecord();
-    
+
     if (alOverlaySignal.isVisible())
         onAlOverlayCancelRecord();
-    
-    setLookAndFeel (nullptr);
 
+    setLookAndFeel (nullptr);
 }
 
 //==============================================================================
 void PolarDesignerAudioProcessorEditor::paint (Graphics& g)
 {
     g.fillAll (mainLaF.mainBackground);
-        
 #ifdef AA_DO_DEBUG_PATH
     g.strokePath (debugPath, PathStrokeType (15.0f));
 #endif
-    
 }
 
 void PolarDesignerAudioProcessorEditor::resized()
@@ -344,34 +345,30 @@ void PolarDesignerAudioProcessorEditor::resized()
     topComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     topComponent.alignContent = juce::FlexBox::AlignContent::center;
 
-    const float marginFlex = 0.01f;
+    const float marginFlex = 0.022f;
     const float topComponentTitleFlex = 0.4f;
-    const float topComponentButtonsFlex = 0.05f;
+    const float topComponentButtonsFlex = 0.035f;
     const float topComponentSpacingFlex = topComponentButtonsFlex/2;
     const float topComponentButtonsMargin = 5;
     const float radioButonsFlex = 0.18f;
     const float radioButonsSpaceFlex = 0.025f;
 
-    topComponent.items.add(juce::FlexItem().withFlex(marginFlex));
-    topComponent.items.add(juce::FlexItem(logoAA).withFlex(topComponentButtonsFlex));
-    topComponent.items.add(juce::FlexItem().withFlex(topComponentSpacingFlex));
-    topComponent.items.add(juce::FlexItem(titleAA).withFlex(topComponentTitleFlex));
-    topComponent.items.add(juce::FlexItem().withFlex(topComponentSpacingFlex));
-    topComponent.items.add(juce::FlexItem(titlePD).withFlex(topComponentTitleFlex));
-    topComponent.items.add(juce::FlexItem(tbAbButton[0]).withFlex(topComponentButtonsFlex).withMargin(topComponentButtonsMargin));
+    topComponent.items.add(juce::FlexItem().withFlex(0.022f));
+    topComponent.items.add(juce::FlexItem(logoAA).withFlex(0.033f));
+    topComponent.items.add(juce::FlexItem().withFlex(0.007f));
+    topComponent.items.add(juce::FlexItem(titlePD).withFlex(0.14f));
+    topComponent.items.add(juce::FlexItem().withFlex(0.063f));
+    topComponent.items.add(juce::FlexItem(titleCompare).withFlex(0.063f));
+    topComponent.items.add(juce::FlexItem().withFlex(0.016f));
+    topComponent.items.add(juce::FlexItem(tbAbButton[0]).withFlex(topComponentButtonsFlex));
+    /*
     topComponent.items.add(juce::FlexItem().withFlex(topComponentSpacingFlex/2));
     topComponent.items.add(juce::FlexItem(tbAbButton[1]).withFlex(topComponentButtonsFlex).withMargin(topComponentButtonsMargin));
     topComponent.items.add(juce::FlexItem().withFlex(topComponentSpacingFlex));
     topComponent.items.add(juce::FlexItem(tbZeroDelay).withFlex(topComponentButtonsFlex*3).withMargin(5));
     topComponent.items.add(juce::FlexItem().withFlex(marginFlex));
-
-    juce::FlexBox topComponentLine;
-    topComponentLine.flexDirection = FlexBox::Direction::row;
-    topComponentLine.justifyContent = juce::FlexBox::JustifyContent::center;
-    topComponentLine.alignContent = juce::FlexBox::AlignContent::center;
-    topComponentLine.items.add(juce::FlexItem().withFlex(marginFlex));
-    topComponentLine.items.add(juce::FlexItem(titleLine).withFlex(1.f - 2 * marginFlex));
-    topComponentLine.items.add(juce::FlexItem().withFlex(marginFlex));
+    */
+    topComponent.items.add(juce::FlexItem().withFlex(0.798f));
 
     juce::FlexBox bandNumbersComponent;
     bandNumbersComponent.flexDirection = FlexBox::Direction::row;
@@ -548,13 +545,11 @@ void PolarDesignerAudioProcessorEditor::resized()
     mainComponent.items.add(juce::FlexItem(trimSliderComponent).withFlex(marginFlex*2));
     mainComponent.items.add(juce::FlexItem().withFlex(marginFlex));
 
-    fb.items.add(juce::FlexItem().withFlex(marginFlex));
-    fb.items.add(juce::FlexItem(topComponent).withFlex(marginFlex*10));
-    fb.items.add(juce::FlexItem().withFlex(marginFlex/2));
-    fb.items.add(juce::FlexItem(topComponentLine).withFlex(marginFlex/5));
-    fb.items.add(juce::FlexItem().withFlex(marginFlex));
-    fb.items.add(juce::FlexItem(mainComponent).withFlex(marginFlex*75));
-    fb.items.add(juce::FlexItem(footer).withFlex(marginFlex*5));
+    fb.items.add(juce::FlexItem().withFlex(0.031f));
+    fb.items.add(juce::FlexItem(topComponent).withFlex(0.048f));
+    fb.items.add(juce::FlexItem().withFlex(0.92f));
+    //fb.items.add(juce::FlexItem(mainComponent).withFlex(marginFlex*75));
+    //fb.items.add(juce::FlexItem(footer).withFlex(marginFlex*5));
 
     fb.performLayout(area);
 
