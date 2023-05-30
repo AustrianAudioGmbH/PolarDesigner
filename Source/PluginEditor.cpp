@@ -322,7 +322,7 @@ PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
 //==============================================================================
 void PolarDesignerAudioProcessorEditor::paint (Graphics& g)
 {
-    g.fillAll (globalLaF.ClBackground);
+    g.fillAll (mainLaF.mainBackground);
         
 #ifdef AA_DO_DEBUG_PATH
     g.strokePath (debugPath, PathStrokeType (15.0f));
