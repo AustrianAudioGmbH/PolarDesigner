@@ -40,7 +40,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
     setResizable(true, true);
     setSize(EDITOR_WIDTH, EDITOR_HEIGHT);
-    setLookAndFeel(&globalLaF);
+    setLookAndFeel(&mainLaF);
 
     logoAA.setLogoColour(mainLaF.mainTextColor);
     addAndMakeVisible(&logoAA);
@@ -60,16 +60,12 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tmbABButton[0].addListener(this);
     tmbABButton[0].setButtonText("A");
     tmbABButton[0].setClickingTogglesState(true);
-    tmbABButton[0].setColour(TextButton::textColourOnId, Colours::powderblue);
-    tmbABButton[0].setColour(TextButton::buttonOnColourId, Colours::blueviolet.brighter());
     tmbABButton[0].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
     tmbABButton[0].setRadioGroupId(3344);
 
     tmbABButton[1].addListener(this);
     tmbABButton[1].setButtonText("B");
     tmbABButton[1].setClickingTogglesState(true);
-    tmbABButton[1].setColour(TextButton::textColourOnId, Colours::powderblue);
-    tmbABButton[1].setColour(TextButton::buttonOnColourId, Colours::blueviolet.brighter());
     tmbABButton[1].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
     tmbABButton[1].setRadioGroupId(3344);
 
@@ -363,7 +359,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     topComponent.items.add(juce::FlexItem().withFlex(0.063f));
     topComponent.items.add(juce::FlexItem(titleCompare).withFlex(0.063f));
     topComponent.items.add(juce::FlexItem().withFlex(0.016f));
-    topComponent.items.add(juce::FlexItem(tmbABButton).withFlex(0.077f));
+    topComponent.items.add(juce::FlexItem(tmbABButton).withFlex(0.077f).withMargin(4));
     /*
     topComponent.items.add(juce::FlexItem().withFlex(topComponentSpacingFlex/2));
     topComponent.items.add(juce::FlexItem(tbAbButton[1]).withFlex(topComponentButtonsFlex).withMargin(topComponentButtonsMargin));
@@ -371,7 +367,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     topComponent.items.add(juce::FlexItem(tbZeroDelay).withFlex(topComponentButtonsFlex*3).withMargin(5));
     topComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     */
-    topComponent.items.add(juce::FlexItem().withFlex(0.798f));
+    topComponent.items.add(juce::FlexItem().withFlex(0.579f));
 
     juce::FlexBox bandNumbersComponent;
     bandNumbersComponent.flexDirection = FlexBox::Direction::row;

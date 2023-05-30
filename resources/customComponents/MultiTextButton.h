@@ -21,10 +21,12 @@ class TextMultiButton  : public juce::Component
 public:
     TextMultiButton()
     {
+        setLookAndFeel(&mainLaF);
     }
 
     ~TextMultiButton() override
     {
+        setLookAndFeel(nullptr);
         textButtonArray.clear();
     }
 
@@ -73,12 +75,10 @@ public:
 
         float buttonFlex = 1.f / textButtonArray.size();
 
-        fb.items.add(juce::FlexItem().withWidth(4));
         for (TextButton *tb : textButtonArray)
         {
-            fb.items.add(juce::FlexItem(*tb).withFlex(buttonFlex).withHeight(getHeight()-8).withAlignSelf(juce::FlexItem::AlignSelf::center));
+            fb.items.add(juce::FlexItem(*tb).withFlex(buttonFlex));
         }
-        fb.items.add(juce::FlexItem().withWidth(4));
         fb.performLayout(area);
     }
 
