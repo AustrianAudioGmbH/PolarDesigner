@@ -420,7 +420,7 @@ public:
 
         g.setColour(textColour_);
         g.setFont(regularFont);
-        g.drawFittedText(regularText, bounds.toNearestInt(), Justification::left, 1);
+        g.drawFittedText(regularText, bounds.toNearestInt(), Justification::right, 1);
     };
 
 private:
