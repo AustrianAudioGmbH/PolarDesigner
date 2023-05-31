@@ -59,7 +59,7 @@ public:
 
     void paint (juce::Graphics& g) override
     {
-        g.fillAll (mainLaF.textButtonBackgroundColor);
+        g.fillAll (mainLaF.multiTextButtonBackgroundColor);
         g.setColour(mainLaF.textButtonFrameColor);
         g.drawRect (getLocalBounds(), 1);
     }

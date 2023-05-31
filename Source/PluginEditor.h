@@ -122,6 +122,7 @@ private:
     ToggleButton tbEq[3], tbAllowBackwardsPattern;
 
     TextMultiButton tmbABButton;
+    DrawableButton drbSaveFile { String("Save File"), DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize};
 
     // Pointers for value tree state
     std::unique_ptr<ReverseSlider::SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4], slProximityAtt;

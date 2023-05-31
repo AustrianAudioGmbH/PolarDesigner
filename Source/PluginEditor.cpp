@@ -69,6 +69,10 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tmbABButton[1].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
     tmbABButton[1].setRadioGroupId(3344);
 
+    addAndMakeVisible(&drbSaveFile);
+    auto normalSaveButton = juce::Drawable::createFromImageData(BinaryData::downloadArrow_svg, BinaryData::downloadArrow_svgSize);
+    drbSaveFile.setImages(normalSaveButton.get());
+
     addAndMakeVisible (&footer);
     
     addAndMakeVisible (&alOverlayError);
@@ -366,7 +370,7 @@ void PolarDesignerAudioProcessorEditor::resized()
 
     topComponent.items.add(juce::FlexItem(/*Load preset button*/).withFlex(0.1f).withMargin(2));
     topComponent.items.add(juce::FlexItem().withFlex(0.012f));
-    topComponent.items.add(juce::FlexItem(/*Download button*/).withFlex(0.03f).withMargin(2));
+    topComponent.items.add(juce::FlexItem(drbSaveFile).withFlex(0.03f).withMargin(2));
     topComponent.items.add(juce::FlexItem().withFlex(0.043f));
 
     juce::FlexBox bandNumbersComponent;
