@@ -5,15 +5,21 @@
               pluginAUMainType="'aufx'" version="2.1.0" companyName="Austrian Audio"
               companyCopyright="Austrian Audio" companyWebsite="www.austrian.audio"
               bundleIdentifier="audio.austrian.plugins.polardesigner" reportAppUsage="0"
-              pluginFormats="buildAAX,buildAU,buildAUv3,buildStandalone,buildVST3,enableIAA"
-              pluginAAXCategory="8192" pluginVST3Category="Fx" pluginRTASCategory="8192"
-              pluginVSTCategory="kPlugCategEffect" pluginCharacteristicsValue="pluginAAXDisableMultiMono"
-              companyEmail="sayhello@austrianaudio.com" jucerFormatVersion="1"
-              displaySplashScreen="1" defines="JUCE_MODAL_LOOPS_PERMITTED=1"
-              headerPath="/opt/homebrew/opt/fftw/include/" pluginAUIsSandboxSafe="1">
+              pluginFormats="buildStandalone,buildVST3" pluginAAXCategory="8192"
+              pluginVST3Category="Fx" pluginRTASCategory="8192" pluginVSTCategory="kPlugCategEffect"
+              pluginCharacteristicsValue="pluginAAXDisableMultiMono" companyEmail="sayhello@austrianaudio.com"
+              jucerFormatVersion="1" displaySplashScreen="1" defines="JUCE_MODAL_LOOPS_PERMITTED=1"
+              headerPath="/opt/homebrew/opt/fftw/include/" pluginAUIsSandboxSafe="1"
+              cppLanguageStandard="17">
   <MAINGROUP id="nmXiNr" name="PolarDesigner">
+    <GROUP id="{C8EE4C48-1BA5-E054-5005-2C66E75BBE64}" name="Assets">
+      <FILE id="ObfHNt" name="loadArrow.svg" compile="0" resource="1" file="Assets/loadArrow.svg"/>
+      <FILE id="uCzmRQ" name="scrollImage.png" compile="0" resource="1" file="Assets/scrollImage.png"/>
+    </GROUP>
     <GROUP id="{D54BFC58-8ED6-1DEF-A2B9-DAAF16495BAC}" name="resources">
       <GROUP id="{75BF05EC-024B-1F61-DA13-169C5FDE5119}" name="customComponents">
+        <FILE id="x7u7c6" name="MultiTextButton.h" compile="0" resource="0"
+              file="resources/customComponents/MultiTextButton.h"/>
         <FILE id="x5WJg9" name="EndlessSlider.h" compile="0" resource="0" file="resources/customComponents/EndlessSlider.h"/>
         <FILE id="wQcMfW" name="AlertOverlay.h" compile="0" resource="0" file="resources/customComponents/AlertOverlay.h"/>
         <FILE id="DfVGB4" name="DirectivityEQ.h" compile="0" resource="0" file="resources/customComponents/DirectivityEQ.h"/>
@@ -32,6 +38,8 @@
         <FILE id="bTt83l" name="AA_LaF.h" compile="0" resource="0" file="resources/lookAndFeel/AA_LaF.h"/>
         <FILE id="YpEjI4" name="BinaryFonts.cpp" compile="1" resource="0" file="resources/lookAndFeel/BinaryFonts.cpp"/>
         <FILE id="JtOg8r" name="BinaryFonts.h" compile="0" resource="0" file="resources/lookAndFeel/BinaryFonts.h"/>
+        <FILE id="Rq0Vta" name="MainLookAndFeel.h" compile="0" resource="0"
+              file="resources/lookAndFeel/MainLookAndFeel.h" xcodeResource="0"/>
       </GROUP>
       <FILE id="UWXtmB" name="PolarDesigner.xml" compile="0" resource="0"
             file="resources/PolarDesigner.xml" xcodeResource="1"/>
@@ -48,8 +56,7 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f" aaxFolder="../SDKs/aax-sdk-2-4-0/"
-               customXcodeResourceFolders="Assets/&#10;">
+    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f" aaxFolder="..\..\SDKs\AAX">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" headerPath="/opt/homebrew/opt/fftw/include&#10;../../../SDKs/vstsdk2.4"
                        libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="11.4 SDK"
@@ -76,16 +83,14 @@
         <MODULEPATH id="juce_dsp" path="../JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2017 targetFolder="Builds/VisualStudio2017" externalLibraries="libfftwf-3.3.lib">
+    <VS2017 targetFolder="Builds/VisualStudio2017" externalLibraries="libfftwf-3.3.lib"
+            aaxFolder="..\..\SDKs\AAX">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" headerPath="..\..\resources\fftw_win"
                        libraryPath="..\..\resources\fftw_win" useRuntimeLibDLL="0"/>
         <CONFIGURATION isDebug="0" name="Release" headerPath="..\..\resources\fftw_win"
                        libraryPath="..\..\resources\fftw_win" enablePluginBinaryCopyStep="0"
                        useRuntimeLibDLL="0"/>
-        <CONFIGURATION isDebug="0" name="Release x32" headerPath="..\..\resources\fftw_win"
-                       libraryPath="..\..\resources\fftw_win\x32" enablePluginBinaryCopyStep="0"
-                       winArchitecture="Win32" useRuntimeLibDLL="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../JUCE/modules"/>
@@ -132,6 +137,32 @@
         <MODULEPATH id="juce_opengl" path="../JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_IPHONE>
+    <VS2019 targetFolder="Builds/VisualStudio2019" aaxFolder="..\..\SDKs\AAX"
+            externalLibraries="libfftwf-3.3.lib">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="..\..\resources\fftw_win"
+                       libraryPath="..\..\resources\fftw_win"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="..\..\resources\fftw_win"
+                       libraryPath="..\..\resources\fftw_win" enablePluginBinaryCopyStep="0"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_opengl"/>
+        <MODULEPATH id="juce_gui_extra"/>
+        <MODULEPATH id="juce_gui_basics"/>
+        <MODULEPATH id="juce_graphics"/>
+        <MODULEPATH id="juce_events"/>
+        <MODULEPATH id="juce_dsp"/>
+        <MODULEPATH id="juce_data_structures"/>
+        <MODULEPATH id="juce_cryptography"/>
+        <MODULEPATH id="juce_core"/>
+        <MODULEPATH id="juce_audio_utils"/>
+        <MODULEPATH id="juce_audio_processors"/>
+        <MODULEPATH id="juce_audio_plugin_client"/>
+        <MODULEPATH id="juce_audio_formats"/>
+        <MODULEPATH id="juce_audio_devices"/>
+        <MODULEPATH id="juce_audio_basics"/>
+      </MODULEPATHS>
+    </VS2019>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
@@ -155,5 +186,5 @@
     <OSX/>
     <WINDOWS/>
   </LIVE_SETTINGS>
-  <JUCEOPTIONS JUCE_DSP_USE_SHARED="1"/>
+  <JUCEOPTIONS JUCE_DSP_USE_SHARED="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
 </JUCERPROJECT>
