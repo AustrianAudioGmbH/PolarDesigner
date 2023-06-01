@@ -36,6 +36,8 @@ public:
     {
         Rectangle<float> buttonArea(0.0f, 0.0f, button.getWidth(), button.getHeight());
 
+        auto loadArrowImg = juce::Drawable::createFromImageData(BinaryData::loadArrow_svg, BinaryData::loadArrow_svgSize);
+
         if (button.getButtonText() == "Zero latency")
         {
             g.setColour(textButtonActiveFrameColor);
@@ -52,7 +54,27 @@ public:
                 g.fillRect(buttonArea.reduced(1.0f, 1.0f));
             }
         }
-        else if (button.getButtonText() == "Save File")
+        else if (button.getButtonText() == "Load")
+        {
+            g.setColour(textButtonFrameColor);
+            g.drawRect(buttonArea, 1);
+
+            auto arrowArea = buttonArea.reduced(button.getWidth()*0.45f, button.getHeight()*0.33f).translated(button.getWidth()*0.36f, 0);
+
+            loadArrowImg->drawWithin(g, arrowArea, juce::RectanglePlacement::centred, 1.f);
+
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonHoverBackgroundColor);
+                g.fillRect(buttonArea.reduced(1.0f, 1.0f));
+            }
+            if (isButtonDown)
+            {
+                g.setColour(textButtonPressedBackgroundColor);
+                g.fillRect(buttonArea.reduced(1.0f, 1.0f));
+            }
+        }
+        else if (button.getButtonText() == "Save")
         {
             g.setColour(textButtonFrameColor);
             g.drawRect(buttonArea, 1);
@@ -87,6 +109,29 @@ public:
                 g.setColour(textButtonActiveFrameColor);
                 g.drawRect(buttonArea.reduced(3.0f, 3.0f), 1);
             }
+        }
+    }
+
+    void drawButtonText(Graphics& g, TextButton& button, bool /*isMouseOverButton*/, bool /*isButtonDown*/) override
+    {
+        Rectangle<int> buttonArea(0, 0, button.getWidth(), button.getHeight());
+
+        Font font(getTextButtonFont(button, button.getHeight()));
+        g.setFont(font);
+        g.setColour(mainTextColor);
+
+        int x = button.getWidth() * 0.18f;
+        int y = button.getHeight() * 0.34f;
+        int w = button.getWidth() * 0.47f;
+        int h = button.getHeight() * 0.34f;
+
+        if (button.getButtonText() == "Load")
+        {
+           g.drawFittedText(button.getButtonText(), x, y, w, h, Justification::centred, 1);
+        }
+        else
+        {
+           g.drawFittedText(button.getButtonText(), buttonArea, Justification::centred, 1);
         }
     }
 };

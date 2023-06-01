@@ -389,11 +389,11 @@ private:
     Colour textColour_ = Colour(Colours::white);
 };
 
-class  TitleBarCompareText : public Component
+class  TitleBarTextLabel : public Component
 {
 public:
-    TitleBarCompareText() {};
-    ~TitleBarCompareText() {};
+    TitleBarTextLabel() {};
+    ~TitleBarTextLabel() {};
 
     void setTitle(String newRegularText) {
         regularText = newRegularText;
@@ -403,7 +403,7 @@ public:
         regularFont = newRegularFont;
     }
 
-    void setCompareTextColour(Colour textColour) {
+    void setLabelTextColour(Colour textColour) {
         textColour_ = textColour;
         repaint();
     }

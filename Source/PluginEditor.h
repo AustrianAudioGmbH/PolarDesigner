@@ -95,7 +95,7 @@ private:
  
     AALogo logoAA;
     TitleBarPDText titlePD;
-    TitleBarCompareText titleCompare;
+    TitleBarTextLabel titleCompare, titlePreset;
 
     Footer footer;
     LaF globalLaF;
@@ -117,12 +117,11 @@ private:
     // Solo Buttons
     MuteSoloButton msbSolo[5], msbMute[5];
     // Text Buttons
-    TextButton tbLoadFile, tbSaveFile, tbRecordDisturber, tbRecordSignal, tbZeroDelay, tbAbButton[2], tbSetNrBands[5], tbSyncChannel[5];
+    TextButton tbLoad, tbSave, tbRecordDisturber, tbRecordSignal, tbZeroDelay, tbSetNrBands[5], tbSyncChannel[5];
     // ToggleButtons
     ToggleButton tbEq[3], tbAllowBackwardsPattern;
 
     TextMultiButton tmbABButton;
-    DrawableButton drbSaveFile { String("Save File"), DrawableButton::ButtonStyle::ImageOnButtonBackgroundOriginalSize};
 
     // Pointers for value tree state
     std::unique_ptr<ReverseSlider::SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4], slProximityAtt;

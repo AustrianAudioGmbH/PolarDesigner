@@ -52,7 +52,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     addAndMakeVisible(&titleCompare);
     titleCompare.setTitle(String("Compare"));
     titleCompare.setFont(mainLaF.normalFont);
-    titleCompare.setCompareTextColour(mainLaF.mainTextColor);
+    titleCompare.setLabelTextColour(mainLaF.mainTextColor);
 
     addAndMakeVisible(&tmbABButton);
     tmbABButton.setButtonsNumber(2);
@@ -69,9 +69,26 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tmbABButton[1].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
     tmbABButton[1].setRadioGroupId(3344);
 
-    addAndMakeVisible(&drbSaveFile);
-    auto normalSaveButton = juce::Drawable::createFromImageData(BinaryData::downloadArrow_svg, BinaryData::downloadArrow_svgSize);
-    drbSaveFile.setImages(normalSaveButton.get());
+    addAndMakeVisible(&tbZeroDelay);
+    tbZeroDelayAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment(valueTreeState, "zeroDelayMode", tbZeroDelay));
+    tbZeroDelay.addListener(this);
+    tbZeroDelay.setButtonText("Zero latency");
+    tbZeroDelay.setToggleState(processor.zeroDelayModeActive(), NotificationType::dontSendNotification);
+
+    addAndMakeVisible(&titlePreset);
+    titlePreset.setTitle(String("Preset"));
+    titlePreset.setFont(mainLaF.normalFont);
+    titlePreset.setLabelTextColour(mainLaF.mainTextColor);
+
+    addAndMakeVisible(&tbLoad);
+    tbLoad.addListener(this);
+    tbLoad.setButtonText("Load");
+    tbLoad.setToggleState(false, NotificationType::dontSendNotification);
+
+    addAndMakeVisible(&tbSave);
+    tbSave.addListener(this);
+    tbSave.setButtonText("Save");
+    tbSave.setToggleState(false, NotificationType::dontSendNotification);
 
     addAndMakeVisible (&footer);
     
@@ -181,15 +198,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     }
     
     directivityEqualiser.initValueBox();
-    
-    addAndMakeVisible (&tbLoadFile);
-    tbLoadFile.setButtonText ("load preset");
-    tbLoadFile.addListener (this);
-    
-    addAndMakeVisible (&tbSaveFile);
-    tbSaveFile.setButtonText ("save preset");
-    tbSaveFile.addListener (this);
-    
     addAndMakeVisible (&tbRecordDisturber);
     tbRecordDisturber.setButtonText ("terminate spill");
     tbRecordDisturber.addListener (this);
@@ -259,13 +267,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     slProximity.setColour (Slider::rotarySliderOutlineColourId, globalLaF.AARed);
     slProximity.setTextBoxStyle (Slider::TextBoxRight, false, 45, 15);
     slProximity.addListener (this);
-    
-    addAndMakeVisible (&tbZeroDelay);
-    tbZeroDelayAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "zeroDelayMode", tbZeroDelay));
-    tbZeroDelay.addListener (this);
-    tbZeroDelay.setButtonText ("Zero latency");
-    tbZeroDelay.setToggleState(processor.zeroDelayModeActive(), NotificationType::dontSendNotification);
-    
     directivityEqualiser.setSoloActive (getSoloActive());
     for (auto& vis : polarPatternVisualizers)
     {
@@ -366,12 +367,13 @@ void PolarDesignerAudioProcessorEditor::resized()
     topComponent.items.add(juce::FlexItem(tmbABButton).withFlex(0.077f).withMargin(2));
     topComponent.items.add(juce::FlexItem().withFlex(0.042f));
     topComponent.items.add(juce::FlexItem(tbZeroDelay).withFlex(0.1f).withMargin(2));
-    topComponent.items.add(juce::FlexItem().withFlex(0.25f));
-
-    topComponent.items.add(juce::FlexItem(/*Load preset button*/).withFlex(0.1f).withMargin(2));
-    topComponent.items.add(juce::FlexItem().withFlex(0.012f));
-    topComponent.items.add(juce::FlexItem(drbSaveFile).withFlex(0.03f).withMargin(2));
-    topComponent.items.add(juce::FlexItem().withFlex(0.043f));
+    topComponent.items.add(juce::FlexItem().withFlex(0.18f));
+    topComponent.items.add(juce::FlexItem(titlePreset).withFlex(0.04f));
+    topComponent.items.add(juce::FlexItem().withFlex(0.022f));
+    topComponent.items.add(juce::FlexItem(tbLoad).withFlex(0.072f).withMargin(2));
+    topComponent.items.add(juce::FlexItem().withFlex(0.01f));
+    topComponent.items.add(juce::FlexItem(tbSave).withFlex(0.072f).withMargin(2));
+    topComponent.items.add(juce::FlexItem().withFlex(0.034f));
 
     juce::FlexBox bandNumbersComponent;
     bandNumbersComponent.flexDirection = FlexBox::Direction::row;
@@ -403,8 +405,6 @@ void PolarDesignerAudioProcessorEditor::resized()
     sideComponent.items.add(juce::FlexItem(bandNumbersComponent).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     sideComponent.items.add(juce::FlexItem(grpPreset).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(tbLoadFile).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(tbSaveFile).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     sideComponent.items.add(juce::FlexItem(grpEq).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem(tbEq[0]).withFlex(sideComponentItemFlex));
@@ -611,11 +611,11 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         valueTreeState.getParameter("syncChannel")->setValueNotifyingHost(valueTreeState.getParameter("syncChannel")->convertTo0to1((5)));
     }
 
-    if (button == &tbLoadFile)
+    if (button == &tbLoad)
     {
         loadFile();
     }
-    else if (button == &tbSaveFile)
+    else if (button == &tbSave)
     {
         saveFile();
     }
@@ -656,24 +656,24 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         bool isToggled = button->getToggleState();
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
     }
-    else if (button == &tbAbButton[0])
+    else if (button == &tmbABButton[0])
     {
         bool isToggled = button->getToggleState();
         if (isToggled < 0.5f)
         {
             processor.setAbLayer(0);
             button->setAlpha(getABButtonAlphaFromLayerState(isToggled));
-            tbAbButton[1].setAlpha(getABButtonAlphaFromLayerState(!isToggled));
+            tmbABButton[1].setAlpha(getABButtonAlphaFromLayerState(!isToggled));
         }
     }
-    else if (button == &tbAbButton[1])
+    else if (button == &tmbABButton[1])
     {
         bool isToggled = button->getToggleState();
         if (isToggled < 0.5f)
         {
             processor.setAbLayer(1);
             button->setAlpha(getABButtonAlphaFromLayerState(isToggled));
-            tbAbButton[0].setAlpha(getABButtonAlphaFromLayerState(!isToggled));
+            tmbABButton[0].setAlpha(getABButtonAlphaFromLayerState(!isToggled));
         }
     }
     else // muteSoloButton!
@@ -957,8 +957,8 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
     
     //    cbSetNrBands.setEnabled(set);
     //    cbSyncChannel.setEnabled(set);
-    tbLoadFile.setEnabled(set);
-    tbSaveFile.setEnabled(set);
+    tbLoad.setEnabled(set);
+    tbSave.setEnabled(set);
     tbEq[0].setEnabled(set);
     tbEq[1].setEnabled(set);
     tbEq[2].setEnabled(set);
