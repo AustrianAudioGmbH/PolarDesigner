@@ -59,7 +59,7 @@ public:
             g.setColour(textButtonFrameColor);
             g.drawRect(buttonArea, 1);
 
-            auto arrowArea = buttonArea.reduced(button.getWidth()*0.45f, button.getHeight()*0.33f).translated(button.getWidth()*0.36f, 0);
+            auto arrowArea = buttonArea.reduced(button.proportionOfWidth(0.45f), button.proportionOfHeight(0.33f)).translated(button.proportionOfWidth(0.36f), 0);
 
             loadArrowImg->drawWithin(g, arrowArea, juce::RectanglePlacement::centred, 1.f);
 
@@ -116,14 +116,16 @@ public:
     {
         Rectangle<int> buttonArea(0, 0, button.getWidth(), button.getHeight());
 
-        Font font(getTextButtonFont(button, button.getHeight()));
-        g.setFont(font);
         g.setColour(mainTextColor);
 
-        int x = button.getWidth() * 0.18f;
-        int y = button.getHeight() * 0.34f;
-        int w = button.getWidth() * 0.47f;
-        int h = button.getHeight() * 0.34f;
+        int x = button.proportionOfWidth(0.18f);
+        int y = button.proportionOfHeight(0.3f);
+        int w = button.proportionOfWidth(0.47f);
+        int h = button.proportionOfHeight(0.38f);
+
+        Font font(getTextButtonFont(button, button.getHeight()));
+        font.setHeight(h);
+        g.setFont(font);
 
         if (button.getButtonText() == "Load")
         {
