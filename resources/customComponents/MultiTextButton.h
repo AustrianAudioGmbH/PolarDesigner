@@ -44,17 +44,10 @@ public:
         }
         resized();
     }
-
+  
     TextButton &operator[](int i)
     {
-        if (textButtonArray.isEmpty())
-        {
-            return TextButton();
-        }
-        else
-        {
-            return *textButtonArray.getUnchecked(i);
-        }
+        return *textButtonArray.getUnchecked(i);
     }
 
     void paint (juce::Graphics& g) override
