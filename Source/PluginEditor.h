@@ -121,7 +121,7 @@ private:
     // ToggleButtons
     ToggleButton tbEq[3], tbAllowBackwardsPattern;
 
-    TextMultiButton tmbABButton;
+    TextMultiButton tmbABButton, tmbNrBandsButton;
 
     // Pointers for value tree state
     std::unique_ptr<ReverseSlider::SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4], slProximityAtt;

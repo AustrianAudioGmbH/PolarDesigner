@@ -90,6 +90,20 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbSave.setButtonText("Save");
     tbSave.setToggleState(false, NotificationType::dontSendNotification);
 
+    addAndMakeVisible(&tmbNrBandsButton);
+    tmbNrBandsButton.setButtonsNumber(maxNumberBands);
+
+    for (int i = 0; i < maxNumberBands; ++i)
+    {
+        tmbNrBandsButton[i].setClickingTogglesState(true);
+        tmbNrBandsButton[i].setRadioGroupId(34567);
+
+        tmbNrBandsButton[i].setButtonText(String(i + 1));
+        tmbNrBandsButton[i].addListener(this);
+
+        if (i == nActiveBands - 1) tmbNrBandsButton[i].setToggleState(true, NotificationType::dontSendNotification);
+    }
+
     addAndMakeVisible (&footer);
     
     addAndMakeVisible (&alOverlayError);
@@ -225,22 +239,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbEq[2].addListener (this);
     tbEq[2].setButtonText ("diffuse field");
     tbEq[2].setRadioGroupId(1);
-
-    for (int i = 0; i < maxNumberBands; ++i)
-    {
-        addAndMakeVisible(tbSetNrBands[i]);
-
-        tbSetNrBands[i].setClickingTogglesState (true);
-        tbSetNrBands[i].setRadioGroupId (34567);
-
-        tbSetNrBands[i].setColour (TextButton::textColourOnId,   Colours::powderblue);
-        tbSetNrBands[i].setColour (TextButton::buttonOnColourId, Colours::blueviolet.brighter());
-
-        tbSetNrBands[i].setButtonText(String(i+1));
-        tbSetNrBands[i].addListener(this);
-
-        if (i == nActiveBands - 1) tbSetNrBands[i].setToggleState(true, NotificationType::dontSendNotification);
-    }
 
     for (int i = 0; i < 5; ++i)
     {
@@ -394,15 +392,13 @@ void PolarDesignerAudioProcessorEditor::resized()
         if (i < 4) syncChannelComponent.items.add(juce::FlexItem().withFlex(radioButonsSpaceFlex));
     }
 
-    const float sideComponentItemFlex = 0.05f;
-
     juce::FlexBox sideComponent;
     sideComponent.flexDirection = FlexBox::Direction::column;
     sideComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     sideComponent.alignContent = juce::FlexBox::AlignContent::center;
-    sideComponent.items.add(juce::FlexItem(grpBands).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(bandNumbersComponent).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    sideComponent.items.add(juce::FlexItem(/*placeholder for grpBands*/).withFlex(0.136f));
+    sideComponent.items.add(juce::FlexItem().withFlex(0.864f));
+    /*
     sideComponent.items.add(juce::FlexItem(grpPreset).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     sideComponent.items.add(juce::FlexItem(grpEq).withFlex(sideComponentItemFlex));
@@ -420,7 +416,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     sideComponent.items.add(juce::FlexItem(grpSync).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem(syncChannelComponent).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    */
 
     // Margins are fixed value because DirectivityEQ component has fixed margins
     const float polarVisualizersComponentLeftMargin = 33;
@@ -541,9 +537,9 @@ void PolarDesignerAudioProcessorEditor::resized()
     mainComponent.items.add(juce::FlexItem().withFlex(0.021f));
     mainComponent.items.add(juce::FlexItem(sideComponent).withFlex(0.21f));
     mainComponent.items.add(juce::FlexItem().withFlex(0.027f));
-    mainComponent.items.add(juce::FlexItem(middleComponent).withFlex(0.66f));
+    mainComponent.items.add(juce::FlexItem(/*middleComponent*/).withFlex(0.66f));
     mainComponent.items.add(juce::FlexItem().withFlex(0.017f));
-    mainComponent.items.add(juce::FlexItem(trimSliderComponent).withFlex(0.03f));
+    mainComponent.items.add(juce::FlexItem(/*trimSliderComponent*/).withFlex(0.03f));
     mainComponent.items.add(juce::FlexItem().withFlex(0.027f));
 
     fb.items.add(juce::FlexItem().withFlex(0.03f));
@@ -553,6 +549,23 @@ void PolarDesignerAudioProcessorEditor::resized()
     fb.items.add(juce::FlexItem(footer).withFlex(0.03f));
 
     fb.performLayout(area);
+
+    // Number of bands Group
+    juce::FlexBox fbNrBandsOutComp;
+    fbNrBandsOutComp.items.add(juce::FlexItem{ grpBands }.withFlex(1.0f));
+    fbNrBandsOutComp.performLayout(sideComponent.items[0].currentBounds);
+
+    juce::FlexBox fbNrBandsInComp;
+    fbNrBandsInComp.flexDirection = juce::FlexBox::Direction::column;
+    fbNrBandsInComp.justifyContent = juce::FlexBox::JustifyContent::center;
+    fbNrBandsInComp.alignContent = juce::FlexBox::AlignContent::center;
+    fbNrBandsInComp.items.add(juce::FlexItem{  }.withFlex(0.45f));
+    fbNrBandsInComp.items.add(juce::FlexItem{ tmbNrBandsButton }.withFlex(0.4f));
+    fbNrBandsInComp.items.add(juce::FlexItem{  }.withFlex(0.15f));
+
+    auto outerBounds = fbNrBandsOutComp.items[0].currentBounds;
+    auto inCompWidth = outerBounds.getWidth();
+    fbNrBandsInComp.performLayout(outerBounds.reduced(inCompWidth * 0.06f, 0));
 
     /*
     alOverlayError.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
