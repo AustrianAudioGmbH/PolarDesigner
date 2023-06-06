@@ -57,17 +57,17 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     addAndMakeVisible(&tmbABButton);
     tmbABButton.setButtonsNumber(2);
 
-    tmbABButton[0].addListener(this);
-    tmbABButton[0].setButtonText("A");
     tmbABButton[0].setClickingTogglesState(true);
-    tmbABButton[0].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
     tmbABButton[0].setRadioGroupId(3344);
+    tmbABButton[0].setButtonText("A");
+    tmbABButton[0].addListener(this);
+    tmbABButton[0].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
 
-    tmbABButton[1].addListener(this);
-    tmbABButton[1].setButtonText("B");
     tmbABButton[1].setClickingTogglesState(true);
-    tmbABButton[1].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
     tmbABButton[1].setRadioGroupId(3344);
+    tmbABButton[1].setButtonText("B");
+    tmbABButton[1].addListener(this);
+    tmbABButton[1].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
 
     addAndMakeVisible(&tbZeroDelay);
     tbZeroDelayAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment(valueTreeState, "zeroDelayMode", tbZeroDelay));
@@ -386,9 +386,6 @@ void PolarDesignerAudioProcessorEditor::resized()
 
     for (int i = 0; i < 5; i++)
     {
-        bandNumbersComponent.items.add(juce::FlexItem(tbSetNrBands[i]).withFlex(radioButonsFlex));
-        if (i < 4) bandNumbersComponent.items.add(juce::FlexItem().withFlex(radioButonsSpaceFlex));
-
         syncChannelComponent.items.add(juce::FlexItem(tbSyncChannel[i]).withFlex(radioButonsFlex));
         if (i < 4) syncChannelComponent.items.add(juce::FlexItem().withFlex(radioButonsSpaceFlex));
     }
@@ -581,23 +578,23 @@ void PolarDesignerAudioProcessorEditor::buttonStateChanged(Button* button)
 
 void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
 {
-    if ((button == &tbSetNrBands[0]) && (button->getToggleState() > 0.5f))
+    if ((button == &tmbNrBandsButton[0]) && (button->getToggleState() > 0.5f))
     {
         valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((0)));
     }
-    if ((button == &tbSetNrBands[1]) && (button->getToggleState() > 0.5f))
+    if ((button == &tmbNrBandsButton[1]) && (button->getToggleState() > 0.5f))
     {
         valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((1)));
     }
-    if ((button == &tbSetNrBands[2]) && (button->getToggleState() > 0.5f))
+    if ((button == &tmbNrBandsButton[2]) && (button->getToggleState() > 0.5f))
     {
         valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((2)));
     }
-    if ((button == &tbSetNrBands[3]) && (button->getToggleState() > 0.5f))
+    if ((button == &tmbNrBandsButton[3]) && (button->getToggleState() > 0.5f))
     {
         valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((3)));
     }
-    if ((button == &tbSetNrBands[4]) && (button->getToggleState() > 0.5f))
+    if ((button == &tmbNrBandsButton[4]) && (button->getToggleState() > 0.5f))
     {
         valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((4)));
     }
@@ -955,11 +952,11 @@ void PolarDesignerAudioProcessorEditor::onAlOverlayMaxSigToDist()
 
 void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
 {
-    tbSetNrBands[0].setEnabled(set);
-    tbSetNrBands[1].setEnabled(set);
-    tbSetNrBands[2].setEnabled(set);
-    tbSetNrBands[3].setEnabled(set);
-    tbSetNrBands[4].setEnabled(set);
+    tmbNrBandsButton[0].setEnabled(set);
+    tmbNrBandsButton[1].setEnabled(set);
+    tmbNrBandsButton[2].setEnabled(set);
+    tmbNrBandsButton[3].setEnabled(set);
+    tmbNrBandsButton[4].setEnabled(set);
     tbSyncChannel[0].setEnabled(set);
     tbSyncChannel[1].setEnabled(set);
     tbSyncChannel[2].setEnabled(set);
