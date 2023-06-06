@@ -16,6 +16,7 @@ public:
     const Colour mainBackground = Colour(24, 25, 27);
     const Colour mainTextColor = Colour(255, 255, 255);
     const Colour multiTextButtonBackgroundColor = Colour(31, 32, 38);
+    const Colour groupComponentBackgroundColor = Colour(28, 30, 33);
     const Colour textButtonDefaultBackgroundColor = Colour(24, 25, 27);
     const Colour textButtonHoverBackgroundColor = Colour(Colours::white.withAlpha(0.3f));
     const Colour textButtonPressedBackgroundColor = Colour(Colours::white.withAlpha(0.1f));
@@ -135,5 +136,16 @@ public:
         {
            g.drawFittedText(button.getButtonText(), buttonArea, Justification::centred, 1);
         }
+    }
+
+    void drawGroupComponentOutline(Graphics& g, int width, int height,
+        const String& text, const Justification& position,
+        GroupComponent& group) override
+    {
+        Rectangle<int> groupArea(0, 0, group.getWidth(), group.getHeight());
+        g.setColour(groupComponentBackgroundColor);
+        juce::Path path;
+        path.addRoundedRectangle(groupArea.toFloat(), 10.f, 1.f);
+        g.fillPath(path);
     }
 };
