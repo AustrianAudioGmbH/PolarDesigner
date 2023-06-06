@@ -120,11 +120,11 @@ public:
         g.setColour(mainTextColor);
 
         int x = button.proportionOfWidth(0.18f);
-        int y = button.proportionOfHeight(0.3f);
+        int y = button.proportionOfHeight(0.24f);
         int w = button.proportionOfWidth(0.47f);
-        int h = button.proportionOfHeight(0.38f);
+        int h = button.proportionOfHeight(0.55f);
 
-        Font font(getTextButtonFont(button, button.getHeight()));
+        Font font(normalFont);
         font.setHeight(h);
         g.setFont(font);
 
@@ -142,10 +142,24 @@ public:
         const String& text, const Justification& position,
         GroupComponent& group) override
     {
-        Rectangle<int> groupArea(0, 0, group.getWidth(), group.getHeight());
+        Rectangle<float> groupArea(0, 0, group.getWidth(), group.getHeight());
         g.setColour(groupComponentBackgroundColor);
+
         juce::Path path;
-        path.addRoundedRectangle(groupArea.toFloat(), 10.f, 1.f);
+        path.addRoundedRectangle(groupArea, 10.f, 10.f);
+        path.closeSubPath();
         g.fillPath(path);
+
+        g.setColour(mainTextColor);
+
+        int x = group.proportionOfWidth(0.06f);
+        int y = group.proportionOfHeight(0.136f);
+        int w = group.proportionOfWidth(0.87f);
+        int h = group.proportionOfHeight(0.2f);
+
+        Font font(normalFont);
+        font.setHeight(h);
+        g.setFont(font);
+        g.drawFittedText(text, x, y, w, h, Justification::left, 1);
     }
 };

@@ -92,6 +92,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
     addAndMakeVisible(&tmbNrBandsButton);
     tmbNrBandsButton.setButtonsNumber(maxNumberBands);
+    tmbNrBandsButton.setAlwaysOnTop(true);
 
     for (int i = 0; i < maxNumberBands; ++i)
     {
@@ -131,7 +132,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     grpEq.setTextLabelPosition (Justification::centredLeft);
     
     addAndMakeVisible (&grpBands);
-    grpBands.setText ("band control");
+    grpBands.setText ("Number of bands");
     grpBands.setTextLabelPosition (Justification::centredLeft);
     
     addAndMakeVisible (&grpPreset);
