@@ -10,7 +10,7 @@
               pluginCharacteristicsValue="pluginAAXDisableMultiMono" companyEmail="sayhello@austrianaudio.com"
               jucerFormatVersion="1" displaySplashScreen="1" defines="JUCE_MODAL_LOOPS_PERMITTED=1"
               headerPath="/opt/homebrew/opt/fftw/include/" pluginAUIsSandboxSafe="1"
-              cppLanguageStandard="17">
+              cppLanguageStandard="20">
   <MAINGROUP id="nmXiNr" name="PolarDesigner">
     <GROUP id="{C8EE4C48-1BA5-E054-5005-2C66E75BBE64}" name="Assets">
       <FILE id="ObfHNt" name="loadArrow.svg" compile="0" resource="1" file="Assets/loadArrow.svg"/>
