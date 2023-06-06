@@ -400,7 +400,6 @@ void PolarDesignerAudioProcessorEditor::resized()
     sideComponent.flexDirection = FlexBox::Direction::column;
     sideComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     sideComponent.alignContent = juce::FlexBox::AlignContent::center;
-    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     sideComponent.items.add(juce::FlexItem(grpBands).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem(bandNumbersComponent).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
@@ -515,7 +514,6 @@ void PolarDesignerAudioProcessorEditor::resized()
     middleComponent.flexDirection = FlexBox::Direction::column;
     middleComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     middleComponent.alignContent = juce::FlexBox::AlignContent::center;
-    middleComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     middleComponent.items.add(juce::FlexItem(polarVisualizersComponent).withFlex(middleComponentFlex*4));
     middleComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     middleComponent.items.add(juce::FlexItem(directivityEqualiser).withFlex(middleComponentFlex*10));
@@ -540,19 +538,19 @@ void PolarDesignerAudioProcessorEditor::resized()
     mainComponent.flexDirection = FlexBox::Direction::row;
     mainComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     mainComponent.alignContent = juce::FlexBox::AlignContent::center;
-    mainComponent.items.add(juce::FlexItem().withFlex(marginFlex));
-    mainComponent.items.add(juce::FlexItem(sideComponent).withFlex(marginFlex*15));
-    mainComponent.items.add(juce::FlexItem().withFlex(marginFlex));
-    mainComponent.items.add(juce::FlexItem(middleComponent).withFlex(marginFlex*75));
-    mainComponent.items.add(juce::FlexItem().withFlex(marginFlex));
-    mainComponent.items.add(juce::FlexItem(trimSliderComponent).withFlex(marginFlex*2));
-    mainComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    mainComponent.items.add(juce::FlexItem().withFlex(0.021f));
+    mainComponent.items.add(juce::FlexItem(sideComponent).withFlex(0.21f));
+    mainComponent.items.add(juce::FlexItem().withFlex(0.027f));
+    mainComponent.items.add(juce::FlexItem(middleComponent).withFlex(0.66f));
+    mainComponent.items.add(juce::FlexItem().withFlex(0.017f));
+    mainComponent.items.add(juce::FlexItem(trimSliderComponent).withFlex(0.03f));
+    mainComponent.items.add(juce::FlexItem().withFlex(0.027f));
 
-    fb.items.add(juce::FlexItem().withFlex(0.031f));
-    fb.items.add(juce::FlexItem(topComponent).withFlex(0.048f));
-    fb.items.add(juce::FlexItem().withFlex(0.92f));
-    //fb.items.add(juce::FlexItem(mainComponent).withFlex(marginFlex*75));
-    //fb.items.add(juce::FlexItem(footer).withFlex(marginFlex*5));
+    fb.items.add(juce::FlexItem().withFlex(0.03f));
+    fb.items.add(juce::FlexItem(topComponent).withFlex(0.046f));
+    fb.items.add(juce::FlexItem().withFlex(0.05f));
+    fb.items.add(juce::FlexItem(mainComponent).withFlex(0.84f));
+    fb.items.add(juce::FlexItem(footer).withFlex(0.03f));
 
     fb.performLayout(area);
 
