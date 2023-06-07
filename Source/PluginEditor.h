@@ -123,7 +123,7 @@ private:
     // ImageButtons
     TextButton ibEqCtr[2];
 
-    TextMultiButton tmbABButton, tmbNrBandsButton;
+    TextMultiButton tmbABButton, tmbNrBandsButton, tmbSyncChannelButton;
 
     // Pointers for value tree state
     std::unique_ptr<ReverseSlider::SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4], slProximityAtt;

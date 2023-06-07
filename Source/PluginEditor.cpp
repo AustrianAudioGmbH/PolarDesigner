@@ -145,6 +145,25 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     ibEqCtr[1].setButtonText("Diffuse Field");
     ibEqCtr[1].addListener(this);
 
+    addAndMakeVisible(&grpSync);
+    grpSync.setText("Sync group");
+
+    addAndMakeVisible(&tmbSyncChannelButton);
+    tmbSyncChannelButton.setButtonsNumber(5);
+    tmbSyncChannelButton.setAlwaysOnTop(true);
+
+    for (int i = 0; i < 5; ++i)
+    {
+        tmbSyncChannelButton[i].setClickingTogglesState(true);
+        tmbSyncChannelButton[i].setRadioGroupId(76543);
+
+        if (i == 0) tmbSyncChannelButton[i].setButtonText(String("X"));
+        else tmbSyncChannelButton[i].setButtonText(String(i));
+        tmbSyncChannelButton[i].addListener(this);
+
+        if (i == syncChannelIdx - 1) tmbSyncChannelButton[i].setToggleState(true, NotificationType::dontSendNotification);
+    }
+
     addAndMakeVisible (&grpPreset);
     grpPreset.setText ("preset control");
     grpPreset.setTextLabelPosition (Justification::centredLeft);
@@ -156,10 +175,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     addAndMakeVisible (&grpProxComp);
     grpProxComp.setText ("proximity control");
     grpProxComp.setTextLabelPosition (Justification::centredLeft);
-    
-    addAndMakeVisible (&grpSync);
-    grpSync.setText ("sync-channel");
-    grpSync.setTextLabelPosition (Justification::centredLeft);
     
     eqColours[0] = Colour(0xFDBA4949);
     eqColours[1] = Colour(0xFDBA6F49);
@@ -235,24 +250,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbAllowBackwardsPatternAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "allowBackwardsPattern", tbAllowBackwardsPattern));
     tbAllowBackwardsPattern.setButtonText ("allow reverse patterns");
     tbAllowBackwardsPattern.addListener (this);
-
-    for (int i = 0; i < 5; ++i)
-    {
-        addAndMakeVisible(tbSyncChannel[i]);
-
-        tbSyncChannel[i].setClickingTogglesState(true);
-        tbSyncChannel[i].setRadioGroupId(76543);
-
-        tbSyncChannel[i].setColour(TextButton::textColourOnId, Colours::powderblue);
-        tbSyncChannel[i].setColour(TextButton::buttonOnColourId, Colours::blueviolet.brighter());
-
-        if(i == 0) tbSyncChannel[i].setButtonText(String("X"));
-        else tbSyncChannel[i].setButtonText(String(i));
-
-        tbSyncChannel[i].addListener(this);
-
-        if (i == syncChannelIdx - 1) tbSyncChannel[i].setToggleState(true, NotificationType::dontSendNotification);
-    }
 
     addAndMakeVisible (&slProximity);
     slProximityAtt = std::unique_ptr<ReverseSlider::SliderAttachment>(new ReverseSlider::SliderAttachment (valueTreeState, "proximity", slProximity));
@@ -392,7 +389,8 @@ void PolarDesignerAudioProcessorEditor::resized()
     sideComponent.items.add(juce::FlexItem(/*placeholder for grpBands*/).withFlex(0.14f));
     sideComponent.items.add(juce::FlexItem().withFlex(0.02f));
     sideComponent.items.add(juce::FlexItem(/*placeholder for grpEq*/).withFlex(0.22f));
-    sideComponent.items.add(juce::FlexItem().withFlex(0.62f));
+    sideComponent.items.add(juce::FlexItem().withFlex(0.48f));
+    sideComponent.items.add(juce::FlexItem(/*placeholder for grpSync*/).withFlex(0.14f));
     /*
     sideComponent.items.add(juce::FlexItem(grpPreset).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
@@ -583,6 +581,23 @@ void PolarDesignerAudioProcessorEditor::resized()
     outerBounds = fbEqCtrOutComp.items[0].currentBounds;
     inCompWidth = outerBounds.getWidth();
     fbEqCtrInComp.performLayout(outerBounds);
+
+    // Sync channel Group
+    juce::FlexBox fbSyncChannelOutComp;
+    fbSyncChannelOutComp.items.add(juce::FlexItem{ grpSync }.withFlex(1.0f));
+    fbSyncChannelOutComp.performLayout(sideComponent.items[4].currentBounds);
+
+    juce::FlexBox fbSyncChannelInComp;
+    fbSyncChannelInComp.flexDirection = juce::FlexBox::Direction::column;
+    fbSyncChannelInComp.justifyContent = juce::FlexBox::JustifyContent::center;
+    fbSyncChannelInComp.alignContent = juce::FlexBox::AlignContent::center;
+    fbSyncChannelInComp.items.add(juce::FlexItem{  }.withFlex(0.45f));
+    fbSyncChannelInComp.items.add(juce::FlexItem{ tmbSyncChannelButton }.withFlex(0.4f));
+    fbSyncChannelInComp.items.add(juce::FlexItem{  }.withFlex(0.15f));
+
+    outerBounds = fbSyncChannelOutComp.items[0].currentBounds;
+    inCompWidth = outerBounds.getWidth();
+    fbSyncChannelInComp.performLayout(outerBounds.reduced(inCompWidth * 0.06f, 0));
 
     /*
     alOverlayError.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
