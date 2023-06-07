@@ -127,14 +127,24 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     alOverlaySignal.setMessage("Make sure playback of a desired target signal is active. Stop signal tracking to apply polar patterns with maximum signal energy. Also track an undesired spill target to be able to maximize the target-to-spill ratio.");
 
     // groups
-    addAndMakeVisible (&grpEq);
-    grpEq.setText ("equalization control");
-    grpEq.setTextLabelPosition (Justification::centredLeft);
-    
     addAndMakeVisible (&grpBands);
     grpBands.setText ("Number of bands");
-    grpBands.setTextLabelPosition (Justification::centredLeft);
-    
+
+    addAndMakeVisible(&grpEq);
+    grpEq.setText("Equalization control");
+
+    addAndMakeVisible(&ibEqCtr[0]);
+    ibEqCtr[0].setClickingTogglesState(true);
+    ibEqCtr[0].setRadioGroupId(256);
+    ibEqCtr[0].setButtonText("Free Field");
+    ibEqCtr[0].addListener(this);
+
+    addAndMakeVisible(&ibEqCtr[1]);
+    ibEqCtr[1].setClickingTogglesState(true);
+    ibEqCtr[1].setRadioGroupId(256);
+    ibEqCtr[1].setButtonText("Diffuse Field");
+    ibEqCtr[1].addListener(this);
+
     addAndMakeVisible (&grpPreset);
     grpPreset.setText ("preset control");
     grpPreset.setTextLabelPosition (Justification::centredLeft);
@@ -225,21 +235,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbAllowBackwardsPatternAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "allowBackwardsPattern", tbAllowBackwardsPattern));
     tbAllowBackwardsPattern.setButtonText ("allow reverse patterns");
     tbAllowBackwardsPattern.addListener (this);
-    
-    addAndMakeVisible (&tbEq[0]);
-    tbEq[0].addListener (this);
-    tbEq[0].setButtonText ("off");
-    tbEq[0].setRadioGroupId(1);
-    
-    addAndMakeVisible (&tbEq[1]);
-    tbEq[1].addListener (this);
-    tbEq[1].setButtonText ("free field");
-    tbEq[1].setRadioGroupId(1);
-    
-    addAndMakeVisible (&tbEq[2]);
-    tbEq[2].addListener (this);
-    tbEq[2].setButtonText ("diffuse field");
-    tbEq[2].setRadioGroupId(1);
 
     for (int i = 0; i < 5; ++i)
     {
@@ -394,8 +389,10 @@ void PolarDesignerAudioProcessorEditor::resized()
     sideComponent.flexDirection = FlexBox::Direction::column;
     sideComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     sideComponent.alignContent = juce::FlexBox::AlignContent::center;
-    sideComponent.items.add(juce::FlexItem(/*placeholder for grpBands*/).withFlex(0.136f));
-    sideComponent.items.add(juce::FlexItem().withFlex(0.864f));
+    sideComponent.items.add(juce::FlexItem(/*placeholder for grpBands*/).withFlex(0.14f));
+    sideComponent.items.add(juce::FlexItem().withFlex(0.02f));
+    sideComponent.items.add(juce::FlexItem(/*placeholder for grpEq*/).withFlex(0.22f));
+    sideComponent.items.add(juce::FlexItem().withFlex(0.62f));
     /*
     sideComponent.items.add(juce::FlexItem(grpPreset).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
@@ -535,7 +532,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     mainComponent.items.add(juce::FlexItem().withFlex(0.021f));
     mainComponent.items.add(juce::FlexItem(sideComponent).withFlex(0.21f));
     mainComponent.items.add(juce::FlexItem().withFlex(0.027f));
-    mainComponent.items.add(juce::FlexItem(/*middleComponent*/).withFlex(0.66f));
+    mainComponent.items.add(juce::FlexItem(middleComponent).withFlex(0.66f));
     mainComponent.items.add(juce::FlexItem().withFlex(0.017f));
     mainComponent.items.add(juce::FlexItem(/*trimSliderComponent*/).withFlex(0.03f));
     mainComponent.items.add(juce::FlexItem().withFlex(0.027f));
@@ -564,6 +561,28 @@ void PolarDesignerAudioProcessorEditor::resized()
     auto outerBounds = fbNrBandsOutComp.items[0].currentBounds;
     auto inCompWidth = outerBounds.getWidth();
     fbNrBandsInComp.performLayout(outerBounds.reduced(inCompWidth * 0.06f, 0));
+
+    // Equalization control Group
+    juce::FlexBox fbEqCtrOutComp;
+    fbEqCtrOutComp.items.add(juce::FlexItem{ grpEq }.withFlex(1.0f));
+    fbEqCtrOutComp.performLayout(sideComponent.items[2].currentBounds);
+
+    juce::FlexBox fbFields;
+    fbFields.flexDirection = juce::FlexBox::Direction::row;
+    fbFields.justifyContent = juce::FlexBox::JustifyContent::center;
+    fbFields.alignContent = juce::FlexBox::AlignContent::center;
+    fbFields.items.add(juce::FlexItem{ ibEqCtr[0] }.withFlex(0.5f));
+    fbFields.items.add(juce::FlexItem{ ibEqCtr[1] }.withFlex(0.5f));
+
+    juce::FlexBox fbEqCtrInComp;
+    fbEqCtrInComp.flexDirection = juce::FlexBox::Direction::column;
+    fbEqCtrInComp.justifyContent = juce::FlexBox::JustifyContent::center;
+    fbEqCtrInComp.alignContent = juce::FlexBox::AlignContent::center;
+    fbEqCtrInComp.items.add(juce::FlexItem{ fbFields }.withFlex(1.f));
+
+    outerBounds = fbEqCtrOutComp.items[0].currentBounds;
+    inCompWidth = outerBounds.getWidth();
+    fbEqCtrInComp.performLayout(outerBounds);
 
     /*
     alOverlayError.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
@@ -628,17 +647,13 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     {
         saveFile();
     }
-    else if (button == &tbEq[0])
+    else if (button == &ibEqCtr[0])
     {
         processor.setEqState(0);
     }
-    else if (button == &tbEq[1])
+    else if (button == &ibEqCtr[1])
     {
         processor.setEqState(1);
-    }
-    else if (button == &tbEq[2])
-    {
-        processor.setEqState(2);
     }
     else if (button == &tbRecordDisturber)
     {
@@ -962,15 +977,13 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
     tbSyncChannel[2].setEnabled(set);
     tbSyncChannel[3].setEnabled(set);
     tbSyncChannel[4].setEnabled(set);
-    tbSyncChannel[5].setEnabled(set);
     
     //    cbSetNrBands.setEnabled(set);
     //    cbSyncChannel.setEnabled(set);
     tbLoad.setEnabled(set);
     tbSave.setEnabled(set);
-    tbEq[0].setEnabled(set);
-    tbEq[1].setEnabled(set);
-    tbEq[2].setEnabled(set);
+    ibEqCtr[0].setEnabled(set);
+    ibEqCtr[1].setEnabled(set);
     tbAllowBackwardsPattern.setEnabled(set);
     tbRecordDisturber.setEnabled(set);
     tbRecordSignal.setEnabled(set);
@@ -980,7 +993,7 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
 void PolarDesignerAudioProcessorEditor::setEqMode()
 {
     int activeIdx = processor.getEqState();
-    tbEq[activeIdx].setToggleState(true, NotificationType::sendNotification);
+    ibEqCtr[activeIdx].setToggleState(true, NotificationType::sendNotification);
 }
 
 

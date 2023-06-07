@@ -38,6 +38,9 @@ public:
         Rectangle<float> buttonArea(0.0f, 0.0f, button.getWidth(), button.getHeight());
 
         auto loadArrowImg = juce::Drawable::createFromImageData(BinaryData::loadArrow_svg, BinaryData::loadArrow_svgSize);
+        auto freeFieldImg = juce::Drawable::createFromImageData(BinaryData::freeField_svg, BinaryData::freeField_svgSize);
+        auto diffuseFieldImg = juce::Drawable::createFromImageData(BinaryData::diffuseField_svg, BinaryData::diffuseField_svgSize);
+        auto eqFieldCheckSign = juce::Drawable::createFromImageData(BinaryData::eqFieldCheckSign_svg, BinaryData::eqFieldCheckSign_svgSize);
 
         if (button.getButtonText() == "Zero latency")
         {
@@ -91,6 +94,40 @@ public:
                 g.fillRect(buttonArea.reduced(1.0f, 1.0f));
             }
         }
+        else if (button.getButtonText() == "Free Field")
+        {
+            auto freeFieldImageArea = buttonArea;
+            if (button.getToggleState() == true)
+            {
+               freeFieldImageArea.removeFromTop(button.proportionOfHeight(0.33f));
+               freeFieldImageArea.removeFromBottom(button.proportionOfHeight(0.25f));
+               freeFieldImg->drawWithin(g, freeFieldImageArea, juce::RectanglePlacement::centred, 1.f);
+               eqFieldCheckSign->drawWithin(g, freeFieldImageArea.reduced(20,20), juce::RectanglePlacement::centred, 1.f);
+            }
+            else
+            {
+                freeFieldImageArea.removeFromTop(button.proportionOfHeight(0.33f));
+                freeFieldImageArea.removeFromBottom(button.proportionOfHeight(0.25f));
+                freeFieldImg->drawWithin(g, freeFieldImageArea, juce::RectanglePlacement::centred, 1.f);
+            }
+        }
+        else if (button.getButtonText() == "Diffuse Field")
+        {
+            auto diffuseFieldImageArea = buttonArea;
+            if (button.getToggleState() == true)
+            {
+                diffuseFieldImageArea.removeFromTop(button.proportionOfHeight(0.33f));
+                diffuseFieldImageArea.removeFromBottom(button.proportionOfHeight(0.25f));
+                diffuseFieldImg->drawWithin(g, diffuseFieldImageArea, juce::RectanglePlacement::centred, 1.f);
+                eqFieldCheckSign->drawWithin(g, diffuseFieldImageArea.reduced(20, 20), juce::RectanglePlacement::centred, 1.f);
+            }
+            else
+            {
+                diffuseFieldImageArea.removeFromTop(button.proportionOfHeight(0.33f));
+                diffuseFieldImageArea.removeFromBottom(button.proportionOfHeight(0.25f));
+                diffuseFieldImg->drawWithin(g, diffuseFieldImageArea, juce::RectanglePlacement::centred, 1.f);
+            }
+        }
         else
         {
             if (isMouseOverButton)
@@ -119,23 +156,39 @@ public:
 
         g.setColour(mainTextColor);
 
-        int x = button.proportionOfWidth(0.18f);
-        int y = button.proportionOfHeight(0.24f);
-        int w = button.proportionOfWidth(0.47f);
-        int h = button.proportionOfHeight(0.55f);
+        int x = buttonArea.getX();
+        int y = buttonArea.getY();
+        int w = buttonArea.getWidth();
+        int h = buttonArea.getHeight();
+
+        if (button.getButtonText() == "Load")
+        {
+            x = buttonArea.proportionOfWidth(0.18f);
+            y = buttonArea.proportionOfHeight(0.24f);
+            w = buttonArea.proportionOfWidth(0.47f);
+            h = buttonArea.proportionOfHeight(0.55f);
+        }
+        else if (button.getButtonText() == "Free Field")
+        {
+            y = buttonArea.proportionOfHeight(0.775f);
+            h = buttonArea.proportionOfHeight(0.12f);
+        }
+        else if (button.getButtonText() == "Diffuse Field")
+        {
+            y = buttonArea.proportionOfHeight(0.775f);
+            h = buttonArea.proportionOfHeight(0.12f);
+        }
+        else
+        {
+            y = buttonArea.proportionOfHeight(0.47f)/2;
+            w = buttonArea.getWidth();
+            h = buttonArea.proportionOfHeight(0.53f);
+        }
 
         Font font(normalFont);
         font.setHeight(h);
         g.setFont(font);
-
-        if (button.getButtonText() == "Load")
-        {
-           g.drawFittedText(button.getButtonText(), x, y, w, h, Justification::centred, 1);
-        }
-        else
-        {
-           g.drawFittedText(button.getButtonText(), buttonArea, Justification::centred, 1);
-        }
+        g.drawFittedText(button.getButtonText(), x, y, w, h, Justification::centred, 1);
     }
 
     void drawGroupComponentOutline(Graphics& g, int width, int height,
@@ -156,6 +209,12 @@ public:
         int y = group.proportionOfHeight(0.136f);
         int w = group.proportionOfWidth(0.87f);
         int h = group.proportionOfHeight(0.2f);
+
+        if (text == "Equalization control")
+        {
+            y = group.proportionOfHeight(0.12f);
+            h = group.proportionOfHeight(0.132f);
+        }
 
         Font font(normalFont);
         font.setHeight(h);

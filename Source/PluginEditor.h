@@ -119,7 +119,9 @@ private:
     // Text Buttons
     TextButton tbLoad, tbSave, tbRecordDisturber, tbRecordSignal, tbZeroDelay, tbSyncChannel[5];
     // ToggleButtons
-    ToggleButton tbEq[3], tbAllowBackwardsPattern;
+    ToggleButton tbAllowBackwardsPattern;
+    // ImageButtons
+    TextButton ibEqCtr[2];
 
     TextMultiButton tmbABButton, tmbNrBandsButton;
 
