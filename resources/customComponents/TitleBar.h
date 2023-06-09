@@ -416,7 +416,8 @@ public:
     void paint(Graphics& g) override
     {
         Rectangle<int> bounds = getLocalBounds();
-        regularFont.setHeight(bounds.getHeight() * 0.55f);
+        int fontSize = getTopLevelComponent()->getHeight() * 0.025f;
+        regularFont.setHeight(fontSize);
 
         g.setColour(textColour_);
         g.setFont(regularFont);

@@ -157,32 +157,24 @@ public:
         g.setColour(mainTextColor);
 
         int x = buttonArea.getX();
-        int y = buttonArea.getY();
         int w = buttonArea.getWidth();
-        int h = buttonArea.getHeight();
+        int h = button.getTopLevelComponent()->getHeight() * 0.023f;
+        int y = (buttonArea.getHeight() - h)/2;
 
         if (button.getButtonText() == "Load")
         {
             x = buttonArea.proportionOfWidth(0.18f);
-            y = buttonArea.proportionOfHeight(0.24f);
             w = buttonArea.proportionOfWidth(0.47f);
-            h = buttonArea.proportionOfHeight(0.55f);
         }
         else if (button.getButtonText() == "Free Field")
         {
             y = buttonArea.proportionOfHeight(0.775f);
-            h = buttonArea.proportionOfHeight(0.12f);
+            h = button.getTopLevelComponent()->getHeight() * 0.02f;
         }
         else if (button.getButtonText() == "Diffuse Field")
         {
             y = buttonArea.proportionOfHeight(0.775f);
-            h = buttonArea.proportionOfHeight(0.12f);
-        }
-        else
-        {
-            y = buttonArea.proportionOfHeight(0.47f)/2;
-            w = buttonArea.getWidth();
-            h = buttonArea.proportionOfHeight(0.53f);
+            h = button.getTopLevelComponent()->getHeight() * 0.018f;
         }
 
         Font font(normalFont);
@@ -206,15 +198,9 @@ public:
         g.setColour(mainTextColor);
 
         int x = group.proportionOfWidth(0.06f);
-        int y = group.proportionOfHeight(0.136f);
+        int y = 10.f;
         int w = group.proportionOfWidth(0.87f);
-        int h = group.proportionOfHeight(0.2f);
-
-        if (text == "Equalization control")
-        {
-            y = group.proportionOfHeight(0.12f);
-            h = group.proportionOfHeight(0.132f);
-        }
+        int h = group.getTopLevelComponent()->getHeight()*0.025f;
 
         Font font(normalFont);
         font.setHeight(h);
