@@ -145,6 +145,12 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     ibEqCtr[1].setButtonText("Diffuse Field");
     ibEqCtr[1].addListener(this);
 
+    addAndMakeVisible(&grpProxComp);
+    grpProxComp.setText("Proximity control");
+
+    addAndMakeVisible(&grpDstC);
+    grpDstC.setText("Terminator control");
+
     addAndMakeVisible(&grpSync);
     grpSync.setText("Sync group");
 
@@ -164,18 +170,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         if (i == syncChannelIdx - 1) tmbSyncChannelButton[i].setToggleState(true, NotificationType::dontSendNotification);
     }
 
-    addAndMakeVisible (&grpPreset);
-    grpPreset.setText ("preset control");
-    grpPreset.setTextLabelPosition (Justification::centredLeft);
-    
-    addAndMakeVisible (&grpDstC);
-    grpDstC.setText ("terminator control");
-    grpDstC.setTextLabelPosition (Justification::centredLeft);
-    
-    addAndMakeVisible (&grpProxComp);
-    grpProxComp.setText ("proximity control");
-    grpProxComp.setTextLabelPosition (Justification::centredLeft);
-    
     eqColours[0] = Colour(0xFDBA4949);
     eqColours[1] = Colour(0xFDBA6F49);
     eqColours[2] = Colour(0xFDBAAF49);
@@ -389,8 +383,13 @@ void PolarDesignerAudioProcessorEditor::resized()
     sideComponent.items.add(juce::FlexItem(/*placeholder for grpBands*/).withFlex(0.14f));
     sideComponent.items.add(juce::FlexItem().withFlex(0.02f));
     sideComponent.items.add(juce::FlexItem(/*placeholder for grpEq*/).withFlex(0.22f));
-    sideComponent.items.add(juce::FlexItem().withFlex(0.48f));
+    sideComponent.items.add(juce::FlexItem().withFlex(0.02f));
+    sideComponent.items.add(juce::FlexItem(/*placeholder for grpProxComp*/).withFlex(0.14f));
+    sideComponent.items.add(juce::FlexItem().withFlex(0.02f));
+    sideComponent.items.add(juce::FlexItem(/*placeholder for grpTermControl*/).withFlex(0.28f));
+    sideComponent.items.add(juce::FlexItem().withFlex(0.02f));
     sideComponent.items.add(juce::FlexItem(/*placeholder for grpSync*/).withFlex(0.14f));
+    
     /*
     sideComponent.items.add(juce::FlexItem(grpPreset).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
@@ -582,17 +581,51 @@ void PolarDesignerAudioProcessorEditor::resized()
     inCompWidth = outerBounds.getWidth();
     fbEqCtrInComp.performLayout(outerBounds);
 
+    // Proximity control Group
+    juce::FlexBox fbProximityControlOutComp;
+    fbProximityControlOutComp.items.add(juce::FlexItem{ grpProxComp }.withFlex(1.0f));
+    fbProximityControlOutComp.performLayout(sideComponent.items[4].currentBounds);
+
+    juce::FlexBox fbProximityControlInComp;
+    fbProximityControlInComp.flexDirection = juce::FlexBox::Direction::column;
+    fbProximityControlInComp.justifyContent = juce::FlexBox::JustifyContent::center;
+    fbProximityControlInComp.alignContent = juce::FlexBox::AlignContent::center;
+    fbProximityControlInComp.items.add(juce::FlexItem{  }.withFlex(0.45f));
+    fbProximityControlInComp.items.add(juce::FlexItem{ slProximity }.withFlex(0.4f));
+    fbProximityControlInComp.items.add(juce::FlexItem{  }.withFlex(0.15f));
+
+    outerBounds = fbProximityControlInComp.items[0].currentBounds;
+    inCompWidth = outerBounds.getWidth();
+    fbProximityControlInComp.performLayout(outerBounds.reduced(inCompWidth * 0.06f, 0));
+
+    // Terminator control Group
+    juce::FlexBox fbTerminatorControlOutComp;
+    fbTerminatorControlOutComp.items.add(juce::FlexItem{ grpDstC }.withFlex(1.0f));
+    fbTerminatorControlOutComp.performLayout(sideComponent.items[6].currentBounds);
+
+    juce::FlexBox fbTerminatorControlInComp;
+    fbTerminatorControlInComp.flexDirection = juce::FlexBox::Direction::column;
+    fbTerminatorControlInComp.justifyContent = juce::FlexBox::JustifyContent::center;
+    fbTerminatorControlInComp.alignContent = juce::FlexBox::AlignContent::center;
+    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.45f));
+    fbTerminatorControlInComp.items.add(juce::FlexItem{ tmbSyncChannelButton }.withFlex(0.4f));
+    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.15f));
+
+    outerBounds = fbProximityControlInComp.items[0].currentBounds;
+    inCompWidth = outerBounds.getWidth();
+    fbProximityControlInComp.performLayout(outerBounds.reduced(inCompWidth * 0.06f, 0));
+
     // Sync channel Group
     juce::FlexBox fbSyncChannelOutComp;
     fbSyncChannelOutComp.items.add(juce::FlexItem{ grpSync }.withFlex(1.0f));
-    fbSyncChannelOutComp.performLayout(sideComponent.items[4].currentBounds);
+    fbSyncChannelOutComp.performLayout(sideComponent.items[8].currentBounds);
 
     juce::FlexBox fbSyncChannelInComp;
     fbSyncChannelInComp.flexDirection = juce::FlexBox::Direction::column;
     fbSyncChannelInComp.justifyContent = juce::FlexBox::JustifyContent::center;
     fbSyncChannelInComp.alignContent = juce::FlexBox::AlignContent::center;
     fbSyncChannelInComp.items.add(juce::FlexItem{  }.withFlex(0.45f));
-    fbSyncChannelInComp.items.add(juce::FlexItem{ tmbSyncChannelButton }.withFlex(0.4f));
+    fbSyncChannelInComp.items.add(juce::FlexItem{  }.withFlex(0.4f));
     fbSyncChannelInComp.items.add(juce::FlexItem{  }.withFlex(0.15f));
 
     outerBounds = fbSyncChannelOutComp.items[0].currentBounds;
