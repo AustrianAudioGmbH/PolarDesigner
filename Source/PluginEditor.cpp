@@ -106,7 +106,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     }
 
     addAndMakeVisible (&footer);
-    
+
     addAndMakeVisible (&alOverlayError);
     alOverlayError.setVisible(false);
     alOverlayError.setColour(AlertWindow::backgroundColourId, globalLaF.AAGrey);
@@ -155,16 +155,15 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     grpSync.setText("Sync group");
 
     addAndMakeVisible(&tmbSyncChannelButton);
-    tmbSyncChannelButton.setButtonsNumber(5);
+    tmbSyncChannelButton.setButtonsNumber(4);
     tmbSyncChannelButton.setAlwaysOnTop(true);
 
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < 4; ++i)
     {
         tmbSyncChannelButton[i].setClickingTogglesState(true);
         tmbSyncChannelButton[i].setRadioGroupId(76543);
 
-        if (i == 0) tmbSyncChannelButton[i].setButtonText(String("X"));
-        else tmbSyncChannelButton[i].setButtonText(String(i));
+        tmbSyncChannelButton[i].setButtonText(String(i+1));
         tmbSyncChannelButton[i].addListener(this);
 
         if (i == syncChannelIdx - 1) tmbSyncChannelButton[i].setToggleState(true, NotificationType::dontSendNotification);
