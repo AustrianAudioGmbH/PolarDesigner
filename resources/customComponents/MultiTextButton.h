@@ -44,6 +44,15 @@ public:
         }
         resized();
     }
+
+    void disableAllButtonsApartOf(int btnNr)
+    {
+        for (int i = 0; i < textButtonArray.size(); i++)
+        {
+            if (i != btnNr)
+            textButtonArray.getUnchecked(i)->setToggleState(false, juce::NotificationType::dontSendNotification);
+        }
+    }
   
     TextButton &operator[](int i)
     {

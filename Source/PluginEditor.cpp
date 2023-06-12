@@ -135,13 +135,11 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
     addAndMakeVisible(&ibEqCtr[0]);
     ibEqCtr[0].setClickingTogglesState(true);
-    ibEqCtr[0].setRadioGroupId(256);
     ibEqCtr[0].setButtonText("Free Field");
     ibEqCtr[0].addListener(this);
 
     addAndMakeVisible(&ibEqCtr[1]);
     ibEqCtr[1].setClickingTogglesState(true);
-    ibEqCtr[1].setRadioGroupId(256);
     ibEqCtr[1].setButtonText("Diffuse Field");
     ibEqCtr[1].addListener(this);
 
@@ -161,7 +159,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     for (int i = 0; i < 4; ++i)
     {
         tmbSyncChannelButton[i].setClickingTogglesState(true);
-        tmbSyncChannelButton[i].setRadioGroupId(76543);
 
         tmbSyncChannelButton[i].setButtonText(String(i+1));
         tmbSyncChannelButton[i].addListener(this);
@@ -369,7 +366,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     syncChannelComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     syncChannelComponent.alignContent = juce::FlexBox::AlignContent::center;
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 4; i++)
     {
         syncChannelComponent.items.add(juce::FlexItem(tbSyncChannel[i]).withFlex(radioButonsFlex));
         if (i < 4) syncChannelComponent.items.add(juce::FlexItem().withFlex(radioButonsSpaceFlex));
@@ -665,25 +662,25 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((4)));
     }
     
-    if ((button == &tbSyncChannel[0]) && (button->getToggleState() > 0.5f))
+    if ((button == &tmbSyncChannelButton[0]) && (button->getToggleState() > 0.5f))
     {
+        tmbSyncChannelButton.disableAllButtonsApartOf(0);
         valueTreeState.getParameter("syncChannel")->setValueNotifyingHost(valueTreeState.getParameter("syncChannel")->convertTo0to1((1)));
     }
-    if ((button == &tbSyncChannel[1]) && (button->getToggleState() > 0.5f))
+    if ((button == &tmbSyncChannelButton[1]) && (button->getToggleState() > 0.5f))
     {
+        tmbSyncChannelButton.disableAllButtonsApartOf(1);
         valueTreeState.getParameter("syncChannel")->setValueNotifyingHost(valueTreeState.getParameter("syncChannel")->convertTo0to1((2)));
     }
-    if ((button == &tbSyncChannel[2]) && (button->getToggleState() > 0.5f))
+    if ((button == &tmbSyncChannelButton[2]) && (button->getToggleState() > 0.5f))
     {
+        tmbSyncChannelButton.disableAllButtonsApartOf(2);
         valueTreeState.getParameter("syncChannel")->setValueNotifyingHost(valueTreeState.getParameter("syncChannel")->convertTo0to1((3)));
     }
-    if ((button == &tbSyncChannel[3]) && (button->getToggleState() > 0.5f))
+    if ((button == &tmbSyncChannelButton[3]) && (button->getToggleState() > 0.5f))
     {
+        tmbSyncChannelButton.disableAllButtonsApartOf(3);
         valueTreeState.getParameter("syncChannel")->setValueNotifyingHost(valueTreeState.getParameter("syncChannel")->convertTo0to1((4)));
-    }
-    if ((button == &tbSyncChannel[4]) && (button->getToggleState() > 0.5f))
-    {
-        valueTreeState.getParameter("syncChannel")->setValueNotifyingHost(valueTreeState.getParameter("syncChannel")->convertTo0to1((5)));
     }
 
     if (button == &tbLoad)
@@ -697,10 +694,12 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &ibEqCtr[0])
     {
         processor.setEqState(0);
+        ibEqCtr[1].setToggleState(false, juce::NotificationType::dontSendNotification);
     }
     else if (button == &ibEqCtr[1])
     {
         processor.setEqState(1);
+        ibEqCtr[0].setToggleState(false, juce::NotificationType::dontSendNotification);
     }
     else if (button == &tbRecordDisturber)
     {
