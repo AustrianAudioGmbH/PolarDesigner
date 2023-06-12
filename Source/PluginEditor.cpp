@@ -106,7 +106,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     }
 
     addAndMakeVisible (&footer);
-
+    /*
     addAndMakeVisible (&alOverlayError);
     alOverlayError.setVisible(false);
     alOverlayError.setColour(AlertWindow::backgroundColourId, globalLaF.AAGrey);
@@ -125,7 +125,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     alOverlaySignal.setColour(TextButton::buttonColourId , globalLaF.AARed);
     alOverlaySignal.setTitle("acquiring target!");
     alOverlaySignal.setMessage("Make sure playback of a desired target signal is active. Stop signal tracking to apply polar patterns with maximum signal energy. Also track an undesired spill target to be able to maximize the target-to-spill ratio.");
-
+    */
     // groups
     addAndMakeVisible (&grpBands);
     grpBands.setText ("Number of bands");
@@ -242,10 +242,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbAllowBackwardsPattern.addListener (this);
 
     addAndMakeVisible (&slProximity);
-    slProximityAtt = std::unique_ptr<ReverseSlider::SliderAttachment>(new ReverseSlider::SliderAttachment (valueTreeState, "proximity", slProximity));
+    slProximityAtt = std::unique_ptr<SliderAttachment>(new SliderAttachment (valueTreeState, "proximity", slProximity));
     slProximity.setSliderStyle (Slider::LinearHorizontal);
-    slProximity.setColour (Slider::thumbColourId, globalLaF.AARed);
-    slProximity.setColour (Slider::rotarySliderOutlineColourId, globalLaF.AARed);
     slProximity.setTextBoxStyle (Slider::TextBoxRight, false, 45, 15);
     slProximity.addListener (this);
     directivityEqualiser.setSoloActive (getSoloActive());
@@ -586,13 +584,13 @@ void PolarDesignerAudioProcessorEditor::resized()
     fbProximityControlInComp.flexDirection = juce::FlexBox::Direction::column;
     fbProximityControlInComp.justifyContent = juce::FlexBox::JustifyContent::center;
     fbProximityControlInComp.alignContent = juce::FlexBox::AlignContent::center;
-    fbProximityControlInComp.items.add(juce::FlexItem{  }.withFlex(0.45f));
-    fbProximityControlInComp.items.add(juce::FlexItem{ slProximity }.withFlex(0.4f));
-    fbProximityControlInComp.items.add(juce::FlexItem{  }.withFlex(0.15f));
+    fbProximityControlInComp.items.add(juce::FlexItem{  }.withFlex(0.5f));
+    fbProximityControlInComp.items.add(juce::FlexItem{ slProximity }.withFlex(0.45f));
+    fbProximityControlInComp.items.add(juce::FlexItem{  }.withFlex(0.05f));
 
-    outerBounds = fbProximityControlInComp.items[0].currentBounds;
+    outerBounds = fbProximityControlOutComp.items[0].currentBounds;
     inCompWidth = outerBounds.getWidth();
-    fbProximityControlInComp.performLayout(outerBounds.reduced(inCompWidth * 0.06f, 0));
+    fbProximityControlInComp.performLayout(outerBounds);
 
     // Terminator control Group
     juce::FlexBox fbTerminatorControlOutComp;
@@ -604,12 +602,12 @@ void PolarDesignerAudioProcessorEditor::resized()
     fbTerminatorControlInComp.justifyContent = juce::FlexBox::JustifyContent::center;
     fbTerminatorControlInComp.alignContent = juce::FlexBox::AlignContent::center;
     fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.45f));
-    fbTerminatorControlInComp.items.add(juce::FlexItem{ tmbSyncChannelButton }.withFlex(0.4f));
+    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.4f));
     fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.15f));
 
-    outerBounds = fbProximityControlInComp.items[0].currentBounds;
+    outerBounds = fbTerminatorControlOutComp.items[0].currentBounds;
     inCompWidth = outerBounds.getWidth();
-    fbProximityControlInComp.performLayout(outerBounds.reduced(inCompWidth * 0.06f, 0));
+    fbTerminatorControlInComp.performLayout(outerBounds.reduced(inCompWidth * 0.06f, 0));
 
     // Sync channel Group
     juce::FlexBox fbSyncChannelOutComp;

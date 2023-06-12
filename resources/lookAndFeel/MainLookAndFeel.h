@@ -21,6 +21,7 @@ public:
     const Colour textButtonHoverBackgroundColor = Colour(Colours::white.withAlpha(0.3f));
     const Colour textButtonPressedBackgroundColor = Colour(Colours::white.withAlpha(0.1f));
     const Colour textButtonFrameColor = Colour(52, 54, 57);
+    const Colour labelBackgroundColor = Colour(39, 39, 44);
     const Colour textButtonActiveFrameColor = Colour(255, 255, 255);
 
     Typeface::Ptr normalFont;
@@ -206,5 +207,96 @@ public:
         font.setHeight(h);
         g.setFont(font);
         g.drawFittedText(text, x, y, w, h, Justification::left, 1);
+    }
+
+    Slider::SliderLayout getSliderLayout(Slider& slider) override
+    {
+        Rectangle<int> localBounds(0, 0, slider.getWidth(), slider.getHeight());
+
+        Slider::SliderLayout layout;
+
+        layout.sliderBounds.setBounds(localBounds.getWidth()*0.07f, localBounds.getY(), localBounds.getWidth()*0.42f, localBounds.getHeight());
+        layout.textBoxBounds.setBounds(localBounds.getWidth() * 0.71f, localBounds.getY(), localBounds.getWidth()*0.29f, localBounds.getHeight());
+        layout.textBoxBounds.reduce(10, 10);
+
+        return layout;
+    }
+
+    void drawLinearSlider(Graphics& g, int x, int y, int width, int height,
+        float sliderPos, float minSliderPos, float maxSliderPos,
+        const Slider::SliderStyle style, Slider& slider) override
+    {
+        drawLinearSliderBackground(g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
+        drawLinearSliderThumb(g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
+    }
+
+    void drawLinearSliderBackground(Graphics& g, int x, int y, int width, int height,
+        float sliderPos,
+        float minSliderPos,
+        float maxSliderPos,
+        const Slider::SliderStyle style, Slider& slider) override
+    {
+        const float h = slider.getTopLevelComponent()->getHeight() * 0.005f;
+
+        Path p;
+
+        p.addRoundedRectangle(x, 0.5f * height - h / 2, width, h, h);
+
+        g.setColour(textButtonFrameColor);
+        g.fillPath(p);
+    }
+
+    void drawLinearSliderThumb(Graphics& g, int x, int y, int width, int height,
+        float sliderPos, float minSliderPos, float maxSliderPos,
+        const Slider::SliderStyle style, Slider& slider) override
+    {
+        const float newDiameter = slider.getTopLevelComponent()->getHeight() * 0.024f;
+
+        Path p;
+        p.addEllipse(sliderPos - newDiameter/2, height/2.f - newDiameter/2.f, newDiameter, newDiameter);
+
+        g.setColour(mainTextColor);
+        g.fillPath(p);
+    }
+
+    void drawLabel(Graphics& g, Label& label) override
+    {
+        Rectangle<float> labelArea(0, 0, label.getWidth(), label.getHeight());
+
+        g.setColour(labelBackgroundColor);
+        auto labelInnerArea = labelArea.reduced(labelArea.getWidth() * 0.07f, labelArea.getHeight() * 0.08f);
+        g.fillRect(labelInnerArea);
+
+        g.setColour(mainTextColor);
+
+        int x = labelArea.getX();
+        int w = labelArea.getWidth();
+        int h = label.getTopLevelComponent()->getHeight() * 0.018f;
+        int y = (labelArea.getHeight() - h) / 2;
+
+        Font font(normalFont);
+        font.setHeight(h);
+        g.setFont(font);
+
+        if (!label.isBeingEdited()) {
+          g.drawFittedText(label.getText(), x, y, w, h, Justification::centred, 1);
+       }
+    }
+
+    void fillTextEditorBackground(Graphics& g, int width, int height, TextEditor& textEditor) override
+    {
+        Rectangle<float> textEditorArea(0, 0, textEditor.getWidth(), textEditor.getHeight());
+        g.setColour(textButtonHoverBackgroundColor);
+        g.fillRect(textEditorArea);
+    }
+
+    void drawTextEditorOutline(Graphics& g, int width, int height, TextEditor& textEditor) override
+    {
+        Rectangle<float> textEditorArea(0, 0, textEditor.getWidth(), textEditor.getHeight());
+        if (textEditor.isEnabled())
+        {
+            g.setColour(mainTextColor);
+            g.drawRect(textEditorArea, 1.f);
+        }
     }
 };
