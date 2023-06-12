@@ -625,7 +625,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     fbSyncChannelInComp.justifyContent = juce::FlexBox::JustifyContent::center;
     fbSyncChannelInComp.alignContent = juce::FlexBox::AlignContent::center;
     fbSyncChannelInComp.items.add(juce::FlexItem{  }.withFlex(0.45f));
-    fbSyncChannelInComp.items.add(juce::FlexItem{  }.withFlex(0.4f));
+    fbSyncChannelInComp.items.add(juce::FlexItem{ tmbSyncChannelButton }.withFlex(0.4f));
     fbSyncChannelInComp.items.add(juce::FlexItem{  }.withFlex(0.15f));
 
     outerBounds = fbSyncChannelOutComp.items[0].currentBounds;
