@@ -107,7 +107,10 @@ public:
                freeFieldImageArea.removeFromTop(button.proportionOfHeight(0.33f));
                freeFieldImageArea.removeFromBottom(button.proportionOfHeight(0.25f));
                freeFieldImg->drawWithin(g, freeFieldImageArea, juce::RectanglePlacement::centred, 1.f);
-               eqFieldCheckSign->drawWithin(g, freeFieldImageArea.reduced(20,20), juce::RectanglePlacement::centred, 1.f);
+
+               auto eqFieldCheckSignArea = juce::Rectangle<float>(20,
+                   freeFieldImageArea.getY() + 5, freeFieldImageArea.getWidth(), freeFieldImageArea.getHeight() * 0.3f);
+               eqFieldCheckSign->drawWithin(g, eqFieldCheckSignArea, juce::RectanglePlacement::centred, 1.f);
             }
             else
             {
@@ -124,7 +127,10 @@ public:
                 diffuseFieldImageArea.removeFromTop(button.proportionOfHeight(0.33f));
                 diffuseFieldImageArea.removeFromBottom(button.proportionOfHeight(0.25f));
                 diffuseFieldImg->drawWithin(g, diffuseFieldImageArea, juce::RectanglePlacement::centred, 1.f);
-                eqFieldCheckSign->drawWithin(g, diffuseFieldImageArea.reduced(20, 20), juce::RectanglePlacement::centred, 1.f);
+
+                auto eqFieldCheckSignArea = juce::Rectangle<float>(20,
+                    diffuseFieldImageArea.getY() + 5, diffuseFieldImageArea.getWidth(), diffuseFieldImageArea.getHeight() * 0.3f);
+                eqFieldCheckSign->drawWithin(g, eqFieldCheckSignArea, juce::RectanglePlacement::centred, 1.f);
             }
             else
             {
