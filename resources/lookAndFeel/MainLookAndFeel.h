@@ -311,7 +311,7 @@ public:
 
         g.setColour(textButtonActiveRedFrameColor);
         Path outline;
-        outline.addRoundedRectangle(toggleButtonBounds.reduced(14, 15), 10, 10);
+        outline.addRoundedRectangle(toggleButtonBounds.reduced(button.getWidth() * 0.19f, button.getHeight() * 0.28f), button.getHeight() * 0.23f, button.getHeight() * 0.23f);
 
         g.strokePath(outline, PathStrokeType(2.0f));
 
@@ -351,17 +351,17 @@ public:
         bool isMouseOverButton,
         bool isButtonDown) override
     {
-        const float newDiameter = 16.f;
+        const float newDiameter = h * 0.34f;
 
         Path p;
 
         if (ticked)
         {
-            p.addEllipse(w / 2, h / 2 - newDiameter / 2, newDiameter, newDiameter);
+            p.addEllipse(w*0.77f - newDiameter, h / 2 - newDiameter / 2, newDiameter, newDiameter);
         }
         else
         {
-            p.addEllipse(w / 2 - 2*newDiameter / 2, h / 2 - newDiameter / 2, newDiameter, newDiameter);
+            p.addEllipse(w*0.23f, h / 2 - newDiameter / 2, newDiameter, newDiameter);
         }
 
         g.setColour(mainTextColor);
