@@ -246,7 +246,9 @@ public:
 
         p.addRoundedRectangle(x, 0.5f * height - h / 2, width, h, h);
 
-        g.setColour(textButtonFrameColor);
+        auto pathColor = slider.isEnabled() ? textButtonFrameColor : textButtonFrameColor.withAlpha(0.4f);
+        g.setColour(pathColor);
+
         g.fillPath(p);
     }
 
@@ -259,7 +261,9 @@ public:
         Path p;
         p.addEllipse(sliderPos - newDiameter/2, height/2.f - newDiameter/2.f, newDiameter, newDiameter);
 
-        g.setColour(mainTextColor);
+        auto pathColor = slider.isEnabled() ? mainTextColor : mainTextColor.withAlpha(0.4f);
+        g.setColour(pathColor);
+
         g.fillPath(p);
     }
 
@@ -271,7 +275,8 @@ public:
         auto labelInnerArea = labelArea.reduced(labelArea.getWidth() * 0.07f, labelArea.getHeight() * 0.08f);
         g.fillRect(labelInnerArea);
 
-        g.setColour(mainTextColor);
+        auto textColor = label.isEnabled() ? mainTextColor : mainTextColor.withAlpha(0.4f);
+        g.setColour(textColor);
 
         int x = labelArea.getX();
         int w = labelArea.getWidth();

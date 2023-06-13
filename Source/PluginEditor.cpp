@@ -153,6 +153,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     slProximity.addListener(this);
 
     addAndMakeVisible(&tgbProxCtr);
+    tgbProxCtrAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment(valueTreeState, "proximityOnOff", tgbProxCtr));
     tgbProxCtr.addListener(this);
 
     addAndMakeVisible(&grpDstC);
@@ -731,6 +732,10 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     {
         return;
     }
+    else if (button == &tgbProxCtr)
+    {
+        slProximity.setEnabled(tgbProxCtr.getToggleState());
+    }
     else if (button == &tbZeroDelay)
     {
         bool isToggled = button->getToggleState();
@@ -1044,6 +1049,7 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
     tbRecordDisturber.setEnabled(set);
     tbRecordSignal.setEnabled(set);
     slProximity.setEnabled(set);
+    tgbProxCtr.setEnabled(set);
 }
 
 void PolarDesignerAudioProcessorEditor::setEqMode()
