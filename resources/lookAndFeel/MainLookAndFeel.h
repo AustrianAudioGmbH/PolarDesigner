@@ -19,10 +19,13 @@ public:
     const Colour groupComponentBackgroundColor = Colour(28, 30, 33);
     const Colour textButtonDefaultBackgroundColor = Colour(24, 25, 27);
     const Colour textButtonHoverBackgroundColor = Colour(Colours::white.withAlpha(0.3f));
+    const Colour textButtonHoverRedBackgroundColor = Colour(182, 22, 22).withAlpha(0.3f);
     const Colour textButtonPressedBackgroundColor = Colour(Colours::white.withAlpha(0.1f));
+    const Colour textButtonPressedRedBackgroundColor = Colour(182, 22, 22).withAlpha(0.1f);
     const Colour textButtonFrameColor = Colour(52, 54, 57);
     const Colour labelBackgroundColor = Colour(39, 39, 44);
     const Colour textButtonActiveFrameColor = Colour(255, 255, 255);
+    const Colour textButtonActiveRedFrameColor = Colour(182, 22, 22);
 
     Typeface::Ptr normalFont;
 
@@ -133,20 +136,20 @@ public:
         {
             if (isMouseOverButton)
             {
-                g.setColour(textButtonHoverBackgroundColor);
+                g.setColour(textButtonHoverRedBackgroundColor);
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (isButtonDown)
             {
-                g.setColour(textButtonPressedBackgroundColor);
+                g.setColour(textButtonPressedRedBackgroundColor);
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (button.getToggleState() == true)
             {
-                g.setColour(textButtonPressedBackgroundColor);
+                g.setColour(textButtonPressedRedBackgroundColor);
                 g.fillRect(buttonArea.reduced(4.0f, 4.0f));
-                g.setColour(textButtonActiveFrameColor);
-                g.drawRect(buttonArea.reduced(3.0f, 3.0f), 1);
+                g.setColour(textButtonActiveRedFrameColor);
+                g.drawRect(buttonArea.reduced(3.0f, 3.0f), 2);
             }
         }
     }
