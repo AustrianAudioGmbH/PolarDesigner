@@ -113,6 +113,8 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() : AudioProcessor (Bus
         std::make_unique<AudioParameterFloat> (ParameterID {"proximity", 1}, "Proximity", NormalisableRange<float>(-1.0f, 1.0f, 0.001f),
                                                0.0f, "", AudioProcessorParameter::genericParameter,
                                                [](float value, int maximumStringLength) { return std::abs(value) < 0.05f ? "off" : String(value, 2); }, nullptr),
+        std::make_unique<AudioParameterBool>  (ParameterID {"proximityOnOff", 1}, "ProximityOnOff", false, "",
+                                               [](bool value, int maximumStringLength) {return (value) ? "on" : "off"; }, nullptr),
         std::make_unique<AudioParameterBool>  (ParameterID {"zeroDelayMode", 1}, "Zero Latency", false, "",
                                                [](bool value, int maximumStringLength) {return (value) ? "on" : "off";}, nullptr),
         std::make_unique<AudioParameterInt>   (ParameterID {"syncChannel", 1}, "Sync to Channel", 0, 4, 0, "",
