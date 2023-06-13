@@ -46,6 +46,9 @@ public:
         auto freeFieldImg = juce::Drawable::createFromImageData(BinaryData::freeField_svg, BinaryData::freeField_svgSize);
         auto diffuseFieldImg = juce::Drawable::createFromImageData(BinaryData::diffuseField_svg, BinaryData::diffuseField_svgSize);
         auto eqFieldCheckSign = juce::Drawable::createFromImageData(BinaryData::eqFieldCheckSign_svg, BinaryData::eqFieldCheckSign_svgSize);
+        auto terminateSpillIconImg = juce::Drawable::createFromImageData(BinaryData::terminateSpillIcon_svg, BinaryData::terminateSpillIcon_svgSize);
+        auto maximizeTargetIconImg = juce::Drawable::createFromImageData(BinaryData::maximizeTargetIcon_svg, BinaryData::maximizeTargetIcon_svgSize);
+        auto maxTargetToSpillIconImg = juce::Drawable::createFromImageData(BinaryData::maxTargetToSpillIcon_svg, BinaryData::maximizeTargetIcon_svgSize);
 
         if (button.getButtonText() == "Zero latency")
         {
@@ -139,6 +142,69 @@ public:
                 diffuseFieldImg->drawWithin(g, diffuseFieldImageArea, juce::RectanglePlacement::centred, 1.f);
             }
         }
+        else if (button.getButtonText() == "Terminate Spill")
+        {
+            g.setColour(textButtonFrameColor);
+            auto reducedRect = buttonArea.reduced(4);
+            g.drawRect(reducedRect, 1);
+
+            auto iconArea = buttonArea.reduced(button.proportionOfWidth(0.45f), button.proportionOfHeight(0.33f)).translated(button.proportionOfWidth(0.38f), 0);
+
+            terminateSpillIconImg->drawWithin(g, iconArea, juce::RectanglePlacement::centred, 1.f);
+
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonHoverBackgroundColor);
+                g.fillRect(reducedRect.reduced(1.0f, 1.0f));
+            }
+            if (isButtonDown)
+            {
+                g.setColour(textButtonPressedBackgroundColor);
+                g.fillRect(reducedRect.reduced(1.0f, 1.0f));
+            }
+        }
+        else if (button.getButtonText() == "Maximize Target")
+        {
+            g.setColour(textButtonFrameColor);
+            auto reducedRect = buttonArea.reduced(4);
+            g.drawRect(reducedRect, 1);
+
+            auto iconArea = buttonArea.reduced(button.proportionOfWidth(0.45f), button.proportionOfHeight(0.33f)).translated(button.proportionOfWidth(0.38f), 0);
+             
+            maximizeTargetIconImg->drawWithin(g, iconArea, juce::RectanglePlacement::centred, 1.f);
+             
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonHoverBackgroundColor);
+                g.fillRect(reducedRect.reduced(1.0f, 1.0f));
+            }
+            if (isButtonDown)
+            {
+                g.setColour(textButtonPressedBackgroundColor);
+                g.fillRect(reducedRect.reduced(1.0f, 1.0f));
+            }
+        }
+        else if (button.getButtonText() == "Max Target-to-spill")
+        {
+            g.setColour(textButtonFrameColor);
+            auto reducedRect = buttonArea.reduced(4);
+            g.drawRect(reducedRect, 1);
+
+            auto iconArea = buttonArea.reduced(button.proportionOfWidth(0.45f), button.proportionOfHeight(0.33f)).translated(button.proportionOfWidth(0.38f), 0);
+
+            maxTargetToSpillIconImg->drawWithin(g, iconArea, juce::RectanglePlacement::centred, 1.f);
+
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonHoverBackgroundColor);
+                g.fillRect(reducedRect.reduced(1.0f, 1.0f));
+            }
+            if (isButtonDown)
+            {
+                g.setColour(textButtonPressedBackgroundColor);
+                g.fillRect(reducedRect.reduced(1.0f, 1.0f));
+            }
+        }
         else
         {
             if (isMouseOverButton)
@@ -172,6 +238,8 @@ public:
         int h = button.getTopLevelComponent()->getHeight() * 0.023f;
         int y = (buttonArea.getHeight() - h)/2;
 
+        auto justification = Justification::centred;
+
         if (button.getButtonText() == "Load")
         {
             x = buttonArea.proportionOfWidth(0.18f);
@@ -187,11 +255,19 @@ public:
             y = buttonArea.proportionOfHeight(0.775f);
             h = button.getTopLevelComponent()->getHeight() * 0.018f;
         }
+        else if (button.getButtonText() == "Terminate Spill"
+            || button.getButtonText() == "Maximize Target"
+            || button.getButtonText() == "Max Target-to-spill")
+        {
+            justification = Justification::centredLeft;
+            x = buttonArea.proportionOfWidth(0.11f);
+            w = buttonArea.proportionOfWidth(0.78f);
+        }
 
         Font font(normalFont);
         font.setHeight(h);
         g.setFont(font);
-        g.drawFittedText(button.getButtonText(), x, y, w, h, Justification::centred, 1);
+        g.drawFittedText(button.getButtonText(), x, y, w, h, justification, 1);
     }
 
     void drawGroupComponentOutline(Graphics& g, int width, int height,

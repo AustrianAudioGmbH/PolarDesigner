@@ -238,13 +238,18 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     }
     
     directivityEqualiser.initValueBox();
-    addAndMakeVisible (&tbRecordDisturber);
-    tbRecordDisturber.setButtonText ("terminate spill");
-    tbRecordDisturber.addListener (this);
+
+    addAndMakeVisible (&tbTerminateSpill);
+    tbTerminateSpill.setButtonText ("Terminate Spill");
+    tbTerminateSpill.addListener (this);
     
-    addAndMakeVisible (&tbRecordSignal);
-    tbRecordSignal.setButtonText ("maximize target");
-    tbRecordSignal.addListener (this);
+    addAndMakeVisible (&tbMaximizeTarget);
+    tbMaximizeTarget.setButtonText ("Maximize Target");
+    tbMaximizeTarget.addListener (this);
+
+    addAndMakeVisible(&tbMaxTargetToSpill);
+    tbMaxTargetToSpill.setButtonText("Max Target-to-spill");
+    tbMaxTargetToSpill.addListener(this);
     
     addAndMakeVisible (&tbAllowBackwardsPattern);
     tbAllowBackwardsPatternAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "allowBackwardsPattern", tbAllowBackwardsPattern));
@@ -403,8 +408,8 @@ void PolarDesignerAudioProcessorEditor::resized()
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     sideComponent.items.add(juce::FlexItem(grpDstC).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem(tbAllowBackwardsPattern).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(tbRecordDisturber).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(tbRecordSignal).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(tbTerminateSpill).withFlex(sideComponentItemFlex));
+    sideComponent.items.add(juce::FlexItem(tbMaximizeTarget).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
     sideComponent.items.add(juce::FlexItem(grpSync).withFlex(sideComponentItemFlex));
     sideComponent.items.add(juce::FlexItem(syncChannelComponent).withFlex(sideComponentItemFlex));
@@ -614,9 +619,13 @@ void PolarDesignerAudioProcessorEditor::resized()
     fbTerminatorControlInComp.flexDirection = juce::FlexBox::Direction::column;
     fbTerminatorControlInComp.justifyContent = juce::FlexBox::JustifyContent::center;
     fbTerminatorControlInComp.alignContent = juce::FlexBox::AlignContent::center;
-    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.45f));
-    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.4f));
-    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.15f));
+    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.25f));
+    fbTerminatorControlInComp.items.add(juce::FlexItem{ tbTerminateSpill }.withFlex(0.22f));
+    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
+    fbTerminatorControlInComp.items.add(juce::FlexItem{ tbMaximizeTarget }.withFlex(0.22f));
+    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
+    fbTerminatorControlInComp.items.add(juce::FlexItem{ tbMaxTargetToSpill }.withFlex(0.22f));
+    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
 
     outerBounds = fbTerminatorControlOutComp.items[0].currentBounds;
     inCompWidth = outerBounds.getWidth();
@@ -712,7 +721,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         processor.setEqState(1);
         ibEqCtr[0].setToggleState(false, juce::NotificationType::dontSendNotification);
     }
-    else if (button == &tbRecordDisturber)
+    else if (button == &tbTerminateSpill)
     {
         processor.startTracking(true);
         alOverlayDisturber.enableRatioButton(processor.getSignalRecorded());
@@ -720,13 +729,17 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         disableMainArea();
         setSideAreaEnabled(false);
     }
-    else if (button == &tbRecordSignal)
+    else if (button == &tbMaximizeTarget)
     {
         processor.startTracking(false);
         alOverlaySignal.enableRatioButton(processor.getDisturberRecorded());
         alOverlaySignal.setVisible(true);
         disableMainArea();
         setSideAreaEnabled(false);
+    }
+    else if (button == &tbMaxTargetToSpill)
+    {
+         //TODO
     }
     else if (button == &tbAllowBackwardsPattern)
     {
@@ -1046,8 +1059,9 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
     ibEqCtr[0].setEnabled(set);
     ibEqCtr[1].setEnabled(set);
     tbAllowBackwardsPattern.setEnabled(set);
-    tbRecordDisturber.setEnabled(set);
-    tbRecordSignal.setEnabled(set);
+    tbTerminateSpill.setEnabled(set);
+    tbMaximizeTarget.setEnabled(set);
+    tbMaxTargetToSpill.setEnabled(set);
     slProximity.setEnabled(set);
     tgbProxCtr.setEnabled(set);
 }
