@@ -26,6 +26,7 @@ public:
     const Colour labelBackgroundColor = Colour(39, 39, 44);
     const Colour textButtonActiveFrameColor = Colour(255, 255, 255);
     const Colour textButtonActiveRedFrameColor = Colour(182, 22, 22);
+    const Colour toggleButtonActiveRedBackgroundColor = Colour(182, 22, 22).withAlpha(0.7f);
 
     Typeface::Ptr normalFont;
 
@@ -301,5 +302,69 @@ public:
             g.setColour(mainTextColor);
             g.drawRect(textEditorArea, 1.f);
         }
+    }
+
+    void drawToggleButton(Graphics& g, ToggleButton& button,
+        bool isMouseOverButton, bool isButtonDown) override
+    {
+        Rectangle<int> toggleButtonBounds(0, 0, button.getWidth(), button.getHeight());
+
+        g.setColour(textButtonActiveRedFrameColor);
+        Path outline;
+        outline.addRoundedRectangle(toggleButtonBounds.reduced(14, 15), 10, 10);
+
+        g.strokePath(outline, PathStrokeType(2.0f));
+
+        if (button.getToggleState() != true)
+        {
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonHoverRedBackgroundColor);
+            }
+            else
+            {
+                g.setColour(textButtonPressedRedBackgroundColor);
+            }
+        }
+        else
+        {
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonHoverRedBackgroundColor);
+            }
+            else
+            {
+                g.setColour(textButtonPressedRedBackgroundColor);
+            }
+        }
+        g.fillPath(outline);
+
+        drawTickBox(g, button, toggleButtonBounds.getX(), toggleButtonBounds.getY(),
+            toggleButtonBounds.getWidth(), toggleButtonBounds.getHeight(),
+            button.getToggleState(), false, false, false);
+    }
+
+    void drawTickBox(Graphics& g, Component& component,
+        float x, float y, float w, float h,
+        bool ticked,
+        bool isEnabled,
+        bool isMouseOverButton,
+        bool isButtonDown) override
+    {
+        const float newDiameter = 16.f;
+
+        Path p;
+
+        if (ticked)
+        {
+            p.addEllipse(w / 2, h / 2 - newDiameter / 2, newDiameter, newDiameter);
+        }
+        else
+        {
+            p.addEllipse(w / 2 - 2*newDiameter / 2, h / 2 - newDiameter / 2, newDiameter, newDiameter);
+        }
+
+        g.setColour(mainTextColor);
+        g.fillPath(p);
     }
 };

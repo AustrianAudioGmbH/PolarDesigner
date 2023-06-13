@@ -146,6 +146,15 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     addAndMakeVisible(&grpProxComp);
     grpProxComp.setText("Proximity control");
 
+    addAndMakeVisible(&slProximity);
+    slProximityAtt = std::unique_ptr<SliderAttachment>(new SliderAttachment(valueTreeState, "proximity", slProximity));
+    slProximity.setSliderStyle(Slider::LinearHorizontal);
+    slProximity.setTextBoxStyle(Slider::TextBoxRight, false, 45, 15);
+    slProximity.addListener(this);
+
+    addAndMakeVisible(&tgbProxCtr);
+    tgbProxCtr.addListener(this);
+
     addAndMakeVisible(&grpDstC);
     grpDstC.setText("Terminator control");
 
@@ -241,12 +250,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbAllowBackwardsPattern.setButtonText ("allow reverse patterns");
     tbAllowBackwardsPattern.addListener (this);
 
-    addAndMakeVisible (&slProximity);
-    slProximityAtt = std::unique_ptr<SliderAttachment>(new SliderAttachment (valueTreeState, "proximity", slProximity));
-    slProximity.setSliderStyle (Slider::LinearHorizontal);
-    slProximity.setTextBoxStyle (Slider::TextBoxRight, false, 45, 15);
-    slProximity.addListener (this);
-    directivityEqualiser.setSoloActive (getSoloActive());
+    directivityEqualiser.setSoloActive(getSoloActive());
+
     for (auto& vis : polarPatternVisualizers)
     {
         vis.setSoloActive (getSoloActive());
@@ -580,11 +585,18 @@ void PolarDesignerAudioProcessorEditor::resized()
     fbProximityControlOutComp.items.add(juce::FlexItem{ grpProxComp }.withFlex(1.0f));
     fbProximityControlOutComp.performLayout(sideComponent.items[4].currentBounds);
 
+    juce::FlexBox fbProximityControlToggleButton;
+    fbProximityControlToggleButton.flexDirection = juce::FlexBox::Direction::row;
+    fbProximityControlToggleButton.justifyContent = juce::FlexBox::JustifyContent::center;
+    fbProximityControlToggleButton.alignContent = juce::FlexBox::AlignContent::center;
+    fbProximityControlToggleButton.items.add(juce::FlexItem{  }.withFlex(0.75f));
+    fbProximityControlToggleButton.items.add(juce::FlexItem{ tgbProxCtr }.withFlex(0.25f));
+
     juce::FlexBox fbProximityControlInComp;
     fbProximityControlInComp.flexDirection = juce::FlexBox::Direction::column;
     fbProximityControlInComp.justifyContent = juce::FlexBox::JustifyContent::center;
     fbProximityControlInComp.alignContent = juce::FlexBox::AlignContent::center;
-    fbProximityControlInComp.items.add(juce::FlexItem{  }.withFlex(0.5f));
+    fbProximityControlInComp.items.add(juce::FlexItem{ fbProximityControlToggleButton }.withFlex(0.5f));
     fbProximityControlInComp.items.add(juce::FlexItem{ slProximity }.withFlex(0.45f));
     fbProximityControlInComp.items.add(juce::FlexItem{  }.withFlex(0.05f));
 
