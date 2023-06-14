@@ -172,6 +172,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
         tmbSyncChannelButton[i].setButtonText(String(i+1));
         tmbSyncChannelButton[i].addListener(this);
+        //Set ID manually for drawing colors purpose
+        tmbSyncChannelButton[i].setComponentID(String("552" + String(i + 1)));
 
         if (i == syncChannelIdx - 1) tmbSyncChannelButton[i].setToggleState(true, NotificationType::dontSendNotification);
     }
