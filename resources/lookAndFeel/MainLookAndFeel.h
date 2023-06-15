@@ -58,6 +58,7 @@ public:
         auto terminateSpillIconImg = juce::Drawable::createFromImageData(BinaryData::terminateSpillIcon_svg, BinaryData::terminateSpillIcon_svgSize);
         auto maximizeTargetIconImg = juce::Drawable::createFromImageData(BinaryData::maximizeTargetIcon_svg, BinaryData::maximizeTargetIcon_svgSize);
         auto maxTargetToSpillIconImg = juce::Drawable::createFromImageData(BinaryData::maxTargetToSpillIcon_svg, BinaryData::maximizeTargetIcon_svgSize);
+        auto closePresetListIconImg = juce::Drawable::createFromImageData(BinaryData::closePresetListIcon_svg, BinaryData::closePresetListIcon_svgSize);
 
         if (button.getButtonText() == "Zero latency")
         {
@@ -83,6 +84,23 @@ public:
             auto arrowArea = buttonArea.reduced(button.proportionOfWidth(0.45f), button.proportionOfHeight(0.33f)).translated(button.proportionOfWidth(0.36f), 0);
 
             loadArrowImg->drawWithin(g, arrowArea, juce::RectanglePlacement::centred, 1.f);
+
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonHoverBackgroundColor);
+                g.fillRect(buttonArea.reduced(1.0f, 1.0f));
+            }
+            if (isButtonDown)
+            {
+                g.setColour(textButtonPressedBackgroundColor);
+                g.fillRect(buttonArea.reduced(1.0f, 1.0f));
+            }
+        }
+        else if (button.getComponentID() == "5621")
+        {
+            auto imageArea = buttonArea.reduced(5, 5);// button.proportionOfWidth(0.45f), button.proportionOfHeight(0.33f)).translated(button.proportionOfWidth(0.36f), 0);
+
+            closePresetListIconImg->drawWithin(g, imageArea, juce::RectanglePlacement::centred, 1.f);
 
             if (isMouseOverButton)
             {
@@ -288,6 +306,19 @@ public:
                 g.fillRect(buttonArea.reduced(4.0f, 4.0f));
                 g.setColour(textButtonActiveYellowFrameColor);
                 g.drawRect(buttonArea.reduced(3.0f, 3.0f), 2);
+            }
+        }
+        else if (button.getComponentID() == "5621")
+        {
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonHoverBackgroundColor);
+                g.fillRect(buttonArea.reduced(3.0f, 3.0f));
+            }
+            if (isButtonDown)
+            {
+                g.setColour(textButtonPressedBackgroundColor);
+                g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
         }
         else

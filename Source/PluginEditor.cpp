@@ -270,10 +270,19 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     addAndMakeVisible(&grpPresetList);
     grpPresetList.setText("Preset");
 
+    addAndMakeVisible(&tbClosePresetList);
+    tbClosePresetList.addListener(this);
+    tbClosePresetList.setComponentID("5621");
+    tbClosePresetList.setToggleState(false, NotificationType::dontSendNotification);
+
     addAndMakeVisible(&tbOpenFromFile);
     tbOpenFromFile.setClickingTogglesState(true);
     tbOpenFromFile.setButtonText("Open from file");
     tbOpenFromFile.addListener(this);
+
+    addAndMakeVisible(&lbUserPresets);
+
+    addAndMakeVisible(&lbFactoryPresets);
 
     nActiveBandsChanged();
     zeroDelayModeChange();
@@ -669,23 +678,31 @@ void PolarDesignerAudioProcessorEditor::resized()
     fbPresetListOutComp.items.add(juce::FlexItem{ grpPresetList }.withFlex(1.0f));
     fbPresetListOutComp.performLayout(mainfb.items[1].currentBounds);
 
-    juce::FlexBox fbPresetListSubInComp;
-    fbPresetListSubInComp.flexDirection = juce::FlexBox::Direction::row;
-    fbPresetListSubInComp.justifyContent = juce::FlexBox::JustifyContent::center;
-    fbPresetListSubInComp.alignContent = juce::FlexBox::AlignContent::center;
-    fbPresetListSubInComp.items.add(juce::FlexItem{  }.withFlex(0.5f));
-    fbPresetListSubInComp.items.add(juce::FlexItem{ tbOpenFromFile }.withFlex(0.5f));
+    juce::FlexBox fbPresetListSub1InComp;
+    fbPresetListSub1InComp.flexDirection = juce::FlexBox::Direction::row;
+    fbPresetListSub1InComp.justifyContent = juce::FlexBox::JustifyContent::center;
+    fbPresetListSub1InComp.items.add(juce::FlexItem{  }.withFlex(0.9f));
+    fbPresetListSub1InComp.items.add(juce::FlexItem{ tbClosePresetList }.withFlex(0.1f));
+
+    juce::FlexBox fbPresetListSub2InComp;
+    fbPresetListSub2InComp.flexDirection = juce::FlexBox::Direction::row;
+    fbPresetListSub2InComp.justifyContent = juce::FlexBox::JustifyContent::center;
+    fbPresetListSub2InComp.alignContent = juce::FlexBox::AlignContent::center;
+    fbPresetListSub2InComp.items.add(juce::FlexItem{  }.withFlex(0.5f));
+    fbPresetListSub2InComp.items.add(juce::FlexItem{ tbOpenFromFile }.withFlex(0.5f));
 
     juce::FlexBox fbPresetListInComp;
     fbPresetListInComp.flexDirection = juce::FlexBox::Direction::column;
     fbPresetListInComp.justifyContent = juce::FlexBox::JustifyContent::center;
     fbPresetListInComp.alignContent = juce::FlexBox::AlignContent::center;
-    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.083f));
-    fbPresetListInComp.items.add(juce::FlexItem{ fbPresetListSubInComp }.withFlex(0.04f));
+    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.04f));
+    fbPresetListInComp.items.add(juce::FlexItem{ fbPresetListSub1InComp }.withFlex(0.03f));
+    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.013f));
+    fbPresetListInComp.items.add(juce::FlexItem{ fbPresetListSub2InComp }.withFlex(0.04f));
     fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
-    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.27f));
+    fbPresetListInComp.items.add(juce::FlexItem{ lbUserPresets }.withFlex(0.27f));
     fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
-    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.27f));
+    fbPresetListInComp.items.add(juce::FlexItem{ lbFactoryPresets }.withFlex(0.27f));
     fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.217f));
 
     outerBounds = fbPresetListOutComp.items[0].currentBounds;
@@ -748,8 +765,20 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
 
     if (button == &tbLoad)
     {
-        showPresetList(!button->getToggleState());
-        button->setToggleState(!button->getToggleState(), juce::NotificationType::dontSendNotification);
+        if (!presetListVisible)
+        {
+            showPresetList(!button->getToggleState());
+            logoAA.setVisible(!logoAA.isVisible());
+            titlePD.setVisible(!titlePD.isVisible());
+        }
+    }
+    else if (button == &tbOpenFromFile)
+    {
+        loadFile();
+    }
+    else if (button == &tbClosePresetList)
+    {
+        showPresetList(false);
         logoAA.setVisible(!logoAA.isVisible());
         titlePD.setVisible(!titlePD.isVisible());
     }

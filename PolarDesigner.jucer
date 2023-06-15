@@ -13,6 +13,8 @@
               cppLanguageStandard="20">
   <MAINGROUP id="nmXiNr" name="PolarDesigner">
     <GROUP id="{C8EE4C48-1BA5-E054-5005-2C66E75BBE64}" name="Assets">
+      <FILE id="BbMSdg" name="closePresetListIcon.svg" compile="0" resource="1"
+            file="Assets/closePresetListIcon.svg"/>
       <FILE id="GaRa62" name="diffuseField.svg" compile="0" resource="1"
             file="Assets/diffuseField.svg"/>
       <FILE id="irXVGy" name="eqFieldCheckSign.svg" compile="0" resource="1"
