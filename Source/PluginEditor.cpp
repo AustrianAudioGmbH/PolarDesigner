@@ -146,15 +146,16 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     addAndMakeVisible(&grpProxComp);
     grpProxComp.setText("Proximity control");
 
+    addAndMakeVisible(&tgbProxCtr);
+    tgbProxCtrAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment(valueTreeState, "proximityOnOff", tgbProxCtr));
+    tgbProxCtr.addListener(this);
+
     addAndMakeVisible(&slProximity);
     slProximityAtt = std::unique_ptr<SliderAttachment>(new SliderAttachment(valueTreeState, "proximity", slProximity));
     slProximity.setSliderStyle(Slider::LinearHorizontal);
     slProximity.setTextBoxStyle(Slider::TextBoxRight, false, 45, 15);
+    slProximity.setEnabled(tgbProxCtr.getToggleState());
     slProximity.addListener(this);
-
-    addAndMakeVisible(&tgbProxCtr);
-    tgbProxCtrAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment(valueTreeState, "proximityOnOff", tgbProxCtr));
-    tgbProxCtr.addListener(this);
 
     addAndMakeVisible(&grpDstC);
     grpDstC.setText("Terminator control");
@@ -1064,8 +1065,11 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
     tbTerminateSpill.setEnabled(set);
     tbMaximizeTarget.setEnabled(set);
     tbMaxTargetToSpill.setEnabled(set);
-    slProximity.setEnabled(set);
     tgbProxCtr.setEnabled(set);
+    if (tgbProxCtr.getToggleState())
+    {
+        slProximity.setEnabled(set);
+    }
 }
 
 void PolarDesignerAudioProcessorEditor::setEqMode()
