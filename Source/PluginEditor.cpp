@@ -31,7 +31,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     : AudioProcessorEditor (&p), loadingFile(false), processor (p), valueTreeState(vts),
     directivityEqualiser (p), alOverlayError(AlertOverlay::Type::errorMessage),
     alOverlayDisturber(AlertOverlay::Type::disturberTracking),
-    alOverlaySignal(AlertOverlay::Type::signalTracking)
+    alOverlaySignal(AlertOverlay::Type::signalTracking),
+    presetListVisible(false)
 {
 //    openGLContext.attachTo (*getTopLevelComponent());
     
@@ -265,10 +266,18 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     {
         vis.setSoloActive (getSoloActive());
     }
-    
+
+    addAndMakeVisible(&grpPresetList);
+    grpPresetList.setText("Preset");
+
+    addAndMakeVisible(&tbOpenFromFile);
+    tbOpenFromFile.setClickingTogglesState(true);
+    tbOpenFromFile.setButtonText("Open from file");
+    tbOpenFromFile.addListener(this);
+
     nActiveBandsChanged();
     zeroDelayModeChange();
-    
+
     // set overlay callbacks
     alOverlayError.setOnOkayCallback ([this]() { onAlOverlayErrorOkay(); });
     
@@ -330,12 +339,17 @@ void PolarDesignerAudioProcessorEditor::paint (Graphics& g)
 
 void PolarDesignerAudioProcessorEditor::resized()
 {
-    Rectangle<int> area (getLocalBounds());
+    Rectangle<int> area(getLocalBounds());
 
-    juce::FlexBox fb;
-    fb.flexDirection = FlexBox::Direction::column;
-    fb.justifyContent = juce::FlexBox::JustifyContent::center;
-    fb.alignContent = juce::FlexBox::AlignContent::center;
+    juce::FlexBox mainfb;
+    mainfb.flexDirection = FlexBox::Direction::row;
+    mainfb.justifyContent = juce::FlexBox::JustifyContent::center;
+    mainfb.alignContent = juce::FlexBox::AlignContent::center;
+
+    juce::FlexBox subfb;
+    subfb.flexDirection = FlexBox::Direction::column;
+    subfb.justifyContent = juce::FlexBox::JustifyContent::center;
+    subfb.alignContent = juce::FlexBox::AlignContent::center;
 
     juce::FlexBox topComponent;
     topComponent.flexDirection = FlexBox::Direction::row;
@@ -345,16 +359,20 @@ void PolarDesignerAudioProcessorEditor::resized()
     const float marginFlex = 0.022f;
     const float topComponentTitleFlex = 0.4f;
     const float topComponentButtonsFlex = 0.035f;
-    const float topComponentSpacingFlex = topComponentButtonsFlex/2;
+    const float topComponentSpacingFlex = topComponentButtonsFlex / 2;
     const float topComponentButtonsMargin = 5;
     const float radioButonsFlex = 0.18f;
     const float radioButonsSpaceFlex = 0.025f;
 
     topComponent.items.add(juce::FlexItem().withFlex(0.022f));
-    topComponent.items.add(juce::FlexItem(logoAA).withFlex(0.033f));
-    topComponent.items.add(juce::FlexItem().withFlex(0.007f));
-    topComponent.items.add(juce::FlexItem(titlePD).withFlex(0.14f));
-    topComponent.items.add(juce::FlexItem().withFlex(0.063f));
+    if (!presetListVisible)
+    {
+        topComponent.items.add(juce::FlexItem(logoAA).withFlex(0.033f));
+        topComponent.items.add(juce::FlexItem().withFlex(0.007f));
+        topComponent.items.add(juce::FlexItem(titlePD).withFlex(0.14f));
+        topComponent.items.add(juce::FlexItem().withFlex(0.063f));
+    }
+
     topComponent.items.add(juce::FlexItem(titleCompare).withFlex(0.063f));
     topComponent.items.add(juce::FlexItem().withFlex(0.016f));
     topComponent.items.add(juce::FlexItem(tmbABButton).withFlex(0.077f).withMargin(2));
@@ -397,26 +415,6 @@ void PolarDesignerAudioProcessorEditor::resized()
     sideComponent.items.add(juce::FlexItem(/*placeholder for grpTermControl*/).withFlex(0.28f));
     sideComponent.items.add(juce::FlexItem().withFlex(0.02f));
     sideComponent.items.add(juce::FlexItem(/*placeholder for grpSync*/).withFlex(0.14f));
-    
-    /*
-    sideComponent.items.add(juce::FlexItem(grpPreset).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
-    sideComponent.items.add(juce::FlexItem(grpEq).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(tbEq[0]).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(tbEq[1]).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(tbEq[2]).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
-    sideComponent.items.add(juce::FlexItem(grpProxComp).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(slProximity).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
-    sideComponent.items.add(juce::FlexItem(grpDstC).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(tbAllowBackwardsPattern).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(tbTerminateSpill).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(tbMaximizeTarget).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem().withFlex(marginFlex));
-    sideComponent.items.add(juce::FlexItem(grpSync).withFlex(sideComponentItemFlex));
-    sideComponent.items.add(juce::FlexItem(syncChannelComponent).withFlex(sideComponentItemFlex));
-    */
 
     // Margins are fixed value because DirectivityEQ component has fixed margins
     const float polarVisualizersComponentLeftMargin = 33;
@@ -535,20 +533,35 @@ void PolarDesignerAudioProcessorEditor::resized()
     mainComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     mainComponent.alignContent = juce::FlexBox::AlignContent::center;
     mainComponent.items.add(juce::FlexItem().withFlex(0.021f));
-    mainComponent.items.add(juce::FlexItem(sideComponent).withFlex(0.21f));
-    mainComponent.items.add(juce::FlexItem().withFlex(0.027f));
+    if (!presetListVisible)
+    {
+        mainComponent.items.add(juce::FlexItem(sideComponent).withFlex(0.21f));
+        mainComponent.items.add(juce::FlexItem().withFlex(0.027f));
+    }
     mainComponent.items.add(juce::FlexItem(middleComponent).withFlex(0.66f));
     mainComponent.items.add(juce::FlexItem().withFlex(0.017f));
     mainComponent.items.add(juce::FlexItem(/*trimSliderComponent*/).withFlex(0.03f));
     mainComponent.items.add(juce::FlexItem().withFlex(0.027f));
 
-    fb.items.add(juce::FlexItem().withFlex(0.03f));
-    fb.items.add(juce::FlexItem(topComponent).withFlex(0.046f));
-    fb.items.add(juce::FlexItem().withFlex(0.05f));
-    fb.items.add(juce::FlexItem(mainComponent).withFlex(0.84f));
-    fb.items.add(juce::FlexItem(footer).withFlex(0.03f));
+    subfb.items.add(juce::FlexItem().withFlex(0.03f));
+    subfb.items.add(juce::FlexItem(topComponent).withFlex(0.046f));
+    subfb.items.add(juce::FlexItem().withFlex(0.05f));
+    subfb.items.add(juce::FlexItem(mainComponent).withFlex(0.84f));
+    subfb.items.add(juce::FlexItem(footer).withFlex(0.03f));
 
-    fb.performLayout(area);
+    if (!presetListVisible)
+    {
+        mainfb.items.add(juce::FlexItem(subfb).withFlex(1.f));
+    }
+    else
+    {
+        mainfb.items.add(juce::FlexItem(subfb).withFlex(0.76f));
+        mainfb.items.add(juce::FlexItem(/*placeholder for preset list */).withFlex(0.24f));
+    }
+
+    mainfb.performLayout(area);
+
+    //fb.performLayout(area);
 
     // Number of bands Group
     juce::FlexBox fbNrBandsOutComp;
@@ -651,6 +664,33 @@ void PolarDesignerAudioProcessorEditor::resized()
     inCompWidth = outerBounds.getWidth();
     fbSyncChannelInComp.performLayout(outerBounds.reduced(inCompWidth * 0.06f, 0));
 
+    // Preset List Group
+    juce::FlexBox fbPresetListOutComp;
+    fbPresetListOutComp.items.add(juce::FlexItem{ grpPresetList }.withFlex(1.0f));
+    fbPresetListOutComp.performLayout(mainfb.items[1].currentBounds);
+
+    juce::FlexBox fbPresetListSubInComp;
+    fbPresetListSubInComp.flexDirection = juce::FlexBox::Direction::row;
+    fbPresetListSubInComp.justifyContent = juce::FlexBox::JustifyContent::center;
+    fbPresetListSubInComp.alignContent = juce::FlexBox::AlignContent::center;
+    fbPresetListSubInComp.items.add(juce::FlexItem{  }.withFlex(0.5f));
+    fbPresetListSubInComp.items.add(juce::FlexItem{ tbOpenFromFile }.withFlex(0.5f));
+
+    juce::FlexBox fbPresetListInComp;
+    fbPresetListInComp.flexDirection = juce::FlexBox::Direction::column;
+    fbPresetListInComp.justifyContent = juce::FlexBox::JustifyContent::center;
+    fbPresetListInComp.alignContent = juce::FlexBox::AlignContent::center;
+    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.083f));
+    fbPresetListInComp.items.add(juce::FlexItem{ fbPresetListSubInComp }.withFlex(0.04f));
+    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
+    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.27f));
+    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
+    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.27f));
+    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.217f));
+
+    outerBounds = fbPresetListOutComp.items[0].currentBounds;
+    inCompWidth = outerBounds.getWidth();
+    fbPresetListInComp.performLayout(outerBounds.reduced(inCompWidth * 0.06f, 0));
     /*
     alOverlayError.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
     alOverlayDisturber.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
@@ -708,7 +748,10 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
 
     if (button == &tbLoad)
     {
-        loadFile();
+        showPresetList(!button->getToggleState());
+        button->setToggleState(!button->getToggleState(), juce::NotificationType::dontSendNotification);
+        logoAA.setVisible(!logoAA.isVisible());
+        titlePD.setVisible(!titlePD.isVisible());
     }
     else if (button == &tbSave)
     {
@@ -1003,6 +1046,12 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
     
     directivityEqualiser.resetTooltipTexts();
     directivityEqualiser.repaint();
+}
+
+void PolarDesignerAudioProcessorEditor::showPresetList(bool shouldShow)
+{
+    presetListVisible = shouldShow;
+    resized();
 }
 
 void PolarDesignerAudioProcessorEditor::disableMainArea()

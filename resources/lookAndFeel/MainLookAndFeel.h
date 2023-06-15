@@ -111,6 +111,22 @@ public:
                 g.fillRect(buttonArea.reduced(1.0f, 1.0f));
             }
         }
+        else if (button.getButtonText() == "Open from file")
+        {
+            g.setColour(textButtonFrameColor);
+            g.drawRect(buttonArea, 1);
+
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonHoverBackgroundColor);
+                g.fillRect(buttonArea.reduced(1.0f, 1.0f));
+            }
+            if (isButtonDown)
+            {
+                g.setColour(textButtonPressedBackgroundColor);
+                g.fillRect(buttonArea.reduced(1.0f, 1.0f));
+            }
+        }
         else if (button.getButtonText() == "Free Field")
         {
             auto freeFieldImageArea = buttonArea;
@@ -347,7 +363,15 @@ public:
         g.setColour(groupComponentBackgroundColor);
 
         juce::Path path;
-        path.addRoundedRectangle(groupArea, 10.f, 10.f);
+        if (text == "Preset")
+        {
+            path.addRectangle(groupArea);
+        }
+        else
+        {
+            path.addRoundedRectangle(groupArea, 10.f, 10.f);
+        }
+
         path.closeSubPath();
         g.fillPath(path);
 
@@ -357,6 +381,11 @@ public:
         int y = 10.f;
         int w = group.proportionOfWidth(0.87f);
         int h = group.getTopLevelComponent()->getHeight()*0.025f;
+
+        if (text == "Preset")
+        {
+            y = group.proportionOfHeight(0.09f);
+        }
 
         Font font(normalFont);
         font.setHeight(h);

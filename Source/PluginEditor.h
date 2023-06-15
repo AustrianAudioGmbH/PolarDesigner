@@ -90,6 +90,7 @@ private:
 
     bool loadingFile;
     bool recordingDisturber;
+    bool presetListVisible;
 
     Colour eqColours[5];
  
@@ -106,7 +107,7 @@ private:
     TooltipWindow tooltipWindow;
 
     // Groups
-    GroupComponent grpEq, grpPreset, grpDstC, grpProxComp, grpBands, grpSync;
+    GroupComponent grpEq, grpPreset, grpDstC, grpProxComp, grpBands, grpSync, grpPresetList;
     // Sliders
     ReverseSlider slBandGain[5], slCrossoverPosition[4];
     DirSlider slDir[5];
@@ -118,7 +119,7 @@ private:
     // Solo Buttons
     MuteSoloButton msbSolo[5], msbMute[5];
     // Text Buttons
-    TextButton tbLoad, tbSave, tbTerminateSpill, tbMaximizeTarget, tbMaxTargetToSpill, tbZeroDelay, tbSyncChannel[5];
+    TextButton tbLoad, tbSave, tbTerminateSpill, tbMaximizeTarget, tbMaxTargetToSpill, tbZeroDelay, tbSyncChannel[5], tbOpenFromFile;
     // ToggleButtons
     ToggleButton tbAllowBackwardsPattern, tgbProxCtr;
     // ImageButtons
@@ -154,6 +155,7 @@ private:
     void setSideAreaEnabled(bool set);
     void disableOverlay();
     void zeroDelayModeChange();
+    void showPresetList(bool shouldShow);
     
     OpenGLContext openGLContext;
     
