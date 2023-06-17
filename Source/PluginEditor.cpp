@@ -281,8 +281,10 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbOpenFromFile.addListener(this);
 
     addAndMakeVisible(&lbUserPresets);
+    lbUserPresets.setHeaderText("User Presets");
 
     addAndMakeVisible(&lbFactoryPresets);
+    lbFactoryPresets.setHeaderText("Factory Presets");
 
     nActiveBandsChanged();
     zeroDelayModeChange();

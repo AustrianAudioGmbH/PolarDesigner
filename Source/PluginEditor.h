@@ -40,6 +40,7 @@
 #include "../resources/customComponents/AlertOverlay.h"
 #include "../resources/customComponents/EndlessSlider.h"
 #include "../resources/customComponents/MultiTextButton.h"
+#include "../resources/customComponents/PresetListBox.h"
 
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
@@ -127,7 +128,7 @@ private:
 
     TextMultiButton tmbABButton, tmbNrBandsButton, tmbSyncChannelButton;
 
-    ListBox lbUserPresets, lbFactoryPresets;
+    PresetListBox lbUserPresets, lbFactoryPresets;
 
     // Pointers for value tree state
     std::unique_ptr<ReverseSlider::SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4];

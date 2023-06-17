@@ -25,12 +25,15 @@
             file="Assets/maximizeTargetIcon.svg"/>
       <FILE id="mrYLjb" name="maxTargetToSpillIcon.svg" compile="0" resource="1"
             file="Assets/maxTargetToSpillIcon.svg"/>
+      <FILE id="sTinup" name="presetHeaderArrowIcon.svg" compile="0" resource="1"
+            file="Assets/presetHeaderArrowIcon.svg"/>
       <FILE id="uCzmRQ" name="scrollImage.png" compile="0" resource="1" file="Assets/scrollImage.png"/>
       <FILE id="KEj4pY" name="terminateSpillIcon.svg" compile="0" resource="1"
             file="Assets/terminateSpillIcon.svg"/>
     </GROUP>
     <GROUP id="{D54BFC58-8ED6-1DEF-A2B9-DAAF16495BAC}" name="resources">
       <GROUP id="{75BF05EC-024B-1F61-DA13-169C5FDE5119}" name="customComponents">
+        <FILE id="ZUAv2H" name="PresetListBox.h" compile="0" resource="0" file="resources/customComponents/PresetListBox.h"/>
         <FILE id="x7u7c6" name="MultiTextButton.h" compile="0" resource="0"
               file="resources/customComponents/MultiTextButton.h"/>
         <FILE id="x5WJg9" name="EndlessSlider.h" compile="0" resource="0" file="resources/customComponents/EndlessSlider.h"/>
