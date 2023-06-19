@@ -51,20 +51,30 @@ public:
 
     void paintListBoxItem(int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override
     {
+        auto comp = presets.getComponentForRowNumber(rowNumber);
+        auto comp2 = presets.getRowContainingPosition(mousepos.getX(), mousepos.getY());
+
         if (rowIsSelected)
         {
             highlightColor = mainLaF.textButtonHoverBackgroundColor;
         }
-        else if (mouseOverRow)
+        else if (mouseOverRow && comp)
         {
-            highlightColor = mainLaF.textButtonHoverBackgroundColor.withAlpha(0.5f);
+            auto currentComp = comp->getBounds();
+            if (currentComp.contains(mousepos.toInt()))
+            {
+                highlightColor = mainLaF.textButtonHoverBackgroundColor.withAlpha(0.5f);
+                g.setColour(highlightColor);
+                g.fillRect(currentComp);
+            }
+
         }
         else
         {
             highlightColor = mainLaF.groupComponentBackgroundColor;
         }
 
-        g.fillAll(highlightColor);
+        //g.fillAll(highlightColor);
         g.setColour(mainLaF.mainTextColor);
 
         int h = getTopLevelComponent()->getHeight() * 0.023f;
@@ -79,13 +89,14 @@ public:
     void mouseEnter(const MouseEvent& event) override
     {
         mouseOverRow = true;
+        mousepos = event.position;
         repaint();
     }
 
     void mouseExit(const MouseEvent& event) override
     {
-        mouseOverRow = false;
-        repaint();
+        //mouseOverRow = false;
+        //repaint();
     }
 
     int getNumRows() override
@@ -208,6 +219,7 @@ private:
             }
         }
     }
+    Point<float> mousepos;
 
     String selectedCategory;
     ListBox presets;
