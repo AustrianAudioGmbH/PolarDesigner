@@ -42,6 +42,8 @@ public:
     MainLookAndFeel()
     {
         normalFont = Typeface::createSystemTypefaceFor(BinaryFonts::NunitoSansSemiBold_ttf, BinaryFonts::NunitoSansSemiBold_ttfSize);
+
+        setColour(ListBox::backgroundColourId, groupComponentBackgroundColor);
     }
 
     ~MainLookAndFeel() {}

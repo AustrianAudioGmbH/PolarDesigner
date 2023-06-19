@@ -972,6 +972,10 @@ void PolarDesignerAudioProcessorEditor::saveFile()
             disableMainArea();
             setSideAreaEnabled(false);
         }
+        else
+        {
+            lbUserPresets.AddNewPresetToList(presetFile.getFileNameWithoutExtension());
+        }
     }
 }
 
