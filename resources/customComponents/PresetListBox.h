@@ -48,7 +48,7 @@ public:
 
     void paintListBoxItem(int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override
     {
-        g.fillAll(mainLaF.groupComponentBackgroundColor);
+        g.fillAll(mainLaF.mainBackground);
 
         if (rowIsSelected) 
             g.fillAll(mainLaF.textButtonHoverBackgroundColor.withAlpha(0.5f));
@@ -80,7 +80,6 @@ public:
     }
 
     void setHeaderText(const String& text) { presets.getHeaderComponent()->setTitle(text); }
-    //void returnKeyPressed(int row) override { selectRow(row); }
     void listBoxItemClicked(int row, const MouseEvent&) override { selectRow(row); }
 
     void AddNewPresetToList(const String& presetName)
@@ -107,17 +106,12 @@ private:
             Rectangle<float> buttonArea(0, 0, getWidth(), getHeight());
             g.fillAll(mainLaF.groupComponentBackgroundColor);
 
-            auto presetHeaderArrowImg = juce::Drawable::createFromImageData(BinaryData::presetHeaderArrowIcon_svg, BinaryData::presetHeaderArrowIcon_svgSize);
- 
             int x = 0;
-            int w = buttonArea.getWidth()*0.45f;
+            int w = buttonArea.getWidth()*0.65f;
             int h = getTopLevelComponent()->getHeight() * 0.023f;
             int y = (buttonArea.getHeight() - h) / 2;
 
             g.setColour(mainLaF.textButtonHoverBackgroundColor);
-
-            auto arrowArea = buttonArea.reduced(0, proportionOfHeight(0.33f));
-            presetHeaderArrowImg->drawWithin(g, arrowArea, juce::RectanglePlacement::centred, 1.f);
 
             Font font(mainLaF.normalFont);
             font.setHeight(h);
