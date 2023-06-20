@@ -574,8 +574,6 @@ void PolarDesignerAudioProcessorEditor::resized()
 
     mainfb.performLayout(area);
 
-    //fb.performLayout(area);
-
     // Number of bands Group
     juce::FlexBox fbNrBandsOutComp;
     fbNrBandsOutComp.items.add(juce::FlexItem{ grpBands }.withFlex(1.0f));
@@ -992,7 +990,16 @@ void PolarDesignerAudioProcessorEditor::loadSavedPresetsToList()
         jsonString = preset.loadFileAsString();
 
         if (jsonString.contains("Austrian Audio PolarDesigner"))
-            lbUserPresets.AddNewPresetToList(preset.getFileNameWithoutExtension());
+        {
+            if (jsonString.contains("Factory Preset"))
+            {
+                lbFactoryPresets.AddNewPresetToList(preset.getFileNameWithoutExtension());
+            }
+            else
+            {
+                lbUserPresets.AddNewPresetToList(preset.getFileNameWithoutExtension());
+            }
+        }
     }
 }
 
@@ -1066,7 +1073,7 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
 {
     tbZeroDelay.setToggleState(processor.zeroDelayModeActive(), NotificationType::dontSendNotification);
     
-    nActiveBands = processor.getNBands(); //cbSetNrBands.getSelectedId();
+    nActiveBands = processor.getNBands();
     int nActive = nActiveBands;
     
     if (processor.zeroDelayModeActive())
@@ -1156,8 +1163,6 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
     tbSyncChannel[3].setEnabled(set);
     tbSyncChannel[4].setEnabled(set);
     
-    //    cbSetNrBands.setEnabled(set);
-    //    cbSyncChannel.setEnabled(set);
     tbLoad.setEnabled(set);
     tbSave.setEnabled(set);
     ibEqCtr[0].setEnabled(set);
