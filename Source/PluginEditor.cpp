@@ -294,6 +294,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
     addAndMakeVisible(&lbFactoryPresets);
     lbFactoryPresets.setHeaderText("Factory Presets");
+    lbFactoryPresets.addChangeListener(this);
 
     nActiveBandsChanged();
     zeroDelayModeChange();
@@ -400,8 +401,8 @@ void PolarDesignerAudioProcessorEditor::resized()
     topComponent.items.add(juce::FlexItem(tmbABButton).withFlex(0.077f).withMargin(2));
     topComponent.items.add(juce::FlexItem().withFlex(0.042f));
     topComponent.items.add(juce::FlexItem(tbZeroDelay).withFlex(0.1f).withMargin(2));
-    topComponent.items.add(juce::FlexItem().withFlex(0.18f));
-    topComponent.items.add(juce::FlexItem(titlePreset).withFlex(0.04f));
+    topComponent.items.add(juce::FlexItem().withFlex(0.1f));
+    topComponent.items.add(juce::FlexItem(titlePreset).withFlex(0.12f));
     topComponent.items.add(juce::FlexItem().withFlex(0.022f));
     topComponent.items.add(juce::FlexItem(tbLoad).withFlex(0.072f).withMargin(2));
     topComponent.items.add(juce::FlexItem().withFlex(0.01f));
@@ -1135,7 +1136,7 @@ void PolarDesignerAudioProcessorEditor::mouseDown(const MouseEvent& event)
 
 void PolarDesignerAudioProcessorEditor::changeListenerCallback(ChangeBroadcaster* source)
 {
-    if (source == &lbUserPresets || source == &lbFactoryPresets)
+    if (source == &lbUserPresets)
     {
         File presetDir(processor.getLastDir().exists() ? processor.getLastDir() : File::getSpecialLocation(File::userHomeDirectory));
 
@@ -1145,6 +1146,21 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback(ChangeBroadcaster
         if (presetFile.size() == 1)
         {
             processor.loadPreset(presetFile.getFirst());
+            titlePreset.setTitle(String("Preset: " + selectedPreset));
+            showPresetList(false);
+        }
+    }
+    else if (source == &lbFactoryPresets)
+    {
+        File presetDir(processor.getLastDir().exists() ? processor.getLastDir() : File::getSpecialLocation(File::userHomeDirectory));
+
+        auto selectedPreset = lbFactoryPresets.getSelectedPresetName();
+        auto presetFile = presetDir.findChildFiles(File::findFiles, false, String(selectedPreset + ".json"));
+
+        if (presetFile.size() == 1)
+        {
+            processor.loadPreset(presetFile.getFirst());
+            titlePreset.setTitle(String("Preset: " + selectedPreset));
             showPresetList(false);
         }
     }

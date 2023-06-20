@@ -77,6 +77,7 @@ public:
     void listBoxItemDoubleClicked(int row, const MouseEvent&) override
     {
         sendChangeMessage();
+        presets.deselectAllRows();
     }
 
     String getSelectedPresetName()
