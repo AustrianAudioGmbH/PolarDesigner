@@ -43,7 +43,7 @@ public:
     {
         normalFont = Typeface::createSystemTypefaceFor(BinaryFonts::NunitoSansSemiBold_ttf, BinaryFonts::NunitoSansSemiBold_ttfSize);
 
-        setColour(ListBox::backgroundColourId, groupComponentBackgroundColor);
+        setColour(ListBox::backgroundColourId, mainBackground);
     }
 
     ~MainLookAndFeel() {}
@@ -584,5 +584,22 @@ public:
 
         g.setColour(mainTextColor);
         g.fillPath(p);
+    }
+
+    void drawScrollbar(Graphics& g,
+        ScrollBar& scrollbar,
+        int  	x,
+        int  	y,
+        int  	width,
+        int  	height,
+        bool  	isScrollbarVertical,
+        int  	thumbStartPosition,
+        int  	thumbSize,
+        bool  	isMouseOver,
+        bool  	isMouseDown
+    ) override
+    {
+        g.setColour(mainTextColor);
+        g.fillRect(0, thumbStartPosition, width, thumbSize);
     }
 };
