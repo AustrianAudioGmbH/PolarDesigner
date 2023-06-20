@@ -14,7 +14,7 @@
 #include "../resources/lookAndFeel/MainLookAndFeel.h"
 
 class PresetListBox : public Component,
-    public ListBoxModel
+    public ListBoxModel, public ChangeBroadcaster
 {
 public:
     PresetListBox()
@@ -76,11 +76,20 @@ public:
 
     void listBoxItemDoubleClicked(int row, const MouseEvent&) override
     {
-        //TODO: load preset
+        sendChangeMessage();
+    }
+
+    String getSelectedPresetName()
+    {
+        return *data.getUnchecked(selectedRow);
     }
 
     void setHeaderText(const String& text) { presets.getHeaderComponent()->setTitle(text); }
-    void listBoxItemClicked(int row, const MouseEvent&) override { selectRow(row); }
+    void listBoxItemClicked(int row, const MouseEvent&) override
+    { 
+        selectedRow = row;
+        selectRow(row); 
+    }
 
     void AddNewPresetToList(const String& presetName)
     {
@@ -151,4 +160,5 @@ private:
     ListBox presets;
     MainLookAndFeel mainLaF;
     OwnedArray<String> data;
+    int selectedRow = -1;
 };

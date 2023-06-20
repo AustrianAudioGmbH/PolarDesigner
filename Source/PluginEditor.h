@@ -44,13 +44,12 @@
 
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
-typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
 */
 class PolarDesignerAudioProcessorEditor  : public AudioProcessorEditor, private Button::Listener,
-                                           private Slider::Listener, private Timer
+                                           private Slider::Listener, private Timer, public ChangeListener
 {
 public:
     PolarDesignerAudioProcessorEditor (PolarDesignerAudioProcessor&, AudioProcessorValueTreeState&);
@@ -79,6 +78,8 @@ public:
     int getControlParameterIndex (Component& control) override;
 
     void loadSavedPresetsToList();
+
+    void changeListenerCallback(ChangeBroadcaster* source) override;
         
 private:
     static const int EDITOR_WIDTH = 1194;
@@ -144,7 +145,7 @@ private:
     AlertOverlay alOverlayDisturber;
     AlertOverlay alOverlaySignal;
 
-    Path sideBorderPath;
+    Rectangle<float> presetArea;
     
 #ifdef AA_DO_DEBUG_PATH
     Path debugPath;
@@ -161,6 +162,8 @@ private:
     void disableOverlay();
     void zeroDelayModeChange();
     void showPresetList(bool shouldShow);
+
+    void mouseDown(const MouseEvent& event) override;
     
     OpenGLContext openGLContext;
     

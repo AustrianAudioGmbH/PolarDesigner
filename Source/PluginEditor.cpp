@@ -35,7 +35,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     presetListVisible(false)
 {
 //    openGLContext.attachTo (*getTopLevelComponent());
-    
+
     nActiveBands = processor.getNBands();
     syncChannelIdx = processor.getSyncChannelIdx();
 
@@ -57,6 +57,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
     addAndMakeVisible(&tmbABButton);
     tmbABButton.setButtonsNumber(2);
+    tmbABButton.setInterceptsMouseClicks(true, true);
 
     tmbABButton[0].setClickingTogglesState(true);
     tmbABButton[0].setRadioGroupId(3344);
@@ -80,6 +81,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     titlePreset.setTitle(String("Preset"));
     titlePreset.setFont(mainLaF.normalFont);
     titlePreset.setLabelTextColour(mainLaF.mainTextColor);
+    titlePreset.setInterceptsMouseClicks(false, true);
 
     addAndMakeVisible(&tbLoad);
     tbLoad.addListener(this);
@@ -107,6 +109,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     }
 
     addAndMakeVisible (&footer);
+    footer.setInterceptsMouseClicks(false, true);
     /*
     addAndMakeVisible (&alOverlayError);
     alOverlayError.setVisible(false);
@@ -211,6 +214,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         slDir[i].setColour (Slider::thumbColourId, eqColours[i]); // colour of knob
         slDir[i].addListener (this);
         slDir[i].setTooltipEditable (true);
+        slDir[i].setInterceptsMouseClicks(false, true);
         
         // Band Gain slider
         addAndMakeVisible (&slBandGain[i]);
@@ -220,6 +224,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         slBandGain[i].setColour (Slider::thumbColourId, eqColours[i]);
         slBandGain[i].setTextBoxStyle (Slider::TextBoxAbove, false, 50, 15);
         slBandGain[i].addListener (this);
+        slBandGain[i].setInterceptsMouseClicks(false, true);
         
         // First-Order directivity visualizer (The "O"verhead view)
         addAndMakeVisible (&polarPatternVisualizers[i]);
@@ -227,6 +232,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         polarPatternVisualizers[i].setDirWeight (slDir[i].getValue());
         polarPatternVisualizers[i].setMuteSoloButtons (&msbSolo[i], &msbMute[i]);
         polarPatternVisualizers[i].setColour (eqColours[i]);
+        polarPatternVisualizers[i].setInterceptsMouseClicks(false, true);
 
         // main directivity Equaliser section
         directivityEqualiser.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slCrossoverPosition[i - 1] : nullptr, (i < maxNumberBands - 1) ? &slCrossoverPosition[i] : nullptr, &msbSolo[i], &msbMute[i], &slBandGain[i], &polarPatternVisualizers[i]);
@@ -239,6 +245,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         slCrossoverPosition[i].setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
         slCrossoverPosition[i].addListener(this);
         slCrossoverPosition[i].setVisible(false);
+        slCrossoverPosition[i].setInterceptsMouseClicks(false, true);
     }
     
     directivityEqualiser.initValueBox();
@@ -261,6 +268,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tbAllowBackwardsPattern.addListener (this);
 
     directivityEqualiser.setSoloActive(getSoloActive());
+    directivityEqualiser.setInterceptsMouseClicks(false, true);
 
     for (auto& vis : polarPatternVisualizers)
     {
@@ -282,6 +290,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
     addAndMakeVisible(&lbUserPresets);
     lbUserPresets.setHeaderText("User Presets");
+    lbUserPresets.addChangeListener(this);
 
     addAndMakeVisible(&lbFactoryPresets);
     lbFactoryPresets.setHeaderText("Factory Presets");
@@ -715,6 +724,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     alOverlayDisturber.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
     alOverlaySignal.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
     */
+    presetArea = mainfb.items[1].currentBounds;
 }
 
 void PolarDesignerAudioProcessorEditor::buttonStateChanged(Button* button)
@@ -723,6 +733,10 @@ void PolarDesignerAudioProcessorEditor::buttonStateChanged(Button* button)
 
 void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
 {
+    if (presetListVisible)
+    {
+        showPresetList(false);
+    }
     if ((button == &tmbNrBandsButton[0]) && (button->getToggleState() > 0.5f))
     {
         valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((0)));
@@ -770,8 +784,6 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         if (!presetListVisible)
         {
             showPresetList(!button->getToggleState());
-            logoAA.setVisible(!logoAA.isVisible());
-            titlePD.setVisible(!titlePD.isVisible());
         }
     }
     else if (button == &tbOpenFromFile)
@@ -781,8 +793,6 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &tbClosePresetList)
     {
         showPresetList(false);
-        logoAA.setVisible(!logoAA.isVisible());
-        titlePD.setVisible(!titlePD.isVisible());
     }
     else if (button == &tbSave)
     {
@@ -1110,7 +1120,34 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
 void PolarDesignerAudioProcessorEditor::showPresetList(bool shouldShow)
 {
     presetListVisible = shouldShow;
+    logoAA.setVisible(!shouldShow);
+    titlePD.setVisible(!shouldShow);
     resized();
+}
+
+void PolarDesignerAudioProcessorEditor::mouseDown(const MouseEvent& event)
+{
+    if (presetListVisible && !presetArea.contains(event.mouseDownPosition))
+    {
+        showPresetList(false);
+    }
+}
+
+void PolarDesignerAudioProcessorEditor::changeListenerCallback(ChangeBroadcaster* source)
+{
+    if (source == &lbUserPresets || source == &lbFactoryPresets)
+    {
+        File presetDir(processor.getLastDir().exists() ? processor.getLastDir() : File::getSpecialLocation(File::userHomeDirectory));
+
+        auto selectedPreset = lbUserPresets.getSelectedPresetName();
+        auto presetFile = presetDir.findChildFiles(File::findFiles, false, String(selectedPreset + ".json"));
+
+        if (presetFile.size() == 1)
+        {
+            processor.loadPreset(presetFile.getFirst());
+            showPresetList(false);
+        }
+    }
 }
 
 void PolarDesignerAudioProcessorEditor::disableMainArea()
