@@ -308,6 +308,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     
     addAndMakeVisible(&trimSlider);
 
+    loadSavedPresetsToList();
+
     startTimer (30);
     
     setEqMode();
@@ -976,6 +978,21 @@ void PolarDesignerAudioProcessorEditor::saveFile()
         {
             lbUserPresets.AddNewPresetToList(presetFile.getFileNameWithoutExtension());
         }
+    }
+}
+
+void PolarDesignerAudioProcessorEditor::loadSavedPresetsToList()
+{
+    File presetDir(processor.getLastDir().exists() ? processor.getLastDir() : File::getSpecialLocation(File::userHomeDirectory));
+    auto presetsArray = presetDir.findChildFiles(File::findFiles, false, "*.json");
+
+    String jsonString;
+    for (auto preset : presetsArray)
+    {
+        jsonString = preset.loadFileAsString();
+
+        if (jsonString.contains("Austrian Audio PolarDesigner"))
+            lbUserPresets.AddNewPresetToList(preset.getFileNameWithoutExtension());
     }
 }
 

@@ -77,6 +77,8 @@ public:
     void decrementTrim(int nBands);
 
     int getControlParameterIndex (Component& control) override;
+
+    void loadSavedPresetsToList();
         
 private:
     static const int EDITOR_WIDTH = 1194;
