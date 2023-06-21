@@ -149,11 +149,26 @@ public:
         }
         else if (button.getButtonText() == "Free Field")
         {
+            g.setColour(textButtonFrameColor);
+            g.drawRect(buttonArea, 1);
+
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonHoverBackgroundColor);
+                g.fillRect(buttonArea.reduced(1.0f, 1.0f));
+            }
+            if (isButtonDown)
+            {
+                g.setColour(textButtonPressedBackgroundColor);
+                g.fillRect(buttonArea.reduced(1.0f, 1.0f));
+            }
+
             auto freeFieldImageArea = buttonArea;
+            freeFieldImageArea.removeFromTop(button.proportionOfHeight(0.11f));
+            freeFieldImageArea.removeFromBottom(button.proportionOfHeight(0.33f));
+
             if (button.getToggleState() == true)
             {
-               freeFieldImageArea.removeFromTop(button.proportionOfHeight(0.33f));
-               freeFieldImageArea.removeFromBottom(button.proportionOfHeight(0.25f));
                freeFieldImg->drawWithin(g, freeFieldImageArea, juce::RectanglePlacement::centred, 1.f);
 
                auto eqFieldCheckSignArea = juce::Rectangle<float>(20,
@@ -162,28 +177,38 @@ public:
             }
             else
             {
-                freeFieldImageArea.removeFromTop(button.proportionOfHeight(0.33f));
-                freeFieldImageArea.removeFromBottom(button.proportionOfHeight(0.25f));
                 freeFieldImg->drawWithin(g, freeFieldImageArea, juce::RectanglePlacement::centred, 1.f);
             }
         }
         else if (button.getButtonText() == "Diffuse Field")
         {
+            g.setColour(textButtonFrameColor);
+            g.drawRect(buttonArea, 1);
+            
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonHoverBackgroundColor);
+                g.fillRect(buttonArea.reduced(1.0f, 1.0f));
+            }
+            if (isButtonDown)
+            {
+                g.setColour(textButtonPressedBackgroundColor);
+                g.fillRect(buttonArea.reduced(1.0f, 1.0f));
+            }
+            
             auto diffuseFieldImageArea = buttonArea;
+            diffuseFieldImageArea.removeFromTop(button.proportionOfHeight(0.11f));
+            diffuseFieldImageArea.removeFromBottom(button.proportionOfHeight(0.33f));
+            
             if (button.getToggleState() == true)
             {
-                diffuseFieldImageArea.removeFromTop(button.proportionOfHeight(0.33f));
-                diffuseFieldImageArea.removeFromBottom(button.proportionOfHeight(0.25f));
                 diffuseFieldImg->drawWithin(g, diffuseFieldImageArea, juce::RectanglePlacement::centred, 1.f);
-
                 auto eqFieldCheckSignArea = juce::Rectangle<float>(20,
                     diffuseFieldImageArea.getY() + 5, diffuseFieldImageArea.getWidth(), diffuseFieldImageArea.getHeight() * 0.3f);
                 eqFieldCheckSign->drawWithin(g, eqFieldCheckSignArea, juce::RectanglePlacement::centred, 1.f);
             }
             else
             {
-                diffuseFieldImageArea.removeFromTop(button.proportionOfHeight(0.33f));
-                diffuseFieldImageArea.removeFromBottom(button.proportionOfHeight(0.25f));
                 diffuseFieldImg->drawWithin(g, diffuseFieldImageArea, juce::RectanglePlacement::centred, 1.f);
             }
         }
@@ -365,12 +390,12 @@ public:
         }
         else if (button.getButtonText() == "Free Field")
         {
-            y = buttonArea.proportionOfHeight(0.775f);
+            y = buttonArea.proportionOfHeight(0.7f);
             h = button.getTopLevelComponent()->getHeight() * 0.02f;
         }
         else if (button.getButtonText() == "Diffuse Field")
         {
-            y = buttonArea.proportionOfHeight(0.775f);
+            y = buttonArea.proportionOfHeight(0.7f);
             h = button.getTopLevelComponent()->getHeight() * 0.018f;
         }
         else if (button.getButtonText() == "Terminate Spill"

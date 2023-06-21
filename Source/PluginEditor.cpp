@@ -610,14 +610,19 @@ void PolarDesignerAudioProcessorEditor::resized()
     fbFields.flexDirection = juce::FlexBox::Direction::row;
     fbFields.justifyContent = juce::FlexBox::JustifyContent::center;
     fbFields.alignContent = juce::FlexBox::AlignContent::center;
-    fbFields.items.add(juce::FlexItem{ ibEqCtr[0] }.withFlex(0.5f));
-    fbFields.items.add(juce::FlexItem{ ibEqCtr[1] }.withFlex(0.5f));
+    fbFields.items.add(juce::FlexItem{ }.withFlex(0.08f));
+    fbFields.items.add(juce::FlexItem{ ibEqCtr[0] }.withFlex(0.4f));
+    fbFields.items.add(juce::FlexItem{ }.withFlex(0.04f));
+    fbFields.items.add(juce::FlexItem{ ibEqCtr[1] }.withFlex(0.4f));
+    fbFields.items.add(juce::FlexItem{ }.withFlex(0.08f));
 
     juce::FlexBox fbEqCtrInComp;
     fbEqCtrInComp.flexDirection = juce::FlexBox::Direction::column;
     fbEqCtrInComp.justifyContent = juce::FlexBox::JustifyContent::center;
     fbEqCtrInComp.alignContent = juce::FlexBox::AlignContent::center;
-    fbEqCtrInComp.items.add(juce::FlexItem{ fbFields }.withFlex(1.f));
+    fbEqCtrInComp.items.add(juce::FlexItem{  }.withFlex(0.3f));
+    fbEqCtrInComp.items.add(juce::FlexItem{ fbFields }.withFlex(0.58f));
+    fbEqCtrInComp.items.add(juce::FlexItem{  }.withFlex(0.12f));
 
     outerBounds = fbEqCtrOutComp.items[0].currentBounds;
     inCompWidth = outerBounds.getWidth();
