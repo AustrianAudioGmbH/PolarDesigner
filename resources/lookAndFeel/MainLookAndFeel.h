@@ -22,20 +22,15 @@ public:
     const Colour textButtonDefaultBackgroundColor = Colour(24, 25, 27);
     const Colour textButtonActiveFrameColor = Colour(255, 255, 255);
     const Colour textButtonActiveRedFrameColor = Colour(182, 22, 22);
-    const Colour textButtonActiveGreenFrameColor = Colour(0, 157, 25);
-    const Colour textButtonActiveOrangeFrameColor = Colour(255, 107, 0);
-    const Colour textButtonActiveYellowFrameColor = Colour(214, 193, 9);
+    const Colour textButtonActiveBlue1FrameColor = Colour(0, 49, 222);
+    const Colour textButtonActiveBlue2FrameColor = Colour(0, 127, 255);
+    const Colour textButtonActiveBlue3FrameColor = Colour(0, 87, 255);
+    const Colour textButtonActiveBlue4FrameColor = Colour(108, 180, 238);
     const Colour sliderHoverFrameColor = Colour(93, 94, 95);
     const Colour textButtonHoverBackgroundColor = textButtonActiveFrameColor.withAlpha(0.3f);
     const Colour textButtonHoverRedBackgroundColor = textButtonActiveRedFrameColor.withAlpha(0.3f);
-    const Colour textButtonHoverGreenBackgroundColor = textButtonActiveGreenFrameColor.withAlpha(0.3f);
-    const Colour textButtonHoverOrangeBackgroundColor = textButtonActiveOrangeFrameColor.withAlpha(0.3f);
-    const Colour textButtonHoverYellowBackgroundColor = textButtonActiveYellowFrameColor.withAlpha(0.3f);
     const Colour textButtonPressedBackgroundColor = textButtonActiveFrameColor.withAlpha(0.1f);
     const Colour textButtonPressedRedBackgroundColor = textButtonActiveRedFrameColor.withAlpha(0.1f);
-    const Colour textButtonPressedGreenBackgroundColor = textButtonActiveGreenFrameColor.withAlpha(0.1f);
-    const Colour textButtonPressedOrangeBackgroundColor = textButtonActiveOrangeFrameColor.withAlpha(0.1f);
-    const Colour textButtonPressedYellowBackgroundColor = textButtonActiveYellowFrameColor.withAlpha(0.1f);
     const Colour toggleButtonActiveRedBackgroundColor = Colour(182, 22, 22).withAlpha(0.7f);
 
     Typeface::Ptr normalFont;
@@ -276,23 +271,44 @@ public:
                 g.fillRect(reducedRect.reduced(1.0f, 1.0f));
             }
         }
-        else if(button.getComponentID() == "5522")
+        //Sync channel buttons
+        else if (button.getComponentID() == "5521")
         {
             if (isMouseOverButton)
             {
-                g.setColour(textButtonHoverGreenBackgroundColor);
+                g.setColour(textButtonActiveBlue1FrameColor.withAlpha(0.3f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (isButtonDown)
             {
-                g.setColour(textButtonPressedGreenBackgroundColor);
+                g.setColour(textButtonActiveBlue1FrameColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (button.getToggleState() == true)
             {
-                g.setColour(textButtonPressedGreenBackgroundColor);
+                g.setColour(textButtonActiveBlue1FrameColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(4.0f, 4.0f));
-                g.setColour(textButtonActiveGreenFrameColor);
+                g.setColour(textButtonActiveBlue1FrameColor);
+                g.drawRect(buttonArea.reduced(3.0f, 3.0f), 2);
+            }
+        }
+        else if(button.getComponentID() == "5522")
+        {
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonActiveBlue2FrameColor.withAlpha(0.3f));
+                g.fillRect(buttonArea.reduced(3.0f, 3.0f));
+            }
+            if (isButtonDown)
+            {
+                g.setColour(textButtonActiveBlue2FrameColor.withAlpha(0.1f));
+                g.fillRect(buttonArea.reduced(3.0f, 3.0f));
+            }
+            if (button.getToggleState() == true)
+            {
+                g.setColour(textButtonActiveBlue2FrameColor.withAlpha(0.1f));
+                g.fillRect(buttonArea.reduced(4.0f, 4.0f));
+                g.setColour(textButtonActiveBlue2FrameColor);
                 g.drawRect(buttonArea.reduced(3.0f, 3.0f), 2);
             }
         }
@@ -300,19 +316,19 @@ public:
         {
             if (isMouseOverButton)
             {
-                g.setColour(textButtonHoverOrangeBackgroundColor);
+                g.setColour(textButtonActiveBlue3FrameColor.withAlpha(0.3f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (isButtonDown)
             {
-                g.setColour(textButtonPressedOrangeBackgroundColor);
+                g.setColour(textButtonActiveBlue3FrameColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (button.getToggleState() == true)
             {
-                g.setColour(textButtonPressedOrangeBackgroundColor);
+                g.setColour(textButtonActiveBlue3FrameColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(4.0f, 4.0f));
-                g.setColour(textButtonActiveOrangeFrameColor);
+                g.setColour(textButtonActiveBlue3FrameColor);
                 g.drawRect(buttonArea.reduced(3.0f, 3.0f), 2);
             }
         }
@@ -320,19 +336,19 @@ public:
         {
             if (isMouseOverButton)
             {
-                g.setColour(textButtonHoverYellowBackgroundColor);
+                g.setColour(textButtonActiveBlue4FrameColor.withAlpha(0.3f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (isButtonDown)
             {
-                g.setColour(textButtonPressedYellowBackgroundColor);
+                g.setColour(textButtonActiveBlue4FrameColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (button.getToggleState() == true)
             {
-                g.setColour(textButtonPressedYellowBackgroundColor);
+                g.setColour(textButtonActiveBlue4FrameColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(4.0f, 4.0f));
-                g.setColour(textButtonActiveYellowFrameColor);
+                g.setColour(textButtonActiveBlue4FrameColor);
                 g.drawRect(buttonArea.reduced(3.0f, 3.0f), 2);
             }
         }
