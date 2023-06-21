@@ -17,16 +17,15 @@
             file="Assets/closePresetListIcon.svg"/>
       <FILE id="GaRa62" name="diffuseField.svg" compile="0" resource="1"
             file="Assets/diffuseField.svg"/>
-      <FILE id="irXVGy" name="eqFieldCheckSign.svg" compile="0" resource="1"
+      <FILE id="FCgVhK" name="eqFieldCheckSign.svg" compile="0" resource="1"
             file="Assets/eqFieldCheckSign.svg"/>
+      <FILE id="eovuEk" name="eyeDrop.svg" compile="0" resource="1" file="Assets/eyeDrop.svg"/>
       <FILE id="AzLBEY" name="freeField.svg" compile="0" resource="1" file="Assets/freeField.svg"/>
       <FILE id="ObfHNt" name="loadArrow.svg" compile="0" resource="1" file="Assets/loadArrow.svg"/>
       <FILE id="DIwzDZ" name="maximizeTargetIcon.svg" compile="0" resource="1"
             file="Assets/maximizeTargetIcon.svg"/>
       <FILE id="mrYLjb" name="maxTargetToSpillIcon.svg" compile="0" resource="1"
             file="Assets/maxTargetToSpillIcon.svg"/>
-      <FILE id="sTinup" name="presetHeaderArrowIcon.svg" compile="0" resource="1"
-            file="Assets/presetHeaderArrowIcon.svg"/>
       <FILE id="uCzmRQ" name="scrollImage.png" compile="0" resource="1" file="Assets/scrollImage.png"/>
       <FILE id="KEj4pY" name="terminateSpillIcon.svg" compile="0" resource="1"
             file="Assets/terminateSpillIcon.svg"/>
