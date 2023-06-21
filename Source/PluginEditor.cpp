@@ -701,26 +701,19 @@ void PolarDesignerAudioProcessorEditor::resized()
     fbPresetListSub1InComp.items.add(juce::FlexItem{  }.withFlex(0.9f));
     fbPresetListSub1InComp.items.add(juce::FlexItem{ tbClosePresetList }.withFlex(0.1f));
 
-    juce::FlexBox fbPresetListSub2InComp;
-    fbPresetListSub2InComp.flexDirection = juce::FlexBox::Direction::row;
-    fbPresetListSub2InComp.justifyContent = juce::FlexBox::JustifyContent::center;
-    fbPresetListSub2InComp.alignContent = juce::FlexBox::AlignContent::center;
-    fbPresetListSub2InComp.items.add(juce::FlexItem{  }.withFlex(0.5f));
-    fbPresetListSub2InComp.items.add(juce::FlexItem{ tbOpenFromFile }.withFlex(0.5f));
-
     juce::FlexBox fbPresetListInComp;
     fbPresetListInComp.flexDirection = juce::FlexBox::Direction::column;
     fbPresetListInComp.justifyContent = juce::FlexBox::JustifyContent::center;
     fbPresetListInComp.alignContent = juce::FlexBox::AlignContent::center;
     fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.04f));
     fbPresetListInComp.items.add(juce::FlexItem{ fbPresetListSub1InComp }.withFlex(0.03f));
-    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.013f));
-    fbPresetListInComp.items.add(juce::FlexItem{ fbPresetListSub2InComp }.withFlex(0.04f));
-    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
-    fbPresetListInComp.items.add(juce::FlexItem{ lbUserPresets }.withFlex(0.27f));
-    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
-    fbPresetListInComp.items.add(juce::FlexItem{ lbFactoryPresets }.withFlex(0.27f));
-    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.217f));
+    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
+    fbPresetListInComp.items.add(juce::FlexItem{ tbOpenFromFile }.withFlex(0.04f));
+    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
+    fbPresetListInComp.items.add(juce::FlexItem{ lbUserPresets }.withFlex(0.41f));
+    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
+    fbPresetListInComp.items.add(juce::FlexItem{ lbFactoryPresets }.withFlex(0.41f));
+    fbPresetListInComp.items.add(juce::FlexItem{  }.withFlex(0.03f));
 
     outerBounds = fbPresetListOutComp.items[0].currentBounds;
     inCompWidth = outerBounds.getWidth();

@@ -39,7 +39,7 @@ public:
     {
         normalFont = Typeface::createSystemTypefaceFor(BinaryFonts::NunitoSansSemiBold_ttf, BinaryFonts::NunitoSansSemiBold_ttfSize);
 
-        setColour(ListBox::backgroundColourId, mainBackground);
+        setColour(ListBox::backgroundColourId, groupComponentBackgroundColor);
     }
 
     ~MainLookAndFeel() {}
@@ -96,7 +96,7 @@ public:
         }
         else if (button.getComponentID() == "5621")
         {
-            auto imageArea = buttonArea.reduced(5, 5);// button.proportionOfWidth(0.45f), button.proportionOfHeight(0.33f)).translated(button.proportionOfWidth(0.36f), 0);
+            auto imageArea = buttonArea.reduced(5, 5);
 
             closePresetListIconImg->drawWithin(g, imageArea, juce::RectanglePlacement::centred, 1.f);
 
@@ -162,18 +162,13 @@ public:
             auto freeFieldImageArea = buttonArea;
             freeFieldImageArea.removeFromTop(button.proportionOfHeight(0.11f));
             freeFieldImageArea.removeFromBottom(button.proportionOfHeight(0.33f));
+            freeFieldImg->drawWithin(g, freeFieldImageArea, juce::RectanglePlacement::centred, 1.f);
 
             if (button.getToggleState() == true)
             {
-               freeFieldImg->drawWithin(g, freeFieldImageArea, juce::RectanglePlacement::centred, 1.f);
-
-               auto eqFieldCheckSignArea = juce::Rectangle<float>(20,
-                   freeFieldImageArea.getY() + 5, freeFieldImageArea.getWidth(), freeFieldImageArea.getHeight() * 0.3f);
-               eqFieldCheckSign->drawWithin(g, eqFieldCheckSignArea, juce::RectanglePlacement::centred, 1.f);
-            }
-            else
-            {
-                freeFieldImg->drawWithin(g, freeFieldImageArea, juce::RectanglePlacement::centred, 1.f);
+                auto eqFieldCheckSignArea = juce::Rectangle<float>(button.getWidth() * 0.77f,
+                    button.getHeight() * 0.05f, button.getWidth() * 0.18f, button.getWidth() * 0.18f);
+                eqFieldCheckSign->drawWithin(g, eqFieldCheckSignArea, juce::RectanglePlacement::centred, 1.f);
             }
         }
         else if (button.getButtonText() == "Diffuse Field")
@@ -195,17 +190,13 @@ public:
             auto diffuseFieldImageArea = buttonArea;
             diffuseFieldImageArea.removeFromTop(button.proportionOfHeight(0.11f));
             diffuseFieldImageArea.removeFromBottom(button.proportionOfHeight(0.33f));
+            diffuseFieldImg->drawWithin(g, diffuseFieldImageArea, juce::RectanglePlacement::centred, 1.f);
             
             if (button.getToggleState() == true)
             {
-                diffuseFieldImg->drawWithin(g, diffuseFieldImageArea, juce::RectanglePlacement::centred, 1.f);
-                auto eqFieldCheckSignArea = juce::Rectangle<float>(20,
-                    diffuseFieldImageArea.getY() + 5, diffuseFieldImageArea.getWidth(), diffuseFieldImageArea.getHeight() * 0.3f);
+                auto eqFieldCheckSignArea = juce::Rectangle<float>(button.getWidth()*0.77f,
+                    button.getHeight() * 0.05f, button.getWidth()*0.18f, button.getWidth() * 0.18f);
                 eqFieldCheckSign->drawWithin(g, eqFieldCheckSignArea, juce::RectanglePlacement::centred, 1.f);
-            }
-            else
-            {
-                diffuseFieldImg->drawWithin(g, diffuseFieldImageArea, juce::RectanglePlacement::centred, 1.f);
             }
         }
         else if (button.getButtonText() == "Terminate Spill")
@@ -459,7 +450,7 @@ public:
 
         if (text == "Preset")
         {
-            y = group.proportionOfHeight(0.09f);
+            y = group.proportionOfHeight(0.04f);
         }
 
         Font font(normalFont);
@@ -652,7 +643,13 @@ public:
         bool  	isMouseDown
     ) override
     {
-        g.setColour(mainTextColor);
-        g.fillRect(0, thumbStartPosition, width, thumbSize);
+        Path pathBgr;
+        pathBgr.addRoundedRectangle(x, y, width, height, width / 2);
+        g.setColour(textButtonFrameColor);
+        g.fillPath(pathBgr);
+        Path pathFgr;
+        pathFgr.addRoundedRectangle(0, thumbStartPosition, width, thumbSize, width/2);
+        g.setColour(sliderHoverFrameColor);
+        g.fillPath(pathFgr);
     }
 };

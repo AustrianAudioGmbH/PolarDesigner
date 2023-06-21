@@ -28,27 +28,19 @@ public:
     void resized() override
     {
         FlexBox fb;
-        fb.flexDirection = FlexBox::Direction::row;
+        fb.flexDirection = FlexBox::Direction::column;
         fb.justifyContent = juce::FlexBox::JustifyContent::center;
-
-        FlexBox subFb;
-        subFb.flexDirection = FlexBox::Direction::column;
-        subFb.justifyContent = juce::FlexBox::JustifyContent::center;
-        subFb.items.add(juce::FlexItem(*presets.getHeaderComponent()).withFlex(0.1f));
-        subFb.items.add(juce::FlexItem(presets).withFlex(0.9f));
-
-        fb.items.add(juce::FlexItem().withFlex(0.09f));
-        fb.items.add(juce::FlexItem(subFb).withFlex(0.82f));
-        fb.items.add(juce::FlexItem().withFlex(0.09f));
- 
+        fb.items.add(juce::FlexItem(presets).withFlex(1.f));
         fb.performLayout(getLocalBounds());
 
-        presets.setRowHeight(subFb.items[1].currentBounds.getHeight() * 0.16f);
+        presets.setRowHeight(fb.items[0].currentBounds.getHeight() * 0.1f);
     }
 
     void paintListBoxItem(int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override
     {
-        g.fillAll(mainLaF.mainBackground);
+        auto eyeDropImg = juce::Drawable::createFromImageData(BinaryData::eyeDrop_svg, BinaryData::eyeDrop_svgSize);
+        auto eyeDropArea = Rectangle<float>(0, 0, width, height).reduced(width*0.03f, height*0.15f);
+        eyeDropImg->drawWithin(g, eyeDropArea, juce::RectanglePlacement::xRight, 1.f);
 
         if (rowIsSelected) 
             g.fillAll(mainLaF.textButtonHoverBackgroundColor.withAlpha(0.5f));
@@ -61,7 +53,7 @@ public:
         Font font(mainLaF.normalFont);
         font.setHeight(h);
         g.setFont(font);
-        g.drawFittedText(*data.getUnchecked(rowNumber), 2, y, width, h, Justification::left, 1);
+        g.drawFittedText(*data.getUnchecked(rowNumber), 2, y, width - 2*eyeDropImg->getWidth(), h, Justification::left, 1);
     }
 
     int getNumRows() override
