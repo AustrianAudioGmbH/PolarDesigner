@@ -25,6 +25,7 @@ public:
     const Colour textButtonActiveGreenFrameColor = Colour(0, 157, 25);
     const Colour textButtonActiveOrangeFrameColor = Colour(255, 107, 0);
     const Colour textButtonActiveYellowFrameColor = Colour(214, 193, 9);
+    const Colour sliderHoverFrameColor = Colour(93, 94, 95);
     const Colour textButtonHoverBackgroundColor = textButtonActiveFrameColor.withAlpha(0.3f);
     const Colour textButtonHoverRedBackgroundColor = textButtonActiveRedFrameColor.withAlpha(0.3f);
     const Colour textButtonHoverGreenBackgroundColor = textButtonActiveGreenFrameColor.withAlpha(0.3f);
@@ -480,14 +481,19 @@ public:
     {
         const float h = slider.getTopLevelComponent()->getHeight() * 0.005f;
 
-        Path p;
+        Path pathBgr;
+        Rectangle<float> backgroundRect(x, 0.5f * height - h / 2, width, h);
+        pathBgr.addRoundedRectangle(backgroundRect, h);
+        auto pathBgrColor = slider.isEnabled() ? textButtonFrameColor : textButtonFrameColor.withAlpha(0.4f);
+        g.setColour(pathBgrColor);
+        g.fillPath(pathBgr);
 
-        p.addRoundedRectangle(x, 0.5f * height - h / 2, width, h, h);
-
-        auto pathColor = slider.isEnabled() ? textButtonFrameColor : textButtonFrameColor.withAlpha(0.4f);
-        g.setColour(pathColor);
-
-        g.fillPath(p);
+        Path pathFrg;
+        Rectangle<float> foregroundRect(width/2 + x, 0.5f * height - h / 2, sliderPos - (width / 2 + x), h);
+        pathFrg.addRectangle(foregroundRect);
+        auto pathFrgColor = slider.isEnabled() ? textButtonActiveRedFrameColor : textButtonFrameColor.withAlpha(0.4f);
+        g.setColour(pathFrgColor);
+        g.fillPath(pathFrg);
     }
 
     void drawLinearSliderThumb(Graphics& g, int x, int y, int width, int height,
@@ -503,6 +509,12 @@ public:
         g.setColour(pathColor);
 
         g.fillPath(p);
+
+        if (slider.isMouseOver() && slider.isEnabled())
+        {
+            g.setColour(sliderHoverFrameColor);
+            g.strokePath(p, PathStrokeType(1.0f));
+        }
     }
 
     void drawLabel(Graphics& g, Label& label) override
