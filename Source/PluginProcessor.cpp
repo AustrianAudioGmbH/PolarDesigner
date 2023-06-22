@@ -112,7 +112,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() : AudioProcessor (Bus
                                                [](bool value, int maximumStringLength) {return (value) ? "on" : "off";}, nullptr),
         std::make_unique<AudioParameterFloat> (ParameterID {"proximity", 1}, "Proximity", NormalisableRange<float>(-1.0f, 1.0f, 0.001f),
                                                0.0f, "", AudioProcessorParameter::genericParameter,
-                                               [](float value, int maximumStringLength) { return std::abs(value) < 0.05f ? "off" : String(value, 2); }, nullptr),
+                                               [](float value, int maximumStringLength) { return std::abs(value) < 0.05f ? "0.00" : String(value, 2); }, nullptr),
         std::make_unique<AudioParameterBool>  (ParameterID {"proximityOnOff", 1}, "ProximityOnOff", false, "",
                                                [](bool value, int maximumStringLength) {return (value) ? "on" : "off"; }, nullptr),
         std::make_unique<AudioParameterBool>  (ParameterID {"zeroDelayMode", 1}, "Zero Latency", false, "",
@@ -156,6 +156,8 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() : AudioProcessor (Bus
     allowBackwardsPattern = vtsParams.getRawParameterValue("allowBackwardsPattern");
     vtsParams.addParameterListener("proximity", this);
     proxDistance = vtsParams.getRawParameterValue("proximity");
+    vtsParams.addParameterListener("proximityOnOff", this);
+    proxOnOff = vtsParams.getRawParameterValue("proximityOnOff");
     vtsParams.addParameterListener("zeroDelayMode", this);
     zeroDelayMode = vtsParams.getRawParameterValue("zeroDelayMode");
     vtsParams.addParameterListener("syncChannel", this);
@@ -362,14 +364,15 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
     createOmniAndEightSignals (buffer);
     
     // proximity compensation filter
-    if (zeroDelayMode->load() < 0.5f && proxDistance->load() < -0.05) // reduce proximity effect only on figure-of-eight
+    auto proximity = (proxOnOff->load() == 1.f) ? proxDistance->load() : 0.f;
+    if (zeroDelayMode->load() < 0.5f && proximity < -0.05) // reduce proximity effect only on figure-of-eight
     {
         float* writePointerEight = omniEightBuffer.getWritePointer (1);
         dsp::AudioBlock<float> eightBlock(&writePointerEight, 1, numSamples);
         dsp::ProcessContextReplacing<float> contextProxEight(eightBlock);
         proxCompIIR.process(contextProxEight);
     }
-    else if (zeroDelayMode->load() < 0.5f && proxDistance->load() > 0.05) // apply proximity to omni
+    else if (zeroDelayMode->load() < 0.5f && proximity > 0.05) // apply proximity to omni
     {
         float* writePointerOmni = omniEightBuffer.getWritePointer (0);
         dsp::AudioBlock<float> omniBlock(&writePointerOmni, 1, numSamples);
@@ -665,6 +668,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const String &parameterID, f
             
             paramsToSync.nrActiveBands = nBandsPtr->load();
             paramsToSync.proximity = proxDistance->load();
+            paramsToSync.proximityOnOff = proxOnOff->load();
             
             paramsToSync.allowBackwardsPattern = allowBackwardsPattern->load();
             
@@ -709,6 +713,10 @@ void PolarDesignerAudioProcessor::parameterChanged (const String &parameterID, f
         else if (parameterID == "proximity")
         {
             paramsToSync.proximity = proxDistance->load();
+        }
+        else if (parameterID == "proximityOnOff")
+        {
+            paramsToSync.proximityOnOff = proxOnOff->load();
         }
         else if (parameterID == "zeroDelayMode")
         {
@@ -1015,6 +1023,9 @@ Result PolarDesignerAudioProcessor::loadPreset(const File& presetFile)
     
     x = parsedJson.getProperty ("proximity", parsedJson);
     vtsParams.getParameter ("proximity")->setValueNotifyingHost (vtsParams.getParameter("proximity")->convertTo0to1(x));
+
+    x = parsedJson.getProperty("proximityOnOff", parsedJson);
+    vtsParams.getParameter("proximityOnOff")->setValueNotifyingHost(vtsParams.getParameter("proximityOnOff")->convertTo0to1(x));
     
     loadingFile = false;
     
@@ -1063,6 +1074,7 @@ Result PolarDesignerAudioProcessor::savePreset (File destination)
     jsonObj->setProperty ("mute5", muteBand[4]->load());
     jsonObj->setProperty ("ffDfEq", doEq);
     jsonObj->setProperty ("proximity", proxDistance->load());
+    jsonObj->setProperty("proximityOnOff", proxOnOff->load());
     
     String jsonString = JSON::toString (var (jsonObj), false, 2);
     if (destination.replaceWithText (jsonString))
@@ -1475,7 +1487,10 @@ void PolarDesignerAudioProcessor::timerCallback()
         
         if (allowBackwardsPattern->load() != paramsToSync.allowBackwardsPattern)
             vtsParams.getParameter ("allowBackwardsPattern")->setValueNotifyingHost (vtsParams.getParameterRange ("allowBackwardsPattern").convertTo0to1 (paramsToSync.allowBackwardsPattern));
-        
+
+        if (proxOnOff->load() != paramsToSync.proximityOnOff)
+            vtsParams.getParameter("proximityOnOff")->setValueNotifyingHost(vtsParams.getParameterRange("proximityOnOff").convertTo0to1(paramsToSync.proximityOnOff));
+
         if (paramsToSync.ffDfEq != doEq)
         {
             setEqState(paramsToSync.ffDfEq);

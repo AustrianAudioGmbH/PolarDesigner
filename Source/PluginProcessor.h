@@ -33,7 +33,7 @@
 struct ParamsToSync {
     int nrActiveBands, ffDfEq;
     float xOverFreqs[4], dirFactors[5], gains[5], proximity;
-    bool solo[5], mute[5], allowBackwardsPattern, zeroDelayMode, abLayer;
+    bool solo[5], mute[5], allowBackwardsPattern, proximityOnOff, zeroDelayMode, abLayer;
     bool paramsValid = false;
 };
 
@@ -204,6 +204,7 @@ private:
     std::atomic<float>* allowBackwardsPattern;
     
     std::atomic<float>* proxDistance;
+    std::atomic<float>* proxOnOff;
     
     std::atomic<float>* zeroDelayMode;
     std::atomic<float>* soloBand[5];
@@ -229,7 +230,7 @@ private:
     
     double currentSampleRate;
     int currentBlockSize;
-    
+
     //==============================================================================
     void resetXoverFreqs();
     void computeAllFilterCoefficients();
