@@ -124,7 +124,8 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() : AudioProcessor (Bus
     dfEqOmniBuffer(1, DF_EQ_LEN), dfEqEightBuffer(1, DF_EQ_LEN),
     ffEqOmniBuffer(1, FF_EQ_LEN), ffEqEightBuffer(1, FF_EQ_LEN), isBypassed(false),
     soloActive(false), loadingFile(false), readingSharedParams(false), trackingActive(false),
-    trackingDisturber(false), disturberRecorded(false), signalRecorded(false), currentSampleRate(48000)
+    trackingDisturber(false), disturberRecorded(false), signalRecorded(false), currentSampleRate(48000),
+    termControlWaveform(1)
 {
     
     vtsParams.addParameterListener("xOverF1", this);
@@ -179,7 +180,10 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() : AudioProcessor (Bus
     delay.setDelayTime (std::ceilf(static_cast<float>(FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE) / 2 - 1) / FILTER_BANK_NATIVE_SAMPLE_RATE);
     
     oldProxDistance = proxDistance->load();
-    
+
+    termControlWaveform.setRepaintRate(30);
+    termControlWaveform.setBufferSize(256);
+
     startTimer(50);
 }
 
@@ -439,7 +443,10 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
         }
         convolversReady = true;
     }
-    
+
+    getPlayHead()->getCurrentPosition(info);
+    termControlWaveform.pushBuffer(buffer);
+
     if (trackingActive)
         trackSignalEnergy();
     

@@ -132,6 +132,9 @@ public:
     Atomic<bool> abLayerChanged = false;
     
     bool convolversReady;
+
+    AudioVisualiserComponent termControlWaveform;
+    AudioPlayHead::CurrentPositionInfo info;
     
     // initial xover frequencies for several numbers of bands
     const float INIT_XOVER_FREQS_2B[1] = {1000.0f};

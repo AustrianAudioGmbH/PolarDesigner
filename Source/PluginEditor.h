@@ -142,11 +142,13 @@ private:
     DirectivityEQ directivityEqualiser;
     PolarPatternVisualizer polarPatternVisualizers[5];
     AlertOverlay alOverlayError;
-    AlertOverlay alOverlayDisturber;
+    //AlertOverlay alOverlayDisturber;
     AlertOverlay alOverlaySignal;
 
     Rectangle<float> presetArea;
-    
+
+    bool isTargetAquiring;
+
 #ifdef AA_DO_DEBUG_PATH
     Path debugPath;
 #endif
@@ -157,7 +159,7 @@ private:
     void saveFile();
     void timerCallback() override;
     bool getSoloActive();
-    void disableMainArea();
+    void setMainAreaEnabled(bool enable);
     void setSideAreaEnabled(bool set);
     void disableOverlay();
     void zeroDelayModeChange();

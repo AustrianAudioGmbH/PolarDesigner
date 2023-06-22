@@ -30,9 +30,10 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
                                                           AudioProcessorValueTreeState& vts)
     : AudioProcessorEditor (&p), loadingFile(false), processor (p), valueTreeState(vts),
     directivityEqualiser (p), alOverlayError(AlertOverlay::Type::errorMessage),
-    alOverlayDisturber(AlertOverlay::Type::disturberTracking),
+    //alOverlayDisturber(AlertOverlay::Type::disturberTracking),
     alOverlaySignal(AlertOverlay::Type::signalTracking),
-    presetListVisible(false)
+    presetListVisible(false),
+    isTargetAquiring(false)
 {
 //    openGLContext.attachTo (*getTopLevelComponent());
 
@@ -163,6 +164,9 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
     addAndMakeVisible(&grpDstC);
     grpDstC.setText("Terminator control");
+
+    addAndMakeVisible(processor.termControlWaveform);
+    processor.termControlWaveform.setColours(mainLaF.labelBackgroundColor, mainLaF.textButtonActiveRedFrameColor);
 
     addAndMakeVisible(&grpSync);
     grpSync.setText("Sync group");
@@ -302,9 +306,9 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     // set overlay callbacks
     alOverlayError.setOnOkayCallback ([this]() { onAlOverlayErrorOkay(); });
     
-    alOverlayDisturber.setOnOkayCallback ([this]() { onAlOverlayApplyPattern(); });
-    alOverlayDisturber.setOnCancelCallback ([this]() { onAlOverlayCancelRecord(); });
-    alOverlayDisturber.setOnRatioCallback ([this]() { onAlOverlayMaxSigToDist(); });
+    //alOverlayDisturber.setOnOkayCallback ([this]() { onAlOverlayApplyPattern(); });
+    //alOverlayDisturber.setOnCancelCallback ([this]() { onAlOverlayCancelRecord(); });
+    //alOverlayDisturber.setOnRatioCallback ([this]() { onAlOverlayMaxSigToDist(); });
     
     alOverlaySignal.setOnOkayCallback ([this]() { onAlOverlayApplyPattern(); });
     alOverlaySignal.setOnCancelCallback ([this]() { onAlOverlayCancelRecord(); });
@@ -342,8 +346,8 @@ void PolarDesignerAudioProcessorEditor::decrementTrim(int nBands) {
 
 PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
 {
-    if (alOverlayDisturber.isVisible())
-        onAlOverlayCancelRecord();
+    //if (alOverlayDisturber.isVisible())
+    //    onAlOverlayCancelRecord();
 
     if (alOverlaySignal.isVisible())
         onAlOverlayCancelRecord();
@@ -662,11 +666,26 @@ void PolarDesignerAudioProcessorEditor::resized()
     fbTerminatorControlInComp.justifyContent = juce::FlexBox::JustifyContent::center;
     fbTerminatorControlInComp.alignContent = juce::FlexBox::AlignContent::center;
     fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.25f));
-    fbTerminatorControlInComp.items.add(juce::FlexItem{ tbTerminateSpill }.withFlex(0.22f));
-    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
-    fbTerminatorControlInComp.items.add(juce::FlexItem{ tbMaximizeTarget }.withFlex(0.22f));
-    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
-    fbTerminatorControlInComp.items.add(juce::FlexItem{ tbMaxTargetToSpill }.withFlex(0.22f));
+    if (!isTargetAquiring)
+    {
+        tbTerminateSpill.setVisible(true);
+        tbMaximizeTarget.setVisible(true);
+        tbMaxTargetToSpill.setVisible(true);
+        processor.termControlWaveform.setVisible(false);
+        fbTerminatorControlInComp.items.add(juce::FlexItem{ tbTerminateSpill }.withFlex(0.22f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{ tbMaximizeTarget }.withFlex(0.22f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{ tbMaxTargetToSpill }.withFlex(0.22f));
+    }
+    else
+    {
+        tbTerminateSpill.setVisible(false);
+        tbMaximizeTarget.setVisible(false);
+        tbMaxTargetToSpill.setVisible(false);
+        processor.termControlWaveform.setVisible(true);
+        fbTerminatorControlInComp.items.add(juce::FlexItem{ processor.termControlWaveform }.withFlex(0.68f));
+    }
     fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
 
     outerBounds = fbTerminatorControlOutComp.items[0].currentBounds;
@@ -809,18 +828,23 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     }
     else if (button == &tbTerminateSpill)
     {
-        processor.startTracking(true);
-        alOverlayDisturber.enableRatioButton(processor.getSignalRecorded());
-        alOverlayDisturber.setVisible(true);
-        disableMainArea();
-        setSideAreaEnabled(false);
+        if (processor.info.isPlaying)
+        {
+            isTargetAquiring = true;
+            processor.startTracking(true);
+            //alOverlayDisturber.enableRatioButton(processor.getSignalRecorded());
+            //alOverlayDisturber.setVisible(true);
+            setMainAreaEnabled(false);
+            setSideAreaEnabled(false);
+            resized();
+        }
     }
     else if (button == &tbMaximizeTarget)
     {
         processor.startTracking(false);
         alOverlaySignal.enableRatioButton(processor.getDisturberRecorded());
         alOverlaySignal.setVisible(true);
-        disableMainArea();
+        setMainAreaEnabled(false);
         setSideAreaEnabled(false);
     }
     else if (button == &tbMaxTargetToSpill)
@@ -952,7 +976,7 @@ void PolarDesignerAudioProcessorEditor::loadFile()
             alOverlayError.setTitle("preset load error!");
             alOverlayError.setMessage(errorMessage);
             alOverlayError.setVisible(true);
-            disableMainArea();
+            setMainAreaEnabled(false);
             setSideAreaEnabled(false);
         }
         else
@@ -978,7 +1002,7 @@ void PolarDesignerAudioProcessorEditor::saveFile()
             alOverlayError.setTitle("preset save error!");
             alOverlayError.setMessage(errorMessage);
             alOverlayError.setVisible(true);
-            disableMainArea();
+            setMainAreaEnabled(false);
             setSideAreaEnabled(false);
         }
         else
@@ -1076,6 +1100,14 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
         processor.ffDfEqChanged = false;
         setEqMode();
     }
+    if (!processor.info.isPlaying && isTargetAquiring)
+    {
+        isTargetAquiring = false;
+        processor.stopTracking(1);
+        setSideAreaEnabled(true);
+        setMainAreaEnabled(true);
+        resized();
+    }
 }
 
 void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
@@ -1164,18 +1196,18 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback(ChangeBroadcaster
     }
 }
 
-void PolarDesignerAudioProcessorEditor::disableMainArea()
+void PolarDesignerAudioProcessorEditor::setMainAreaEnabled(bool enable)
 {
-    directivityEqualiser.setActive(false);
+    directivityEqualiser.setActive(enable);
     for (int i = 0; i < nActiveBands; i++)
     {
-        slDir[i].setEnabled(false);
-        slBandGain[i].setEnabled(false);
-        msbSolo[i].setEnabled(false);
-        msbMute[i].setEnabled(false);
-        polarPatternVisualizers[i].setActive(false);
+        slDir[i].setEnabled(enable);
+        slBandGain[i].setEnabled(enable);
+        msbSolo[i].setEnabled(enable);
+        msbMute[i].setEnabled(enable);
+        polarPatternVisualizers[i].setActive(enable);
     }
-    tbZeroDelay.setEnabled(false);
+    tbZeroDelay.setEnabled(enable);
 }
 
 void PolarDesignerAudioProcessorEditor::onAlOverlayErrorOkay()
@@ -1239,7 +1271,7 @@ void PolarDesignerAudioProcessorEditor::setEqMode()
 void PolarDesignerAudioProcessorEditor::disableOverlay()
 {
     alOverlayError.setVisible(false);
-    alOverlayDisturber.setVisible(false);
+    //alOverlayDisturber.setVisible(false);
     alOverlaySignal.setVisible(false);
     directivityEqualiser.setActive(true);
     nActiveBandsChanged();
