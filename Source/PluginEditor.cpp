@@ -34,8 +34,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     alOverlaySignal(AlertOverlay::Type::signalTracking),
     presetListVisible(false),
     showTerminatorAnimationWindow(false),
-    isTargetAquiring(false),
-    showPlaybackSpill(false)
+    isTargetAquiring(false)
 {
 //    openGLContext.attachTo (*getTopLevelComponent());
 
@@ -689,17 +688,17 @@ void PolarDesignerAudioProcessorEditor::resized()
     if (showTerminatorAnimationWindow)
     {
         tbCloseTerminatorControl.setVisible(true);
+        albPlaybackSpill.setVisible(!isTargetAquiring);
+        albAcquiringTarget.setVisible(isTargetAquiring);
+        processor.termControlWaveform.setVisible(true);
         tbTerminateSpill.setVisible(false);
         tbMaximizeTarget.setVisible(false);
         tbMaxTargetToSpill.setVisible(false);
 
-        albPlaybackSpill.setVisible(showPlaybackSpill);
-        albAcquiringTarget.setVisible(!showPlaybackSpill);
-        processor.termControlWaveform.setVisible(true);
         fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withHeight(10));
         fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTerminatorControlCloseComp }.withFlex(0.12f));
         fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
-        fbTerminatorControlInComp.items.add(juce::FlexItem{ showPlaybackSpill ? albPlaybackSpill : albAcquiringTarget }.withFlex(0.22f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{ isTargetAquiring ? albAcquiringTarget : albPlaybackSpill }.withFlex(0.22f));
         fbTerminatorControlInComp.items.add(juce::FlexItem{ processor.termControlWaveform }.withFlex(0.46f));
         fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
     }
@@ -712,6 +711,7 @@ void PolarDesignerAudioProcessorEditor::resized()
         tbTerminateSpill.setVisible(true);
         tbMaximizeTarget.setVisible(true);
         tbMaxTargetToSpill.setVisible(true);
+
         fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.25f));
         fbTerminatorControlInComp.items.add(juce::FlexItem{ tbTerminateSpill }.withFlex(0.22f));
         fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
@@ -862,6 +862,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &tbTerminateSpill)
     {
         showTerminatorAnimationWindow = true;
+        resized();
     }
     else if (button == &tbCloseTerminatorControl)
     {
@@ -1137,30 +1138,35 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
         {
             if (!isTargetAquiring)
             {
-                showPlaybackSpill = false;
+                isTargetAquiring = true;
+                setSideAreaEnabled(false);
+                setMainAreaEnabled(false);
                 processor.startTracking(true);
                 resized();
             }
-            isTargetAquiring = true;
         }
         else
         {
             if (isTargetAquiring)
             {
-                showPlaybackSpill = true;
+                isTargetAquiring = false;
+                setSideAreaEnabled(true);
+                setMainAreaEnabled(true);
                 processor.stopTracking(1);
                 resized();
             }
-            isTargetAquiring = false;
         }
     }
     else
     {
         if (isTargetAquiring)
         {
+            isTargetAquiring = false;
+            setSideAreaEnabled(true);
+            setMainAreaEnabled(true);
             processor.stopTracking(0);
+            resized();
         }
-        isTargetAquiring = false;
     }
 }
 

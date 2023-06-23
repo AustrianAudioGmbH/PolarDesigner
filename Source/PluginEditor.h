@@ -151,7 +151,6 @@ private:
 
     bool showTerminatorAnimationWindow;
     bool isTargetAquiring;
-    bool showPlaybackSpill;
 
 #ifdef AA_DO_DEBUG_PATH
     Path debugPath;
