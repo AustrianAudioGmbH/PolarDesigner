@@ -11,7 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-
+#include "../resources/lookAndFeel/MainLookAndFeel.h"
 //==============================================================================
 /*
 */
@@ -22,26 +22,46 @@ public:
     AnimatedLabel()
     {
         it = 0;
-        startTimer(100);
         fontHeight = 14.f;
+        repaintBypassed = false;
+        timerBypassedPeriods = 0;
         addAndMakeVisible(&animatedRectangle);
-
+        animatedRectangle.setVisible(false);
     }
 
     ~AnimatedLabel() override
     {
     }
 
+    void startAnimation()
+    {
+        it = 0;
+        fontHeight = 14.f;
+        repaintBypassed = false;
+        timerBypassedPeriods = 0;
+        animatedString.clear();
+        startTimer(100);
+        animatedRectangle.setVisible(true);
+    }
+
+    void stopAnimation()
+    {
+        it = 0;
+        fontHeight = 14.f;
+        repaintBypassed = false;
+        timerBypassedPeriods = 0;
+        animatedString.clear();
+        stopTimer();
+        animatedRectangle.setVisible(false);
+    }
+
     void paint (juce::Graphics& g) override
     {
         fontHeight = getTopLevelComponent()->getHeight() * 0.018f;
         textArea = getLocalBounds().reduced(getLocalBounds().getWidth() * 0.06f, (getLocalBounds().getHeight() - fontHeight)/2);
-        g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+        g.fillAll (mainLaF.labelBackgroundColor);
 
-        g.setColour (juce::Colours::grey);
-        g.drawRect (getLocalBounds(), 1);
-
-        g.setColour (juce::Colours::white);
+        g.setColour (mainLaF.mainTextColor);
         g.setFont (fontHeight);
 
         g.drawText (animatedString, textArea,
@@ -69,24 +89,37 @@ public:
     }
 
 private:
-    const char* destString = "12345678910";
-    String animatedString = "";
+    String animatedString;
     int it;
     int fontHeight;
     Font textFont;
+    int timerBypassedPeriods;
+    bool repaintBypassed;
 
     void timerCallback() override
     {
-        animatedString.append(&destString[it], 1);
-        it++;
-        if (it > strlen(destString))
+        auto charStr =  getTitle().getCharPointer();
+        if (!repaintBypassed && it < getTitle().length())
+        {
+            animatedString += charStr[it];
+            it++;
+            repaint();
+        }
+        else
         {
             it = 0;
-            animatedString.clear();
+            repaintBypassed = true;
+            timerBypassedPeriods++;
+            if (timerBypassedPeriods > 30)
+            {
+                repaintBypassed = false;
+                timerBypassedPeriods = 0;
+                animatedString.clear();
+            }
         }
-        repaint();
         resized();
     }
+
     class AnimatedRectangle : public juce::Component,
         private juce::Timer
     {
@@ -103,8 +136,7 @@ private:
         void paint(juce::Graphics& g) override
         {
             if (show)
-                g.fillAll(juce::Colour(255, 255, 255));
-
+                g.fillAll(mainLaF.mainTextColor);
         }
 
         void resized() override
@@ -118,9 +150,12 @@ private:
             show = !show;
             repaint();
         }
+        MainLookAndFeel mainLaF;
     } animatedRectangle;
 
     Rectangle<int> textArea;
     Rectangle<int> rectArea;
+    MainLookAndFeel mainLaF;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AnimatedLabel)
 };

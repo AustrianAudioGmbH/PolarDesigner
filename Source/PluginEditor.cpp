@@ -175,10 +175,10 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     processor.termControlWaveform.setColours(mainLaF.labelBackgroundColor, mainLaF.textButtonActiveRedFrameColor);
 
     addAndMakeVisible(&albPlaybackSpill);
-    albPlaybackSpill.setTitle("PLAYBACK SPILL");
+    albPlaybackSpill.setTitle("PLAYBACK SPILL  ");
 
     addAndMakeVisible(&albAcquiringTarget);
-    albAcquiringTarget.setTitle("ACQUIRING TARGET");
+    albAcquiringTarget.setTitle("ACQUIRING TARGET  ");
 
     addAndMakeVisible(&grpSync);
     grpSync.setText("Sync group");
@@ -862,6 +862,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &tbTerminateSpill)
     {
         showTerminatorAnimationWindow = true;
+        albPlaybackSpill.startAnimation();
         resized();
     }
     else if (button == &tbCloseTerminatorControl)
@@ -1142,6 +1143,8 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
                 setSideAreaEnabled(false);
                 setMainAreaEnabled(false);
                 processor.startTracking(true);
+                albAcquiringTarget.startAnimation();
+                albPlaybackSpill.stopAnimation();
                 resized();
             }
         }
@@ -1153,6 +1156,8 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
                 setSideAreaEnabled(true);
                 setMainAreaEnabled(true);
                 processor.stopTracking(1);
+                albAcquiringTarget.stopAnimation();
+                albPlaybackSpill.startAnimation();
                 resized();
             }
         }
@@ -1165,6 +1170,8 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
             setSideAreaEnabled(true);
             setMainAreaEnabled(true);
             processor.stopTracking(0);
+            albAcquiringTarget.stopAnimation();
+            albPlaybackSpill.stopAnimation();
             resized();
         }
     }
