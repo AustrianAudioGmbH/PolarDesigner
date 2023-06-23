@@ -32,6 +32,7 @@
     </GROUP>
     <GROUP id="{D54BFC58-8ED6-1DEF-A2B9-DAAF16495BAC}" name="resources">
       <GROUP id="{75BF05EC-024B-1F61-DA13-169C5FDE5119}" name="customComponents">
+        <FILE id="YX4Cc1" name="AnimatedLabel.h" compile="0" resource="0" file="resources/customComponents/AnimatedLabel.h"/>
         <FILE id="ZUAv2H" name="PresetListBox.h" compile="0" resource="0" file="resources/customComponents/PresetListBox.h"/>
         <FILE id="x7u7c6" name="MultiTextButton.h" compile="0" resource="0"
               file="resources/customComponents/MultiTextButton.h"/>

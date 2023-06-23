@@ -94,7 +94,7 @@ public:
                 g.fillRect(buttonArea.reduced(1.0f, 1.0f));
             }
         }
-        else if (button.getComponentID() == "5621")
+        else if (button.getComponentID() == "5621" || button.getComponentID() == "5721")
         {
             auto imageArea = buttonArea.reduced(5, 5);
 
@@ -343,7 +343,7 @@ public:
                 g.drawRect(buttonArea.reduced(3.0f, 3.0f), 2);
             }
         }
-        else if (button.getComponentID() == "5621")
+        else if (button.getComponentID() == "5621" || button.getComponentID() == "5721")
         {
             if (isMouseOverButton)
             {

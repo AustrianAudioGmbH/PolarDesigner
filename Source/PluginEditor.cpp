@@ -33,7 +33,9 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     //alOverlayDisturber(AlertOverlay::Type::disturberTracking),
     alOverlaySignal(AlertOverlay::Type::signalTracking),
     presetListVisible(false),
-    isTargetAquiring(false)
+    showTerminatorAnimationWindow(false),
+    isTargetAquiring(false),
+    showPlaybackSpill(false)
 {
 //    openGLContext.attachTo (*getTopLevelComponent());
 
@@ -165,8 +167,19 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     addAndMakeVisible(&grpDstC);
     grpDstC.setText("Terminator control");
 
+    addAndMakeVisible(&tbCloseTerminatorControl);
+    tbCloseTerminatorControl.setComponentID("5721");
+    tbCloseTerminatorControl.setToggleState(false, NotificationType::dontSendNotification);
+    tbCloseTerminatorControl.addListener(this);
+
     addAndMakeVisible(processor.termControlWaveform);
     processor.termControlWaveform.setColours(mainLaF.labelBackgroundColor, mainLaF.textButtonActiveRedFrameColor);
+
+    addAndMakeVisible(&albPlaybackSpill);
+    albPlaybackSpill.setTitle("PLAYBACK SPILL");
+
+    addAndMakeVisible(&albAcquiringTarget);
+    albAcquiringTarget.setTitle("ACQUIRING TARGET");
 
     addAndMakeVisible(&grpSync);
     grpSync.setText("Sync group");
@@ -665,28 +678,48 @@ void PolarDesignerAudioProcessorEditor::resized()
     fbTerminatorControlInComp.flexDirection = juce::FlexBox::Direction::column;
     fbTerminatorControlInComp.justifyContent = juce::FlexBox::JustifyContent::center;
     fbTerminatorControlInComp.alignContent = juce::FlexBox::AlignContent::center;
-    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.25f));
-    if (!isTargetAquiring)
+
+    juce::FlexBox fbTerminatorControlCloseComp;
+    fbTerminatorControlCloseComp.flexDirection = juce::FlexBox::Direction::row;
+    fbTerminatorControlCloseComp.justifyContent = juce::FlexBox::JustifyContent::center;
+    fbTerminatorControlCloseComp.alignContent = juce::FlexBox::AlignContent::center;
+    fbTerminatorControlCloseComp.items.add(juce::FlexItem{  }.withFlex(0.88f));
+    fbTerminatorControlCloseComp.items.add(juce::FlexItem{ tbCloseTerminatorControl }.withFlex(0.12f));
+
+    if (showTerminatorAnimationWindow)
     {
+        tbCloseTerminatorControl.setVisible(true);
+        tbTerminateSpill.setVisible(false);
+        tbMaximizeTarget.setVisible(false);
+        tbMaxTargetToSpill.setVisible(false);
+
+        albPlaybackSpill.setVisible(showPlaybackSpill);
+        albAcquiringTarget.setVisible(!showPlaybackSpill);
+        processor.termControlWaveform.setVisible(true);
+        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withHeight(10));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTerminatorControlCloseComp }.withFlex(0.12f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{ showPlaybackSpill ? albPlaybackSpill : albAcquiringTarget }.withFlex(0.22f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{ processor.termControlWaveform }.withFlex(0.46f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
+    }
+    else
+    {
+        tbCloseTerminatorControl.setVisible(false);
+        albPlaybackSpill.setVisible(false);
+        albAcquiringTarget.setVisible(false);
+        processor.termControlWaveform.setVisible(false);
         tbTerminateSpill.setVisible(true);
         tbMaximizeTarget.setVisible(true);
         tbMaxTargetToSpill.setVisible(true);
-        processor.termControlWaveform.setVisible(false);
+        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.25f));
         fbTerminatorControlInComp.items.add(juce::FlexItem{ tbTerminateSpill }.withFlex(0.22f));
         fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
         fbTerminatorControlInComp.items.add(juce::FlexItem{ tbMaximizeTarget }.withFlex(0.22f));
         fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
         fbTerminatorControlInComp.items.add(juce::FlexItem{ tbMaxTargetToSpill }.withFlex(0.22f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
     }
-    else
-    {
-        tbTerminateSpill.setVisible(false);
-        tbMaximizeTarget.setVisible(false);
-        tbMaxTargetToSpill.setVisible(false);
-        processor.termControlWaveform.setVisible(true);
-        fbTerminatorControlInComp.items.add(juce::FlexItem{ processor.termControlWaveform }.withFlex(0.68f));
-    }
-    fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
 
     outerBounds = fbTerminatorControlOutComp.items[0].currentBounds;
     inCompWidth = outerBounds.getWidth();
@@ -828,16 +861,14 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     }
     else if (button == &tbTerminateSpill)
     {
-        if (processor.info.isPlaying)
-        {
-            isTargetAquiring = true;
-            processor.startTracking(true);
-            //alOverlayDisturber.enableRatioButton(processor.getSignalRecorded());
-            //alOverlayDisturber.setVisible(true);
-            setMainAreaEnabled(false);
-            setSideAreaEnabled(false);
-            resized();
-        }
+        showTerminatorAnimationWindow = true;
+    }
+    else if (button == &tbCloseTerminatorControl)
+    {
+        showTerminatorAnimationWindow = false;
+        setMainAreaEnabled(true);
+        setSideAreaEnabled(true);
+        resized();
     }
     else if (button == &tbMaximizeTarget)
     {
@@ -1100,13 +1131,36 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
         processor.ffDfEqChanged = false;
         setEqMode();
     }
-    if (!processor.info.isPlaying && isTargetAquiring)
+    if (showTerminatorAnimationWindow)
     {
+        if (processor.info.isPlaying)
+        {
+            if (!isTargetAquiring)
+            {
+                showPlaybackSpill = false;
+                processor.startTracking(true);
+                resized();
+            }
+            isTargetAquiring = true;
+        }
+        else
+        {
+            if (isTargetAquiring)
+            {
+                showPlaybackSpill = true;
+                processor.stopTracking(1);
+                resized();
+            }
+            isTargetAquiring = false;
+        }
+    }
+    else
+    {
+        if (isTargetAquiring)
+        {
+            processor.stopTracking(0);
+        }
         isTargetAquiring = false;
-        processor.stopTracking(1);
-        setSideAreaEnabled(true);
-        setMainAreaEnabled(true);
-        resized();
     }
 }
 

@@ -41,6 +41,7 @@
 #include "../resources/customComponents/EndlessSlider.h"
 #include "../resources/customComponents/MultiTextButton.h"
 #include "../resources/customComponents/PresetListBox.h"
+#include "../resources/customComponents/AnimatedLabel.h"
 
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
@@ -123,11 +124,11 @@ private:
     // Solo Buttons
     MuteSoloButton msbSolo[5], msbMute[5];
     // Text Buttons
-    TextButton tbLoad, tbSave, tbTerminateSpill, tbMaximizeTarget, tbMaxTargetToSpill, tbZeroDelay, tbSyncChannel[5], tbClosePresetList, tbOpenFromFile;
+    TextButton tbLoad, tbSave, tbTerminateSpill, tbMaximizeTarget, tbMaxTargetToSpill, tbZeroDelay, tbSyncChannel[5], tbOpenFromFile;
     // ToggleButtons
     ToggleButton tbAllowBackwardsPattern, tgbProxCtr;
     // ImageButtons
-    TextButton ibEqCtr[2];
+    TextButton ibEqCtr[2], tbClosePresetList, tbCloseTerminatorControl;
 
     TextMultiButton tmbABButton, tmbNrBandsButton, tmbSyncChannelButton;
 
@@ -146,8 +147,11 @@ private:
     AlertOverlay alOverlaySignal;
 
     Rectangle<float> presetArea;
+    AnimatedLabel albPlaybackSpill, albAcquiringTarget;
 
+    bool showTerminatorAnimationWindow;
     bool isTargetAquiring;
+    bool showPlaybackSpill;
 
 #ifdef AA_DO_DEBUG_PATH
     Path debugPath;
