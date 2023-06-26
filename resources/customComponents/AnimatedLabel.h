@@ -22,6 +22,7 @@ public:
     AnimatedLabel()
     {
         it = 0;
+        counter = 0;
         fontHeight = 14.f;
         repaintBypassed = false;
         timerBypassedPeriods = 0;
@@ -33,20 +34,23 @@ public:
     {
     }
 
-    void startAnimation()
+    void startAnimation(const String primText, const String secText = {})
     {
         it = 0;
+        counter = 0;
         fontHeight = 14.f;
         repaintBypassed = false;
         timerBypassedPeriods = 0;
         animatedString.clear();
         startTimer(100);
+        setLabelText(primText, secText);
         animatedRectangle.setVisible(true);
     }
 
     void stopAnimation()
     {
         it = 0;
+        counter = 0;
         fontHeight = 14.f;
         repaintBypassed = false;
         timerBypassedPeriods = 0;
@@ -64,8 +68,8 @@ public:
         g.setColour (mainLaF.mainTextColor);
         g.setFont (fontHeight);
 
-        g.drawText (animatedString, textArea,
-                    juce::Justification::left, true);
+        g.drawMultiLineText(animatedString, textArea.getX(), textArea.getY() + fontHeight/2, textArea.getWidth(),
+            juce::Justification::left, true);
     }
 
     void resized() override
@@ -74,16 +78,27 @@ public:
 
         Font font(fontHeight);
         textArea = getLocalBounds().reduced(getLocalBounds().getWidth() * 0.06f, (getLocalBounds().getHeight() - fontHeight) / 2);
-        int equalSignWidth = getLocalBounds().getWidth() * 0.03f;
+        auto centredTextArea = Rectangle<int>(textArea.getX(), textArea.getY() - fontHeight/4, textArea.getWidth(), fontHeight);
+        int equalSignWidth = getLocalBounds().getWidth() * 0.042f;
+        float rowProportion = static_cast<float>(font.getStringWidth(animatedString)) / static_cast<float>(centredTextArea.getWidth());
 
         if (animatedString.length() > 0)
         {
+            auto currStringLength = animatedString.length();
             equalSignWidth = font.getStringWidth(animatedString) / animatedString.length();
-            rectArea = textArea.withWidth(equalSignWidth).translated(equalSignWidth * animatedString.length(), 0);
+            if (font.getStringWidth(animatedString) > centredTextArea.getWidth())
+            {
+                int nrOfSignsInNewRow = (rowProportion - 1.f) * (centredTextArea.getWidth()/ equalSignWidth);
+                rectArea = centredTextArea.withWidth(equalSignWidth).translated(equalSignWidth * nrOfSignsInNewRow, fontHeight);
+            }
+            else
+            {
+                rectArea = centredTextArea.withWidth(equalSignWidth).translated(equalSignWidth * currStringLength, 0);
+            }
         }
         else
         {
-            rectArea = textArea.withWidth(equalSignWidth);
+            rectArea = centredTextArea.withWidth(equalSignWidth);
         }
         animatedRectangle.setBounds(rectArea);
     }
@@ -95,11 +110,23 @@ private:
     Font textFont;
     int timerBypassedPeriods;
     bool repaintBypassed;
+    String text;
+    String primaryText;
+    String secondaryText;
+    int counter;
+
+    void setLabelText(const String primText, const String secText = {})
+    {
+        primaryText = primText;
+        secondaryText = secText;
+        text = primaryText;
+    }
 
     void timerCallback() override
     {
-        auto charStr =  getTitle().getCharPointer();
-        if (!repaintBypassed && it < getTitle().length())
+        auto charStr = text.getCharPointer();
+
+        if (!repaintBypassed && it < text.length())
         {
             animatedString += charStr[it];
             it++;
@@ -112,7 +139,9 @@ private:
             timerBypassedPeriods++;
             if (timerBypassedPeriods > 30)
             {
+                counter++;
                 repaintBypassed = false;
+                text = (!secondaryText.isEmpty() && counter%2 == 0) ? secondaryText : primaryText;
                 timerBypassedPeriods = 0;
                 animatedString.clear();
             }
