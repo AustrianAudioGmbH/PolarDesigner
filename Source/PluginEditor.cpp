@@ -34,7 +34,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     alOverlaySignal(AlertOverlay::Type::signalTracking),
     presetListVisible(false),
     showTerminatorAnimationWindow(false),
-    isTargetAquiring(false)
+    isTargetAquiring(false),
+    maximizeTarget(false)
 {
 //    openGLContext.attachTo (*getTopLevelComponent());
 
@@ -860,23 +861,24 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &tbTerminateSpill)
     {
         showTerminatorAnimationWindow = true;
+        maximizeTarget = false;
         albPlaybackSpill.startAnimation("PLAYBACK SPILL  ");
         resized();
     }
     else if (button == &tbCloseTerminatorControl)
     {
         showTerminatorAnimationWindow = false;
+        maximizeTarget = false;
         setMainAreaEnabled(true);
         setSideAreaEnabled(true);
         resized();
     }
     else if (button == &tbMaximizeTarget)
     {
-        processor.startTracking(false);
-        alOverlaySignal.enableRatioButton(processor.getDisturberRecorded());
-        alOverlaySignal.setVisible(true);
-        setMainAreaEnabled(false);
-        setSideAreaEnabled(false);
+        showTerminatorAnimationWindow = true;
+        maximizeTarget = true;
+        albPlaybackSpill.startAnimation("PLAYBACK SOURCE  ");
+        resized();
     }
     else if (button == &tbMaxTargetToSpill)
     {
@@ -1141,7 +1143,9 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
                 setSideAreaEnabled(false);
                 setMainAreaEnabled(false);
                 processor.startTracking(true);
-                albAcquiringTarget.startAnimation("ACQUIRING TARGET   ","STOP PLAYBACK WHEN READY TO TERMINATE  ");
+                albAcquiringTarget.startAnimation("ACQUIRING TARGET   ", 
+                                                  maximizeTarget ? "STOP PLAYBACK WHEN READY TO MAXIMIZE  " 
+                                                  : "STOP PLAYBACK WHEN READY TO TERMINATE  ");
                 albPlaybackSpill.stopAnimation();
                 resized();
             }
@@ -1153,9 +1157,9 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
                 isTargetAquiring = false;
                 setSideAreaEnabled(true);
                 setMainAreaEnabled(true);
-                processor.stopTracking(1);
+                processor.stopTracking(maximizeTarget ? 2 : 1);
                 albAcquiringTarget.stopAnimation();
-                albPlaybackSpill.startAnimation("PLAYBACK SPILL  ");
+                albPlaybackSpill.startAnimation(maximizeTarget ? "PLAYBACK SOURCE  " : "PLAYBACK SPILL  ");
                 resized();
             }
         }

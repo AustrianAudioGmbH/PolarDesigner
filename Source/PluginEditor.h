@@ -151,6 +151,7 @@ private:
 
     bool showTerminatorAnimationWindow;
     bool isTargetAquiring;
+    bool maximizeTarget;
 
 #ifdef AA_DO_DEBUG_PATH
     Path debugPath;
