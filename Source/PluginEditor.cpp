@@ -1142,7 +1142,7 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
                 isTargetAquiring = true;
                 setSideAreaEnabled(false);
                 setMainAreaEnabled(false);
-                processor.startTracking(true);
+                processor.startTracking(maximizeTarget ? false : true);
                 albAcquiringTarget.startAnimation("ACQUIRING TARGET   ", 
                                                   maximizeTarget ? "STOP PLAYBACK WHEN READY TO MAXIMIZE  " 
                                                   : "STOP PLAYBACK WHEN READY TO TERMINATE  ");
@@ -1157,7 +1157,7 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
                 isTargetAquiring = false;
                 setSideAreaEnabled(true);
                 setMainAreaEnabled(true);
-                processor.stopTracking(maximizeTarget ? 2 : 1);
+                processor.stopTracking(1);
                 albAcquiringTarget.stopAnimation();
                 albPlaybackSpill.startAnimation(maximizeTarget ? "PLAYBACK SOURCE  " : "PLAYBACK SPILL  ");
                 resized();
