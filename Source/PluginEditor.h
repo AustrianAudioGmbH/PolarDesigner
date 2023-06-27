@@ -64,10 +64,10 @@ public:
     void buttonClicked (Button* button) override;
     void sliderValueChanged (Slider* slider) override;
     
-    void onAlOverlayErrorOkay();
-    void onAlOverlayApplyPattern();
-    void onAlOverlayCancelRecord();
-    void onAlOverlayMaxSigToDist();
+    //void onAlOverlayErrorOkay();
+    //void onAlOverlayApplyPattern();
+    //void onAlOverlayCancelRecord();
+    //void onAlOverlayMaxSigToDist();
     void setEqMode();
     float getABButtonAlphaFromLayerState(int layerState);
     // Helper method to calculate flex on the base of bandlimitPathComponents
@@ -149,9 +149,16 @@ private:
     Rectangle<float> presetArea;
     AnimatedLabel albPlaybackSpill, albAcquiringTarget;
 
+    TextButton terminatorLabelNr1, terminatorLabelSpillMain, terminatorLabelSpillSub;
+    TextButton tbBeginTerminate;
+
+    TextButton terminatorLabelNr2, terminatorLabelMaxMain, terminatorLabelMaxSub;
+    TextButton terminatorLabelNr3, terminatorLabelMaxToSpillMain, terminatorLabelMaxToSpillSub;
+
     bool showTerminatorAnimationWindow;
     bool isTargetAquiring;
     bool maximizeTarget;
+    bool showMaxToSpillWindow;
 
 #ifdef AA_DO_DEBUG_PATH
     Path debugPath;
@@ -165,9 +172,11 @@ private:
     bool getSoloActive();
     void setMainAreaEnabled(bool enable);
     void setSideAreaEnabled(bool set);
-    void disableOverlay();
+    //void disableOverlay();
     void zeroDelayModeChange();
     void showPresetList(bool shouldShow);
+
+    void setActiveTerminatorStage(int stage);
 
     void mouseDown(const MouseEvent& event) override;
     

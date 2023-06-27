@@ -384,6 +384,8 @@ public:
 
         g.setColour(mainTextColor);
 
+        Font font(normalFont);
+
         int x = buttonArea.getX();
         int w = buttonArea.getWidth();
         int h = button.getTopLevelComponent()->getHeight() * 0.023f;
@@ -408,14 +410,35 @@ public:
         }
         else if (button.getButtonText() == "Terminate Spill"
             || button.getButtonText() == "Maximize Target"
-            || button.getButtonText() == "Max Target-to-spill")
+            || button.getButtonText() == "Max Target-to-spill"
+            )
         {
             justification = Justification::centredLeft;
             x = buttonArea.proportionOfWidth(0.11f);
             w = buttonArea.proportionOfWidth(0.78f);
         }
+        else if (button.getButtonText() == "Terminate spill" || 
+            button.getButtonText() == "Maximize target" ||
+            button.getButtonText() == "Max Target-to-Spill" || 
+            button.getButtonText() == "01" ||
+            button.getButtonText() == "02" ||
+            button.getButtonText() == "03" ||
+            button.getButtonText() == "Begin Terminate")
+        {
+            font.setBold(true);
+            justification = Justification::centredLeft;
+            h = button.getTopLevelComponent()->getHeight() * 0.018f;
+            x = 5;
+        }
+        else if (button.getButtonText() == "Click on the button below to apply polar\npatterns with minimum spill energy"
+            )
+        {
+            font.setBold(false);
+            justification = Justification::centredLeft;
+            h = button.getTopLevelComponent()->getHeight() * 0.016f;
+            x = 5;
+        }
 
-        Font font(normalFont);
         font.setHeight(h);
         g.setFont(font);
         g.drawFittedText(button.getButtonText(), x, y, w, h, justification, 1);
