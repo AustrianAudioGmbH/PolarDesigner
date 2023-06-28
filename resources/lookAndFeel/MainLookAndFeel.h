@@ -262,6 +262,25 @@ public:
                 g.fillRect(reducedRect.reduced(1.0f, 1.0f));
             }
         }
+        else if (button.getButtonText() == "Begin Terminate"
+            || button.getButtonText() == "Begin Maximize"
+            || button.getButtonText() == "Apply Max Target-to-Spill"
+            )
+        {
+            g.setColour(textButtonFrameColor);
+            g.drawRect(buttonArea, 1);
+            
+            if (isMouseOverButton)
+            {
+                g.setColour(textButtonHoverBackgroundColor);
+                g.fillRect(buttonArea.reduced(1.0f, 1.0f));
+            }
+            if (isButtonDown)
+            {
+                g.setColour(textButtonPressedBackgroundColor);
+                g.fillRect(buttonArea.reduced(1.0f, 1.0f));
+            }
+        }
         //Sync channel buttons
         else if (button.getComponentID() == "5521")
         {
@@ -417,13 +436,22 @@ public:
             x = buttonArea.proportionOfWidth(0.11f);
             w = buttonArea.proportionOfWidth(0.78f);
         }
+        else if (button.getButtonText() == "Begin Terminate"
+            || button.getButtonText() == "Begin Maximize"
+            || button.getButtonText() == "Apply Max Target-to-Spill"
+            )
+        {
+            justification = Justification::centredLeft;
+            x = buttonArea.proportionOfWidth(0.11f);
+            w = buttonArea.proportionOfWidth(0.78f);
+        }
         else if (button.getButtonText() == "Terminate spill" || 
             button.getButtonText() == "Maximize target" ||
             button.getButtonText() == "Max Target-to-Spill" || 
             button.getButtonText() == "01" ||
             button.getButtonText() == "02" ||
-            button.getButtonText() == "03" ||
-            button.getButtonText() == "Begin Terminate")
+            button.getButtonText() == "03"
+            )
         {
             font.setBold(true);
             justification = Justification::centredLeft;
@@ -431,6 +459,8 @@ public:
             x = 5;
         }
         else if (button.getButtonText() == "Click on the button below to apply polar\npatterns with minimum spill energy"
+            || button.getButtonText() == "Click on the button below to apply polar\npatterns with maximum signal energy"
+            || button.getButtonText() == "Click on the button below to apply polar\npatterns with minimum spill energy"
             )
         {
             font.setBold(false);

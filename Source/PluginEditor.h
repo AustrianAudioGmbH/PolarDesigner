@@ -153,12 +153,24 @@ private:
     TextButton tbBeginTerminate;
 
     TextButton terminatorLabelNr2, terminatorLabelMaxMain, terminatorLabelMaxSub;
+    TextButton tbBeginMaximize;
+
     TextButton terminatorLabelNr3, terminatorLabelMaxToSpillMain, terminatorLabelMaxToSpillSub;
+    TextButton tbApplyMaxTargetToSpill;
 
     bool showTerminatorAnimationWindow;
     bool isTargetAquiring;
     bool maximizeTarget;
     bool showMaxToSpillWindow;
+    bool maxTargetToSpillFlowStarted;
+
+    enum terminatorStage
+    {
+        DISABLED = 0,
+        TERMINATE = 1,
+        MAXIMIZE = 2,
+        MAXTOSPILL = 3
+    } termStage;
 
 #ifdef AA_DO_DEBUG_PATH
     Path debugPath;
@@ -176,7 +188,7 @@ private:
     void zeroDelayModeChange();
     void showPresetList(bool shouldShow);
 
-    void setActiveTerminatorStage(int stage);
+    void showActiveTerminatorStage(terminatorStage stage);
 
     void mouseDown(const MouseEvent& event) override;
     
