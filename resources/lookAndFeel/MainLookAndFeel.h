@@ -262,6 +262,21 @@ public:
                 g.fillRect(reducedRect.reduced(1.0f, 1.0f));
             }
         }
+        else if (button.getButtonText() == "Terminate spill" ||
+                 button.getButtonText() == "Maximize target" ||
+                 button.getButtonText() == "Max Target-to-Spill" || 
+                 button.getButtonText() == "01" ||
+                 button.getButtonText() == "02" ||
+                 button.getButtonText() == "03")
+        {
+
+        }
+        else if (button.getButtonText() == "Click on the button below to apply polar\npatterns with minimum spill energy"
+              || button.getButtonText() == "Click on the button below to apply polar\npatterns with maximum signal energy"
+              || button.getButtonText() == "Find best compromise between reduction\nof spill and maximizing target signal")
+        {
+
+        }
         else if (button.getButtonText() == "Begin Terminate"
             || button.getButtonText() == "Begin Maximize"
             || button.getButtonText() == "Apply Max Target-to-Spill"
@@ -460,12 +475,12 @@ public:
         }
         else if (button.getButtonText() == "Click on the button below to apply polar\npatterns with minimum spill energy"
             || button.getButtonText() == "Click on the button below to apply polar\npatterns with maximum signal energy"
-            || button.getButtonText() == "Click on the button below to apply polar\npatterns with minimum spill energy"
+            || button.getButtonText() == "Find best compromise between reduction\nof spill and maximizing target signal"
             )
         {
             font.setBold(false);
             justification = Justification::centredLeft;
-            h = button.getTopLevelComponent()->getHeight() * 0.016f;
+            h = button.getTopLevelComponent()->getHeight() * 0.0167f;
             x = 5;
         }
 

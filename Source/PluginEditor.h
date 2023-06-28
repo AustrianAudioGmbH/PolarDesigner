@@ -142,9 +142,6 @@ private:
     
     DirectivityEQ directivityEqualiser;
     PolarPatternVisualizer polarPatternVisualizers[5];
-    AlertOverlay alOverlayError;
-    //AlertOverlay alOverlayDisturber;
-    AlertOverlay alOverlaySignal;
 
     Rectangle<float> presetArea;
     AnimatedLabel albPlaybackSpill, albAcquiringTarget;
@@ -164,7 +161,7 @@ private:
     bool showMaxToSpillWindow;
     bool maxTargetToSpillFlowStarted;
 
-    enum terminatorStage
+    enum class terminatorStage
     {
         DISABLED = 0,
         TERMINATE = 1,
@@ -184,7 +181,6 @@ private:
     bool getSoloActive();
     void setMainAreaEnabled(bool enable);
     void setSideAreaEnabled(bool set);
-    //void disableOverlay();
     void zeroDelayModeChange();
     void showPresetList(bool shouldShow);
 

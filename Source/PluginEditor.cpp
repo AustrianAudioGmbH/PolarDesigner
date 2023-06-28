@@ -29,16 +29,14 @@
 PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesignerAudioProcessor& p,
                                                           AudioProcessorValueTreeState& vts)
     : AudioProcessorEditor (&p), loadingFile(false), processor (p), valueTreeState(vts),
-    directivityEqualiser (p), alOverlayError(AlertOverlay::Type::errorMessage),
-    //alOverlayDisturber(AlertOverlay::Type::disturberTracking),
-    alOverlaySignal(AlertOverlay::Type::signalTracking),
+    directivityEqualiser (p),
     presetListVisible(false),
     showTerminatorAnimationWindow(false),
     isTargetAquiring(false),
     maximizeTarget(false),
     showMaxToSpillWindow(false),
     maxTargetToSpillFlowStarted(false),
-    termStage(terminatorStage::DISABLED)
+    termStage(PolarDesignerAudioProcessorEditor::terminatorStage::DISABLED)
 {
 //    openGLContext.attachTo (*getTopLevelComponent());
 
@@ -116,26 +114,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
     addAndMakeVisible (&footer);
     footer.setInterceptsMouseClicks(false, true);
-    /*
-    addAndMakeVisible (&alOverlayError);
-    alOverlayError.setVisible(false);
-    alOverlayError.setColour(AlertWindow::backgroundColourId, globalLaF.AAGrey);
-    alOverlayError.setColour(TextButton::buttonColourId, globalLaF.AARed);
-    
-    addAndMakeVisible (&alOverlayDisturber);
-    alOverlayDisturber.setVisible(false);
-    alOverlayDisturber.setColour(AlertWindow::backgroundColourId, globalLaF.AAGrey);
-    alOverlayDisturber.setColour(TextButton::buttonColourId , globalLaF.AARed);
-    alOverlayDisturber.setTitle("acquiring target!");
-    alOverlayDisturber.setMessage("Make sure playback of an undesired target signal (spill) is active. Terminate to apply polar patterns with minimum spill energy. Also track a desired signal to be able to maximize the target-to-spill ratio.");
-    
-    addAndMakeVisible (&alOverlaySignal);
-    alOverlaySignal.setVisible(false);
-    alOverlaySignal.setColour(AlertWindow::backgroundColourId, globalLaF.AAGrey);
-    alOverlaySignal.setColour(TextButton::buttonColourId , globalLaF.AARed);
-    alOverlaySignal.setTitle("acquiring target!");
-    alOverlaySignal.setMessage("Make sure playback of a desired target signal is active. Stop signal tracking to apply polar patterns with maximum signal energy. Also track an undesired spill target to be able to maximize the target-to-spill ratio.");
-    */
+
     // groups
     addAndMakeVisible (&grpBands);
     grpBands.setText ("Number of bands");
@@ -359,17 +338,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     nActiveBandsChanged();
     zeroDelayModeChange();
 
-    // set overlay callbacks
-    //alOverlayError.setOnOkayCallback ([this]() { onAlOverlayErrorOkay(); });
-    
-    //alOverlayDisturber.setOnOkayCallback ([this]() { onAlOverlayApplyPattern(); });
-    //alOverlayDisturber.setOnCancelCallback ([this]() { onAlOverlayCancelRecord(); });
-    //alOverlayDisturber.setOnRatioCallback ([this]() { onAlOverlayMaxSigToDist(); });
-    
-    //alOverlaySignal.setOnOkayCallback ([this]() { onAlOverlayApplyPattern(); });
-    //alOverlaySignal.setOnCancelCallback ([this]() { onAlOverlayCancelRecord(); });
-    //alOverlaySignal.setOnRatioCallback ([this]() { onAlOverlayMaxSigToDist(); });
-    
     trimSlider.sliderIncremented = [this] { incrementTrim(nActiveBands); };
     trimSlider.sliderDecremented = [this] { decrementTrim(nActiveBands); };
     
@@ -402,12 +370,6 @@ void PolarDesignerAudioProcessorEditor::decrementTrim(int nBands) {
 
 PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
 {
-    //if (alOverlayDisturber.isVisible())
-    //    onAlOverlayCancelRecord();
-
-    //if (alOverlaySignal.isVisible())
-    //    onAlOverlayCancelRecord();
-
     setLookAndFeel (nullptr);
 }
 
@@ -768,11 +730,41 @@ void PolarDesignerAudioProcessorEditor::resized()
     fbTermLbMaxToSpill.items.add(juce::FlexItem{  }.withFlex(0.02f));
     fbTermLbMaxToSpill.items.add(juce::FlexItem{ terminatorLabelMaxToSpillMain }.withFlex(0.9f));
 
+    juce::FlexBox fbTermLbMaxToSpillDesc;
+    fbTermLbMaxToSpillDesc.flexDirection = juce::FlexBox::Direction::row;
+    fbTermLbMaxToSpillDesc.items.add(juce::FlexItem{  }.withFlex(0.1f));
+    fbTermLbMaxToSpillDesc.items.add(juce::FlexItem{ terminatorLabelMaxToSpillSub }.withFlex(0.9f));
+
+    juce::FlexBox fbTermLbMaxToSpillApply;
+    fbTermLbMaxToSpillApply.flexDirection = juce::FlexBox::Direction::row;
+    fbTermLbMaxToSpillApply.items.add(juce::FlexItem{  }.withFlex(0.1f));
+    fbTermLbMaxToSpillApply.items.add(juce::FlexItem{ tbApplyMaxTargetToSpill }.withFlex(0.9f));
+
+
+
     if (showTerminatorAnimationWindow)
     {
         tbCloseTerminatorControl.setVisible(true);
+        tbCloseTerminatorControl.setVisible(true);
+        albPlaybackSpill.setVisible(!isTargetAquiring);
+        albAcquiringTarget.setVisible(isTargetAquiring);
+        processor.termControlWaveform.setVisible(true);
+        tbTerminateSpill.setVisible(false);
+        tbMaximizeTarget.setVisible(false);
+        tbMaxTargetToSpill.setVisible(false);
+
+        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withHeight(10));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTerminatorControlCloseComp }.withFlex(0.12f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{ isTargetAquiring ? albAcquiringTarget : albPlaybackSpill }.withFlex(0.22f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{ processor.termControlWaveform }.withFlex(0.46f));
+        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
+    }
+    else
+    {
         if (showMaxToSpillWindow)
         {
+            tbCloseTerminatorControl.setVisible(true);
             tbTerminateSpill.setVisible(false);
             tbMaximizeTarget.setVisible(false);
             tbMaxTargetToSpill.setVisible(false);
@@ -815,48 +807,42 @@ void PolarDesignerAudioProcessorEditor::resized()
                 fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
                 break;
             case terminatorStage::MAXTOSPILL:
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withHeight(10));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTerminatorControlCloseComp }.withFlex(0.12f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbSpill }.withFlex(0.1f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMax }.withFlex(0.1f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMaxToSpill }.withFlex(0.1f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMaxToSpillDesc }.withFlex(0.18f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMaxToSpillApply }.withFlex(0.16f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
                 break;
             default:
                 break;
             }
-
-
         }
         else
         {
-            tbCloseTerminatorControl.setVisible(true);
-            albPlaybackSpill.setVisible(!isTargetAquiring);
-            albAcquiringTarget.setVisible(isTargetAquiring);
-            processor.termControlWaveform.setVisible(true);
-            tbTerminateSpill.setVisible(false);
-            tbMaximizeTarget.setVisible(false);
-            tbMaxTargetToSpill.setVisible(false);
+            tbCloseTerminatorControl.setVisible(false);
+            albPlaybackSpill.setVisible(false);
+            albAcquiringTarget.setVisible(false);
+            processor.termControlWaveform.setVisible(false);
+            tbTerminateSpill.setVisible(true);
+            tbMaximizeTarget.setVisible(true);
+            tbMaxTargetToSpill.setVisible(true);
 
-            fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withHeight(10));
-            fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTerminatorControlCloseComp }.withFlex(0.12f));
-            fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
-            fbTerminatorControlInComp.items.add(juce::FlexItem{ isTargetAquiring ? albAcquiringTarget : albPlaybackSpill }.withFlex(0.22f));
-            fbTerminatorControlInComp.items.add(juce::FlexItem{ processor.termControlWaveform }.withFlex(0.46f));
+            fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.25f));
+            fbTerminatorControlInComp.items.add(juce::FlexItem{ tbTerminateSpill }.withFlex(0.22f));
+            fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
+            fbTerminatorControlInComp.items.add(juce::FlexItem{ tbMaximizeTarget }.withFlex(0.22f));
+            fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
+            fbTerminatorControlInComp.items.add(juce::FlexItem{ tbMaxTargetToSpill }.withFlex(0.22f));
             fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
         }
-    }
-    else
-    {
-        tbCloseTerminatorControl.setVisible(false);
-        albPlaybackSpill.setVisible(false);
-        albAcquiringTarget.setVisible(false);
-        processor.termControlWaveform.setVisible(false);
-        tbTerminateSpill.setVisible(true);
-        tbMaximizeTarget.setVisible(true);
-        tbMaxTargetToSpill.setVisible(true);
-
-        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.25f));
-        fbTerminatorControlInComp.items.add(juce::FlexItem{ tbTerminateSpill }.withFlex(0.22f));
-        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
-        fbTerminatorControlInComp.items.add(juce::FlexItem{ tbMaximizeTarget }.withFlex(0.22f));
-        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
-        fbTerminatorControlInComp.items.add(juce::FlexItem{ tbMaxTargetToSpill }.withFlex(0.22f));
-        fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
     }
 
     outerBounds = fbTerminatorControlOutComp.items[0].currentBounds;
@@ -908,11 +894,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     outerBounds = fbPresetListOutComp.items[0].currentBounds;
     inCompWidth = outerBounds.getWidth();
     fbPresetListInComp.performLayout(outerBounds.reduced(inCompWidth * 0.06f, 0));
-    /*
-    alOverlayError.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
-    alOverlayDisturber.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
-    alOverlaySignal.setBounds (directivityEqualiser.getX() + 120, directivityEqualiser.getY() + 50, directivityEqualiser.getWidth() - 240, directivityEqualiser.getHeight() - 100);
-    */
+
     presetArea = mainfb.items[1].currentBounds;
 }
 
@@ -1022,12 +1004,13 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         showTerminatorAnimationWindow = true;
         showMaxToSpillWindow = false;
         maximizeTarget = true;
+        showActiveTerminatorStage(terminatorStage::DISABLED);
         albPlaybackSpill.startAnimation("PLAYBACK SOURCE  ");
         resized();
     }
     else if (button == &tbMaxTargetToSpill)
     {
-        showTerminatorAnimationWindow = true;
+        showTerminatorAnimationWindow = false;
         showMaxToSpillWindow = true;
         maxTargetToSpillFlowStarted = true;
         termStage = terminatorStage::TERMINATE;
@@ -1037,15 +1020,33 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &tbBeginTerminate)
     {
         showMaxToSpillWindow = false;
-        showActiveTerminatorStage(terminatorStage::DISABLED);
+        showTerminatorAnimationWindow = true;
         termStage = terminatorStage::MAXIMIZE;
-        tbTerminateSpill.triggerClick();
+        showMaxToSpillWindow = false;
+        showActiveTerminatorStage(terminatorStage::DISABLED);
+        albPlaybackSpill.startAnimation("PLAYBACK SPILL  ");
+        resized();
     }
     else if (button == &tbBeginMaximize)
     {
         showMaxToSpillWindow = false;
+        termStage = terminatorStage::MAXTOSPILL;
         showActiveTerminatorStage(terminatorStage::MAXIMIZE);
         tbMaximizeTarget.triggerClick();
+    }
+    else if (button == &tbApplyMaxTargetToSpill)
+    {
+        //TODO
+        showTerminatorAnimationWindow = false;
+        showMaxToSpillWindow = false;
+        maxTargetToSpillFlowStarted = false;
+        isTargetAquiring = false;
+        setSideAreaEnabled(true);
+        setMainAreaEnabled(true);
+        processor.stopTracking(2);
+        termStage = terminatorStage::DISABLED;
+        showActiveTerminatorStage(termStage);
+        resized();
     }
     else if (button == &tbAllowBackwardsPattern)
     {
@@ -1169,9 +1170,6 @@ void PolarDesignerAudioProcessorEditor::loadFile()
         Result result = processor.loadPreset (presetFile);
         if (!result.wasOk()) {
             errorMessage = result.getErrorMessage();
-            alOverlayError.setTitle("preset load error!");
-            alOverlayError.setMessage(errorMessage);
-            alOverlayError.setVisible(true);
             setMainAreaEnabled(false);
             setSideAreaEnabled(false);
         }
@@ -1195,9 +1193,6 @@ void PolarDesignerAudioProcessorEditor::saveFile()
         Result result = processor.savePreset (presetFile);
         if (!result.wasOk()) {
             errorMessage = result.getErrorMessage();
-            alOverlayError.setTitle("preset save error!");
-            alOverlayError.setMessage(errorMessage);
-            alOverlayError.setVisible(true);
             setMainAreaEnabled(false);
             setSideAreaEnabled(false);
         }
@@ -1296,12 +1291,14 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
         processor.ffDfEqChanged = false;
         setEqMode();
     }
+
     if (showTerminatorAnimationWindow)
     {
         if (processor.info.isPlaying)
         {
             if (!isTargetAquiring)
             {
+                DBG("PLAYING");
                 isTargetAquiring = true;
                 setSideAreaEnabled(false);
                 setMainAreaEnabled(false);
@@ -1322,14 +1319,17 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
                 setMainAreaEnabled(true);
                 processor.stopTracking(1);
                 albAcquiringTarget.stopAnimation();
+                albPlaybackSpill.stopAnimation();
+
                 if (maxTargetToSpillFlowStarted)
                 {
                     showMaxToSpillWindow = true;
+                    showTerminatorAnimationWindow = false;
                     showActiveTerminatorStage(termStage);
                 }
                 else
                 {
-                   albPlaybackSpill.startAnimation(maximizeTarget ? "PLAYBACK SOURCE  " : "PLAYBACK SPILL  ");
+                    showTerminatorAnimationWindow = false;
                 }
                 resized();
             }
@@ -1407,9 +1407,13 @@ void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage(terminatorStag
 
         terminatorLabelNr2.setVisible(false);
         terminatorLabelMaxMain.setVisible(false);
+        terminatorLabelMaxSub.setVisible(false);
+        tbBeginMaximize.setVisible(false);
 
         terminatorLabelNr3.setVisible(false);
         terminatorLabelMaxToSpillMain.setVisible(false);
+        terminatorLabelMaxToSpillSub.setVisible(false);
+        tbApplyMaxTargetToSpill.setVisible(false);
     }
     else if (stage == terminatorStage::TERMINATE)
     {
@@ -1433,9 +1437,28 @@ void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage(terminatorStag
 
         terminatorLabelNr2.setVisible(true);
         terminatorLabelMaxMain.setVisible(true);
+        terminatorLabelMaxSub.setVisible(true);
+        tbBeginMaximize.setVisible(true);
 
         terminatorLabelNr3.setVisible(true);
         terminatorLabelMaxToSpillMain.setVisible(true);
+    }
+    else if (stage == terminatorStage::MAXTOSPILL)
+    {
+        terminatorLabelNr1.setVisible(true);;
+        terminatorLabelSpillMain.setVisible(true);
+        terminatorLabelSpillSub.setVisible(false);
+        tbBeginTerminate.setVisible(false);
+
+        terminatorLabelNr2.setVisible(true);
+        terminatorLabelMaxMain.setVisible(true);
+        terminatorLabelMaxSub.setVisible(false);
+        tbBeginMaximize.setVisible(false);
+
+        terminatorLabelNr3.setVisible(true);
+        terminatorLabelMaxToSpillMain.setVisible(true);
+        terminatorLabelMaxToSpillSub.setVisible(true);
+        tbApplyMaxTargetToSpill.setVisible(true);
     }
 }
 
@@ -1493,29 +1516,6 @@ void PolarDesignerAudioProcessorEditor::setMainAreaEnabled(bool enable)
     tbZeroDelay.setEnabled(enable);
 }
 
-//void PolarDesignerAudioProcessorEditor::onAlOverlayErrorOkay()
-//{
-//    disableOverlay();
-//}
-//
-//void PolarDesignerAudioProcessorEditor::onAlOverlayApplyPattern()
-//{
-//    disableOverlay();
-//    processor.stopTracking(1);
-//}
-//
-//void PolarDesignerAudioProcessorEditor::onAlOverlayCancelRecord()
-//{
-//    disableOverlay();
-//    processor.stopTracking(0);
-//}
-//
-//void PolarDesignerAudioProcessorEditor::onAlOverlayMaxSigToDist()
-//{
-//    disableOverlay();
-//    processor.stopTracking(2);
-//}
-
 void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
 {
     tmbNrBandsButton[0].setEnabled(set);
@@ -1549,18 +1549,6 @@ void PolarDesignerAudioProcessorEditor::setEqMode()
     int activeIdx = processor.getEqState();
     ibEqCtr[activeIdx].setToggleState(true, NotificationType::sendNotification);
 }
-
-
-//void PolarDesignerAudioProcessorEditor::disableOverlay()
-//{
-//    alOverlayError.setVisible(false);
-//    //alOverlayDisturber.setVisible(false);
-//    alOverlaySignal.setVisible(false);
-//    directivityEqualiser.setActive(true);
-//    nActiveBandsChanged();
-//    setSideAreaEnabled(true);
-//    tbZeroDelay.setEnabled(true);
-//}
 
 // implement this for AAX automation shortchut
 int PolarDesignerAudioProcessorEditor::getControlParameterIndex (Component& control)
