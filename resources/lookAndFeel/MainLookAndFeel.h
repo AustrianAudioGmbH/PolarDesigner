@@ -270,18 +270,12 @@ public:
                  button.getButtonText() == "Maximize target" ||
                  button.getButtonText() == "Max Target-to-Spill")
         {
-            g.fillAll(Colour(0, 255, 0));
         }
-        else if (button.getButtonText() == "TermLine1" ||
-        button.getButtonText() == "TermLine2" ||
-        button.getButtonText() == "TermLine3" ||
-        button.getButtonText() == "TermLine4" ||
-        button.getButtonText() == "TermLine5" ||
-        button.getButtonText() == "TermLine6")
+        else if (button.getButtonText().contains("TermLine"))
         {
             Line<float> line(buttonArea.getCentreX(), 0, buttonArea.getCentreX(), buttonArea.getHeight());
             g.setColour(textButtonPressedBackgroundColor);
-            g.drawLine(line);
+            g.drawLine(line, 1.f);
         }
         else if (button.getButtonText() == "01" ||
         button.getButtonText() == "02" ||
@@ -318,7 +312,6 @@ public:
               || button.getButtonText() == "Click on the button below to apply polar\npatterns with maximum signal energy"
               || button.getButtonText() == "Find best compromise between reduction\nof spill and maximizing target signal")
         {
-        g.fillAll(Colour(255, 255, 255));
         }
         else if (button.getButtonText() == "Begin Terminate"
             || button.getButtonText() == "Begin Maximize"
@@ -529,11 +522,7 @@ public:
             h = button.getTopLevelComponent()->getHeight() * 0.014f;
             y = (buttonArea.getHeight() - h) / 2;
         }
-        else if (button.getButtonText() == "TermLine1" ||
-            button.getButtonText() == "TermLine2" ||
-            button.getButtonText() == "TermLine3" ||
-            button.getButtonText() == "TermLine4" ||
-            button.getButtonText() == "TermLine5")
+        else if (button.getButtonText().contains("TermLine"))
         {
             return;
         }

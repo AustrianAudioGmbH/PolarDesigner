@@ -155,7 +155,7 @@ private:
     TextButton terminatorLabelNr3, terminatorLabelMaxToSpillMain, terminatorLabelMaxToSpillSub;
     TextButton tbApplyMaxTargetToSpill;
 
-    TextButton terminatorStageLine[6];
+    TextButton terminatorStageLine[8];
 
     bool showTerminatorAnimationWindow;
     bool isTargetAquiring;
