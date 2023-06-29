@@ -695,40 +695,40 @@ void PolarDesignerAudioProcessorEditor::resized()
     juce::FlexBox fbTermLbSpill;
     fbTermLbSpill.flexDirection = juce::FlexBox::Direction::row;
     fbTermLbSpill.items.add(juce::FlexItem{ terminatorLabelNr1 }.withFlex(0.08f));
-    fbTermLbSpill.items.add(juce::FlexItem{  }.withFlex(0.02f));
-    fbTermLbSpill.items.add(juce::FlexItem{ terminatorLabelSpillMain }.withFlex(0.9f));
+    fbTermLbSpill.items.add(juce::FlexItem{  }.withFlex(0.04f));
+    fbTermLbSpill.items.add(juce::FlexItem{ terminatorLabelSpillMain }.withFlex(0.88f));
 
     juce::FlexBox fbTermLbSpillDesc;
     fbTermLbSpillDesc.flexDirection = juce::FlexBox::Direction::row;
-    fbTermLbSpillDesc.items.add(juce::FlexItem{  }.withFlex(0.1f));
-    fbTermLbSpillDesc.items.add(juce::FlexItem{ terminatorLabelSpillSub }.withFlex(0.9f));
+    fbTermLbSpillDesc.items.add(juce::FlexItem{  }.withFlex(0.12f));
+    fbTermLbSpillDesc.items.add(juce::FlexItem{ terminatorLabelSpillSub }.withFlex(0.88f));
 
     juce::FlexBox fbTermLbSpillBegin;
     fbTermLbSpillBegin.flexDirection = juce::FlexBox::Direction::row;
-    fbTermLbSpillBegin.items.add(juce::FlexItem{  }.withFlex(0.1f));
-    fbTermLbSpillBegin.items.add(juce::FlexItem{ tbBeginTerminate }.withFlex(0.9f));
+    fbTermLbSpillBegin.items.add(juce::FlexItem{  }.withFlex(0.12f));
+    fbTermLbSpillBegin.items.add(juce::FlexItem{ tbBeginTerminate }.withFlex(0.88f));
 
     juce::FlexBox fbTermLbMax;
     fbTermLbMax.flexDirection = juce::FlexBox::Direction::row;
     fbTermLbMax.items.add(juce::FlexItem{ terminatorLabelNr2 }.withFlex(0.08f));
-    fbTermLbMax.items.add(juce::FlexItem{  }.withFlex(0.02f));
-    fbTermLbMax.items.add(juce::FlexItem{ terminatorLabelMaxMain }.withFlex(0.9f));
+    fbTermLbMax.items.add(juce::FlexItem{  }.withFlex(0.04f));
+    fbTermLbMax.items.add(juce::FlexItem{ terminatorLabelMaxMain }.withFlex(0.88f));
 
     juce::FlexBox fbTermLbMaxDesc;
     fbTermLbMaxDesc.flexDirection = juce::FlexBox::Direction::row;
-    fbTermLbMaxDesc.items.add(juce::FlexItem{  }.withFlex(0.1f));
-    fbTermLbMaxDesc.items.add(juce::FlexItem{ terminatorLabelMaxSub }.withFlex(0.9f));
+    fbTermLbMaxDesc.items.add(juce::FlexItem{  }.withFlex(0.12f));
+    fbTermLbMaxDesc.items.add(juce::FlexItem{ terminatorLabelMaxSub }.withFlex(0.88f));
 
     juce::FlexBox fbTermLbMaxBegin;
     fbTermLbMaxBegin.flexDirection = juce::FlexBox::Direction::row;
-    fbTermLbMaxBegin.items.add(juce::FlexItem{  }.withFlex(0.1f));
-    fbTermLbMaxBegin.items.add(juce::FlexItem{ tbBeginMaximize }.withFlex(0.9f));
+    fbTermLbMaxBegin.items.add(juce::FlexItem{  }.withFlex(0.12f));
+    fbTermLbMaxBegin.items.add(juce::FlexItem{ tbBeginMaximize }.withFlex(0.88f));
 
     juce::FlexBox fbTermLbMaxToSpill;
     fbTermLbMaxToSpill.flexDirection = juce::FlexBox::Direction::row;
     fbTermLbMaxToSpill.items.add(juce::FlexItem{ terminatorLabelNr3 }.withFlex(0.08f));
-    fbTermLbMaxToSpill.items.add(juce::FlexItem{  }.withFlex(0.02f));
-    fbTermLbMaxToSpill.items.add(juce::FlexItem{ terminatorLabelMaxToSpillMain }.withFlex(0.9f));
+    fbTermLbMaxToSpill.items.add(juce::FlexItem{  }.withFlex(0.04f));
+    fbTermLbMaxToSpill.items.add(juce::FlexItem{ terminatorLabelMaxToSpillMain }.withFlex(0.88f));
 
     juce::FlexBox fbTermLbMaxToSpillDesc;
     fbTermLbMaxToSpillDesc.flexDirection = juce::FlexBox::Direction::row;
@@ -739,8 +739,6 @@ void PolarDesignerAudioProcessorEditor::resized()
     fbTermLbMaxToSpillApply.flexDirection = juce::FlexBox::Direction::row;
     fbTermLbMaxToSpillApply.items.add(juce::FlexItem{  }.withFlex(0.1f));
     fbTermLbMaxToSpillApply.items.add(juce::FlexItem{ tbApplyMaxTargetToSpill }.withFlex(0.9f));
-
-
 
     if (showTerminatorAnimationWindow)
     {
@@ -781,11 +779,11 @@ void PolarDesignerAudioProcessorEditor::resized()
                 fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTerminatorControlCloseComp }.withFlex(0.12f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbSpill }.withFlex(0.1f));
-                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
-                fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbSpillDesc }.withFlex(0.18f));
-                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbSpillDesc }.withFlex(0.14f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbSpillBegin }.withFlex(0.16f));
-                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMax }.withFlex(0.1f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMaxToSpill }.withFlex(0.1f));
@@ -798,11 +796,11 @@ void PolarDesignerAudioProcessorEditor::resized()
                 fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbSpill }.withFlex(0.1f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMax }.withFlex(0.1f));
-                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
-                fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMaxDesc }.withFlex(0.18f));
-                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMaxDesc }.withFlex(0.14f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMaxBegin }.withFlex(0.16f));
-                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMaxToSpill }.withFlex(0.1f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
                 break;
@@ -815,9 +813,9 @@ void PolarDesignerAudioProcessorEditor::resized()
                 fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMax }.withFlex(0.1f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMaxToSpill }.withFlex(0.1f));
-                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
-                fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMaxToSpillDesc }.withFlex(0.18f));
-                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.02f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMaxToSpillDesc }.withFlex(0.14f));
+                fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.01f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{ fbTermLbMaxToSpillApply }.withFlex(0.16f));
                 fbTerminatorControlInComp.items.add(juce::FlexItem{  }.withFlex(0.06f));
                 break;
@@ -1422,11 +1420,20 @@ void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage(terminatorStag
         terminatorLabelSpillSub.setVisible(true);
         tbBeginTerminate.setVisible(true);
 
+        terminatorLabelNr1.setEnabled(true);
+        terminatorLabelSpillMain.setEnabled(true);
+        terminatorLabelSpillSub.setEnabled(true);
+        tbBeginTerminate.setEnabled(true);
+
         terminatorLabelNr2.setVisible(true);
         terminatorLabelMaxMain.setVisible(true);
+        terminatorLabelNr2.setEnabled(false);
+        terminatorLabelMaxMain.setEnabled(false);
 
         terminatorLabelNr3.setVisible(true);
         terminatorLabelMaxToSpillMain.setVisible(true);
+        terminatorLabelNr3.setEnabled(false);
+        terminatorLabelMaxToSpillMain.setEnabled(false);
     }
     else if (stage == terminatorStage::MAXIMIZE)
     {
@@ -1434,14 +1441,22 @@ void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage(terminatorStag
         terminatorLabelSpillMain.setVisible(true);
         terminatorLabelSpillSub.setVisible(false);
         tbBeginTerminate.setVisible(false);
+        terminatorLabelNr1.setEnabled(false);;
+        terminatorLabelSpillMain.setEnabled(false);
 
         terminatorLabelNr2.setVisible(true);
         terminatorLabelMaxMain.setVisible(true);
         terminatorLabelMaxSub.setVisible(true);
         tbBeginMaximize.setVisible(true);
+        terminatorLabelNr2.setEnabled(true);
+        terminatorLabelMaxMain.setEnabled(true);
+        terminatorLabelMaxSub.setEnabled(true);
+        tbBeginMaximize.setEnabled(true);
 
         terminatorLabelNr3.setVisible(true);
         terminatorLabelMaxToSpillMain.setVisible(true);
+        terminatorLabelNr3.setEnabled(false);;
+        terminatorLabelMaxToSpillMain.setEnabled(false);
     }
     else if (stage == terminatorStage::MAXTOSPILL)
     {
@@ -1449,16 +1464,24 @@ void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage(terminatorStag
         terminatorLabelSpillMain.setVisible(true);
         terminatorLabelSpillSub.setVisible(false);
         tbBeginTerminate.setVisible(false);
+        terminatorLabelNr1.setEnabled(false);;
+        terminatorLabelSpillMain.setEnabled(false);
 
         terminatorLabelNr2.setVisible(true);
         terminatorLabelMaxMain.setVisible(true);
         terminatorLabelMaxSub.setVisible(false);
         tbBeginMaximize.setVisible(false);
+        terminatorLabelNr2.setEnabled(false);
+        terminatorLabelMaxMain.setEnabled(false);
 
         terminatorLabelNr3.setVisible(true);
         terminatorLabelMaxToSpillMain.setVisible(true);
         terminatorLabelMaxToSpillSub.setVisible(true);
         tbApplyMaxTargetToSpill.setVisible(true);
+        terminatorLabelNr3.setEnabled(true);
+        terminatorLabelMaxToSpillMain.setEnabled(true);
+        terminatorLabelMaxToSpillSub.setEnabled(true);
+        tbApplyMaxTargetToSpill.setEnabled(true);
     }
 }
 

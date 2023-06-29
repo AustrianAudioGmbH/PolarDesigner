@@ -15,6 +15,7 @@ class MainLookAndFeel : public LookAndFeel_V4
 public:
     const Colour mainBackground = Colour(24, 25, 27);
     const Colour mainTextColor = Colour(255, 255, 255);
+    const Colour mainTextInactiveColor = Colour(255, 255, 255).withAlpha(0.7f);
     const Colour textButtonFrameColor = Colour(52, 54, 57);
     const Colour labelBackgroundColor = Colour(39, 39, 44);
     const Colour multiTextButtonBackgroundColor = Colour(31, 32, 38);
@@ -34,10 +35,13 @@ public:
     const Colour toggleButtonActiveRedBackgroundColor = Colour(182, 22, 22).withAlpha(0.7f);
 
     Typeface::Ptr normalFont;
+    Typeface::Ptr terminatorRegularFont, terminatorBoldFont;
 
     MainLookAndFeel()
     {
         normalFont = Typeface::createSystemTypefaceFor(BinaryFonts::NunitoSansSemiBold_ttf, BinaryFonts::NunitoSansSemiBold_ttfSize);
+        terminatorRegularFont = Typeface::createSystemTypefaceFor(BinaryFonts::InterRegular_ttf, BinaryFonts::InterRegular_ttfSize);
+        terminatorBoldFont = Typeface::createSystemTypefaceFor(BinaryFonts::InterBold_ttf, BinaryFonts::InterBold_ttfSize);
 
         setColour(ListBox::backgroundColourId, groupComponentBackgroundColor);
     }
@@ -264,12 +268,40 @@ public:
         }
         else if (button.getButtonText() == "Terminate spill" ||
                  button.getButtonText() == "Maximize target" ||
-                 button.getButtonText() == "Max Target-to-Spill" || 
-                 button.getButtonText() == "01" ||
-                 button.getButtonText() == "02" ||
-                 button.getButtonText() == "03")
+                 button.getButtonText() == "Max Target-to-Spill")
         {
 
+        }
+        else if (button.getButtonText() == "01" ||
+        button.getButtonText() == "02" ||
+        button.getButtonText() == "03")
+        {
+            if (button.isEnabled())
+            {
+                Path path;
+                auto reducedButtonArea = buttonArea.reduced(1);
+                auto ellipseArea = reducedButtonArea;
+                ellipseArea.setWidth(jmin(reducedButtonArea.getWidth(), reducedButtonArea.getHeight()));
+                ellipseArea.setHeight(jmin(reducedButtonArea.getWidth(), reducedButtonArea.getHeight()));
+                ellipseArea.setCentre(buttonArea.getCentre());
+                path.addEllipse(ellipseArea);
+                g.setColour(toggleButtonActiveRedBackgroundColor);
+                g.fillPath(path);
+                g.setColour(textButtonActiveRedFrameColor);
+                g.strokePath(path, PathStrokeType(1.0f));
+            }
+            else
+            {
+                Path path;
+                auto reducedButtonArea = buttonArea.reduced(1);
+                auto ellipseArea = reducedButtonArea;
+                ellipseArea.setWidth(jmin(reducedButtonArea.getWidth(), reducedButtonArea.getHeight()));
+                ellipseArea.setHeight(jmin(reducedButtonArea.getWidth(), reducedButtonArea.getHeight()));
+                ellipseArea.setCentre(buttonArea.getCentre());
+                path.addEllipse(ellipseArea);
+                g.setColour(textButtonPressedBackgroundColor);
+                g.fillPath(path);;
+            }
         }
         else if (button.getButtonText() == "Click on the button below to apply polar\npatterns with minimum spill energy"
               || button.getButtonText() == "Click on the button below to apply polar\npatterns with maximum signal energy"
@@ -282,7 +314,7 @@ public:
             || button.getButtonText() == "Apply Max Target-to-Spill"
             )
         {
-            g.setColour(textButtonFrameColor);
+            g.setColour(mainTextColor);
             g.drawRect(buttonArea, 1);
             
             if (isMouseOverButton)
@@ -420,10 +452,12 @@ public:
 
         Font font(normalFont);
 
+        auto text = button.getButtonText();
+
         int x = buttonArea.getX();
         int w = buttonArea.getWidth();
         int h = button.getTopLevelComponent()->getHeight() * 0.023f;
-        int y = (buttonArea.getHeight() - h)/2;
+        int y = (buttonArea.getHeight() - h) / 2;
 
         auto justification = Justification::centred;
 
@@ -460,33 +494,45 @@ public:
             x = buttonArea.proportionOfWidth(0.11f);
             w = buttonArea.proportionOfWidth(0.78f);
         }
-        else if (button.getButtonText() == "Terminate spill" || 
+        else if (button.getButtonText() == "Terminate spill" ||
             button.getButtonText() == "Maximize target" ||
-            button.getButtonText() == "Max Target-to-Spill" || 
-            button.getButtonText() == "01" ||
+            button.getButtonText() == "Max Target-to-Spill")
+        {
+            g.setColour(button.isEnabled() ? mainTextColor : mainTextInactiveColor);
+            font = button.isEnabled() ? terminatorBoldFont : terminatorRegularFont;
+            justification = Justification::centredLeft;
+            h = button.getTopLevelComponent()->getHeight() * 0.015f;
+            y = (buttonArea.getHeight() - h) / 2;
+        }
+        else if (button.getButtonText() == "01" ||
             button.getButtonText() == "02" ||
             button.getButtonText() == "03"
             )
         {
-            font.setBold(true);
-            justification = Justification::centredLeft;
-            h = button.getTopLevelComponent()->getHeight() * 0.018f;
-            x = 5;
+            g.setColour(button.isEnabled() ? mainTextColor : mainTextInactiveColor);
+            String tmpText("");
+            tmpText += button.getButtonText().getCharPointer()[1];
+            text = tmpText;
+            font = button.isEnabled() ? terminatorBoldFont : terminatorRegularFont;
+            justification = Justification::centred;
+            h = button.getTopLevelComponent()->getHeight() * 0.014f;
+            y = (buttonArea.getHeight() - h) / 2;
         }
         else if (button.getButtonText() == "Click on the button below to apply polar\npatterns with minimum spill energy"
             || button.getButtonText() == "Click on the button below to apply polar\npatterns with maximum signal energy"
             || button.getButtonText() == "Find best compromise between reduction\nof spill and maximizing target signal"
             )
         {
-            font.setBold(false);
+            g.setColour(button.isEnabled() ? mainTextColor : mainTextInactiveColor);
+            font = terminatorRegularFont;
             justification = Justification::centredLeft;
-            h = button.getTopLevelComponent()->getHeight() * 0.0167f;
-            x = 5;
+            h = button.getTopLevelComponent()->getHeight() * 0.014f;
+            w = buttonArea.proportionOfWidth(1.f);
         }
 
         font.setHeight(h);
         g.setFont(font);
-        g.drawFittedText(button.getButtonText(), x, y, w, h, justification, 1);
+        g.drawFittedText(text, x, y, w, h, justification, 1);
     }
 
     void drawGroupComponentOutline(Graphics& g, int width, int height,
