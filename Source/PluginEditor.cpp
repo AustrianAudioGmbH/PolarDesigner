@@ -258,6 +258,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
     addAndMakeVisible(&terminatorLabelNr1);
     terminatorLabelNr1.setButtonText("01");
+    terminatorLabelNr1.setToggleState(false, NotificationType::dontSendNotification);
     addAndMakeVisible(&terminatorLabelSpillMain);
     terminatorLabelSpillMain.setButtonText("Terminate spill");
     addAndMakeVisible(&terminatorLabelSpillSub);
@@ -272,6 +273,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
     addAndMakeVisible(&terminatorLabelNr2);
     terminatorLabelNr2.setButtonText("02");
+    terminatorLabelNr2.setToggleState(false, NotificationType::dontSendNotification);
     addAndMakeVisible(&terminatorLabelMaxMain);
     terminatorLabelMaxMain.setButtonText("Maximize target");
     addAndMakeVisible(&terminatorLabelMaxSub);
@@ -286,6 +288,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
     addAndMakeVisible(&terminatorLabelNr3);
     terminatorLabelNr3.setButtonText("03");
+    terminatorLabelNr3.setToggleState(false, NotificationType::dontSendNotification);
     addAndMakeVisible(&terminatorLabelMaxToSpillMain);
     terminatorLabelMaxToSpillMain.setButtonText("Max Target-to-Spill");
     addAndMakeVisible(&terminatorLabelMaxToSpillSub);
@@ -1054,6 +1057,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         termStage = terminatorStage::MAXTOSPILL;
         showActiveTerminatorStage(terminatorStage::MAXIMIZE);
         tbMaximizeTarget.triggerClick();
+        resized();
     }
     else if (button == &tbApplyMaxTargetToSpill)
     {
@@ -1439,6 +1443,10 @@ void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage(terminatorStag
         {
             line.setVisible(false);
         }
+
+        terminatorLabelNr1.setToggleState(false, NotificationType::dontSendNotification);
+        terminatorLabelNr2.setToggleState(false, NotificationType::dontSendNotification);
+        terminatorLabelNr3.setToggleState(false, NotificationType::dontSendNotification);
     }
     else if (stage == terminatorStage::TERMINATE)
     {
@@ -1466,6 +1474,12 @@ void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage(terminatorStag
         {
             line.setVisible(true);
         }
+        terminatorStageLine[2].setVisible(false);
+        terminatorStageLine[3].setVisible(false);
+
+        terminatorLabelNr1.setToggleState(false, NotificationType::dontSendNotification);
+        terminatorLabelNr2.setToggleState(false, NotificationType::dontSendNotification);
+        terminatorLabelNr3.setToggleState(false, NotificationType::dontSendNotification);
     }
     else if (stage == terminatorStage::MAXIMIZE)
     {
@@ -1496,6 +1510,10 @@ void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage(terminatorStag
         }
         terminatorStageLine[0].setVisible(false);
         terminatorStageLine[1].setVisible(false);
+
+        terminatorLabelNr1.setToggleState(true, NotificationType::dontSendNotification);
+        terminatorLabelNr2.setToggleState(false, NotificationType::dontSendNotification);
+        terminatorLabelNr3.setToggleState(false, NotificationType::dontSendNotification);
     }
     else if (stage == terminatorStage::MAXTOSPILL)
     {
@@ -1530,6 +1548,10 @@ void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage(terminatorStag
         terminatorStageLine[5].setVisible(true);
         terminatorStageLine[6].setVisible(false);
         terminatorStageLine[7].setVisible(false);
+
+        terminatorLabelNr1.setToggleState(true, NotificationType::dontSendNotification);
+        terminatorLabelNr2.setToggleState(true, NotificationType::dontSendNotification);
+        terminatorLabelNr3.setToggleState(false, NotificationType::dontSendNotification);
     }
 }
 

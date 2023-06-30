@@ -308,8 +308,10 @@ public:
         else if (button.getButtonText().contains("TermLine"))
         {
             Line<float> line(buttonArea.getCentreX(), 0, buttonArea.getCentreX(), buttonArea.getHeight());
+            Path linePath;
+            linePath.addLineSegment(line, buttonArea.proportionOfWidth(0.06f));
             g.setColour(textButtonPressedBackgroundColor);
-            g.drawLine(line, 1.f);
+            g.fillPath(linePath);
         }
         else if (button.getButtonText() == "01" ||
         button.getButtonText() == "02" ||
@@ -327,7 +329,7 @@ public:
                 g.setColour(toggleButtonActiveRedBackgroundColor);
                 g.fillPath(path);
                 g.setColour(textButtonActiveRedFrameColor);
-                g.strokePath(path, PathStrokeType(1.0f));
+                g.strokePath(path, PathStrokeType(ellipseArea.proportionOfWidth(0.06f)));
             }
             else
             {
@@ -338,8 +340,38 @@ public:
                 ellipseArea.setHeight(jmin(reducedButtonArea.getWidth(), reducedButtonArea.getHeight()));
                 ellipseArea.setCentre(buttonArea.getCentre());
                 path.addEllipse(ellipseArea);
-                g.setColour(textButtonPressedBackgroundColor);
-                g.fillPath(path);;
+                
+                auto color = textButtonPressedBackgroundColor;
+                if (button.getToggleState())
+                {
+                    //Draw check sign when terminator stage completed
+                    Line<float> line1(Point(ellipseArea.getX() + ellipseArea.proportionOfWidth(0.24f), 
+                        ellipseArea.getY() + ellipseArea.proportionOfHeight(0.47f)), 
+                        Point(ellipseArea.getX() + ellipseArea.proportionOfWidth(0.41f), 
+                            ellipseArea.getY() + ellipseArea.proportionOfHeight(0.67f)));
+
+                    Line<float> line2(line1.getEnd(),
+                        Point(ellipseArea.getX() + ellipseArea.proportionOfWidth(0.72f),
+                            ellipseArea.getY() + ellipseArea.proportionOfHeight(0.26f)));
+
+                    Path signPath;
+                    signPath.addLineSegment(line1, ellipseArea.proportionOfWidth(0.06f));
+                    signPath.addLineSegment(line2, ellipseArea.proportionOfWidth(0.06f));
+
+                    color = textButtonActiveRedFrameColor.withAlpha(0.15f);
+                    g.setColour(color);
+                    g.fillPath(path);;
+                    g.setColour(textButtonActiveRedFrameColor);
+                    g.strokePath(path, PathStrokeType(ellipseArea.proportionOfWidth(0.06f)));
+
+                    g.setColour(mainTextColor);
+                    g.fillPath(signPath);
+                }
+                else
+                {
+                    g.setColour(color);
+                    g.fillPath(path);;
+                }
             }
         }
         else if (button.getButtonText() == "Click on the button below to apply polar\npatterns with minimum spill energy"
@@ -554,6 +586,9 @@ public:
             button.getButtonText() == "03"
             )
         {
+            if (button.getToggleState())
+                return;
+
             g.setColour(button.isEnabled() ? mainTextColor : mainTextInactiveColor);
             String tmpText("");
             tmpText += button.getButtonText().getCharPointer()[1];
