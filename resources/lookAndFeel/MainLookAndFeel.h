@@ -15,7 +15,8 @@ class MainLookAndFeel : public LookAndFeel_V4
 public:
     const Colour mainBackground = Colour(24, 25, 27);
     const Colour mainTextColor = Colour(255, 255, 255);
-    const Colour mainTextInactiveColor = Colour(255, 255, 255).withAlpha(0.7f);
+    const Colour mainTextDisabledColor = mainTextColor.withAlpha(0.4f);
+    const Colour mainTextInactiveColor = mainTextColor.withAlpha(0.7f);
     const Colour textButtonFrameColor = Colour(52, 54, 57);
     const Colour labelBackgroundColor = Colour(39, 39, 44);
     const Colour multiTextButtonBackgroundColor = Colour(31, 32, 38);
@@ -64,7 +65,7 @@ public:
 
         if (button.getButtonText() == "Zero latency")
         {
-            g.setColour(textButtonActiveFrameColor);
+            g.setColour(button.isEnabled() ? textButtonActiveFrameColor : textButtonHoverBackgroundColor);
             g.drawRect(buttonArea, 1);
             
             if (isMouseOverButton)
@@ -84,6 +85,13 @@ public:
             g.drawRect(buttonArea, 1);
 
             auto arrowArea = buttonArea.reduced(button.proportionOfWidth(0.45f), button.proportionOfHeight(0.33f)).translated(button.proportionOfWidth(0.36f), 0);
+
+            if (!button.isEnabled())
+            {
+                bool result = loadArrowImg->replaceColour(Colours::white, mainTextDisabledColor);
+                if (!result)
+                    return;
+            }
 
             loadArrowImg->drawWithin(g, arrowArea, juce::RectanglePlacement::centred, 1.f);
 
@@ -163,6 +171,19 @@ public:
                 g.fillRect(buttonArea.reduced(1.0f, 1.0f));
             }
 
+            if (!button.isEnabled())
+            {
+                bool resultMainImg = freeFieldImg->replaceColour(Colours::white, mainTextDisabledColor);
+                if (!resultMainImg)
+                    return;
+                bool resultSignOutImg = eqFieldCheckSign->replaceColour(Colours::white, mainTextDisabledColor);
+                if (!resultSignOutImg)
+                    return;
+                bool resultSignInImg = eqFieldCheckSign->replaceColour(textButtonActiveRedFrameColor, textButtonHoverRedBackgroundColor);
+                if (!resultSignInImg)
+                    return;
+            }
+
             auto freeFieldImageArea = buttonArea;
             freeFieldImageArea.removeFromTop(button.proportionOfHeight(0.11f));
             freeFieldImageArea.removeFromBottom(button.proportionOfHeight(0.33f));
@@ -191,6 +212,19 @@ public:
                 g.fillRect(buttonArea.reduced(1.0f, 1.0f));
             }
             
+            if (!button.isEnabled())
+            {
+                bool resultMainImg = diffuseFieldImg->replaceColour(Colours::white, mainTextDisabledColor);
+                if (!resultMainImg)
+                    return;
+                bool resultSignOutImg = eqFieldCheckSign->replaceColour(Colours::white, mainTextDisabledColor);
+                if (!resultSignOutImg)
+                    return;
+                bool resultSignInImg = eqFieldCheckSign->replaceColour(textButtonActiveRedFrameColor, textButtonHoverRedBackgroundColor);
+                if (!resultSignInImg)
+                    return;
+            }
+
             auto diffuseFieldImageArea = buttonArea;
             diffuseFieldImageArea.removeFromTop(button.proportionOfHeight(0.11f));
             diffuseFieldImageArea.removeFromBottom(button.proportionOfHeight(0.33f));
@@ -335,84 +369,89 @@ public:
         //Sync channel buttons
         else if (button.getComponentID() == "5521")
         {
+            auto mainColor = button.isEnabled() ? textButtonActiveBlue1FrameColor : textButtonActiveBlue1FrameColor.withAlpha(0.5f);
             if (isMouseOverButton)
             {
-                g.setColour(textButtonActiveBlue1FrameColor.withAlpha(0.3f));
+                g.setColour(mainColor.withAlpha(0.3f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (isButtonDown)
             {
-                g.setColour(textButtonActiveBlue1FrameColor.withAlpha(0.1f));
+                g.setColour(mainColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (button.getToggleState() == true)
             {
-                g.setColour(textButtonActiveBlue1FrameColor.withAlpha(0.1f));
+                g.setColour(mainColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(4.0f, 4.0f));
-                g.setColour(textButtonActiveBlue1FrameColor);
+                g.setColour(mainColor);
                 g.drawRect(buttonArea.reduced(3.0f, 3.0f), 2);
             }
         }
         else if(button.getComponentID() == "5522")
         {
+            auto mainColor = button.isEnabled() ? textButtonActiveBlue2FrameColor : textButtonActiveBlue2FrameColor.withAlpha(0.5f);
             if (isMouseOverButton)
             {
-                g.setColour(textButtonActiveBlue2FrameColor.withAlpha(0.3f));
+                g.setColour(mainColor.withAlpha(0.3f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (isButtonDown)
             {
-                g.setColour(textButtonActiveBlue2FrameColor.withAlpha(0.1f));
+                g.setColour(mainColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (button.getToggleState() == true)
             {
-                g.setColour(textButtonActiveBlue2FrameColor.withAlpha(0.1f));
+                g.setColour(mainColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(4.0f, 4.0f));
-                g.setColour(textButtonActiveBlue2FrameColor);
+                g.setColour(mainColor);
                 g.drawRect(buttonArea.reduced(3.0f, 3.0f), 2);
             }
         }
         else if (button.getComponentID() == "5523")
         {
+            auto mainColor = button.isEnabled() ? textButtonActiveBlue3FrameColor : textButtonActiveBlue3FrameColor.withAlpha(0.5f);
             if (isMouseOverButton)
             {
-                g.setColour(textButtonActiveBlue3FrameColor.withAlpha(0.3f));
+                g.setColour(mainColor.withAlpha(0.3f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (isButtonDown)
             {
-                g.setColour(textButtonActiveBlue3FrameColor.withAlpha(0.1f));
+                g.setColour(mainColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (button.getToggleState() == true)
             {
-                g.setColour(textButtonActiveBlue3FrameColor.withAlpha(0.1f));
+                g.setColour(mainColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(4.0f, 4.0f));
-                g.setColour(textButtonActiveBlue3FrameColor);
+                g.setColour(mainColor);
                 g.drawRect(buttonArea.reduced(3.0f, 3.0f), 2);
             }
         }
         else if (button.getComponentID() == "5524")
         {
+            auto mainColor = button.isEnabled() ? textButtonActiveBlue4FrameColor : textButtonActiveBlue4FrameColor.withAlpha(0.5f);
             if (isMouseOverButton)
             {
-                g.setColour(textButtonActiveBlue4FrameColor.withAlpha(0.3f));
+                g.setColour(mainColor.withAlpha(0.3f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (isButtonDown)
             {
-                g.setColour(textButtonActiveBlue4FrameColor.withAlpha(0.1f));
+                g.setColour(mainColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
             if (button.getToggleState() == true)
             {
-                g.setColour(textButtonActiveBlue4FrameColor.withAlpha(0.1f));
+                g.setColour(mainColor.withAlpha(0.1f));
                 g.fillRect(buttonArea.reduced(4.0f, 4.0f));
-                g.setColour(textButtonActiveBlue4FrameColor);
+                g.setColour(mainColor);
                 g.drawRect(buttonArea.reduced(3.0f, 3.0f), 2);
             }
         }
+        //Close preset and close terminator buttons
         else if (button.getComponentID() == "5621" || button.getComponentID() == "5721")
         {
             if (isMouseOverButton)
@@ -426,8 +465,10 @@ public:
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
         }
+        //Nr of bands buttons
         else
         {
+            auto mainColor = button.isEnabled() ? textButtonActiveBlue4FrameColor : textButtonActiveBlue4FrameColor.withAlpha(0.5f);
             if (isMouseOverButton)
             {
                 g.setColour(textButtonHoverRedBackgroundColor);
@@ -442,7 +483,7 @@ public:
             {
                 g.setColour(textButtonPressedRedBackgroundColor);
                 g.fillRect(buttonArea.reduced(4.0f, 4.0f));
-                g.setColour(textButtonActiveRedFrameColor);
+                g.setColour(button.isEnabled() ? textButtonActiveRedFrameColor : textButtonActiveRedFrameColor.withAlpha(0.5f));
                 g.drawRect(buttonArea.reduced(3.0f, 3.0f), 2);
             }
         }
@@ -452,11 +493,11 @@ public:
     {
         Rectangle<int> buttonArea(0, 0, button.getWidth(), button.getHeight());
 
-        g.setColour(mainTextColor);
+        g.setColour(button.isEnabled() ? mainTextColor : mainTextDisabledColor);
 
         Font font(normalFont);
 
-        auto text = button.getButtonText();
+        String text = button.getButtonText();
 
         int x = buttonArea.getX();
         int w = buttonArea.getWidth();
@@ -563,7 +604,7 @@ public:
         path.closeSubPath();
         g.fillPath(path);
 
-        g.setColour(mainTextColor);
+        g.setColour(group.isEnabled() ? mainTextColor : mainTextDisabledColor);
 
         int x = group.proportionOfWidth(0.06f);
         int y = 10.f;
@@ -620,7 +661,7 @@ public:
         Path pathFrg;
         Rectangle<float> foregroundRect(width/2 + x, 0.5f * height - h / 2, sliderPos - (width / 2 + x), h);
         pathFrg.addRectangle(foregroundRect);
-        auto pathFrgColor = slider.isEnabled() ? textButtonActiveRedFrameColor : textButtonFrameColor.withAlpha(0.4f);
+        auto pathFrgColor = slider.isEnabled() ? textButtonActiveRedFrameColor : textButtonActiveRedFrameColor.withAlpha(0.2f);
         g.setColour(pathFrgColor);
         g.fillPath(pathFrg);
     }
@@ -654,7 +695,7 @@ public:
         auto labelInnerArea = labelArea.reduced(labelArea.getWidth() * 0.07f, labelArea.getHeight() * 0.08f);
         g.fillRect(labelInnerArea);
 
-        auto textColor = label.isEnabled() ? mainTextColor : mainTextColor.withAlpha(0.4f);
+        auto textColor = label.isEnabled() ? mainTextColor : textButtonHoverBackgroundColor;
         g.setColour(textColor);
 
         int x = labelArea.getX();
@@ -692,8 +733,7 @@ public:
         bool isMouseOverButton, bool isButtonDown) override
     {
         Rectangle<int> toggleButtonBounds(0, 0, button.getWidth(), button.getHeight());
-
-        g.setColour(textButtonActiveRedFrameColor);
+        g.setColour(button.isEnabled() ? textButtonActiveRedFrameColor : textButtonActiveRedFrameColor.withAlpha(0.5f));
         Path outline;
         outline.addRoundedRectangle(toggleButtonBounds.reduced(button.getWidth() * 0.19f, button.getHeight() * 0.28f), button.getHeight() * 0.23f, button.getHeight() * 0.23f);
 
@@ -747,8 +787,8 @@ public:
         {
             p.addEllipse(w*0.23f, h / 2 - newDiameter / 2, newDiameter, newDiameter);
         }
-
-        g.setColour(mainTextColor);
+        
+        g.setColour(component.isEnabled() ? mainTextColor : mainTextDisabledColor);
         g.fillPath(p);
     }
 
@@ -770,7 +810,7 @@ public:
         g.setColour(textButtonFrameColor);
         g.fillPath(pathBgr);
         Path pathFgr;
-        pathFgr.addRoundedRectangle(0, thumbStartPosition, width, thumbSize, width/2);
+        pathFgr.addRoundedRectangle(0, thumbStartPosition, width, thumbSize, width/2.f);
         g.setColour(sliderHoverFrameColor);
         g.fillPath(pathFgr);
     }

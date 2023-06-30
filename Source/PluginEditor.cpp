@@ -53,11 +53,9 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     addAndMakeVisible(&titlePD);
     titlePD.setTitle(String("PolarDesigner"));
     titlePD.setFont(mainLaF.normalFont);
-    titlePD.setPDTextColour(mainLaF.mainTextColor);
     addAndMakeVisible(&titleCompare);
     titleCompare.setTitle(String("Compare"));
     titleCompare.setFont(mainLaF.normalFont);
-    titleCompare.setLabelTextColour(mainLaF.mainTextColor);
 
     addAndMakeVisible(&tmbABButton);
     tmbABButton.setButtonsNumber(2);
@@ -84,7 +82,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     addAndMakeVisible(&titlePreset);
     titlePreset.setTitle(String("Preset"));
     titlePreset.setFont(mainLaF.normalFont);
-    titlePreset.setLabelTextColour(mainLaF.mainTextColor);
     titlePreset.setInterceptsMouseClicks(false, true);
 
     addAndMakeVisible(&tbLoad);
@@ -446,12 +443,6 @@ void PolarDesignerAudioProcessorEditor::resized()
     syncChannelComponent.flexDirection = FlexBox::Direction::row;
     syncChannelComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     syncChannelComponent.alignContent = juce::FlexBox::AlignContent::center;
-
-    for (int i = 0; i < 4; i++)
-    {
-        syncChannelComponent.items.add(juce::FlexItem(tbSyncChannel[i]).withFlex(radioButonsFlex));
-        if (i < 4) syncChannelComponent.items.add(juce::FlexItem().withFlex(radioButonsSpaceFlex));
-    }
 
     juce::FlexBox sideComponent;
     sideComponent.flexDirection = FlexBox::Direction::column;
@@ -1239,7 +1230,7 @@ void PolarDesignerAudioProcessorEditor::loadSavedPresetsToList()
     auto presetsArray = presetDir.findChildFiles(File::findFiles, false, "*.json");
 
     String jsonString;
-    for (auto preset : presetsArray)
+    for (File preset : presetsArray)
     {
         jsonString = preset.loadFileAsString();
 
@@ -1293,8 +1284,7 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
             msbMute[i].setVisible(false);
         }
     }
-    tbSyncChannel[0].setToggleState(true,  NotificationType::sendNotification);
-    
+
     directivityEqualiser.resetTooltipTexts();
     directivityEqualiser.repaint();
 }
@@ -1545,6 +1535,7 @@ void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage(terminatorStag
 
 void PolarDesignerAudioProcessorEditor::mouseDown(const MouseEvent& event)
 {
+    //Event for hiding preset panel when clicking outside
     if (presetListVisible && !presetArea.contains(event.mouseDownPosition))
     {
         showPresetList(false);
@@ -1595,6 +1586,8 @@ void PolarDesignerAudioProcessorEditor::setMainAreaEnabled(bool enable)
         polarPatternVisualizers[i].setActive(enable);
     }
     tbZeroDelay.setEnabled(enable);
+    titlePreset.setEnabled(enable);
+    repaint();
 }
 
 void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
@@ -1604,11 +1597,10 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
     tmbNrBandsButton[2].setEnabled(set);
     tmbNrBandsButton[3].setEnabled(set);
     tmbNrBandsButton[4].setEnabled(set);
-    tbSyncChannel[0].setEnabled(set);
-    tbSyncChannel[1].setEnabled(set);
-    tbSyncChannel[2].setEnabled(set);
-    tbSyncChannel[3].setEnabled(set);
-    tbSyncChannel[4].setEnabled(set);
+    tmbSyncChannelButton[0].setEnabled(set);
+    tmbSyncChannelButton[1].setEnabled(set);
+    tmbSyncChannelButton[2].setEnabled(set);
+    tmbSyncChannelButton[3].setEnabled(set);
     
     tbLoad.setEnabled(set);
     tbSave.setEnabled(set);
@@ -1623,6 +1615,13 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
     {
         slProximity.setEnabled(set);
     }
+    grpEq.setEnabled(set);
+    grpPreset.setEnabled(set);
+    grpProxComp.setEnabled(set);
+    grpBands.setEnabled(set);
+    grpSync.setEnabled(set);
+    grpPresetList.setEnabled(set);
+    repaint();
 }
 
 void PolarDesignerAudioProcessorEditor::setEqMode()
@@ -1684,7 +1683,7 @@ int PolarDesignerAudioProcessorEditor::getControlParameterIndex (Component& cont
         return 23;
     else if (&control == &slProximity)
         return 26;
-    
+
     return -1;
 }
 

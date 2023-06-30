@@ -51,6 +51,7 @@
 
 #include "TitleBarPaths.h"
 #include "ImgPaths.h"
+#include "../resources/lookAndFeel/MainLookAndFeel.h"
 
 #ifdef JUCE_OSC_H_INCLUDED
 #include "OSCStatus.h"
@@ -363,11 +364,6 @@ public:
         regularFont = newRegularFont;
     }
 
-    void setPDTextColour(Colour textColour) {
-        textColour_ = textColour;
-        repaint();
-    }
-
     void resized() override
     {
         repaint();
@@ -378,7 +374,7 @@ public:
         Rectangle<int> bounds = getLocalBounds();
         regularFont.setHeight(bounds.getHeight()*0.75f);
 
-        g.setColour(textColour_);
+        g.setColour(isEnabled() ? mainLaF.mainTextColor : mainLaF.mainTextDisabledColor);
         g.setFont(regularFont);
         g.drawFittedText(regularText, bounds.toNearestInt(), Justification::left, 1);
     };
@@ -386,7 +382,7 @@ public:
 private:
     Font regularFont = Font(22.f);
     juce::String regularText = "Regular";
-    Colour textColour_ = Colour(Colours::white);
+    MainLookAndFeel mainLaF;
 };
 
 class  TitleBarTextLabel : public Component
@@ -403,11 +399,6 @@ public:
         regularFont = newRegularFont;
     }
 
-    void setLabelTextColour(Colour textColour) {
-        textColour_ = textColour;
-        repaint();
-    }
-
     void resized() override
     {
         repaint();
@@ -419,7 +410,7 @@ public:
         int fontSize = getTopLevelComponent()->getHeight() * 0.025f;
         regularFont.setHeight(fontSize);
 
-        g.setColour(textColour_);
+        g.setColour(isEnabled() ? mainLaF.mainTextColor : mainLaF.mainTextDisabledColor);
         g.setFont(regularFont);
         g.drawFittedText(regularText, bounds.toNearestInt(), Justification::right, 1);
     };
@@ -427,7 +418,7 @@ public:
 private:
     Font regularFont = Font(16.f);
     juce::String regularText = "Regular";
-    Colour textColour_ = Colour(Colours::white);
+    MainLookAndFeel mainLaF;
 };
 
 class IEMLogo : public Component

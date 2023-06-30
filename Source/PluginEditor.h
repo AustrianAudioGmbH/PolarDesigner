@@ -124,7 +124,7 @@ private:
     // Solo Buttons
     MuteSoloButton msbSolo[5], msbMute[5];
     // Text Buttons
-    TextButton tbLoad, tbSave, tbTerminateSpill, tbMaximizeTarget, tbMaxTargetToSpill, tbZeroDelay, tbSyncChannel[5], tbOpenFromFile;
+    TextButton tbLoad, tbSave, tbTerminateSpill, tbMaximizeTarget, tbMaxTargetToSpill, tbZeroDelay, tbOpenFromFile;
     // ToggleButtons
     ToggleButton tbAllowBackwardsPattern, tgbProxCtr;
     // ImageButtons
