@@ -666,12 +666,20 @@ public:
     Slider::SliderLayout getSliderLayout(Slider& slider) override
     {
         Rectangle<int> localBounds(0, 0, slider.getWidth(), slider.getHeight());
-
         Slider::SliderLayout layout;
 
-        layout.sliderBounds.setBounds(localBounds.getWidth()*0.07f, localBounds.getY(), localBounds.getWidth()*0.42f, localBounds.getHeight());
-        layout.textBoxBounds.setBounds(localBounds.getWidth() * 0.71f, localBounds.getY(), localBounds.getWidth()*0.29f, localBounds.getHeight());
-        layout.textBoxBounds.reduce(10, 10);
+        if (slider.getSliderStyle() == Slider::SliderStyle::LinearHorizontal)
+        {
+            layout.sliderBounds.setBounds(localBounds.getWidth() * 0.07f, localBounds.getY(), localBounds.getWidth() * 0.42f, localBounds.getHeight());
+            layout.textBoxBounds.setBounds(localBounds.getWidth() * 0.71f, localBounds.getY(), localBounds.getWidth() * 0.29f, localBounds.getHeight());
+            layout.textBoxBounds.reduce(10, 10);
+        }
+        else if (slider.getSliderStyle() == Slider::SliderStyle::LinearVertical)
+        {
+            layout.sliderBounds.setBounds(localBounds.getX(), localBounds.getY(), localBounds.getWidth() * 0.42f, localBounds.getHeight());
+            layout.textBoxBounds.setBounds(localBounds.getWidth() * 0.71f, localBounds.getY(), localBounds.getWidth() * 0.29f, localBounds.getHeight());
+            layout.textBoxBounds.reduce(10, 10);
+        }
 
         return layout;
     }
@@ -690,21 +698,33 @@ public:
         float maxSliderPos,
         const Slider::SliderStyle style, Slider& slider) override
     {
+        g.fillAll(Colour(255, 255, 0));
         const float h = slider.getTopLevelComponent()->getHeight() * 0.005f;
 
         Path pathBgr;
         Rectangle<float> backgroundRect(x, 0.5f * height - h / 2, width, h);
         pathBgr.addRoundedRectangle(backgroundRect, h);
         auto pathBgrColor = slider.isEnabled() ? textButtonFrameColor : textButtonFrameColor.withAlpha(0.4f);
-        g.setColour(pathBgrColor);
-        g.fillPath(pathBgr);
 
         Path pathFrg;
-        Rectangle<float> foregroundRect(width/2 + x, 0.5f * height - h / 2, sliderPos - (width / 2 + x), h);
+        Rectangle<float> foregroundRect(width / 2 + x, 0.5f * height - h / 2, sliderPos - (width / 2 + x), h);
         pathFrg.addRectangle(foregroundRect);
         auto pathFrgColor = slider.isEnabled() ? textButtonActiveRedFrameColor : textButtonActiveRedFrameColor.withAlpha(0.2f);
-        g.setColour(pathFrgColor);
-        g.fillPath(pathFrg);
+
+        if (style == Slider::SliderStyle::LinearHorizontal)
+        {
+            g.setColour(pathBgrColor);
+            g.fillPath(pathBgr);
+            g.setColour(pathFrgColor);
+            g.fillPath(pathFrg);
+        }
+        else if (style == Slider::SliderStyle::LinearVertical)
+        {
+            g.setColour(pathBgrColor);
+            g.fillPath(pathBgr);
+            g.setColour(pathFrgColor);
+            g.fillPath(pathFrg);
+        }
     }
 
     void drawLinearSliderThumb(Graphics& g, int x, int y, int width, int height,

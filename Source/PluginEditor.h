@@ -110,9 +110,9 @@ private:
     // Groups
     GroupComponent grpEq, grpPreset, grpDstC, grpProxComp, grpBands, grpSync, grpPresetList;
     // Sliders
-    ReverseSlider slBandGain[5], slCrossoverPosition[4];
+    ReverseSlider slCrossoverPosition[4];
     DirSlider slDir[5];
-    Slider slProximity;
+    Slider slProximity, slBandGain[5];
 
     // a slider to use to 'trim' the EQ's
     EndlessSlider trimSlider;
@@ -131,7 +131,7 @@ private:
     PresetListBox lbUserPresets, lbFactoryPresets;
 
     // Pointers for value tree state
-    std::unique_ptr<ReverseSlider::SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4];
+    std::unique_ptr<SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4];
     std::unique_ptr<SliderAttachment> slProximityAtt;
     std::unique_ptr<SliderAttachment> slDirAtt[5];
     std::unique_ptr<ButtonAttachment> msbSoloAtt[5], msbMuteAtt[5], tbAllowBackwardsPatternAtt, tbZeroDelayAtt, tgbProxCtrAtt;

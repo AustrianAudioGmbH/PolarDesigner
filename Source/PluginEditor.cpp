@@ -212,13 +212,12 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         
         // Band Gain slider
         addAndMakeVisible (&slBandGain[i]);
-        slBandGainAtt[i] = std::unique_ptr<ReverseSlider::SliderAttachment>(new ReverseSlider::SliderAttachment (valueTreeState, "gain" + String(i+1), slBandGain[i]));
-        slBandGain[i].setSliderStyle (Slider::LinearHorizontal);
+        slBandGainAtt[i] = std::unique_ptr<SliderAttachment>(new SliderAttachment (valueTreeState, "gain" + String(i+1), slBandGain[i]));
+        slBandGain[i].setSliderStyle (Slider::LinearVertical);
         slBandGain[i].setColour (Slider::rotarySliderOutlineColourId, eqColours[i]);
         slBandGain[i].setColour (Slider::thumbColourId, eqColours[i]);
         slBandGain[i].setTextBoxStyle (Slider::TextBoxAbove, false, 50, 15);
         slBandGain[i].addListener (this);
-        slBandGain[i].setInterceptsMouseClicks(false, true);
         
         // First-Order directivity visualizer (The "O"verhead view)
         addAndMakeVisible (&polarPatternVisualizers[i]);
@@ -547,20 +546,16 @@ void PolarDesignerAudioProcessorEditor::resized()
     muteSoloModule.items.add(juce::FlexItem().withWidth(polarVisualizersComponentRightMargin));
     gainBandSlidersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentRightMargin));
 
-    const float middleComponentFlex = 0.05f;
-
     juce::FlexBox middleComponent;
     middleComponent.flexDirection = FlexBox::Direction::column;
     middleComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     middleComponent.alignContent = juce::FlexBox::AlignContent::center;
-    middleComponent.items.add(juce::FlexItem(polarVisualizersComponent).withFlex(middleComponentFlex*4));
-    middleComponent.items.add(juce::FlexItem().withFlex(marginFlex));
-    middleComponent.items.add(juce::FlexItem(directivityEqualiser).withFlex(middleComponentFlex*10));
-    middleComponent.items.add(juce::FlexItem().withFlex(marginFlex));
-    middleComponent.items.add(juce::FlexItem().withFlex(middleComponentFlex));
-    middleComponent.items.add(juce::FlexItem(muteSoloModule).withFlex(middleComponentFlex));
-    middleComponent.items.add(juce::FlexItem(gainBandSlidersComponent).withFlex(middleComponentFlex));
-    middleComponent.items.add(juce::FlexItem().withFlex(marginFlex));
+    middleComponent.items.add(juce::FlexItem(polarVisualizersComponent).withFlex(0.23f));
+    middleComponent.items.add(juce::FlexItem(directivityEqualiser).withFlex(0.54f));
+    middleComponent.items.add(juce::FlexItem().withFlex(0.1f));
+    middleComponent.items.add(juce::FlexItem(muteSoloModule).withFlex(0.07f));
+    middleComponent.items.add(juce::FlexItem(gainBandSlidersComponent).withFlex(0.2f));
+    middleComponent.items.add(juce::FlexItem().withFlex(0.05f));
 
     const float trimSliderComponentFlex = 0.5f;
     const float trimSliderComponentMarginOffset = 0.03f;
