@@ -130,7 +130,7 @@ public:
 
         // draw directivity
         Path dirPath;
-        g.setColour (colour.withMultipliedAlpha(!isActive ? 0.0f : calcAlpha()));
+        g.setColour(colour);
         
         int idx=0;
         for (int phi = -180; phi <= 180; phi += degStep)
