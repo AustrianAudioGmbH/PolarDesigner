@@ -189,18 +189,18 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     for (int i = 0; i < maxNumberBands; ++i)
     {
         // SOLO button
-        msbSolo[i].setType (MuteSoloButton::Type::solo);
-        addAndMakeVisible (&msbSolo[i]);
-        msbSoloAtt[i] = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "solo" + String(i+1), msbSolo[i]));
-        msbSolo[i].addListener (this);
-        msbSolo[i].setAlwaysOnTop (true);
+        addAndMakeVisible (&tgbSolo[i]);
+        tgbSoloAtt[i] = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "solo" + String(i+1), tgbSolo[i]));
+        tgbSolo[i].addListener (this);
+        tgbSolo[i].setButtonText("S");
+        tgbSolo[i].setAlwaysOnTop (true);
         
         // MUTE button
-        msbMute[i].setType (MuteSoloButton::Type::mute);
-        addAndMakeVisible (&msbMute[i]);
-        msbMuteAtt[i] = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "mute" + String(i+1), msbMute[i]));
-        msbMute[i].addListener (this);
-        msbMute[i].setAlwaysOnTop (true);
+        addAndMakeVisible (&tgbMute[i]);
+        tgbMuteAtt[i] = std::unique_ptr<ButtonAttachment>(new ButtonAttachment (valueTreeState, "mute" + String(i+1), tgbMute[i]));
+        tgbMute[i].addListener (this);
+        tgbMute[i].setButtonText("M");
+        tgbMute[i].setAlwaysOnTop (true);
         
         // Direction slider
         addAndMakeVisible (&slDir[i]);
@@ -216,19 +216,20 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         slBandGain[i].setSliderStyle (Slider::LinearVertical);
         slBandGain[i].setColour (Slider::rotarySliderOutlineColourId, eqColours[i]);
         slBandGain[i].setColour (Slider::thumbColourId, eqColours[i]);
-        slBandGain[i].setTextBoxStyle (Slider::TextBoxAbove, false, 50, 15);
+        slBandGain[i].setTextBoxStyle(Slider::TextBoxRight, false, 45, 15);
+        slBandGain[i].setTextValueSuffix(" dB");
         slBandGain[i].addListener (this);
-        
+
         // First-Order directivity visualizer (The "O"verhead view)
         addAndMakeVisible (&polarPatternVisualizers[i]);
         polarPatternVisualizers[i].setActive(true);
         polarPatternVisualizers[i].addListener(this);
         polarPatternVisualizers[i].setDirWeight (slDir[i].getValue());
-        polarPatternVisualizers[i].setMuteSoloButtons (&msbSolo[i], &msbMute[i]);
+        polarPatternVisualizers[i].setMuteSoloButtons (&tgbSolo[i], &tgbMute[i]);
         polarPatternVisualizers[i].setColour (eqColours[i]);
 
         // main directivity Equaliser section
-        directivityEqualiser.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slCrossoverPosition[i - 1] : nullptr, (i < maxNumberBands - 1) ? &slCrossoverPosition[i] : nullptr, &msbSolo[i], &msbMute[i], &slBandGain[i], &polarPatternVisualizers[i]);
+        directivityEqualiser.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slCrossoverPosition[i - 1] : nullptr, (i < maxNumberBands - 1) ? &slCrossoverPosition[i] : nullptr, &tgbSolo[i], &tgbMute[i], &slBandGain[i], &polarPatternVisualizers[i]);
         
         if (i == maxNumberBands - 1)
             break; // there is one slCrossoverPosition less than bands
@@ -476,19 +477,17 @@ void PolarDesignerAudioProcessorEditor::resized()
     muteSoloModule.alignContent = juce::FlexBox::AlignContent::center;
     muteSoloModule.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin));
 
-    const float muteSoloComponentButtonsFlex = 0.14f;
-
     juce::FlexBox muteSoloComponent[5];
     for (int i = 0; i < 5; i++)
     {
         muteSoloComponent[i].flexDirection = FlexBox::Direction::row;
         muteSoloComponent[i].justifyContent = juce::FlexBox::JustifyContent::center;
         muteSoloComponent[i].alignContent = juce::FlexBox::AlignContent::center;
-        muteSoloComponent[i].items.add(juce::FlexItem().withFlex(marginFlex));
-        muteSoloComponent[i].items.add(juce::FlexItem(msbMute[i]).withFlex(muteSoloComponentButtonsFlex));
-        muteSoloComponent[i].items.add(juce::FlexItem().withFlex(1.f - 2 * marginFlex - 2 * muteSoloComponentButtonsFlex));
-        muteSoloComponent[i].items.add(juce::FlexItem(msbSolo[i]).withFlex(muteSoloComponentButtonsFlex));
-        muteSoloComponent[i].items.add(juce::FlexItem().withFlex(marginFlex));
+        muteSoloComponent[i].items.add(juce::FlexItem().withFlex(0.4f));
+        muteSoloComponent[i].items.add(juce::FlexItem(tgbSolo[i]).withWidth(0.04 * EDITOR_HEIGHT).withHeight(0.04 * EDITOR_HEIGHT));
+        muteSoloComponent[i].items.add(juce::FlexItem().withWidth(0.025 * EDITOR_HEIGHT));
+        muteSoloComponent[i].items.add(juce::FlexItem(tgbMute[i]).withWidth(0.04 * EDITOR_HEIGHT).withHeight(0.04 * EDITOR_HEIGHT));
+        muteSoloComponent[i].items.add(juce::FlexItem().withFlex(0.4f));
     }
 
     juce::FlexBox dirSlidersComponent;
@@ -552,9 +551,9 @@ void PolarDesignerAudioProcessorEditor::resized()
     middleComponent.alignContent = juce::FlexBox::AlignContent::center;
     middleComponent.items.add(juce::FlexItem(polarVisualizersComponent).withFlex(0.23f));
     middleComponent.items.add(juce::FlexItem(directivityEqualiser).withFlex(0.54f));
-    middleComponent.items.add(juce::FlexItem().withFlex(0.1f));
+    middleComponent.items.add(juce::FlexItem().withFlex(0.05f));
     middleComponent.items.add(juce::FlexItem(muteSoloModule).withFlex(0.07f));
-    middleComponent.items.add(juce::FlexItem(gainBandSlidersComponent).withFlex(0.2f));
+    middleComponent.items.add(juce::FlexItem(gainBandSlidersComponent).withFlex(0.25f));
     middleComponent.items.add(juce::FlexItem().withFlex(0.05f));
 
     const float trimSliderComponentFlex = 0.5f;
@@ -1104,42 +1103,47 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &polarPatternVisualizers[0])
     {
         bool isToggled = button->getToggleState();
-        msbSolo[0].setEnabled(isToggled);
-        msbMute[0].setEnabled(isToggled);
+        tgbSolo[0].setEnabled(isToggled);
+        tgbMute[0].setEnabled(isToggled);
         slBandGain[0].setEnabled(isToggled);
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
+        repaint();
     }
     else if (button == &polarPatternVisualizers[1])
     {
         bool isToggled = button->getToggleState();
-        msbSolo[1].setEnabled(isToggled);
-        msbMute[1].setEnabled(isToggled);
+        tgbSolo[1].setEnabled(isToggled);
+        tgbMute[1].setEnabled(isToggled);
         slBandGain[1].setEnabled(isToggled);
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
+        repaint();
     }
     else if (button == &polarPatternVisualizers[2])
     {
         bool isToggled = button->getToggleState();
-        msbSolo[2].setEnabled(isToggled);
-        msbMute[2].setEnabled(isToggled);
+        tgbSolo[2].setEnabled(isToggled);
+        tgbMute[2].setEnabled(isToggled);
         slBandGain[2].setEnabled(isToggled);
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
+        repaint();
     }
     else if (button == &polarPatternVisualizers[3])
     {
         bool isToggled = button->getToggleState();
-        msbSolo[3].setEnabled(isToggled);
-        msbMute[3].setEnabled(isToggled);
+        tgbSolo[3].setEnabled(isToggled);
+        tgbMute[3].setEnabled(isToggled);
         slBandGain[3].setEnabled(isToggled);
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
+        repaint();
     }
     else if (button == &polarPatternVisualizers[4])
     {
         bool isToggled = button->getToggleState();
-        msbSolo[4].setEnabled(isToggled);
-        msbMute[4].setEnabled(isToggled);
+        tgbSolo[4].setEnabled(isToggled);
+        tgbMute[4].setEnabled(isToggled);
         slBandGain[4].setEnabled(isToggled);
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
+        repaint();
     }
     else // muteSoloButton!
     {
@@ -1183,7 +1187,7 @@ std::vector<float> PolarDesignerAudioProcessorEditor::getBandLimitWidthVector(fl
 bool PolarDesignerAudioProcessorEditor::getSoloActive()
 {
     bool active = false;
-    for (auto& but : msbSolo)
+    for (auto& but : tgbSolo)
     {
         if (but.getToggleState())
         {
@@ -1296,31 +1300,31 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
         {
             slDir[i].setEnabled(true);
             slBandGain[i].setEnabled(true);
-            msbSolo[i].setEnabled(true);
-            msbMute[i].setEnabled(true);
+            tgbSolo[i].setEnabled(true);
+            tgbMute[i].setEnabled(true);
             polarPatternVisualizers[i].setActive(true);
             polarPatternVisualizers[i].setVisible(true);
 
             slDir[i].setVisible(true);
             slBandGain[i].setVisible(true);
-            msbSolo[i].setVisible(true);
-            msbMute[i].setVisible(true);
+            tgbSolo[i].setVisible(true);
+            tgbMute[i].setVisible(true);
         }
         else
         {
             slDir[i].setEnabled(false);
             slBandGain[i].setEnabled(false);
-            msbSolo[i].setEnabled(false);
-            msbSolo[i].setToggleState(false, NotificationType::sendNotification);
-            msbMute[i].setEnabled(false);
-            msbMute[i].setToggleState(false, NotificationType::sendNotification);
+            tgbSolo[i].setEnabled(false);
+            tgbSolo[i].setToggleState(false, NotificationType::sendNotification);
+            tgbMute[i].setEnabled(false);
+            tgbMute[i].setToggleState(false, NotificationType::sendNotification);
             polarPatternVisualizers[i].setActive(false);
             polarPatternVisualizers[i].setVisible(false);
             
             slDir[i].setVisible(false);
             slBandGain[i].setVisible(false);
-            msbSolo[i].setVisible(false);
-            msbMute[i].setVisible(false);
+            tgbSolo[i].setVisible(false);
+            tgbMute[i].setVisible(false);
         }
     }
 
@@ -1427,18 +1431,18 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
         {
             slDir[i].setEnabled(true);
             slBandGain[i].setEnabled(true);
-            msbSolo[i].setEnabled(true);
-            msbMute[i].setEnabled(true);
+            tgbSolo[i].setEnabled(true);
+            tgbMute[i].setEnabled(true);
             polarPatternVisualizers[i].setActive(true);
         }
         else
         {
             slDir[i].setEnabled(false);
             slBandGain[i].setEnabled(false);
-            msbSolo[i].setEnabled(false);
-            msbSolo[i].setToggleState(false, NotificationType::sendNotification);
-            msbMute[i].setEnabled(false);
-            msbMute[i].setToggleState(false, NotificationType::sendNotification);
+            tgbSolo[i].setEnabled(false);
+            tgbSolo[i].setToggleState(false, NotificationType::sendNotification);
+            tgbMute[i].setEnabled(false);
+            tgbMute[i].setToggleState(false, NotificationType::sendNotification);
             polarPatternVisualizers[i].setActive(false);
         }
     }
@@ -1642,8 +1646,8 @@ void PolarDesignerAudioProcessorEditor::setMainAreaEnabled(bool enable)
     {
         slDir[i].setEnabled(enable);
         slBandGain[i].setEnabled(enable);
-        msbSolo[i].setEnabled(enable);
-        msbMute[i].setEnabled(enable);
+        tgbSolo[i].setEnabled(enable);
+        tgbMute[i].setEnabled(enable);
         polarPatternVisualizers[i].setActive(enable);
     }
     tbZeroDelay.setEnabled(enable);
@@ -1712,25 +1716,25 @@ int PolarDesignerAudioProcessorEditor::getControlParameterIndex (Component& cont
         return 7;
     else if ((&control == &slDir[4] || &control == &directivityEqualiser.getDirPathComponent(4)) && nActiveBands > 4)
         return 8;
-    else if (&control == &msbSolo[0])
+    else if (&control == &tgbSolo[0])
         return 9;
-    else if (&control == &msbSolo[1] && nActiveBands > 1)
+    else if (&control == &tgbSolo[1] && nActiveBands > 1)
         return 10;
-    else if (&control == &msbSolo[2] && nActiveBands > 2)
+    else if (&control == &tgbSolo[2] && nActiveBands > 2)
         return 11;
-    else if (&control == &msbSolo[3] && nActiveBands > 3)
+    else if (&control == &tgbSolo[3] && nActiveBands > 3)
         return 12;
-    else if (&control == &msbSolo[4] && nActiveBands > 4)
+    else if (&control == &tgbSolo[4] && nActiveBands > 4)
         return 13;
-    else if (&control == &msbMute[0])
+    else if (&control == &tgbMute[0])
         return 14;
-    else if (&control == &msbMute[1] && nActiveBands > 1)
+    else if (&control == &tgbMute[1] && nActiveBands > 1)
         return 15;
-    else if (&control == &msbMute[2] && nActiveBands > 2)
+    else if (&control == &tgbMute[2] && nActiveBands > 2)
         return 16;
-    else if (&control == &msbMute[3] && nActiveBands > 3)
+    else if (&control == &tgbMute[3] && nActiveBands > 3)
         return 17;
-    else if (&control == &msbMute[4] && nActiveBands > 4)
+    else if (&control == &tgbMute[4] && nActiveBands > 4)
         return 18;
     else if (&control == &slBandGain[0])
         return 19;

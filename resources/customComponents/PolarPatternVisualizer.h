@@ -202,7 +202,7 @@ public:
         return isActive;
     }
 
-    void setMuteSoloButtons(MuteSoloButton* solo, MuteSoloButton* mute)
+    void setMuteSoloButtons(ToggleButton* solo, ToggleButton* mute)
     {
         soloButton = solo;
         muteButton = mute;
@@ -254,8 +254,8 @@ private:
     Rectangle<int> plotArea;
     float dirWeight;
     bool isActive;
-    MuteSoloButton* soloButton;
-    MuteSoloButton* muteButton;
+    ToggleButton* soloButton;
+    ToggleButton* muteButton;
     bool soloActive;
     Colour colour;
     Colour hoverColour;

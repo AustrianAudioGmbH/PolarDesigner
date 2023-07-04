@@ -650,7 +650,7 @@ public:
         int x = group.proportionOfWidth(0.06f);
         int y = 10.f;
         int w = group.proportionOfWidth(0.87f);
-        int h = group.getTopLevelComponent()->getHeight()*0.025f;
+        int h = group.getTopLevelComponent()->getHeight() * 0.025f;
 
         if (text == "Preset")
         {
@@ -676,8 +676,8 @@ public:
         }
         else if (slider.getSliderStyle() == Slider::SliderStyle::LinearVertical)
         {
-            layout.sliderBounds.setBounds(localBounds.getX(), localBounds.getY(), localBounds.getWidth() * 0.42f, localBounds.getHeight());
-            layout.textBoxBounds.setBounds(localBounds.getWidth() * 0.71f, localBounds.getY(), localBounds.getWidth() * 0.29f, localBounds.getHeight());
+            layout.sliderBounds.setBounds(localBounds.getX(), localBounds.getHeight() * 0.1f, localBounds.getWidth(), localBounds.getHeight()*0.8f);
+            layout.textBoxBounds.setBounds(localBounds.getWidth() * 0.55f, localBounds.getHeight()*0.3f, slider.getTopLevelComponent()->getWidth() * 0.07f, slider.getTopLevelComponent()->getHeight() * 0.05f);
             layout.textBoxBounds.reduce(10, 10);
         }
 
@@ -698,33 +698,31 @@ public:
         float maxSliderPos,
         const Slider::SliderStyle style, Slider& slider) override
     {
-        g.fillAll(Colour(255, 255, 0));
         const float h = slider.getTopLevelComponent()->getHeight() * 0.005f;
 
         Path pathBgr;
-        Rectangle<float> backgroundRect(x, 0.5f * height - h / 2, width, h);
-        pathBgr.addRoundedRectangle(backgroundRect, h);
-        auto pathBgrColor = slider.isEnabled() ? textButtonFrameColor : textButtonFrameColor.withAlpha(0.4f);
-
         Path pathFrg;
-        Rectangle<float> foregroundRect(width / 2 + x, 0.5f * height - h / 2, sliderPos - (width / 2 + x), h);
-        pathFrg.addRectangle(foregroundRect);
+        auto pathBgrColor = slider.isEnabled() ? textButtonFrameColor : textButtonFrameColor.withAlpha(0.4f);
         auto pathFrgColor = slider.isEnabled() ? textButtonActiveRedFrameColor : textButtonActiveRedFrameColor.withAlpha(0.2f);
 
         if (style == Slider::SliderStyle::LinearHorizontal)
         {
-            g.setColour(pathBgrColor);
-            g.fillPath(pathBgr);
-            g.setColour(pathFrgColor);
-            g.fillPath(pathFrg);
+            Rectangle<float> backgroundRect(x, 0.5f * height - h / 2, width, h);
+            pathBgr.addRoundedRectangle(backgroundRect, h);
+            Rectangle<float> foregroundRect(width / 2 + x, 0.5f * height - h / 2, sliderPos - (width / 2 + x), h);
+            pathFrg.addRectangle(foregroundRect);
         }
         else if (style == Slider::SliderStyle::LinearVertical)
         {
-            g.setColour(pathBgrColor);
-            g.fillPath(pathBgr);
-            g.setColour(pathFrgColor);
-            g.fillPath(pathFrg);
+            Rectangle<float> backgroundRect(0.5f * width - h/2, y, h, height);
+            pathBgr.addRoundedRectangle(backgroundRect, h);
+            Rectangle<float> foregroundRect(0.5f * width - h / 2, y + height * 0.43f, h, sliderPos - (y + height * 0.43f));
+            pathFrg.addRectangle(foregroundRect);
         }
+        g.setColour(pathBgrColor);
+        g.fillPath(pathBgr);
+        g.setColour(pathFrgColor);
+        g.fillPath(pathFrg);
     }
 
     void drawLinearSliderThumb(Graphics& g, int x, int y, int width, int height,
@@ -734,8 +732,14 @@ public:
         const float newDiameter = slider.getTopLevelComponent()->getHeight() * 0.024f;
 
         Path p;
-        p.addEllipse(sliderPos - newDiameter/2, height/2.f - newDiameter/2.f, newDiameter, newDiameter);
-
+        if (style == Slider::SliderStyle::LinearHorizontal)
+        {
+            p.addEllipse(sliderPos - newDiameter / 2, height / 2.f - newDiameter / 2.f, newDiameter, newDiameter);
+        }
+        else if (style == Slider::SliderStyle::LinearVertical)
+        {
+            p.addEllipse(width / 2.f - newDiameter / 2.f, sliderPos - newDiameter / 2, newDiameter, newDiameter);
+        }
         auto pathColor = slider.isEnabled() ? mainTextColor : mainTextColor.withAlpha(0.4f);
         g.setColour(pathColor);
 
@@ -794,39 +798,103 @@ public:
         bool isMouseOverButton, bool isButtonDown) override
     {
         Rectangle<int> toggleButtonBounds(0, 0, button.getWidth(), button.getHeight());
-        g.setColour(button.isEnabled() ? textButtonActiveRedFrameColor : textButtonActiveRedFrameColor.withAlpha(0.5f));
-        Path outline;
-        outline.addRoundedRectangle(toggleButtonBounds.reduced(button.getWidth() * 0.19f, button.getHeight() * 0.28f), button.getHeight() * 0.23f, button.getHeight() * 0.23f);
 
-        g.strokePath(outline, PathStrokeType(2.0f));
+        Font font(normalFont);
 
-        if (button.getToggleState() != true)
-        {
-            if (isMouseOverButton)
+        int x = toggleButtonBounds.getX();
+        int w = toggleButtonBounds.getWidth();
+        int h = button.getTopLevelComponent()->getHeight() * 0.023f;
+        int y = (button.getHeight() - h) / 2;
+
+        font.setHeight(h);
+        g.setFont(font);
+
+        if (button.getButtonText() == "S" || button.getButtonText() == "M")
+        { 
+            toggleButtonBounds.reduce(4, 4);
+            if (button.getToggleState())
             {
-                g.setColour(textButtonHoverRedBackgroundColor);
+                Colour mainColour = button.isEnabled() ? textButtonActiveRedFrameColor : textButtonActiveRedFrameColor.withBrightness(0.5f);
+                Colour textColour = button.isEnabled() ? mainTextColor : mainTextColor.withBrightness(0.5f);
+
+                if (isMouseOverButton)
+                {
+                    g.setColour(mainColour.withAlpha(0.3f));
+                    g.fillRect(toggleButtonBounds);
+                }
+                if (isButtonDown)
+                {
+                    g.setColour(mainColour.withAlpha(0.1f));
+                    g.fillRect(toggleButtonBounds);
+                }
+                g.setColour(mainColour.withAlpha(0.2f));
+                g.fillRect(toggleButtonBounds);
+
+                g.setColour(mainColour.withAlpha(0.5f));
+                g.drawRect(toggleButtonBounds, 1.f);
+                g.setColour(textColour);
+                g.drawFittedText(button.getButtonText(), x, y, w, h, Justification::centred, 1);
             }
             else
             {
-                g.setColour(textButtonPressedRedBackgroundColor);
+                Colour mainColour = button.isEnabled() ? mainTextColor.withBrightness(0.5f) : textButtonFrameColor;
+                Colour textColour = button.isEnabled() ? mainTextColor : mainTextColor.withBrightness(0.3f);
+
+                if (isMouseOverButton)
+                {
+                    g.setColour(mainColour.withAlpha(0.3f));
+                    g.fillRect(toggleButtonBounds);
+                }
+                if (isButtonDown)
+                {
+                    g.setColour(mainColour.withAlpha(0.1f));
+                    g.fillRect(toggleButtonBounds);
+                }
+                g.setColour(mainColour.withAlpha(0.2f));
+                g.fillRect(toggleButtonBounds);
+
+                g.setColour(mainColour.withAlpha(0.5f));
+                g.drawRect(toggleButtonBounds, 1.f);
+                g.setColour(textColour);
+                g.drawFittedText(button.getButtonText(), x, y, w, h, Justification::centred, 1);
             }
         }
         else
         {
-            if (isMouseOverButton)
+            g.setColour(button.isEnabled() ? textButtonActiveRedFrameColor : textButtonActiveRedFrameColor.withAlpha(0.5f));
+            Path outline;
+            outline.addRoundedRectangle(toggleButtonBounds.reduced(button.getWidth() * 0.19f, button.getHeight() * 0.28f), button.getHeight() * 0.23f, button.getHeight() * 0.23f);
+
+            g.strokePath(outline, PathStrokeType(2.0f));
+
+            if (button.getToggleState() != true)
             {
-                g.setColour(textButtonHoverRedBackgroundColor);
+                if (isMouseOverButton)
+                {
+                    g.setColour(textButtonHoverRedBackgroundColor);
+                }
+                else
+                {
+                    g.setColour(textButtonPressedRedBackgroundColor);
+                }
             }
             else
             {
-                g.setColour(textButtonPressedRedBackgroundColor);
+                if (isMouseOverButton)
+                {
+                    g.setColour(textButtonHoverRedBackgroundColor);
+                }
+                else
+                {
+                    g.setColour(textButtonPressedRedBackgroundColor);
+                }
             }
-        }
-        g.fillPath(outline);
+            g.fillPath(outline);
 
-        drawTickBox(g, button, toggleButtonBounds.getX(), toggleButtonBounds.getY(),
-            toggleButtonBounds.getWidth(), toggleButtonBounds.getHeight(),
-            button.getToggleState(), false, false, false);
+            drawTickBox(g, button, toggleButtonBounds.getX(), toggleButtonBounds.getY(),
+                toggleButtonBounds.getWidth(), toggleButtonBounds.getHeight(),
+                button.getToggleState(), false, false, false);
+        }
     }
 
     void drawTickBox(Graphics& g, Component& component,

@@ -118,7 +118,7 @@ private:
     EndlessSlider trimSlider;
 
     // Solo Buttons
-    MuteSoloButton msbSolo[5], msbMute[5];
+    ToggleButton tgbSolo[5], tgbMute[5];
     // Text Buttons
     TextButton tbLoad, tbSave, tbTerminateSpill, tbMaximizeTarget, tbMaxTargetToSpill, tbZeroDelay, tbOpenFromFile;
     // ToggleButtons
@@ -134,7 +134,7 @@ private:
     std::unique_ptr<SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4];
     std::unique_ptr<SliderAttachment> slProximityAtt;
     std::unique_ptr<SliderAttachment> slDirAtt[5];
-    std::unique_ptr<ButtonAttachment> msbSoloAtt[5], msbMuteAtt[5], tbAllowBackwardsPatternAtt, tbZeroDelayAtt, tgbProxCtrAtt;
+    std::unique_ptr<ButtonAttachment> tgbSoloAtt[5], tgbMuteAtt[5], tbAllowBackwardsPatternAtt, tbZeroDelayAtt, tgbProxCtrAtt;
     
     DirectivityEQ directivityEqualiser;
     PolarPatternVisualizer polarPatternVisualizers[5];

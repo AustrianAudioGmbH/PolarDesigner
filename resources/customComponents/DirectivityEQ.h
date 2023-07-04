@@ -81,8 +81,8 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
         Slider* dirSlider = nullptr;
         Slider* lowerFrequencySlider = nullptr;
         Slider* upperFrequencySlider = nullptr;
-        MuteSoloButton* soloButton = nullptr;
-        MuteSoloButton* muteButton = nullptr;
+        ToggleButton* soloButton = nullptr;
+        ToggleButton* muteButton = nullptr;
         Colour colour;
         Slider* gainSlider = nullptr;
         PolarPatternVisualizer* polarPatternVisualizer = nullptr;
@@ -778,7 +778,7 @@ public:
         initValueBox();
     }
 
-    void addSliders(Colour newColour, Slider* dirSlider = nullptr, Slider* lowerFrequencySlider = nullptr, Slider* upperFrequencySlider = nullptr, MuteSoloButton* soloButton = nullptr, MuteSoloButton* muteButton = nullptr, Slider* gainSlider = nullptr, PolarPatternVisualizer* directivityVis = nullptr
+    void addSliders(Colour newColour, Slider* dirSlider = nullptr, Slider* lowerFrequencySlider = nullptr, Slider* upperFrequencySlider = nullptr, ToggleButton* soloButton = nullptr, ToggleButton* muteButton = nullptr, Slider* gainSlider = nullptr, PolarPatternVisualizer* directivityVis = nullptr
                     )
     {
         elements.add({dirSlider, lowerFrequencySlider, upperFrequencySlider, soloButton, muteButton, newColour, gainSlider, directivityVis});

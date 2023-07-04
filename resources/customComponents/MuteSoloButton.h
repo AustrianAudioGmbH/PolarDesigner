@@ -81,13 +81,11 @@ public:
         Rectangle<int> bounds = getLocalBounds();
         const bool state = getToggleState();
 
-        getLookAndFeel().drawTickBox(g, *this, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), getToggleState(), isEnabled(), isMouseOver(), isMouseButtonDown());
-
         g.setFont(getLookAndFeel().getTypefaceForFont (Font(12.0f, 0)));
         g.setFont(bounds.getHeight()-4);
 
         g.setColour(!isEnabled() ? Colours::black : state ? Colours::black : findColour(ToggleButton::tickColourId));
-        g.drawFittedText(type == solo ? "S" : "M", bounds, juce::Justification::centred, 1);
+        g.drawFittedText(type == solo ? "s" : "m", bounds, juce::Justification::centred, 1);
         
     }
 
