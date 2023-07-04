@@ -177,11 +177,11 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         if (i == syncChannelIdx - 1) tmbSyncChannelButton[i].setToggleState(true, NotificationType::dontSendNotification);
     }
 
-    eqColours[0] = Colour(0xFDBA4949);
-    eqColours[1] = Colour(0xFDBA6F49);
-    eqColours[2] = Colour(0xFDBAAF49);
-    eqColours[3] = Colour(0xFD8CBA49);
-    eqColours[4] = Colour(0xFD49BA64);
+    eqColours[0] = mainLaF.polarVisualizerRed;
+    eqColours[1] = mainLaF.polarVisualizerOrange;
+    eqColours[2] = mainLaF.polarVisualizerYellow;
+    eqColours[3] = mainLaF.polarVisualizerGreen;
+    eqColours[4] = mainLaF.polarVisualizerGreenDark;
     
     // directivity eq
     addAndMakeVisible (&directivityEqualiser);
@@ -223,10 +223,10 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         // First-Order directivity visualizer (The "O"verhead view)
         addAndMakeVisible (&polarPatternVisualizers[i]);
         polarPatternVisualizers[i].setActive(true);
+        polarPatternVisualizers[i].addListener(this);
         polarPatternVisualizers[i].setDirWeight (slDir[i].getValue());
         polarPatternVisualizers[i].setMuteSoloButtons (&msbSolo[i], &msbMute[i]);
         polarPatternVisualizers[i].setColour (eqColours[i]);
-        polarPatternVisualizers[i].setInterceptsMouseClicks(false, true);
 
         // main directivity Equaliser section
         directivityEqualiser.addSliders (eqColours[i], &slDir[i], (i > 0) ? &slCrossoverPosition[i - 1] : nullptr, (i < maxNumberBands - 1) ? &slCrossoverPosition[i] : nullptr, &msbSolo[i], &msbMute[i], &slBandGain[i], &polarPatternVisualizers[i]);
@@ -1105,6 +1105,71 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
             button->setAlpha(getABButtonAlphaFromLayerState(isToggled));
             tmbABButton[0].setAlpha(getABButtonAlphaFromLayerState(!isToggled));
         }
+    }
+    else if (button == &polarPatternVisualizers[0])
+    {
+        bool isToggled = button->getToggleState();
+        if (isToggled)
+        {
+            msbSolo[0].triggerClick();
+        }
+        else
+        {
+            msbMute[0].triggerClick();
+        }
+        button->setToggleState(!isToggled, NotificationType::dontSendNotification);
+    }
+    else if (button == &polarPatternVisualizers[1])
+    {
+        bool isToggled = button->getToggleState();
+        if (isToggled)
+        {
+            msbSolo[1].triggerClick();
+        }
+        else
+        {
+            msbMute[1].triggerClick();
+        }
+        button->setToggleState(!isToggled, NotificationType::dontSendNotification);
+    }
+    else if (button == &polarPatternVisualizers[2])
+    {
+        bool isToggled = button->getToggleState();
+        if (isToggled)
+        {
+            msbSolo[2].triggerClick();
+        }
+        else
+        {
+            msbMute[2].triggerClick();
+        }
+        button->setToggleState(!isToggled, NotificationType::dontSendNotification);
+    }
+    else if (button == &polarPatternVisualizers[3])
+    {
+        bool isToggled = button->getToggleState();
+        if (isToggled)
+        {
+            msbSolo[3].triggerClick();
+        }
+        else
+        {
+            msbMute[3].triggerClick();
+        }
+        button->setToggleState(!isToggled, NotificationType::dontSendNotification);
+    }
+    else if (button == &polarPatternVisualizers[4])
+    {
+        bool isToggled = button->getToggleState();
+        if (isToggled)
+        {
+            msbSolo[4].triggerClick();
+        }
+        else
+        {
+            msbMute[4].triggerClick();
+        }
+        button->setToggleState(!isToggled, NotificationType::dontSendNotification);
     }
     else // muteSoloButton!
     {

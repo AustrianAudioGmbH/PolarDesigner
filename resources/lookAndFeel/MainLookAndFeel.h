@@ -29,6 +29,12 @@ public:
     const Colour textButtonActiveBlue3FrameColor = Colour(0, 87, 255);
     const Colour textButtonActiveBlue4FrameColor = Colour(108, 180, 238);
     const Colour sliderHoverFrameColor = Colour(93, 94, 95);
+    const Colour polarVisualizerRed = Colour(182, 22, 22);
+    const Colour polarVisualizerOrange = Colour(255, 107, 0);
+    const Colour polarVisualizerYellow = Colour(214, 193, 9);
+    const Colour polarVisualizerGreen = Colour(96, 154, 0);
+    const Colour polarVisualizerGreenDark = Colour(0, 157, 25);
+    const Colour polarVisualizerGrid = Colour(52, 54, 57);
     const Colour textButtonHoverBackgroundColor = textButtonActiveFrameColor.withAlpha(0.3f);
     const Colour textButtonHoverRedBackgroundColor = textButtonActiveRedFrameColor.withAlpha(0.3f);
     const Colour textButtonPressedBackgroundColor = textButtonActiveFrameColor.withAlpha(0.1f);

@@ -50,12 +50,13 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "../resources/lookAndFeel/MainLookAndFeel.h"
 
 //==============================================================================
 /*
 */
 using namespace dsp;
-class PolarPatternVisualizer : public Component
+class PolarPatternVisualizer : public TextButton
 {
     const float deg2rad = M_PI / 180.0f;
     const int degStep = 4;
@@ -68,8 +69,9 @@ public:
         soloButton = nullptr;
         muteButton = nullptr;
         soloActive = false;
+        mouseOver = false;
 
-        colour = Colour(0xFFD0011B);
+        colour = mainLaF.mainBackground;
         
         for (int phi = -180; phi <= 180; phi += degStep)
         {
@@ -78,21 +80,10 @@ public:
 
         Path circle;
         circle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
-        Path line;
-        line.startNewSubPath(0.0f, -1.0f);
-        line.lineTo(0.0f, 1.0f);
-        
-        grid.clear();
-        grid.addPath(circle);
 
         subGrid.clear();
         for (int i = 1; i < 5; i++)
             subGrid.addPath(circle, AffineTransform().scaled(i/4.0f));
-
-        subGrid.addPath(line);
-        subGrid.addPath(line, AffineTransform().rotation(0.25f * M_PI));
-        subGrid.addPath(line, AffineTransform().rotation(0.5f * M_PI));
-        subGrid.addPath(line, AffineTransform().rotation(0.75f * M_PI));
     }
 
     ~PolarPatternVisualizer()
@@ -101,22 +92,45 @@ public:
 
     void paint (Graphics& g) override
     {
-        Path path;
-        path = grid;
-        path.applyTransform(transform);
-        g.setColour (Colours::skyblue.withMultipliedAlpha(0.1f));
-        g.fillPath(path);
-        g.setColour (Colours::white.withMultipliedAlpha(!isActive ? 0.5f : calcAlpha()));
-        g.strokePath(path, PathStrokeType(1.0f));
+        if (mouseOver)
+        {
+            Path innerCircle;
+            innerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+            innerCircle.applyTransform(transform);
 
-        path = subGrid;
-        path.applyTransform(transform);
-        g.setColour (Colours::skyblue.withMultipliedAlpha(0.3f));
-        g.strokePath(path, PathStrokeType(0.5f));
+            Path outerCircle;
+            outerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+            outerCircle.applyTransform(strokeTransform);
+            outerCircle.setUsingNonZeroWinding(false);
+            outerCircle.addPath(innerCircle);
+
+            g.setColour(colour.withAlpha(0.1f));
+            g.fillPath(outerCircle);
+        }
+
+        if (getToggleState())
+        {
+            Path innerCircle;
+            innerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+            innerCircle.applyTransform(transform);
+
+            Path outerCircle;
+            outerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+            outerCircle.applyTransform(strokeTransform);
+
+            g.setColour(colour.withAlpha(0.1f));
+            g.fillPath(outerCircle);  
+        }
+
+        Path gridPath;
+        gridPath = subGrid;
+        gridPath.applyTransform(transform);
+        g.setColour (mainLaF.polarVisualizerGrid);
+        g.strokePath(gridPath, PathStrokeType(1.f));
 
         // draw directivity
+        Path dirPath;
         g.setColour (colour.withMultipliedAlpha(!isActive ? 0.0f : calcAlpha()));
-        path.clear();
         
         int idx=0;
         for (int phi = -180; phi <= 180; phi += degStep)
@@ -129,24 +143,25 @@ public:
             Point<float> point = effGain * pointsOnCircle[idx];
             
             if (phi == -180)
-                path.startNewSubPath(point);
+                dirPath.startNewSubPath(point);
             else
-                path.lineTo(point);
+                dirPath.lineTo(point);
             ++idx;
         }
 
-        path.closeSubPath();
-        path.applyTransform(transform);
-        g.strokePath(path, PathStrokeType(2.0f));
-
+        dirPath.closeSubPath();
+        dirPath.applyTransform(transform);
+        g.strokePath(dirPath, PathStrokeType(2.0f));
     }
 
     void resized() override
     {
         Rectangle<int> bounds = getLocalBounds();
+        Rectangle<int> strokeBounds = getLocalBounds();
         Point<int> centre = bounds.getCentre();
 
         bounds.reduce(10,10);
+        strokeBounds.reduce(6, 6);
 
         if (bounds.getWidth() > bounds.getHeight())
             bounds.setWidth(bounds.getHeight());
@@ -155,6 +170,14 @@ public:
         bounds.setCentre(centre);
 
         transform = AffineTransform::fromTargetPoints((float) centre.x, (float) centre.y, (float)  centre.x, bounds.getY(), bounds.getX(), centre.y);
+
+        if (strokeBounds.getWidth() > strokeBounds.getHeight())
+            strokeBounds.setWidth(strokeBounds.getHeight());
+        else
+            strokeBounds.setHeight(strokeBounds.getWidth());
+        strokeBounds.setCentre(centre);
+
+        strokeTransform = AffineTransform::fromTargetPoints((float)centre.x, (float)centre.y, (float)centre.x, strokeBounds.getY(), strokeBounds.getX(), centre.y);
 
         plotArea = bounds;
     }
@@ -209,12 +232,25 @@ public:
     void setColour (Colour newColour)
     {
         colour = newColour;
+        repaint();
+    }
+
+    void mouseEnter(const MouseEvent& e) override
+    {
+        mouseOver = true;
+        repaint();
+    }
+
+    void mouseExit(const MouseEvent& e) override
+    {
+        mouseOver = false;
+        repaint();
     }
 
 private:
     Path grid;
     Path subGrid;
-    AffineTransform transform;
+    AffineTransform transform, strokeTransform;
     Rectangle<int> plotArea;
     float dirWeight;
     bool isActive;
@@ -222,7 +258,10 @@ private:
     MuteSoloButton* muteButton;
     bool soloActive;
     Colour colour;
+    Colour hoverColour;
+    bool mouseOver;
 
     Array<Point<float>> pointsOnCircle;
+    MainLookAndFeel mainLaF;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarPatternVisualizer)
 };

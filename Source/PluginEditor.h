@@ -59,20 +59,16 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
-    
+
     void buttonStateChanged(Button* button) override;
     void buttonClicked (Button* button) override;
     void sliderValueChanged (Slider* slider) override;
-    
-    //void onAlOverlayErrorOkay();
-    //void onAlOverlayApplyPattern();
-    //void onAlOverlayCancelRecord();
-    //void onAlOverlayMaxSigToDist();
+
     void setEqMode();
     float getABButtonAlphaFromLayerState(int layerState);
     // Helper method to calculate flex on the base of bandlimitPathComponents
     std::vector<float> getBandLimitWidthVector(float sizeDirectionalEQ, float offsetPolarVisualizer);
-    
+
     void incrementTrim(int nBands);
     void decrementTrim(int nBands);
 
@@ -81,7 +77,7 @@ public:
     void loadSavedPresetsToList();
 
     void changeListenerCallback(ChangeBroadcaster* source) override;
-        
+
 private:
     static const int EDITOR_WIDTH = 1194;
     static const int EDITOR_HEIGHT = 834;
