@@ -92,7 +92,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        if (mouseOver)
+        if (mouseOver && isEnabled())
         {
             Path innerCircle;
             innerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
@@ -130,7 +130,7 @@ public:
 
         // draw directivity
         Path dirPath;
-        g.setColour(colour);
+        g.setColour(isEnabled() ? colour : colour.withBrightness(0.5f));
         
         int idx=0;
         for (int phi = -180; phi <= 180; phi += degStep)

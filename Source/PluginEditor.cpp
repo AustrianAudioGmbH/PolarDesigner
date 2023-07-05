@@ -999,6 +999,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     }
     else if (button == &tbTerminateSpill)
     {
+        setMainAreaEnabled(0);
         showTerminatorAnimationWindow = true;
         showMaxToSpillWindow = false;
         maximizeTarget = false;
@@ -1103,6 +1104,8 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &polarPatternVisualizers[0])
     {
         bool isToggled = button->getToggleState();
+        directivityEqualiser.getDirPathComponent(0).setEnabled(isToggled);
+        slDir[0].setEnabled(isToggled);
         tgbSolo[0].setEnabled(isToggled);
         tgbMute[0].setEnabled(isToggled);
         slBandGain[0].setEnabled(isToggled);
@@ -1112,6 +1115,8 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &polarPatternVisualizers[1])
     {
         bool isToggled = button->getToggleState();
+        directivityEqualiser.getDirPathComponent(1).setEnabled(isToggled);
+        slDir[1].setEnabled(isToggled);
         tgbSolo[1].setEnabled(isToggled);
         tgbMute[1].setEnabled(isToggled);
         slBandGain[1].setEnabled(isToggled);
@@ -1121,6 +1126,8 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &polarPatternVisualizers[2])
     {
         bool isToggled = button->getToggleState();
+        directivityEqualiser.getDirPathComponent(2).setEnabled(isToggled);
+        slDir[2].setEnabled(isToggled);
         tgbSolo[2].setEnabled(isToggled);
         tgbMute[2].setEnabled(isToggled);
         slBandGain[2].setEnabled(isToggled);
@@ -1130,6 +1137,8 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &polarPatternVisualizers[3])
     {
         bool isToggled = button->getToggleState();
+        directivityEqualiser.getDirPathComponent(3).setEnabled(isToggled);
+        slDir[3].setEnabled(isToggled);
         tgbSolo[3].setEnabled(isToggled);
         tgbMute[3].setEnabled(isToggled);
         slBandGain[3].setEnabled(isToggled);
@@ -1139,6 +1148,8 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &polarPatternVisualizers[4])
     {
         bool isToggled = button->getToggleState();
+        directivityEqualiser.getDirPathComponent(4).setEnabled(isToggled);
+        slDir[4].setEnabled(isToggled);
         tgbSolo[4].setEnabled(isToggled);
         tgbMute[4].setEnabled(isToggled);
         slBandGain[4].setEnabled(isToggled);
@@ -1642,13 +1653,19 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback(ChangeBroadcaster
 void PolarDesignerAudioProcessorEditor::setMainAreaEnabled(bool enable)
 {
     directivityEqualiser.setActive(enable);
+    directivityEqualiser.setEnabled(enable);
+
     for (int i = 0; i < nActiveBands; i++)
     {
+        directivityEqualiser.getDirPathComponent(i).setEnabled(enable);
         slDir[i].setEnabled(enable);
         slBandGain[i].setEnabled(enable);
         tgbSolo[i].setEnabled(enable);
         tgbMute[i].setEnabled(enable);
+        polarPatternVisualizers[i].setEnabled(enable);
         polarPatternVisualizers[i].setActive(enable);
+        if (polarPatternVisualizers[i].getToggleState())
+            polarPatternVisualizers[i].setToggleState(false, NotificationType::dontSendNotification);
     }
     tbZeroDelay.setEnabled(enable);
     titlePreset.setEnabled(enable);

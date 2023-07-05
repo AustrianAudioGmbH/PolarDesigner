@@ -363,8 +363,8 @@ public:
                 
                 dirPaths[i].startNewSubPath (hzToX(s.fMin), circY);
                 dirPaths[i].lineTo (hzToX(s.fMax), circY);
-                g.setColour (handle.colour.withSaturation(activeElem == i ? 0.6 : 0.5f).withMultipliedAlpha(calcAlphaOfDirPath(handle)));
-                g.strokePath (dirPaths[i], PathStrokeType (3.0f));
+                g.setColour(dirPathRects[i].isEnabled() ? handle.colour : handle.colour.withBrightness(0.3f));
+                g.strokePath (dirPaths[i], PathStrokeType (2.0f));
                 break;
             }
             
@@ -383,15 +383,14 @@ public:
                 
                 dirPaths[i-1].startNewSubPath (lastRightBound - bandMargin, lastCircY);
                 dirPaths[i-1].quadraticTo (lastRightBound - bandMargin + interpPointMargin, lastCircY, lastRightBound, (lastCircY + circY) / 2);
-                g.setColour (elements.getReference(i-1).colour.withSaturation(activeElem == i-1 ? 0.6 : 0.5f).
-                             withMultipliedAlpha(calcAlphaOfDirPath(elements.getReference(i-1))));
-                g.strokePath (dirPaths[i-1], PathStrokeType (3.0f));
+                g.setColour(dirPathRects[i].isEnabled() ? handle.colour : handle.colour.withBrightness(0.3f));
+                g.strokePath (dirPaths[i-1], PathStrokeType (2.0f));
                 
                 dirPaths[i].startNewSubPath (lastRightBound, (lastCircY + circY) / 2);
                 dirPaths[i].quadraticTo (lastRightBound + bandMargin - interpPointMargin, circY, lastRightBound + bandMargin, circY);
                 dirPaths[i].lineTo (hzToX(s.fMax), circY);
-                g.setColour (handle.colour.withSaturation(activeElem == i ? 0.6 : 0.5f).withMultipliedAlpha(calcAlphaOfDirPath(handle)));
-                g.strokePath (dirPaths[i], PathStrokeType (3.0f));
+                g.setColour(dirPathRects[i].isEnabled() ? handle.colour : handle.colour.withBrightness(0.3f));
+                g.strokePath (dirPaths[i], PathStrokeType (2.0f));
             }
             else
             {
@@ -400,9 +399,8 @@ public:
                 
                 dirPaths[i-1].startNewSubPath (lastRightBound - bandMargin, lastCircY);
                 dirPaths[i-1].quadraticTo (lastRightBound - bandMargin + interpPointMargin, lastCircY, lastRightBound, (lastCircY + circY) / 2);
-                g.setColour (elements.getReference(i-1).colour.withSaturation(activeElem == i-1 ? 0.6 : 0.5f).
-                             withMultipliedAlpha(calcAlphaOfDirPath(elements.getReference(i-1))));
-                g.strokePath (dirPaths[i-1], PathStrokeType (3.0f));
+                g.setColour(dirPathRects[i].isEnabled() ? handle.colour : handle.colour.withBrightness(0.3f));
+                g.strokePath (dirPaths[i-1], PathStrokeType (2.0f));
                 
                 dirPaths[i].startNewSubPath (lastRightBound, (lastCircY + circY) / 2);
                 dirPaths[i].quadraticTo (lastRightBound + bandMargin - interpPointMargin, circY, lastRightBound + bandMargin, circY);
@@ -414,6 +412,9 @@ public:
 
 
         // band handle knobs
+        auto knobSize = getTopLevelComponent()->getHeight() * 0.03f;
+        auto bandHandleKnobImg = juce::Drawable::createFromImageData(BinaryData::bandHandleKnob_svg, BinaryData::bandHandleKnob_svgSize);
+
         for (int i = 0; i < nrActiveBands; ++i)
         {
             BandElements& handle (elements.getReference(i));
@@ -422,28 +423,21 @@ public:
             float circX = (rightBound + leftBound) / 2;
             float circY = handle.dirSlider == nullptr ? dirToY (0.0f) : dirToY (handle.dirSlider->getValue());
             handle.handlePos.setXY(circX,circY);
-                        
+
+            if (!handle.dirSlider->isEnabled())
+            {
+                bool resultMainImg = bandHandleKnobImg->replaceColour(Colours::white, Colours::black);
+            }
+            else
+            {
+                bool resultMainImg = bandHandleKnobImg->replaceColour(Colours::black, Colours::white);
+            }
+
+            auto bandHandleKnobImageArea = Rectangle<float>(circX - (knobSize / 2), circY - (knobSize / 2), knobSize, knobSize);
+
             // paint band handles
-            g.setColour (Colour (0xFF191919));
-            
-            g.drawEllipse (circX - (POLAR_DESIGNER_KNOBS_SIZE / 2),
-                           circY - (POLAR_DESIGNER_KNOBS_SIZE / 2) ,
-                           POLAR_DESIGNER_KNOBS_SIZE,
-                           POLAR_DESIGNER_KNOBS_SIZE, 3.0f);
-            
-            g.setColour (handle.colour);
-            
-            g.drawEllipse (circX - (POLAR_DESIGNER_KNOBS_SIZE / 2),
-                           circY - (POLAR_DESIGNER_KNOBS_SIZE / 2),
-                           POLAR_DESIGNER_KNOBS_SIZE,
-                           POLAR_DESIGNER_KNOBS_SIZE, 1.0f);
-            
-            g.setColour (activeElem == i ? handle.colour.withSaturation(0.8) : handle.colour.withSaturation (0.2).withMultipliedAlpha (calcAlphaOfDirPath(handle)));
-            g.fillEllipse (circX - (POLAR_DESIGNER_KNOBS_SIZE / 2),
-                           circY - (POLAR_DESIGNER_KNOBS_SIZE / 2),
-                           POLAR_DESIGNER_KNOBS_SIZE,
-                           POLAR_DESIGNER_KNOBS_SIZE);
-            
+            bandHandleKnobImg->drawWithin(g, bandHandleKnobImageArea, juce::RectanglePlacement::centred, 1.f);
+
             // align elements
             handle.polarPatternVisualizer->getParentComponent()->resized();
 
@@ -519,9 +513,9 @@ public:
 
     void mouseDrag(const MouseEvent &event) override
     {
-        if (!active)
+        if (!active || !event.eventComponent->isEnabled())
             return;
-        
+
         if (event.eventComponent->getName() == "RectangleComponent" || event.eventComponent == this)
         {
             if (activeElem != -1)
