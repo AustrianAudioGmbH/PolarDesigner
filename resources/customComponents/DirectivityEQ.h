@@ -238,10 +238,11 @@ public:
         rCardPath.applyTransform (rCardPath.getTransformToScaleToFit (1.0f, static_cast<float>(height) - mB - dirImgSize / 2, dirImgSize, dirImgSize, true, Justification::right));
         g.strokePath (rCardPath, PathStrokeType (activePatternPath == rCardFact ? strokeSizeThick : strokeSizeThin));
         g.fillPath (rCardPath);
-        
+
         // frequency labels
-        g.setFont (getLookAndFeel().getTypefaceForFont (Font(12.0f, 2)));
-        g.setFont (16.0f);
+        Font axisLabelFont = getLookAndFeel().getTypefaceForFont(Font(12.0f, 1));
+        g.setFont (axisLabelFont);
+        g.setFont (getTopLevelComponent()->getHeight()*0.017f);
         for (float f=s.fMin; f <= s.fMax; f += powf(10, floorf(log10(f))))
         {
             int xpos = hzToX(f);
@@ -263,7 +264,7 @@ public:
 
             if (drawText)
             {
-                g.drawText (axislabel, xpos - 10, dirToY(s.yMin) + OH + 0.0f, 30, 12, Justification::centred, true);
+                g.drawText (axislabel, xpos - axisLabelFont.getStringWidth(axislabel)/2, dirToY(s.yMin) + OH + 0.0f, axisLabelFont.getStringWidth(axislabel), axisLabelFont.getHeight(), Justification::centred, true);
             }
         }
 
@@ -735,29 +736,30 @@ public:
         {
             float db_val = s.yMax - i * s.gridDiv;
             int ypos = dirToY(db_val);
-            dirGridPath.startNewSubPath(mL-OH, ypos);
-            dirGridPath.lineTo(mL + width+OH, ypos);
+            dirGridPath.startNewSubPath(mL, ypos);
+            dirGridPath.lineTo(mL + width, ypos);
         }
         
         // add grid for super card, hyper card and broad card
         smallDirGridPath.clear();
         int ypos = dirToY(hCardFact);
-        smallDirGridPath.startNewSubPath(mL-OH, ypos);
-        smallDirGridPath.lineTo(mL + width+OH, ypos);
+        smallDirGridPath.startNewSubPath(mL, ypos);
+        smallDirGridPath.lineTo(mL + width, ypos);
         
         ypos = dirToY(sCardFact);
-        smallDirGridPath.startNewSubPath(mL-OH, ypos);
-        smallDirGridPath.lineTo(mL + width+OH, ypos);
+        smallDirGridPath.startNewSubPath(mL, ypos);
+        smallDirGridPath.lineTo(mL + width, ypos);
         
         ypos = dirToY(bCardFact);
-        smallDirGridPath.startNewSubPath(mL-OH, ypos);
-        smallDirGridPath.lineTo(mL + width+OH, ypos);
+        smallDirGridPath.startNewSubPath(mL, ypos);
+        smallDirGridPath.lineTo(mL + width, ypos);
         
         ypos = dirToY(rbCardFact);
-        smallDirGridPath.startNewSubPath(mL-OH, ypos);
-        smallDirGridPath.lineTo(mL + width+OH, ypos);
+        smallDirGridPath.startNewSubPath(mL, ypos);
+        smallDirGridPath.lineTo(mL + width, ypos);
 
         // frequency grid
+        
         hzGridPath.clear();
         hzGridPathBold.clear();
         for (float f=s.fMin; f <= s.fMax; f += powf(10, floorf(log10(f)))) {
@@ -765,13 +767,13 @@ public:
 
             if ((f == 20) || (f == 50) || (f == 100) || (f == 200) || (f == 500) || (f == 1000) || (f == 2000) || (f == 5000) || (f == 10000) || (f == 20000))
             {
-                hzGridPathBold.startNewSubPath(xpos, dirToY(s.yMax)-OH);
-                hzGridPathBold.lineTo(xpos, dirToY(s.yMin)+OH);
+                hzGridPathBold.startNewSubPath(xpos, dirToY(s.yMax));
+                hzGridPathBold.lineTo(xpos, dirToY(s.yMin));
             }
             else
             {
-                hzGridPath.startNewSubPath(xpos, dirToY(s.yMax)-OH);
-                hzGridPath.lineTo(xpos, dirToY(s.yMin)+OH);
+                hzGridPath.startNewSubPath(xpos, dirToY(s.yMax));
+                hzGridPath.lineTo(xpos, dirToY(s.yMin));
             }
         }
         
