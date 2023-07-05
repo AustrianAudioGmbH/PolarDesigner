@@ -55,6 +55,14 @@ public:
 
     ~MainLookAndFeel() {}
 
+    Typeface::Ptr getTypefaceForFont(const Font& f) override
+    {
+        switch (f.getStyleFlags()) {
+        case 1: return normalFont;
+        default: return normalFont;
+        }
+    }
+
     void drawButtonBackground(Graphics& g, Button& button, const Colour& backgroundColour,
         bool isMouseOverButton, bool isButtonDown) override
     {
@@ -677,7 +685,7 @@ public:
         else if (slider.getSliderStyle() == Slider::SliderStyle::LinearVertical)
         {
             layout.sliderBounds.setBounds(localBounds.getX(), localBounds.getHeight() * 0.1f, localBounds.getWidth(), localBounds.getHeight()*0.8f);
-            layout.textBoxBounds.setBounds(localBounds.getWidth() * 0.55f, localBounds.getHeight()*0.3f, slider.getTopLevelComponent()->getWidth() * 0.07f, slider.getTopLevelComponent()->getHeight() * 0.05f);
+            layout.textBoxBounds.setBounds(localBounds.getWidth() * 0.52f, localBounds.getHeight()*0.3f, slider.getTopLevelComponent()->getWidth() * 0.065f, slider.getTopLevelComponent()->getHeight() * 0.05f);
             layout.textBoxBounds.reduce(10, 10);
         }
 
