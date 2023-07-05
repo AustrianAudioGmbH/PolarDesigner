@@ -131,7 +131,8 @@ private:
     PresetListBox lbUserPresets, lbFactoryPresets;
 
     // Pointers for value tree state
-    std::unique_ptr<SliderAttachment> slBandGainAtt[5], slCrossoverAtt[4];
+    std::unique_ptr<ReverseSlider::SliderAttachment> slCrossoverAtt[4];
+    std::unique_ptr<SliderAttachment> slBandGainAtt[5];
     std::unique_ptr<SliderAttachment> slProximityAtt;
     std::unique_ptr<SliderAttachment> slDirAtt[5];
     std::unique_ptr<ButtonAttachment> tgbSoloAtt[5], tgbMuteAtt[5], tbAllowBackwardsPatternAtt, tbZeroDelayAtt, tgbProxCtrAtt;
