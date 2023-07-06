@@ -182,6 +182,7 @@ private:
     void setSideAreaEnabled(bool set);
     void zeroDelayModeChange();
     void showPresetList(bool shouldShow);
+    void setBandEnabled(int bandNr, bool enable);
 
     void showActiveTerminatorStage(terminatorStage stage);
 
