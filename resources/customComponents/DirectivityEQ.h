@@ -383,7 +383,7 @@ public:
                 
                 dirPaths[i-1].startNewSubPath (lastRightBound - bandMargin, lastCircY);
                 dirPaths[i-1].quadraticTo (lastRightBound - bandMargin + interpPointMargin, lastCircY, lastRightBound, (lastCircY + circY) / 2);
-                g.setColour(dirPathRects[i].isEnabled() ? handle.colour : handle.colour.withBrightness(0.3f));
+                g.setColour(dirPathRects[i-1].isEnabled() ? elements.getReference(i-1).colour : elements.getReference(i - 1).colour.withBrightness(0.3f));
                 g.strokePath (dirPaths[i-1], PathStrokeType (2.0f));
                 
                 dirPaths[i].startNewSubPath (lastRightBound, (lastCircY + circY) / 2);
@@ -399,7 +399,7 @@ public:
                 
                 dirPaths[i-1].startNewSubPath (lastRightBound - bandMargin, lastCircY);
                 dirPaths[i-1].quadraticTo (lastRightBound - bandMargin + interpPointMargin, lastCircY, lastRightBound, (lastCircY + circY) / 2);
-                g.setColour(dirPathRects[i].isEnabled() ? handle.colour : handle.colour.withBrightness(0.3f));
+                g.setColour(dirPathRects[i-1].isEnabled() ? elements.getReference(i - 1).colour : elements.getReference(i - 1).colour.withBrightness(0.3f));
                 g.strokePath (dirPaths[i-1], PathStrokeType (2.0f));
                 
                 dirPaths[i].startNewSubPath (lastRightBound, (lastCircY + circY) / 2);
