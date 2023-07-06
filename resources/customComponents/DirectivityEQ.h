@@ -50,6 +50,7 @@
 
 #pragma once
 #include "ImgPaths.h"
+#include "../resources/lookAndFeel/MainLookAndFeel.h"
 
 // !J! On iOS we make the knobs fatter for touchscreen ease-of-use
 #ifdef JUCE_IOS
@@ -92,10 +93,11 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
 
     // margins
     const float mL = 33.0f;
-    const float mR = 10.0f;
-    const float mT = 15.0f;
-    const float mB = 15.0f;
+    const float mR = 15.0f;
+    const float mT = 30.0f;
+    const float mB = 20.0f;
     const float OH = 3.0f;
+    const float mLabel = 5.0f;
     
     class PathComponent : public Component
     {
@@ -106,14 +108,27 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
             path.preallocateSpace(1000);    // !J! Arbitrary Magic Number
         };
         ~PathComponent() {};
-        
-        void setBounds() { Component::setBounds ( path.getBounds().withWidth(10.0f).translated(-3.0f,0.0f).toNearestInt()); }
-        
+        void setBounds() { Component::setBounds(path.getBounds().toNearestInt()); }
         Path& getPath() { return path; }
     private:
         Path path;
     };
-    
+
+    class BandLimitDividerHolder : public Component
+    {
+    public:
+        BandLimitDividerHolder() : Component() {
+            setAlwaysOnTop(true);
+            setName("PathComponent");
+            path.preallocateSpace(1000);
+        };
+        ~BandLimitDividerHolder() {};
+        void setBounds() { Component::setBounds(path.getBounds().toNearestInt()); }
+        Path& getPath() { return path; }
+    private:
+        Path path;
+    };
+
     class RectangleComponent : public Component
     {
     public:
@@ -155,6 +170,8 @@ public:
         {
             addAndMakeVisible (&bandLimitPaths[i]);
             bandLimitPaths[i].addMouseListener(this, true);
+            addAndMakeVisible(&bandLimitDividerHolders[i]);
+            bandLimitDividerHolders[i].addMouseListener(this, true);
         }
         
         for (int i = 0; i < 5; ++i)
@@ -176,6 +193,8 @@ public:
 
     void paint (Graphics& g) override
     {
+        g.setColour(Colour(0, 0, 255));
+        g.drawRect(getLocalBounds());
         nrActiveBands = processor.getNBands();
         
         if (processor.zeroDelayModeActive())
@@ -194,9 +213,15 @@ public:
             for (int i = 0; i < 4; ++i)
             {
                 if (i < nrActiveBands - 1)
+                {
                     bandLimitPaths[i].setVisible(true);
+                    bandLimitDividerHolders[i].setVisible(true);
+                } 
                 else
+                {
                     bandLimitPaths[i].setVisible(false);
+                    bandLimitDividerHolders[i].setVisible(false);
+                }
             }
         }
         
@@ -264,32 +289,36 @@ public:
 
             if (drawText)
             {
-                g.drawText (axislabel, xpos - axisLabelFont.getStringWidth(axislabel)/2, dirToY(s.yMin) + OH + 0.0f, axisLabelFont.getStringWidth(axislabel), axisLabelFont.getHeight(), Justification::centred, true);
+                g.drawText (axislabel, xpos - axisLabelFont.getStringWidth(axislabel)/2 - mLabel, dirToY(s.yMin) + OH + 0.0f, axisLabelFont.getStringWidth(axislabel) + 2 * mLabel, axisLabelFont.getHeight(), Justification::centred, true);
             }
         }
 
-        g.setColour (Colours::whitesmoke.withMultipliedAlpha(0.1f));
+        g.setColour (Colours::white.withAlpha(0.05f));
         g.fillRect (static_cast<float>(hzToX(s.fMin)), dirToY(0),
                     static_cast<float>(hzToX(s.fMax) - hzToX(s.fMin)),
                     dirToY(-0.5) - dirToY(0));
         
         // set path colours and stroke
-        g.setColour (Colours::white);
-        g.strokePath (dirGridPath, PathStrokeType (0.5f));
+        g.setColour (mainLaF.mainTextInactiveColor);
+        g.strokePath (dirGridPath, PathStrokeType (0.25f));
         
-        g.setColour (Colours::white.withMultipliedAlpha(0.5f));
-        g.strokePath (smallDirGridPath, PathStrokeType (0.5f));
+        g.setColour(mainLaF.mainTextInactiveColor);
+        g.strokePath (smallDirGridPath, PathStrokeType (0.25f));
 
-        g.setColour (Colours::white);
-        g.strokePath (hzGridPathBold, PathStrokeType (0.5f));
+        g.setColour(mainLaF.mainTextInactiveColor);
+        g.strokePath (hzGridPathBold, PathStrokeType (0.25f));
 
-        g.setColour (Colours::white.withMultipliedAlpha(0.5f));
-        g.strokePath (hzGridPath, PathStrokeType (0.5f));
+        g.setColour(mainLaF.mainTextInactiveColor);
+        g.strokePath (hzGridPath, PathStrokeType (0.25f));
         
         for (PathComponent& p : bandLimitPaths)
         {
             p.getPath().clear();
         }
+        for (BandLimitDividerHolder& p : bandLimitDividerHolders)
+        {
+            p.getPath().clear();
+        }        
         for (Path& p : dirPaths)
         {
             p.clear();
@@ -305,6 +334,8 @@ public:
         int bandMargin = 20;
         int interpPointMargin = 15;
         int patternRectHeight = 14;
+        int bandLimitDividerWidth = 4.f;
+        int bandLimitDividerHolderWidth = 14.f;
         
         // paint dirPaths and bandLimitPaths
         for (int i = 0; i < nrActiveBands; ++i)
@@ -321,16 +352,11 @@ public:
             {
                 Path& blPath = bandLimitPaths[i].getPath();
                 
-                blPath.startNewSubPath (rightBound, dirToY(s.yMax)-OH);
-                
-                blPath.lineTo (rightBound, dirToY(s.yMin)+OH);
-                
-//blPath.addRectangle(rightBound - 20.0, dirToY(s.yMin)+OH - 20, 40, 40);
-                
-                g.setColour (Colours::steelblue.withMultipliedAlpha(activeBandLimitPath == i ? 1.0f : 0.8f));
+                blPath.addRectangle(rightBound - bandLimitDividerWidth/2, 0, bandLimitDividerWidth, dirToY(s.yMin));
 
-                g.strokePath (blPath, PathStrokeType (POLAR_DESIGNER_BANDLIMIT_DIVIDER_SIZE));
-
+                g.setColour (mainLaF.mainTextDisabledColor.withMultipliedAlpha(activeBandLimitPath == i ? 1.0f : 0.8f));
+                
+                g.fillPath(blPath);
 
 #ifdef AA_DO_DEBUG_PATH
 #if 0
@@ -350,9 +376,15 @@ public:
                 }
 #endif
 #endif
-
                 bandLimitPaths[i].setBounds();
 
+                Path& blDhPath = bandLimitDividerHolders[i].getPath();
+
+                blDhPath.addRectangle(rightBound - bandLimitDividerHolderWidth / 2, 0, bandLimitDividerHolderWidth, 14);
+
+                g.setColour(mainLaF.mainTextDisabledColor.withMultipliedAlpha(activeBandLimitPath == i ? 1.0f : 0.8f));
+                g.fillPath(blDhPath);
+                bandLimitDividerHolders[i].setBounds();
             }
             
             // dirPath
@@ -544,7 +576,7 @@ public:
                 isDraggingDirPath = true;
             }
         }
-        else if (event.eventComponent->getName() == "PathComponent")
+        else if (event.eventComponent->getName() == "PathComponent" || event.eventComponent->getName() == "BandLimitDividerHolder")
         {
             if (activeBandLimitPath != -1)
             {
@@ -622,12 +654,12 @@ public:
                 }
             }
         }
-        else if (event.eventComponent->getName() == "PathComponent")
+        else if (event.eventComponent->getName() == "PathComponent" || event.eventComponent->getName() == "BandLimitDividerHolder")
         {
             // highlight active band limit path
             for (int i = 0; i < nrActiveBands - 1; i++)
             {
-                if (event.eventComponent == &bandLimitPaths[i])
+                if (event.eventComponent == &bandLimitPaths[i] || event.eventComponent == &bandLimitDividerHolders[i])
                 {
                     activeBandLimitPath = i;
                     break;
@@ -970,4 +1002,7 @@ private:
     // components for aax getControlParameterIndex()
     PathComponent bandLimitPaths[4];
     RectangleComponent dirPathRects[5];
+    BandLimitDividerHolder bandLimitDividerHolders[4];
+
+    MainLookAndFeel mainLaF;
 };
