@@ -13,14 +13,14 @@
 class MainLookAndFeel : public LookAndFeel_V4
 {
 public:
-    const Colour mainBackground = Colour(24, 25, 27);
+    const Colour mainBackground = Colour(17, 18, 19);
     const Colour mainTextColor = Colour(255, 255, 255);
     const Colour mainTextDisabledColor = mainTextColor.withAlpha(0.4f);
     const Colour mainTextInactiveColor = mainTextColor.withAlpha(0.7f);
     const Colour textButtonFrameColor = Colour(52, 54, 57);
     const Colour labelBackgroundColor = Colour(39, 39, 44);
     const Colour multiTextButtonBackgroundColor = Colour(31, 32, 38);
-    const Colour groupComponentBackgroundColor = Colour(28, 30, 33);
+    const Colour groupComponentBackgroundColor = Colour(24, 25, 28);
     const Colour textButtonDefaultBackgroundColor = Colour(24, 25, 27);
     const Colour textButtonActiveFrameColor = Colour(255, 255, 255);
     const Colour textButtonActiveRedFrameColor = Colour(182, 22, 22);
