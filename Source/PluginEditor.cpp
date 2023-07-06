@@ -549,12 +549,12 @@ void PolarDesignerAudioProcessorEditor::resized()
     middleComponent.flexDirection = FlexBox::Direction::column;
     middleComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     middleComponent.alignContent = juce::FlexBox::AlignContent::center;
-    middleComponent.items.add(juce::FlexItem(polarVisualizersComponent).withFlex(0.23f));
-    middleComponent.items.add(juce::FlexItem(directivityEqualiser).withFlex(0.54f));
-    middleComponent.items.add(juce::FlexItem().withFlex(0.05f));
+    middleComponent.items.add(juce::FlexItem(polarVisualizersComponent).withFlex(0.24f));
+    middleComponent.items.add(juce::FlexItem(directivityEqualiser).withFlex(0.56f));
+    middleComponent.items.add(juce::FlexItem().withFlex(0.04f));
     middleComponent.items.add(juce::FlexItem(muteSoloModule).withFlex(0.07f));
     middleComponent.items.add(juce::FlexItem(gainBandSlidersComponent).withFlex(0.25f));
-    middleComponent.items.add(juce::FlexItem().withFlex(0.05f));
+    middleComponent.items.add(juce::FlexItem().withFlex(0.03f));
 
     const float trimSliderComponentFlex = 0.5f;
     const float trimSliderComponentMarginOffset = 0.03f;
@@ -1104,55 +1104,35 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &polarPatternVisualizers[0])
     {
         bool isToggled = button->getToggleState();
-        directivityEqualiser.getDirPathComponent(0).setEnabled(isToggled);
-        slDir[0].setEnabled(isToggled);
-        tgbSolo[0].setEnabled(isToggled);
-        tgbMute[0].setEnabled(isToggled);
-        slBandGain[0].setEnabled(isToggled);
+        setBandEnabled(0, isToggled);
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
         repaint();
     }
     else if (button == &polarPatternVisualizers[1])
     {
         bool isToggled = button->getToggleState();
-        directivityEqualiser.getDirPathComponent(1).setEnabled(isToggled);
-        slDir[1].setEnabled(isToggled);
-        tgbSolo[1].setEnabled(isToggled);
-        tgbMute[1].setEnabled(isToggled);
-        slBandGain[1].setEnabled(isToggled);
+        setBandEnabled(1, isToggled);
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
         repaint();
     }
     else if (button == &polarPatternVisualizers[2])
     {
         bool isToggled = button->getToggleState();
-        directivityEqualiser.getDirPathComponent(2).setEnabled(isToggled);
-        slDir[2].setEnabled(isToggled);
-        tgbSolo[2].setEnabled(isToggled);
-        tgbMute[2].setEnabled(isToggled);
-        slBandGain[2].setEnabled(isToggled);
+        setBandEnabled(2, isToggled);
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
         repaint();
     }
     else if (button == &polarPatternVisualizers[3])
     {
         bool isToggled = button->getToggleState();
-        directivityEqualiser.getDirPathComponent(3).setEnabled(isToggled);
-        slDir[3].setEnabled(isToggled);
-        tgbSolo[3].setEnabled(isToggled);
-        tgbMute[3].setEnabled(isToggled);
-        slBandGain[3].setEnabled(isToggled);
+        setBandEnabled(3, isToggled);
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
         repaint();
     }
     else if (button == &polarPatternVisualizers[4])
     {
         bool isToggled = button->getToggleState();
-        directivityEqualiser.getDirPathComponent(4).setEnabled(isToggled);
-        slDir[4].setEnabled(isToggled);
-        tgbSolo[4].setEnabled(isToggled);
-        tgbMute[4].setEnabled(isToggled);
-        slBandGain[4].setEnabled(isToggled);
+        setBandEnabled(4, isToggled);
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
         repaint();
     }
@@ -1470,6 +1450,16 @@ void PolarDesignerAudioProcessorEditor::showPresetList(bool shouldShow)
     resized();
 }
 
+void PolarDesignerAudioProcessorEditor::setBandEnabled(int bandNr, bool enable)
+{
+    directivityEqualiser.getDirPathComponent(bandNr).setEnabled(enable);
+    slDir[bandNr].setEnabled(enable);
+    tgbSolo[bandNr].setEnabled(enable);
+    tgbMute[bandNr].setEnabled(enable);
+    slBandGain[bandNr].setEnabled(enable);
+    repaint();
+}
+
 void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage(terminatorStage stage)
 {
     if (stage == terminatorStage::DISABLED)
@@ -1612,9 +1602,11 @@ void PolarDesignerAudioProcessorEditor::mouseDown(const MouseEvent& event)
     {
         showPresetList(false);
     }
-    for (auto& vis : polarPatternVisualizers)
+
+    for (int i = 0; i < 5; i++)
     {
-        vis.setToggleState(false, NotificationType::dontSendNotification);
+        polarPatternVisualizers[i].setToggleState(false, NotificationType::dontSendNotification);
+        setBandEnabled(i, true);
     }
 }
 
