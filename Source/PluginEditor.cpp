@@ -999,7 +999,6 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     }
     else if (button == &tbTerminateSpill)
     {
-        setMainAreaEnabled(0);
         showTerminatorAnimationWindow = true;
         showMaxToSpillWindow = false;
         maximizeTarget = false;
