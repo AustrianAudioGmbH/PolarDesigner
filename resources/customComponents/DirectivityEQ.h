@@ -334,8 +334,9 @@ public:
         int bandMargin = 20;
         int interpPointMargin = 15;
         int patternRectHeight = 14;
-        int bandLimitDividerWidth = 4.f;
-        int bandLimitDividerHolderWidth = 14.f;
+        int bandLimitDividerWidth = getTopLevelComponent()->getWidth() * 0.0035f;
+        int bandLimitDividerHolderWidth = getTopLevelComponent()->getWidth() * 0.012f;
+        int bandLimitDividerHolderHeight = dirToY(s.yMax) - 4.f;
         
         // paint dirPaths and bandLimitPaths
         for (int i = 0; i < nrActiveBands; ++i)
@@ -352,9 +353,9 @@ public:
             {
                 Path& blPath = bandLimitPaths[i].getPath();
                 
-                blPath.addRectangle(rightBound - bandLimitDividerWidth/2, 0, bandLimitDividerWidth, dirToY(s.yMin));
+                blPath.addRectangle(rightBound - bandLimitDividerWidth/2, dirToY(s.yMax), bandLimitDividerWidth, dirToY(s.yMin));
 
-                g.setColour (mainLaF.mainTextDisabledColor.withMultipliedAlpha(activeBandLimitPath == i ? 1.0f : 0.8f));
+                g.setColour (mainLaF.textButtonFrameColor.withMultipliedAlpha(activeBandLimitPath == i ? 1.0f : 0.8f));
                 
                 g.fillPath(blPath);
 
@@ -380,9 +381,20 @@ public:
 
                 Path& blDhPath = bandLimitDividerHolders[i].getPath();
 
-                blDhPath.addRectangle(rightBound - bandLimitDividerHolderWidth / 2, 0, bandLimitDividerHolderWidth, 14);
+                Point<float> point1(rightBound - bandLimitDividerHolderWidth / 2, 8.f);
+                Point<float> point2(rightBound + bandLimitDividerHolderWidth / 2, 8.f);
+                Point<float> point3(rightBound + bandLimitDividerHolderWidth / 2, bandLimitDividerHolderHeight * 0.75f);
+                Point<float> point4(rightBound, bandLimitDividerHolderHeight);
+                Point<float> point5(rightBound - bandLimitDividerHolderWidth / 2, bandLimitDividerHolderHeight * 0.75f);
 
-                g.setColour(mainLaF.mainTextDisabledColor.withMultipliedAlpha(activeBandLimitPath == i ? 1.0f : 0.8f));
+                blDhPath.startNewSubPath(point1);
+                blDhPath.lineTo(point2);
+                blDhPath.lineTo(point3);
+                blDhPath.lineTo(point4);
+                blDhPath.lineTo(point5);
+                blDhPath.closeSubPath();
+
+                g.setColour(mainLaF.textButtonFrameColor.withMultipliedAlpha(activeBandLimitPath == i ? 1.0f : 0.8f));
                 g.fillPath(blDhPath);
                 bandLimitDividerHolders[i].setBounds();
             }
@@ -499,7 +511,7 @@ public:
             {
                 // draw tooltip showing frequency
                 if (activeBandLimitPath == i || tooltipValueBox[i]->isMouseOver() || tooltipValueBox[i]->isBeingEdited())
-                    drawTooltip(i, rightBound-60, dirToY(s.yMax)-OH);
+                    drawTooltip(i, rightBound-70, dirToY(s.yMax)-OH);
                 else
                     tooltipValueBox[i]->setVisible(false);
             }
