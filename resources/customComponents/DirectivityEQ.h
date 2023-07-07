@@ -148,6 +148,44 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
         Rectangle<float> rectangle;
     };
 
+    class BandKnobComponent : public Component
+    {
+    public:
+        BandKnobComponent() : Component() {
+            setAlwaysOnTop(true);
+            setName("BandKnobComponent");
+        };
+        ~BandKnobComponent() {};
+        void paint(Graphics& g) override
+        {
+            int circX = getLocalBounds().getCentreX();
+            int circY = getLocalBounds().getCentreY();
+            int circleSize = getLocalBounds().getWidth();
+
+            auto bandHandleKnobImg = juce::Drawable::createFromImageData(BinaryData::bandHandleKnob_svg, BinaryData::bandHandleKnob_svgSize);
+            auto bandHandleKnobImageArea = Rectangle<float>(circX - (circleSize / 2), circY - (circleSize / 2), circleSize, circleSize);            // paint band handles
+
+            if (!isEnabled())
+            {
+                bool resultMainImg = bandHandleKnobImg->replaceColour(Colours::white, Colours::black);
+            }
+            else
+            {
+                bool resultMainImg = bandHandleKnobImg->replaceColour(Colours::black, Colours::white);
+            }
+            bandHandleKnobImg->drawWithin(g, bandHandleKnobImageArea, juce::RectanglePlacement::centred, 1.f);
+        }
+
+        void setBounds(float x, float y, float width, float height)
+        {
+            rectangle.setBounds(x, y, width, height);
+            Component::setBounds(rectangle.toNearestInt());
+        }
+
+    private:
+        Rectangle<float> rectangle;
+    };
+
 public:
     DirectivityEQ(PolarDesignerAudioProcessor& p) :
                  Component(), processor(p), nrActiveBands(0), soloActive(false),
@@ -178,6 +216,8 @@ public:
         {
             addAndMakeVisible (&dirPathRects[i]);
             dirPathRects[i].addMouseListener(this, true);
+            addAndMakeVisible(&bandKnobs[i]);
+            bandKnobs[i].addMouseListener(this, true);
         }
         
     };
@@ -206,9 +246,15 @@ public:
             for (int i = 0; i < 5; ++i)
             {
                 if (i < nrActiveBands)
+                {
                     dirPathRects[i].setVisible(true);
+                    bandKnobs[i].setVisible(true);
+                }
                 else
+                {
                     dirPathRects[i].setVisible(false);
+                    bandKnobs[i].setVisible(false);
+                }
             }
             for (int i = 0; i < 4; ++i)
             {
@@ -454,11 +500,8 @@ public:
             lastCircY = circY;
         }
 
-
         // band handle knobs
         auto knobSize = getTopLevelComponent()->getHeight() * 0.03f;
-        auto bandHandleKnobImg = juce::Drawable::createFromImageData(BinaryData::bandHandleKnob_svg, BinaryData::bandHandleKnob_svgSize);
-
         for (int i = 0; i < nrActiveBands; ++i)
         {
             BandElements& handle (elements.getReference(i));
@@ -468,19 +511,16 @@ public:
             float circY = handle.dirSlider == nullptr ? dirToY (0.0f) : dirToY (handle.dirSlider->getValue());
             handle.handlePos.setXY(circX,circY);
 
+            bandKnobs[i].setBounds(circX - knobSize / 2, circY - knobSize / 2, knobSize, knobSize);
+
             if (!handle.dirSlider->isEnabled())
             {
-                bool resultMainImg = bandHandleKnobImg->replaceColour(Colours::white, Colours::black);
+                bandKnobs[i].setEnabled(false);
             }
             else
             {
-                bool resultMainImg = bandHandleKnobImg->replaceColour(Colours::black, Colours::white);
+                bandKnobs[i].setEnabled(true);
             }
-
-            auto bandHandleKnobImageArea = Rectangle<float>(circX - (knobSize / 2), circY - (knobSize / 2), knobSize, knobSize);
-
-            // paint band handles
-            bandHandleKnobImg->drawWithin(g, bandHandleKnobImageArea, juce::RectanglePlacement::centred, 1.f);
 
             // align elements
             handle.polarPatternVisualizer->getParentComponent()->resized();
@@ -560,7 +600,7 @@ public:
         if (!active || !event.eventComponent->isEnabled())
             return;
 
-        if (event.eventComponent->getName() == "RectangleComponent" || event.eventComponent == this)
+        if (event.eventComponent->getName() == "RectangleComponent" || event.eventComponent->getName() == "BandKnobComponent" || event.eventComponent == this)
         {
             if (activeElem != -1)
             {
@@ -654,12 +694,12 @@ public:
                 }
             }
         }
-        else if (event.eventComponent->getName() == "RectangleComponent")
+        else if (event.eventComponent->getName() == "RectangleComponent" || event.eventComponent->getName() == "BandKnobComponent")
         {
             // highlight active pattern path if mouse is on rectangle
             for (int i = 0; i < nrActiveBands; i++)
             {
-                if (event.eventComponent == &dirPathRects[i])
+                if (event.eventComponent == &dirPathRects[i] || event.eventComponent == &bandKnobs[i])
                 {
                     activeElem = i;
                     break;
@@ -1015,6 +1055,7 @@ private:
     PathComponent bandLimitPaths[4];
     RectangleComponent dirPathRects[5];
     BandLimitDividerHolder bandLimitDividerHolders[4];
+    BandKnobComponent bandKnobs[5];
 
     MainLookAndFeel mainLaF;
 };
