@@ -15,20 +15,36 @@
     <GROUP id="{C8EE4C48-1BA5-E054-5005-2C66E75BBE64}" name="Assets">
       <FILE id="yc8Qii" name="bandHandleKnob.svg" compile="0" resource="1"
             file="Assets/bandHandleKnob.svg"/>
+      <FILE id="uoXSCn" name="bCardioidPatternIcon.svg" compile="0" resource="1"
+            file="Assets/bCardioidPatternIcon.svg"/>
+      <FILE id="Ah0HTw" name="cardioidPatternIcon.svg" compile="0" resource="1"
+            file="Assets/cardioidPatternIcon.svg"/>
       <FILE id="BbMSdg" name="closePresetListIcon.svg" compile="0" resource="1"
             file="Assets/closePresetListIcon.svg"/>
       <FILE id="GaRa62" name="diffuseField.svg" compile="0" resource="1"
             file="Assets/diffuseField.svg"/>
+      <FILE id="wNX6q4" name="eightPatternIcon.svg" compile="0" resource="1"
+            file="Assets/eightPatternIcon.svg"/>
       <FILE id="FCgVhK" name="eqFieldCheckSign.svg" compile="0" resource="1"
             file="Assets/eqFieldCheckSign.svg"/>
       <FILE id="eovuEk" name="eyeDrop.svg" compile="0" resource="1" file="Assets/eyeDrop.svg"/>
       <FILE id="AzLBEY" name="freeField.svg" compile="0" resource="1" file="Assets/freeField.svg"/>
+      <FILE id="dJTo0Z" name="hyperCardioidPatternIcon.svg" compile="0" resource="1"
+            file="Assets/hyperCardioidPatternIcon.svg"/>
       <FILE id="ObfHNt" name="loadArrow.svg" compile="0" resource="1" file="Assets/loadArrow.svg"/>
       <FILE id="DIwzDZ" name="maximizeTargetIcon.svg" compile="0" resource="1"
             file="Assets/maximizeTargetIcon.svg"/>
       <FILE id="mrYLjb" name="maxTargetToSpillIcon.svg" compile="0" resource="1"
             file="Assets/maxTargetToSpillIcon.svg"/>
+      <FILE id="j2jGMX" name="omniPatternIcon.svg" compile="0" resource="1"
+            file="Assets/omniPatternIcon.svg"/>
+      <FILE id="o5mswI" name="revBCardioidPatternIcon.svg" compile="0" resource="1"
+            file="Assets/revBCardioidPatternIcon.svg"/>
+      <FILE id="at1Uw2" name="revCardioidPatternIcon.svg" compile="0" resource="1"
+            file="Assets/revCardioidPatternIcon.svg"/>
       <FILE id="uCzmRQ" name="scrollImage.png" compile="0" resource="1" file="Assets/scrollImage.png"/>
+      <FILE id="p2gwYp" name="superCardioidPatternIcon.svg" compile="0" resource="1"
+            file="Assets/superCardioidPatternIcon.svg"/>
       <FILE id="KEj4pY" name="terminateSpillIcon.svg" compile="0" resource="1"
             file="Assets/terminateSpillIcon.svg"/>
     </GROUP>
