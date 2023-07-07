@@ -511,6 +511,94 @@ public:
                 g.fillRect(buttonArea.reduced(3.0f, 3.0f));
             }
         }
+        else if (button.getButtonText() == "Eight Pattern")
+        {
+            g.setColour(labelBackgroundColor);
+            g.fillRoundedRectangle(buttonArea, 3.f);
+            auto imageRect = buttonArea.reduced(0, 4.f);
+            drawPatternImage(g,
+                juce::Drawable::createFromImageData(BinaryData::eightPatternIcon_svg, BinaryData::eightPatternIcon_svgSize),
+                imageRect,
+                isMouseOverButton,
+                isButtonDown);
+        }
+        else if (button.getButtonText() == "HyperCardioid Pattern")
+        {
+            g.setColour(labelBackgroundColor);
+            g.fillRoundedRectangle(buttonArea, 3.f);
+            auto imageRect = buttonArea.reduced(0, 4.f);
+            drawPatternImage(g,
+                juce::Drawable::createFromImageData(BinaryData::hyperCardioidPatternIcon_svg, BinaryData::hyperCardioidPatternIcon_svgSize),
+                imageRect,
+                isMouseOverButton,
+                isButtonDown);
+        }
+        else if (button.getButtonText() == "SuperCardioid Pattern")
+        {
+            g.setColour(labelBackgroundColor);
+            g.fillRoundedRectangle(buttonArea, 3.f);
+            auto imageRect = buttonArea.reduced(0, 4.f);
+            drawPatternImage(g,
+                juce::Drawable::createFromImageData(BinaryData::superCardioidPatternIcon_svg, BinaryData::superCardioidPatternIcon_svgSize),
+                imageRect,
+                isMouseOverButton,
+                isButtonDown);
+        }
+        else if (button.getButtonText() == "Cardioid Pattern")
+        {
+            g.setColour(labelBackgroundColor);
+            g.fillRoundedRectangle(buttonArea, 3.f);
+            auto imageRect = buttonArea.reduced(4.f, 4.f);
+            drawPatternImage(g,
+                juce::Drawable::createFromImageData(BinaryData::cardioidPatternIcon_svg, BinaryData::cardioidPatternIcon_svgSize),
+                imageRect,
+                isMouseOverButton,
+                isButtonDown);
+        }
+        else if (button.getButtonText() == "BCardioid Pattern")
+        {
+            g.setColour(labelBackgroundColor);
+            g.fillRoundedRectangle(buttonArea, 3.f);
+            auto imageRect = buttonArea.reduced(4.f, 4.f);
+            drawPatternImage(g,
+                juce::Drawable::createFromImageData(BinaryData::bCardioidPatternIcon_svg, BinaryData::bCardioidPatternIcon_svgSize),
+                imageRect,
+                isMouseOverButton,
+                isButtonDown);
+        }
+        else if (button.getButtonText() == "Omni Pattern")
+        {
+            g.setColour(labelBackgroundColor);
+            g.fillRoundedRectangle(buttonArea, 3.f);
+            auto imageRect = buttonArea.reduced(4.f, 4.f);
+            drawPatternImage(g,
+                juce::Drawable::createFromImageData(BinaryData::omniPatternIcon_svg, BinaryData::omniPatternIcon_svgSize),
+                imageRect,
+                isMouseOverButton,
+                isButtonDown);
+        }
+        else if (button.getButtonText() == "RevBCardioid Pattern")
+        {
+            g.setColour(labelBackgroundColor);
+            g.fillRoundedRectangle(buttonArea, 3.f);
+            auto imageRect = buttonArea.reduced(4.f, 4.f);
+            drawPatternImage(g,
+                juce::Drawable::createFromImageData(BinaryData::revBCardioidPatternIcon_svg, BinaryData::revBCardioidPatternIcon_svgSize),
+                imageRect,
+                isMouseOverButton,
+                isButtonDown);
+        }
+        else if (button.getButtonText() == "RevCardioid Pattern")
+        {
+            g.setColour(labelBackgroundColor);
+            g.fillRoundedRectangle(buttonArea, 3.f);
+            auto imageRect = buttonArea.reduced(4.f, 4.f);
+            drawPatternImage(g,
+                juce::Drawable::createFromImageData(BinaryData::revBCardioidPatternIcon_svg, BinaryData::revBCardioidPatternIcon_svgSize),
+                imageRect,
+                isMouseOverButton,
+                isButtonDown);
+        }
         //Nr of bands buttons
         else
         {
@@ -626,6 +714,17 @@ public:
             justification = Justification::centredLeft;
             h = button.getTopLevelComponent()->getHeight() * 0.014f;
             w = buttonArea.proportionOfWidth(1.f);
+        }
+        else if (button.getButtonText() == "Eight Pattern" ||
+            button.getButtonText() == "HyperCardioid Pattern" ||
+            button.getButtonText() == "SuperCardioid Pattern" ||
+            button.getButtonText() == "Cardioid Pattern" ||
+            button.getButtonText() == "BCardioid Pattern" ||
+            button.getButtonText() == "Omni Pattern" ||
+            button.getButtonText() == "RevBCardioid Pattern" ||
+            button.getButtonText() == "RevCardioid Pattern")
+        {
+            return;
         }
 
         font.setHeight(h);
@@ -951,4 +1050,22 @@ public:
         g.setColour(sliderHoverFrameColor);
         g.fillPath(pathFgr);
     }
+
+    private:
+        void drawPatternImage(Graphics &g, std::unique_ptr<Drawable> image, Rectangle<float>& imageBounds, bool mouseOver, bool mouseDown)
+        {
+            if (mouseOver)
+            {
+                bool resultMainImg = image->replaceColour(Colours::white, sliderHoverFrameColor);
+                if (!resultMainImg)
+                    return;
+            }
+            if (mouseDown)
+            {
+                bool resultMainImg = image->replaceColour(sliderHoverFrameColor, Colours::white.withAlpha(0.7f));
+                if (!resultMainImg)
+                    return;
+            }
+            image->drawWithin(g, imageBounds, juce::RectanglePlacement::centred, 1.f);
+        }
 };
