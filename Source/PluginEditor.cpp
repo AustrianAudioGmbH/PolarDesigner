@@ -344,8 +344,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     nActiveBandsChanged();
     zeroDelayModeChange();
 
-    //trimSlider.sliderIncremented = [this] { incrementTrim(nActiveBands); };
-    //trimSlider.sliderDecremented = [this] { decrementTrim(nActiveBands); };
+    trimSlider.sliderIncremented = [this] { incrementTrim(nActiveBands); };
+    trimSlider.sliderDecremented = [this] { decrementTrim(nActiveBands); };
     
     nActiveBandsChanged();
     zeroDelayModeChange();

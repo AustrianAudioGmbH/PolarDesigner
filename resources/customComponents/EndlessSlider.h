@@ -14,12 +14,14 @@
 #ifndef EndlessSlider_h
 #define EndlessSlider_h
 
+#include "../resources/lookAndFeel/MainLookAndFeel.h"
+
 class EndlessSlider : public Slider {
 public:
     EndlessSlider () :
     Slider()
     {
-        mousePos = 0;
+        currentMoved = 0;
     };
     
     // Trim step value - modify it freely as needed
@@ -32,8 +34,22 @@ public:
     // calculate whether to callback to an increment or decrement, and update UI
     void mouseDrag(const MouseEvent &e) override
     {
-        mousePos = e.getDistanceFromDragStartY();
-        repaint();
+        static int lastMoved;
+
+        if (e.mouseWasDraggedSinceMouseDown()) {
+            currentMoved = e.getDistanceFromDragStartY();
+            if ((currentMoved > lastMoved)) {
+                sliderDecremented();
+            }
+            else
+                if (currentMoved < lastMoved) {
+                    sliderIncremented();
+                }
+
+            lastMoved = currentMoved;
+
+            repaint();
+        }
     }
 
     void paint (Graphics&g) override
@@ -44,13 +60,17 @@ public:
         float height = bounds.getHeight();
         int numElem = 34;
         float spaceBetween = height / static_cast<float>(numElem);
-        float y = mousePos;
+        float y = currentMoved;
         int mappedY = 0;
         int elemWidth = 0;
-
+        int counter = 0;
         int r = sqrt((height * height) / 2); // circle radius
 
-        ColourGradient cg = ColourGradient(Colours::grey, bounds.getWidth() / 2, bounds.getHeight() / 2, Colours::black, bounds.getWidth() / 2, 0, true);
+        ColourGradient cg = ColourGradient(mainLaF.trimSliderMainColor, 
+                                           bounds.getWidth() / 2, 
+                                           bounds.getHeight() / 2, 
+                                           Colours::black, 
+                                           bounds.getWidth() / 2, 0, true);
         g.setGradientFill(cg);
         g.fillRect(bounds.reduced(5, 5));
 
@@ -64,17 +84,17 @@ public:
             {
                 y += spaceBetween;
             }
-
-            // calculate y when mousePos out of component
+            // calculate y when mouse out of component
             if (y > height)
             {
-                y -= height;
+                counter = std::abs(y / height);
+                y -= height *counter;
             }
             else if (y < 0)
             {
-                y += height;
+                counter = std::abs(y / height) + 1;
+                y += height * counter;
             }
-
             // calculate y when mousePos in component
             if (y < height /2)
             {
@@ -90,9 +110,11 @@ public:
             }
             // calculate width change with circle equation
             elemWidth = sqrt(r*r - (mappedY*mappedY)); 
-
             g.setColour(Colours::black);
-            Rectangle<float> fillRect(bounds.getWidth()*0.22f, y - (elemWidth / (numElem*2))/2, bounds.getWidth()*0.55f, elemWidth / (numElem * 2));
+            Rectangle<float> fillRect(bounds.getWidth()*0.22f, 
+                                      y - (elemWidth / (numElem*2))/2, 
+                                      bounds.getWidth()*0.55f, 
+                                      elemWidth / (numElem * 2));
             g.fillRoundedRectangle(fillRect, 3.f);
         }
     }
@@ -110,7 +132,8 @@ public:
     }
 
 private:
-    float mousePos;
+    int currentMoved;
+    MainLookAndFeel mainLaF;
 };
 
 #endif /* EndlessSlider_h */

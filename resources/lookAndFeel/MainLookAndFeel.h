@@ -35,6 +35,7 @@ public:
     const Colour polarVisualizerGreen = Colour(96, 154, 0);
     const Colour polarVisualizerGreenDark = Colour(0, 157, 25);
     const Colour polarVisualizerGrid = Colour(52, 54, 57);
+    const Colour trimSliderMainColor = Colour(92, 92, 92);
     const Colour textButtonHoverBackgroundColor = textButtonActiveFrameColor.withAlpha(0.3f);
     const Colour textButtonHoverRedBackgroundColor = textButtonActiveRedFrameColor.withAlpha(0.3f);
     const Colour textButtonPressedBackgroundColor = textButtonActiveFrameColor.withAlpha(0.1f);
