@@ -22,6 +22,8 @@ public:
     Slider()
     {
         currentMoved = 0;
+        lastMoved = 0;
+        mouseWheelMovedCounter = 0;
     };
     
     // Trim step value - modify it freely as needed
@@ -34,22 +36,41 @@ public:
     // calculate whether to callback to an increment or decrement, and update UI
     void mouseDrag(const MouseEvent &e) override
     {
-        static int lastMoved;
-
-        if (e.mouseWasDraggedSinceMouseDown()) {
+        if (e.mouseWasDraggedSinceMouseDown()) 
+        {
             currentMoved = e.getDistanceFromDragStartY();
-            if ((currentMoved > lastMoved)) {
+            if ((currentMoved > lastMoved)) 
+            {
                 sliderDecremented();
             }
-            else
-                if (currentMoved < lastMoved) {
-                    sliderIncremented();
-                }
-
+            else if (currentMoved < lastMoved) 
+            {
+                sliderIncremented();
+            }
             lastMoved = currentMoved;
-
             repaint();
         }
+    }
+
+    void mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel) override
+    {
+        Rectangle<float> bounds = getLocalBounds().toFloat();
+        float height = bounds.getHeight();
+
+        mouseWheelMovedCounter++;
+        currentMoved = wheel.deltaY * height * mouseWheelMovedCounter;
+
+        if ((currentMoved > lastMoved))
+        {
+            sliderDecremented();
+        }
+        else if (currentMoved < lastMoved)
+        {
+            sliderIncremented();
+        }
+        lastMoved = currentMoved;
+
+        repaint();
     }
 
     void paint (Graphics&g) override
@@ -132,7 +153,9 @@ public:
     }
 
 private:
+    int lastMoved;
     int currentMoved;
+    int mouseWheelMovedCounter;
     MainLookAndFeel mainLaF;
 };
 
