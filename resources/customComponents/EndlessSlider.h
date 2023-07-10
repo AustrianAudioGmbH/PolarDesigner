@@ -48,19 +48,24 @@ public:
         int mappedY = 0;
         int elemWidth = 0;
 
-        int r = sqrt((height * height) / 2);
+        int r = sqrt((height * height) / 2); // circle radius
+
+        ColourGradient cg = ColourGradient(Colours::grey, bounds.getWidth() / 2, bounds.getHeight() / 2, Colours::black, bounds.getWidth() / 2, 0, true);
+        g.setGradientFill(cg);
+        g.fillRect(bounds.reduced(5, 5));
 
         for (int i = 0; i < numElem; i++)
         {
             if (i == 0)
             {
-                y += spaceBetween/2;
+                y += spaceBetween/2; // place first element
             }
             else
             {
                 y += spaceBetween;
             }
 
+            // calculate y when mousePos out of component
             if (y > height)
             {
                 y -= height;
@@ -70,6 +75,7 @@ public:
                 y += height;
             }
 
+            // calculate y when mousePos in component
             if (y < height /2)
             {
                 mappedY = (-1) * (height / 2) + y;
@@ -82,10 +88,10 @@ public:
             {
                 mappedY = y - height / 2;
             }
+            // calculate width change with circle equation
+            elemWidth = sqrt(r*r - (mappedY*mappedY)); 
 
-            elemWidth = sqrt(r*r - (mappedY*mappedY));
-
-            g.setColour(Colours::red);
+            g.setColour(Colours::black);
             Rectangle<float> fillRect(bounds.getWidth()*0.22f, y - (elemWidth / (numElem*2))/2, bounds.getWidth()*0.55f, elemWidth / (numElem * 2));
             g.fillRoundedRectangle(fillRect, 3.f);
         }

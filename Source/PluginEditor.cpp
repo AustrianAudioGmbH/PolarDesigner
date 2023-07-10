@@ -556,16 +556,13 @@ void PolarDesignerAudioProcessorEditor::resized()
     middleComponent.items.add(juce::FlexItem(gainBandSlidersComponent).withFlex(0.25f));
     middleComponent.items.add(juce::FlexItem().withFlex(0.03f));
 
-    const float trimSliderComponentFlex = 0.5f;
-    const float trimSliderComponentMarginOffset = 0.03f;
-
     juce::FlexBox trimSliderComponent;
     trimSliderComponent.flexDirection = FlexBox::Direction::column;
     trimSliderComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     trimSliderComponent.alignContent = juce::FlexBox::AlignContent::center;
-    trimSliderComponent.items.add(juce::FlexItem().withFlex(trimSliderComponentFlex/2 + trimSliderComponentMarginOffset));
-    trimSliderComponent.items.add(juce::FlexItem(trimSlider).withFlex(trimSliderComponentFlex));
-    trimSliderComponent.items.add(juce::FlexItem().withFlex(trimSliderComponentFlex/2 - trimSliderComponentMarginOffset));
+    trimSliderComponent.items.add(juce::FlexItem().withFlex(0.24f));
+    trimSliderComponent.items.add(juce::FlexItem(trimSlider).withFlex(0.41f));
+    trimSliderComponent.items.add(juce::FlexItem().withFlex(0.35f));
     
     juce::FlexBox mainComponent;
     mainComponent.flexDirection = FlexBox::Direction::row;
