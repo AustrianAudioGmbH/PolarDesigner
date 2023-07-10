@@ -344,8 +344,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     nActiveBandsChanged();
     zeroDelayModeChange();
 
-    trimSlider.sliderIncremented = [this] { incrementTrim(nActiveBands); };
-    trimSlider.sliderDecremented = [this] { decrementTrim(nActiveBands); };
+    //trimSlider.sliderIncremented = [this] { incrementTrim(nActiveBands); };
+    //trimSlider.sliderDecremented = [this] { decrementTrim(nActiveBands); };
     
     nActiveBandsChanged();
     zeroDelayModeChange();
@@ -579,7 +579,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     }
     mainComponent.items.add(juce::FlexItem(middleComponent).withFlex(0.66f));
     mainComponent.items.add(juce::FlexItem().withFlex(0.017f));
-    mainComponent.items.add(juce::FlexItem(/*trimSliderComponent*/).withFlex(0.03f));
+    mainComponent.items.add(juce::FlexItem(trimSliderComponent).withFlex(0.03f));
     mainComponent.items.add(juce::FlexItem().withFlex(0.027f));
 
     subfb.items.add(juce::FlexItem().withFlex(0.03f));

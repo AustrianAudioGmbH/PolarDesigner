@@ -19,11 +19,7 @@ public:
     EndlessSlider () :
     Slider()
     {
-        setChangeNotificationOnlyOnRelease(false);
-        sliderImage = getImageFromAssets("scrollImage.png");
-        setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
-        setSliderStyle (Slider::LinearBarVertical);
-        setScrollWheelEnabled(true);
+        mousePos = 0;
     };
     
     // Trim step value - modify it freely as needed
@@ -36,37 +32,63 @@ public:
     // calculate whether to callback to an increment or decrement, and update UI
     void mouseDrag(const MouseEvent &e) override
     {
-        int currentMoved;
-        static int lastMoved;
-
-        if (e.mouseWasDraggedSinceMouseDown()) {
-            currentMoved = e.getDistanceFromDragStartY();
-            sliderImageTransform = (AffineTransform::translation ((float) (sliderImage.getWidth()),
-                                                                 (float) (sliderImage.getHeight()) + currentMoved)
-                                      .followedBy (getTransform()));
-            
-            if ((currentMoved > lastMoved)){
-                sliderDecremented();
-            } else
-            if (currentMoved < lastMoved) {
-                sliderIncremented();
-            }
-
-            lastMoved = currentMoved;
-
-            repaint();
-        }
+        mousePos = e.getDistanceFromDragStartY();
+        repaint();
     }
-    
+
     void paint (Graphics&g) override
     {
-        Rectangle<int> bounds = getLocalBounds();
-        Path endlessPath;
-        g.setColour(getRandomColour());
+        g.fillAll(Colours::black);
 
-        g.setFillType(juce::FillType(sliderImage, sliderImageTransform));
-        g.fillRect(bounds);
-        
+        Rectangle<float> bounds = getLocalBounds().toFloat();
+        float height = bounds.getHeight();
+        int numElem = 34;
+        float spaceBetween = height / static_cast<float>(numElem);
+        float y = mousePos;
+        int mappedY = 0;
+        int elemWidth = 0;
+
+        int r = sqrt((height * height) / 2);
+
+        for (int i = 0; i < numElem; i++)
+        {
+            if (i == 0)
+            {
+                y += spaceBetween/2;
+            }
+            else
+            {
+                y += spaceBetween;
+            }
+
+            if (y > height)
+            {
+                y -= height;
+            }
+            else if (y < 0)
+            {
+                y += height;
+            }
+
+            if (y < height /2)
+            {
+                mappedY = (-1) * (height / 2) + y;
+            }
+            else if (y == height / 2)
+            {
+                mappedY = 0;
+            }
+            else if (y > height / 2)
+            {
+                mappedY = y - height / 2;
+            }
+
+            elemWidth = sqrt(r*r - (mappedY*mappedY));
+
+            g.setColour(Colours::red);
+            Rectangle<float> fillRect(bounds.getWidth()*0.22f, y - (elemWidth / (numElem*2))/2, bounds.getWidth()*0.55f, elemWidth / (numElem * 2));
+            g.fillRoundedRectangle(fillRect, 3.f);
+        }
     }
 
     void mouseExit (const MouseEvent& e) override
@@ -78,70 +100,11 @@ public:
     
     void resized() override
     {
-        Slider::resized();
-        auto& lf = getLookAndFeel();
-        auto layout = lf.getSliderLayout (*this);
-        
-        sliderRect = layout.sliderBounds;
-        
+        repaint();
     }
 
-    
 private:
-    Rectangle<int> sliderRect;
-    Image sliderImage;
-    AffineTransform sliderImageTransform;
-    
-    // utility functions - from DemoRunner utilities
-    static juce::Colour getRandomColour()
-    {
-        auto& random = juce::Random::getSystemRandom();
-        
-        return juce::Colour ((juce::uint8) random.nextInt (256),
-                             (juce::uint8) random.nextInt (256),
-                             (juce::uint8) random.nextInt (256));
-    }
-
-    // creats a usable image asset from a file stream
-    inline std::unique_ptr<InputStream> createAssetInputStream (const char* resourcePath)
-    {
-#if JUCE_ANDROID
-        ZipFile apkZip (File::getSpecialLocation (File::invokedExecutableFile));
-        return std::unique_ptr<InputStream> (apkZip.createStreamForEntry (apkZip.getIndexOfFileName ("assets/" + String (resourcePath))));
-#else
-#if JUCE_IOS || JUCE_MAC
-        auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
-            .getParentDirectory().getChildFile ("Assets");
-#endif
-        
-        auto resourceFile = assetsDir.getChildFile (resourcePath);
-        jassert (resourceFile.existsAsFile());
-        
-        return resourceFile.createInputStream();
-#endif
-    }
-    
-    // creates an image asset from cache if possible
-    inline Image getImageFromAssets (const char* assetName)
-    {
-        auto hashCode = (String (assetName) + "@endless_slider_assets").hashCode64();
-        auto img = ImageCache::getFromHashCode (hashCode);
-        
-        if (img.isNull())
-        {
-            std::unique_ptr<InputStream> juceIconStream (createAssetInputStream (assetName));
-            
-            if (juceIconStream == nullptr)
-                return {};
-            
-            img = ImageFileFormat::loadFrom (*juceIconStream);
-            
-            ImageCache::addImageToCache (img, hashCode);
-        }
-        
-        return img;
-    }
-    
+    float mousePos;
 };
 
 #endif /* EndlessSlider_h */
