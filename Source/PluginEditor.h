@@ -124,7 +124,7 @@ private:
     // ToggleButtons
     ToggleButton tbAllowBackwardsPattern, tgbProxCtr;
     // ImageButtons
-    TextButton ibEqCtr[2], tbClosePresetList, tbCloseTerminatorControl;
+    TextButton ibEqCtr[2], tbClosePresetList, tbCloseTerminatorControl, tbTrimSliderCenterPointer;
 
     TextMultiButton tmbABButton, tmbNrBandsButton, tmbSyncChannelButton;
 

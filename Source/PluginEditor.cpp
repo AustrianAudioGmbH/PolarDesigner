@@ -352,6 +352,9 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     
     addAndMakeVisible(&trimSlider);
 
+    addAndMakeVisible(&tbTrimSliderCenterPointer);
+    tbTrimSliderCenterPointer.setButtonText("Trim Slider Pointer");
+
     loadSavedPresetsToList();
 
     startTimer (30);
@@ -565,6 +568,14 @@ void PolarDesignerAudioProcessorEditor::resized()
     trimSliderComponent.items.add(juce::FlexItem().withFlex(0.24f));
     trimSliderComponent.items.add(juce::FlexItem(trimSlider).withFlex(0.41f));
     trimSliderComponent.items.add(juce::FlexItem().withFlex(0.35f));
+
+    juce::FlexBox trimSliderCenterPointerComponent;
+    trimSliderCenterPointerComponent.flexDirection = FlexBox::Direction::column;
+    trimSliderCenterPointerComponent.justifyContent = juce::FlexBox::JustifyContent::center;
+    trimSliderCenterPointerComponent.alignContent = juce::FlexBox::AlignContent::center;
+    trimSliderCenterPointerComponent.items.add(juce::FlexItem().withFlex(0.24f));
+    trimSliderCenterPointerComponent.items.add(juce::FlexItem(tbTrimSliderCenterPointer).withFlex(0.41f));
+    trimSliderCenterPointerComponent.items.add(juce::FlexItem().withFlex(0.35f));
     
     juce::FlexBox mainComponent;
     mainComponent.flexDirection = FlexBox::Direction::row;
@@ -577,7 +588,7 @@ void PolarDesignerAudioProcessorEditor::resized()
         mainComponent.items.add(juce::FlexItem().withFlex(0.027f));
     }
     mainComponent.items.add(juce::FlexItem(middleComponent).withFlex(0.66f));
-    mainComponent.items.add(juce::FlexItem().withFlex(0.017f));
+    mainComponent.items.add(juce::FlexItem(trimSliderCenterPointerComponent).withFlex(0.017f));
     mainComponent.items.add(juce::FlexItem(trimSliderComponent).withFlex(0.03f));
     mainComponent.items.add(juce::FlexItem().withFlex(0.027f));
 

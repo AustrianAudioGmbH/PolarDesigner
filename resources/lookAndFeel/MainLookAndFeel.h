@@ -600,6 +600,31 @@ public:
                 isMouseOverButton,
                 isButtonDown);
         }
+        else if (button.getButtonText() == "Trim Slider Pointer")
+        {
+            g.setColour(Colours::red);
+            int pointerHeight = buttonArea.getHeight() * 0.05f;
+            int pointerX = 3.f;
+            int pointerY = buttonArea.getCentreY() - pointerHeight / 2;
+            int pointerWidth = buttonArea.getWidth() - 1.f;
+
+            Path path;
+            Point<float> point1(pointerX, pointerY);
+            Point<float> point2(pointerWidth - 6.f, pointerY);
+            Point<float> point3(pointerWidth, buttonArea.getCentreY());
+            Point<float> point4(pointerWidth - 6.f, pointerY + pointerHeight);
+            Point<float> point5(pointerX, pointerY + pointerHeight);
+
+            path.startNewSubPath(point1);
+            path.lineTo(point2);
+            path.lineTo(point3);
+            path.lineTo(point4);
+            path.lineTo(point5);
+            path.closeSubPath();
+            
+            g.setColour(textButtonFrameColor);
+            g.fillPath(path);
+        }
         //Nr of bands buttons
         else
         {
@@ -724,6 +749,10 @@ public:
             button.getButtonText() == "Omni Pattern" ||
             button.getButtonText() == "RevBCardioid Pattern" ||
             button.getButtonText() == "RevCardioid Pattern")
+        {
+            return;
+        }
+        else if (button.getButtonText() == "Trim Slider Pointer")
         {
             return;
         }
