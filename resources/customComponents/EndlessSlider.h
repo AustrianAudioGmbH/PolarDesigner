@@ -39,11 +39,11 @@ public:
         if (e.mouseWasDraggedSinceMouseDown()) 
         {
             currentMoved = e.getDistanceFromDragStartY();
-            if ((currentMoved > lastMoved)) 
+            if ((currentMoved > lastMoved))
             {
                 sliderDecremented();
             }
-            else if (currentMoved < lastMoved) 
+            else if (currentMoved < lastMoved)
             {
                 sliderIncremented();
             }
@@ -136,7 +136,7 @@ public:
                                       y - (elemWidth / (numElem*2))/2, 
                                       bounds.getWidth()*0.55f, 
                                       elemWidth / (numElem * 2));
-            g.fillRoundedRectangle(fillRect, 3.f);
+            g.fillRoundedRectangle(fillRect, 2.f);
         }
     }
 

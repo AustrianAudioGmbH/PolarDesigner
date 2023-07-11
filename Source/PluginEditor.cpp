@@ -363,14 +363,16 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 void PolarDesignerAudioProcessorEditor::incrementTrim(int nBands) {
     for (int i = 0; i < nBands; i++)
     {
-        slDir[i].setValue(slDir[i].getValue() + trimSlider.step);
+        if(slDir[i].isEnabled())
+            slDir[i].setValue(slDir[i].getValue() + trimSlider.step);
     }
 }
 
 void PolarDesignerAudioProcessorEditor::decrementTrim(int nBands) {
     for (int i = 0; i < nBands; i++)
     {
-        slDir[i].setValue(slDir[i].getValue() - trimSlider.step);
+        if (slDir[i].isEnabled())
+            slDir[i].setValue(slDir[i].getValue() - trimSlider.step);
     }
 }
 
