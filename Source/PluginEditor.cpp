@@ -1431,19 +1431,27 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
         {
             slDir[i].setEnabled(true);
             slBandGain[i].setEnabled(true);
+            slBandGain[i].setVisible(true);
             tgbSolo[i].setEnabled(true);
+            tgbSolo[i].setVisible(true);
             tgbMute[i].setEnabled(true);
+            tgbMute[i].setVisible(true);
             polarPatternVisualizers[i].setActive(true);
+            polarPatternVisualizers[i].setVisible(true);
         }
         else
         {
             slDir[i].setEnabled(false);
             slBandGain[i].setEnabled(false);
+            slBandGain[i].setVisible(false);
             tgbSolo[i].setEnabled(false);
             tgbSolo[i].setToggleState(false, NotificationType::sendNotification);
+            tgbSolo[i].setVisible(false);
             tgbMute[i].setEnabled(false);
             tgbMute[i].setToggleState(false, NotificationType::sendNotification);
+            tgbMute[i].setVisible(false);
             polarPatternVisualizers[i].setActive(false);
+            polarPatternVisualizers[i].setVisible(false);
         }
     }
     
