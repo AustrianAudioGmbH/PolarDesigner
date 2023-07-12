@@ -329,8 +329,8 @@ public:
             g.fillPath(linePath);
         }
         else if (button.getButtonText() == "01" ||
-        button.getButtonText() == "02" ||
-        button.getButtonText() == "03")
+                 button.getButtonText() == "02" ||
+                 button.getButtonText() == "03")
         {
             if (button.isEnabled())
             {
@@ -951,7 +951,10 @@ public:
             toggleButtonBounds.reduce(4, 4);
             if (button.getToggleState())
             {
-                Colour mainColour = button.isEnabled() ? textButtonActiveRedFrameColor : textButtonActiveRedFrameColor.withBrightness(0.5f);
+                Colour soloMainColour = button.isEnabled() ? polarVisualizerYellow : polarVisualizerYellow.withBrightness(0.5f);
+                Colour muteMainColour = button.isEnabled() ? textButtonActiveRedFrameColor : textButtonActiveRedFrameColor.withBrightness(0.5f);
+
+                Colour mainColour = button.getButtonText() == "S" ? soloMainColour : muteMainColour;
                 Colour textColour = button.isEnabled() ? mainTextColor : mainTextColor.withBrightness(0.5f);
 
                 if (isMouseOverButton)

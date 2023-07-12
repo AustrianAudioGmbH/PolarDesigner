@@ -61,8 +61,6 @@
         <FILE id="hdLYyZ" name="PolarPatternVisualizer.h" compile="0" resource="0"
               file="resources/customComponents/PolarPatternVisualizer.h"/>
         <FILE id="c8udYZ" name="ImgPaths.h" compile="0" resource="0" file="resources/customComponents/ImgPaths.h"/>
-        <FILE id="hsRHaQ" name="MuteSoloButton.h" compile="0" resource="0"
-              file="resources/customComponents/MuteSoloButton.h"/>
         <FILE id="iNtdZp" name="ReverseSlider.h" compile="0" resource="0" file="resources/customComponents/ReverseSlider.h"/>
         <FILE id="oSCpWb" name="SimpleLabel.h" compile="0" resource="0" file="resources/customComponents/SimpleLabel.h"/>
         <FILE id="TsqbxH" name="TitleBar.h" compile="0" resource="0" file="resources/customComponents/TitleBar.h"/>

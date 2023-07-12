@@ -32,7 +32,6 @@
 #include "../resources/lookAndFeel/MainLookAndFeel.h"
 #include "../resources/customComponents/TitleBar.h"
 #include "../resources/customComponents/SimpleLabel.h"
-#include "../resources/customComponents/MuteSoloButton.h"
 #include "../resources/customComponents/ReverseSlider.h"
 #include "../resources/customComponents/DirSlider.h"
 #include "../resources/customComponents/PolarPatternVisualizer.h"
