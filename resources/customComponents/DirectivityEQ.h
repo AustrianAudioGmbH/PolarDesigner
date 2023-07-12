@@ -458,6 +458,14 @@ public:
                 bandKnobs[i].setEnabled(true);
             }
 
+            if (bandKnobs[i].isMouseOver() || tooltipValueKnobBox[i]->isMouseOver())
+            {
+                int y = bandKnobs[i].getY() > dirToY(s.yMin - s.yMax) / 2 ? bandKnobs[i].getY() - bandKnobs[i].getHeight() - 5 : bandKnobs[i].getBottom() + 5;
+                drawTooltip(i, bandKnobs[i].getX() - 5, y, true);
+            }
+            else
+                tooltipValueKnobBox[i]->setVisible(false);
+
             // align elements
             handle.polarPatternVisualizer->getParentComponent()->resized();
 
@@ -465,7 +473,7 @@ public:
             {
                 // draw tooltip showing frequency
                 if (activeBandLimitPath == i || tooltipValueBox[i]->isMouseOver() || tooltipValueBox[i]->isBeingEdited())
-                    drawTooltip(i, rightBound-70, dirToY(s.yMax)-OH);
+                    drawTooltip(i, rightBound-70, dirToY(s.yMax)-OH, false);
                 else
                     tooltipValueBox[i]->setVisible(false);
             }
@@ -651,6 +659,11 @@ public:
                 if (!tooltip->isBeingEdited())
                     tooltip->setVisible(false);
             }
+            for (auto& tooltip : tooltipValueKnobBox)
+            {
+                if (!tooltip->isBeingEdited())
+                    tooltip->setVisible(false);
+            }
         }
     }
 
@@ -803,17 +816,40 @@ public:
             tooltipValueBox[i]->setAlwaysOnTop (true);
             tooltipValueBox[i]->setEditable(true);
         }
+
+        for (int i = 0; i < 5; ++i)
+        {
+            Slider* slider = elements[i].dirSlider;
+            if (slider == nullptr)
+                continue;
+
+            slider->addListener(this);
+
+            tooltipValueKnobBox[i].reset(lf.createSliderTextBox(*slider));
+            tooltipValueKnobBox[i]->addMouseListener(this, false);
+            tooltipValueKnobBox[i]->addListener(this);
+            addChildComponent(tooltipValueKnobBox[i].get());
+            tooltipValueKnobBox[i]->setText(slider->getTextFromValue(slider->getValue()), NotificationType::dontSendNotification);
+            tooltipValueKnobBox[i]->setAlwaysOnTop(true);
+            tooltipValueKnobBox[i]->setEditable(false);
+        }
     }
 
-    void drawTooltip(int tooltipIndex, int xCoord, int yCoord)
+    void drawTooltip(int tooltipIndex, int xCoord, int yCoord, bool isKnobTooltip)
     {
-         if (tooltipValueBox[tooltipIndex] == nullptr)
+         if (tooltipValueBox[tooltipIndex] == nullptr || tooltipValueKnobBox[tooltipIndex] == nullptr)
              return;
 
-        int tooltipWidth = 60;
-        int tooltipHeight = 20;
-        tooltipValueBox[tooltipIndex]->setBounds (xCoord, yCoord, tooltipWidth, tooltipHeight);
-        tooltipValueBox[tooltipIndex]->setVisible (true);
+        if (!isKnobTooltip)
+        {
+            tooltipValueBox[tooltipIndex]->setBounds(xCoord, yCoord, getTopLevelComponent()->getWidth() * 0.06f, getTopLevelComponent()->getHeight() * 0.03f);
+            tooltipValueBox[tooltipIndex]->setVisible(true);
+        }
+        else
+        {
+            tooltipValueKnobBox[tooltipIndex]->setBounds(xCoord, yCoord, getTopLevelComponent()->getWidth() * 0.04f, getTopLevelComponent()->getHeight() * 0.03f);
+            tooltipValueKnobBox[tooltipIndex]->setVisible(true);
+        }
     }
 
     void sliderValueChanged(Slider* slider) override
@@ -823,6 +859,12 @@ public:
             Slider* freqSlider = elements[i].upperFrequencySlider;
             if (slider == freqSlider && tooltipValueBox[i]->isVisible())
                 tooltipValueBox[i]->setText (slider->getTextFromValue(slider->getValue()), NotificationType::dontSendNotification);
+        }
+        for (int i = 0; i < 5; ++i)
+        {
+            Slider* dSlider = elements[i].dirSlider;
+            if (slider == dSlider && tooltipValueKnobBox[i]->isVisible())
+                tooltipValueKnobBox[i]->setText(slider->getTextFromValue(slider->getValue()), NotificationType::dontSendNotification);
         }
     }
 
@@ -966,6 +1008,7 @@ private:
     int dirPatternButtonWidth;
 
     std::unique_ptr<Label> tooltipValueBox[4];
+    std::unique_ptr<Label> tooltipValueKnobBox[5];
 
     Array<double> frequencies;
     int numPixels;
