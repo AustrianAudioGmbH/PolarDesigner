@@ -1294,6 +1294,9 @@ void PolarDesignerAudioProcessorEditor::loadSavedPresetsToList()
 void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
 {
     nActiveBands = processor.getNBands();
+    // Set nrbands button state when preset load
+    tmbNrBandsButton[nActiveBands-1].setToggleState(1, NotificationType::dontSendNotification);
+
     for (int i = 0; i < 5; i++)
     {
         if (i < nActiveBands)
