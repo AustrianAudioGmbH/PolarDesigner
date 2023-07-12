@@ -144,7 +144,7 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
             int circleSize = getLocalBounds().getWidth();
 
             auto bandHandleKnobImg = juce::Drawable::createFromImageData(BinaryData::bandHandleKnob_svg, BinaryData::bandHandleKnob_svgSize);
-            auto bandHandleKnobImageArea = Rectangle<float>(circX - (circleSize / 2), circY - (circleSize / 2), circleSize, circleSize);            // paint band handles
+            auto bandHandleKnobImageArea = Rectangle<float>(circX - (circleSize / 2), circY - (circleSize / 2), circleSize, circleSize);
 
             if (!isEnabled())
             {
@@ -664,6 +664,7 @@ public:
                 if (!tooltip->isBeingEdited())
                     tooltip->setVisible(false);
             }
+            repaint();
         }
     }
 
@@ -906,6 +907,12 @@ public:
             if (slider != nullptr)
                 tooltipValueBox[i]->setText (slider->getTextFromValue (slider->getValue()), NotificationType::dontSendNotification);
         }
+        for (int i = 0; i < 5; ++i)
+        {
+            Slider* slider = elements[i].dirSlider;
+            if (slider != nullptr)
+                tooltipValueKnobBox[i]->setText(slider->getTextFromValue(slider->getValue()), NotificationType::dontSendNotification);
+        }
     }
 
     PathComponent& getBandlimitPathComponent (int idx)
@@ -927,6 +934,7 @@ public:
                 if (elem.dirSlider != nullptr && elem.dirSlider->isEnabled())
                     elem.dirSlider->setValue(eightFact);
             }
+            resetTooltipTexts();
         }
         else if (button == &tbPrimDirButtons[1])
         {
@@ -935,6 +943,7 @@ public:
                 if (elem.dirSlider != nullptr && elem.dirSlider->isEnabled())
                     elem.dirSlider->setValue(cardFact);
             }
+            resetTooltipTexts();
         }
         else if (button == &tbPrimDirButtons[2])
         {
@@ -943,6 +952,7 @@ public:
                 if (elem.dirSlider != nullptr && elem.dirSlider->isEnabled())
                     elem.dirSlider->setValue(omniFact);
             }
+            resetTooltipTexts();
         }
         else if (button == &tbPrimDirButtons[3])
         {
@@ -951,6 +961,7 @@ public:
                 if (elem.dirSlider != nullptr && elem.dirSlider->isEnabled())
                     elem.dirSlider->setValue(rCardFact);
             }
+            resetTooltipTexts();
         }
         else if (button == &tbSecDirButtons[0])
         {
@@ -959,6 +970,7 @@ public:
                 if (elem.dirSlider != nullptr && elem.dirSlider->isEnabled())
                     elem.dirSlider->setValue(hCardFact);
             }
+            resetTooltipTexts();
         }
         else if (button == &tbSecDirButtons[1])
         {
@@ -967,6 +979,7 @@ public:
                 if (elem.dirSlider != nullptr && elem.dirSlider->isEnabled())
                     elem.dirSlider->setValue(sCardFact);
             }
+            resetTooltipTexts();
         }
         else if (button == &tbSecDirButtons[2])
         {
@@ -975,6 +988,7 @@ public:
                 if (elem.dirSlider != nullptr && elem.dirSlider->isEnabled())
                     elem.dirSlider->setValue(bCardFact);
             }
+            resetTooltipTexts();
         }
         else if (button == &tbSecDirButtons[3])
         {
@@ -983,6 +997,7 @@ public:
                 if (elem.dirSlider != nullptr && elem.dirSlider->isEnabled())
                     elem.dirSlider->setValue(rbCardFact);
             }
+            resetTooltipTexts();
         }
     }
 
