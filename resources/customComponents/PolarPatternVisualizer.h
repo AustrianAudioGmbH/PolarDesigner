@@ -119,7 +119,7 @@ public:
             outerCircle.applyTransform(strokeTransform);
 
             g.setColour(colour.withAlpha(0.1f));
-            g.fillPath(outerCircle);  
+            g.fillPath(outerCircle);
         }
 
         Path gridPath;
@@ -179,7 +179,15 @@ public:
 
         strokeTransform = AffineTransform::fromTargetPoints((float)centre.x, (float)centre.y, (float)centre.x, strokeBounds.getY(), strokeBounds.getX(), centre.y);
 
+        hitArea.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+        hitArea.applyTransform(strokeTransform);
+
         plotArea = bounds;
+    }
+
+    bool hitTest(int x, int y) override
+    {
+        return hitArea.contains(x, y);
     }
 
     void setDirWeight(float weight)
@@ -260,6 +268,7 @@ private:
     Colour colour;
     Colour hoverColour;
     bool mouseOver;
+    Path hitArea;
 
     Array<Point<float>> pointsOnCircle;
     MainLookAndFeel mainLaF;
