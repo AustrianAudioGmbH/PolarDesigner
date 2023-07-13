@@ -1457,7 +1457,7 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
             polarPatternVisualizers[i].setVisible(false);
         }
     }
-    
+    nActiveBandsChanged();
     directivityEqualiser.resetTooltipTexts();
     directivityEqualiser.repaint();
 }

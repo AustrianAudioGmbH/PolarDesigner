@@ -609,8 +609,10 @@ public:
         if (isDraggingDirPath)
         {
             for (int i = 0; i < nrActiveBands; ++i)
+            {
                 dirPathRects[i].setVisible(true);
-
+                bandKnobs[i].setVisible(true);
+            }
             isDraggingDirPath = false;
         }
 
