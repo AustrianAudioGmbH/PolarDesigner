@@ -84,6 +84,8 @@ public:
         subGrid.clear();
         for (int i = 1; i < 5; i++)
             subGrid.addPath(circle, AffineTransform().scaled(i/4.0f));
+
+        hitArea.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
     }
 
     ~PolarPatternVisualizer()
@@ -151,6 +153,12 @@ public:
 
         dirPath.closeSubPath();
         dirPath.applyTransform(transform);
+
+        Path hitCircle;
+        hitCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+        hitCircle.applyTransform(transform);
+        hitArea = hitCircle;
+
         g.strokePath(dirPath, PathStrokeType(2.0f));
     }
 
@@ -178,9 +186,6 @@ public:
         strokeBounds.setCentre(centre);
 
         strokeTransform = AffineTransform::fromTargetPoints((float)centre.x, (float)centre.y, (float)centre.x, strokeBounds.getY(), strokeBounds.getX(), centre.y);
-
-        hitArea.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
-        hitArea.applyTransform(strokeTransform);
 
         plotArea = bounds;
     }
