@@ -813,9 +813,14 @@ public:
         }
         else if (slider.getSliderStyle() == Slider::SliderStyle::LinearVertical)
         {
-            layout.sliderBounds.setBounds(localBounds.getX(), localBounds.getHeight() * 0.1f, localBounds.getWidth(), localBounds.getHeight()*0.8f);
-            layout.textBoxBounds.setBounds(localBounds.getWidth() * 0.52f, localBounds.getHeight()*0.3f, slider.getTopLevelComponent()->getWidth() * 0.065f, slider.getTopLevelComponent()->getHeight() * 0.05f);
-            layout.textBoxBounds.reduce(10, 10);
+            auto layoutWidth = slider.getTopLevelComponent()->getWidth() * 0.027f;
+
+            layout.sliderBounds.setBounds(localBounds.getRight() - layoutWidth, localBounds.getY(), layoutWidth, localBounds.getHeight());
+
+            int textBoxWidth = slider.getTopLevelComponent()->getWidth() * 0.05f;
+            int textBoxHeight = slider.getTopLevelComponent()->getHeight() * 0.029f;
+            int textBoxX = layout.sliderBounds.getTopLeft().getX() - textBoxWidth + 3.f;
+            layout.textBoxBounds.setBounds(textBoxX, layout.sliderBounds.getCentreY() - textBoxHeight/2, textBoxWidth, textBoxHeight);
         }
 
         return layout;
@@ -836,6 +841,7 @@ public:
         const Slider::SliderStyle style, Slider& slider) override
     {
         const float h = slider.getTopLevelComponent()->getHeight() * 0.005f;
+        const float newDiameter = slider.getTopLevelComponent()->getHeight() * 0.024f;
 
         Path pathBgr;
         Path pathFrg;
@@ -851,9 +857,10 @@ public:
         }
         else if (style == Slider::SliderStyle::LinearVertical)
         {
-            Rectangle<float> backgroundRect(0.5f * width - h/2, y, h, height);
+            Rectangle<float> backgroundRect(x + width/2 - h / 2, y + newDiameter/2, h, height - newDiameter);
             pathBgr.addRoundedRectangle(backgroundRect, h);
-            Rectangle<float> foregroundRect(0.5f * width - h / 2, y + height * 0.43f, h, sliderPos - (y + height * 0.43f));
+            auto mappedSliderPos = jmap(sliderPos, 0.f, static_cast<float>(height), y + newDiameter / 2, height - newDiameter / 2);
+            Rectangle<float> foregroundRect(x + width / 2 - h / 2, y + backgroundRect.getHeight() * 0.43f, h, mappedSliderPos - (y + backgroundRect.getHeight() * 0.43f));
             pathFrg.addRectangle(foregroundRect);
         }
         g.setColour(pathBgrColor);
@@ -867,6 +874,7 @@ public:
         const Slider::SliderStyle style, Slider& slider) override
     {
         const float newDiameter = slider.getTopLevelComponent()->getHeight() * 0.024f;
+        const float h = slider.getTopLevelComponent()->getHeight() * 0.005f;
 
         Path p;
         if (style == Slider::SliderStyle::LinearHorizontal)
@@ -875,7 +883,8 @@ public:
         }
         else if (style == Slider::SliderStyle::LinearVertical)
         {
-            p.addEllipse(width / 2.f - newDiameter / 2.f, sliderPos - newDiameter / 2, newDiameter, newDiameter);
+            auto mappedSliderPos = jmap(sliderPos, 0.f, static_cast<float>(height), y + newDiameter / 2, height - newDiameter/2);
+            p.addEllipse(x + width / 2 - newDiameter / 2, mappedSliderPos - newDiameter / 2, newDiameter, newDiameter);
         }
         auto pathColor = slider.isEnabled() ? mainTextColor : mainTextColor.withAlpha(0.4f);
         g.setColour(pathColor);

@@ -44,7 +44,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     syncChannelIdx = processor.getSyncChannelIdx();
 
     setResizable(true, true);
-    setSize(EDITOR_WIDTH, EDITOR_HEIGHT);
+    setResizeLimits(EDITOR_MIN_WIDTH, EDITOR_MIN_HEIGHT, EDITOR_MAX_WIDTH, EDITOR_MAX_HEIGHT);
+    setSize(EDITOR_MIN_WIDTH, EDITOR_MIN_HEIGHT);
     setLookAndFeel(&mainLaF);
 
     logoAA.setLogoColour(mainLaF.mainTextColor);
@@ -214,10 +215,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         addAndMakeVisible (&slBandGain[i]);
         slBandGainAtt[i] = std::unique_ptr<SliderAttachment>(new SliderAttachment (valueTreeState, "gain" + String(i+1), slBandGain[i]));
         slBandGain[i].setSliderStyle (Slider::LinearVertical);
-        slBandGain[i].setColour (Slider::rotarySliderOutlineColourId, eqColours[i]);
-        slBandGain[i].setColour (Slider::thumbColourId, eqColours[i]);
-        slBandGain[i].setTextBoxStyle(Slider::TextBoxRight, false, 45, 15);
         slBandGain[i].setTextValueSuffix(" dB");
+        slBandGain[i].setTextBoxIsEditable(true);
         slBandGain[i].addListener (this);
 
         // First-Order directivity visualizer (The "O"verhead view)
@@ -474,7 +473,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     polarVisualizersComponent.flexDirection = FlexBox::Direction::row;
     polarVisualizersComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     polarVisualizersComponent.alignContent = juce::FlexBox::AlignContent::center;
-    polarVisualizersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin));
+    polarVisualizersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin + 10));
 
     juce::FlexBox muteSoloModule;
     muteSoloModule.flexDirection = FlexBox::Direction::row;
@@ -489,9 +488,9 @@ void PolarDesignerAudioProcessorEditor::resized()
         muteSoloComponent[i].justifyContent = juce::FlexBox::JustifyContent::center;
         muteSoloComponent[i].alignContent = juce::FlexBox::AlignContent::center;
         muteSoloComponent[i].items.add(juce::FlexItem().withFlex(0.4f));
-        muteSoloComponent[i].items.add(juce::FlexItem(tgbSolo[i]).withWidth(0.04 * EDITOR_HEIGHT).withHeight(0.04 * EDITOR_HEIGHT));
-        muteSoloComponent[i].items.add(juce::FlexItem().withWidth(0.025 * EDITOR_HEIGHT));
-        muteSoloComponent[i].items.add(juce::FlexItem(tgbMute[i]).withWidth(0.04 * EDITOR_HEIGHT).withHeight(0.04 * EDITOR_HEIGHT));
+        muteSoloComponent[i].items.add(juce::FlexItem(tgbSolo[i]).withWidth(0.04 * EDITOR_MIN_HEIGHT).withHeight(0.04 * EDITOR_MIN_HEIGHT));
+        muteSoloComponent[i].items.add(juce::FlexItem().withWidth(0.025 * EDITOR_MIN_HEIGHT));
+        muteSoloComponent[i].items.add(juce::FlexItem(tgbMute[i]).withWidth(0.04 * EDITOR_MIN_HEIGHT).withHeight(0.04 * EDITOR_MIN_HEIGHT));
         muteSoloComponent[i].items.add(juce::FlexItem().withFlex(0.4f));
     }
 
@@ -505,7 +504,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     gainBandSlidersComponent.flexDirection = FlexBox::Direction::row;
     gainBandSlidersComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     gainBandSlidersComponent.alignContent = juce::FlexBox::AlignContent::center;
-    gainBandSlidersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin));
+    gainBandSlidersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin + 10));
 
     //Dynamic layout for polarVisualizers and dirSlider components
     //offsetDirEQ and offsetPolVis are fixed values because DirectivityEQ component has fixed margins
@@ -517,6 +516,8 @@ void PolarDesignerAudioProcessorEditor::resized()
 
     //pVisflex - value used for components spacing across given area i.e 0.65 (maximum 1.0 means full space)
     float pVisflex = 0;
+    float tmpFlex = 0;
+    float flexSum = 0.f;
 
     if (nActiveBands < 2)
     {
@@ -526,7 +527,10 @@ void PolarDesignerAudioProcessorEditor::resized()
             polarVisualizersComponent.items.add(juce::FlexItem(polarPatternVisualizers[0]).withFlex(pVisflex));
             dirSlidersComponent.items.add(juce::FlexItem(slDir[0]).withFlex(pVisflex));
             muteSoloModule.items.add(juce::FlexItem(muteSoloComponent[0]).withFlex(pVisflex));
-            gainBandSlidersComponent.items.add(juce::FlexItem(slBandGain[0]).withFlex(pVisflex));
+
+            float gainSliderFlex = pVisflex / 2;
+            gainBandSlidersComponent.items.add(juce::FlexItem(slBandGain[0]).withFlex(gainSliderFlex));
+            gainBandSlidersComponent.items.add(juce::FlexItem().withFlex(1.f - gainSliderFlex));
         }
     }
     else
@@ -540,7 +544,20 @@ void PolarDesignerAudioProcessorEditor::resized()
                 polarVisualizersComponent.items.add(juce::FlexItem(polarPatternVisualizers[i]).withFlex(pVisflex));
                 dirSlidersComponent.items.add(juce::FlexItem(slDir[i]).withFlex(pVisflex));
                 muteSoloModule.items.add(juce::FlexItem(muteSoloComponent[i]).withFlex(pVisflex));
-                gainBandSlidersComponent.items.add(juce::FlexItem(slBandGain[i]).withFlex(pVisflex));
+
+                //Gain sliders position calculate to fit textbox when bandwidth is narrow
+                auto gainSliderHalfWidth = getLookAndFeel().getSliderLayout(slBandGain[i]).sliderBounds.getWidth()/2;
+                float gainSliderHalfWidthFlex = gainSliderHalfWidth / dirEqSize;
+
+                float gainSliderFlex = pVisflex / 2 + tmpFlex / 2;
+
+                gainBandSlidersComponent.items.add(juce::FlexItem(slBandGain[i]).withFlex(gainSliderFlex));
+
+                flexSum += gainSliderFlex;
+                tmpFlex = pVisflex;
+
+                if(i == nActiveBands - 1)
+                     gainBandSlidersComponent.items.add(juce::FlexItem().withFlex(1 - flexSum));
             }
         }
     }
@@ -574,7 +591,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     trimSliderCenterPointerComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     trimSliderCenterPointerComponent.alignContent = juce::FlexBox::AlignContent::center;
     trimSliderCenterPointerComponent.items.add(juce::FlexItem().withFlex(0.24f));
-    trimSliderCenterPointerComponent.items.add(juce::FlexItem(tbTrimSliderCenterPointer).withFlex(0.41f));
+    trimSliderCenterPointerComponent.items.add(juce::FlexItem(tbTrimSliderCenterPointer).withFlex(1.f));
     trimSliderCenterPointerComponent.items.add(juce::FlexItem().withFlex(0.35f));
     
     juce::FlexBox mainComponent;
