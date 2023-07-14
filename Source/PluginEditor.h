@@ -41,6 +41,7 @@
 #include "../resources/customComponents/MultiTextButton.h"
 #include "../resources/customComponents/PresetListBox.h"
 #include "../resources/customComponents/AnimatedLabel.h"
+#include "../resources/customComponents/GainSlider.h"
 
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
@@ -78,8 +79,11 @@ public:
     void changeListenerCallback(ChangeBroadcaster* source) override;
 
 private:
-    static const int EDITOR_WIDTH = 1194;
-    static const int EDITOR_HEIGHT = 834;
+    static const int EDITOR_MIN_WIDTH = 1194;
+    static const int EDITOR_MIN_HEIGHT = 834;
+    static const int EDITOR_MAX_WIDTH = 2732;
+    static const int EDITOR_MAX_HEIGHT = 2048;
+
     String presetFilename;
     String errorMessage;
 
@@ -111,7 +115,8 @@ private:
     // Sliders
     ReverseSlider slCrossoverPosition[4];
     DirSlider slDir[5];
-    Slider slProximity, slBandGain[5];
+    Slider slProximity;
+    GainSlider slBandGain[5];
 
     // a slider to use to 'trim' the EQ's
     EndlessSlider trimSlider;
