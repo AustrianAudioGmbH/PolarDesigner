@@ -74,7 +74,7 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
     };
 
     // margins
-    const float mL = 43.0f;
+    float mL = 43.0f;
     const float mR = 15.0f;
     const float mT = 30.0f;
     const float mB = 20.0f;
@@ -672,10 +672,15 @@ public:
 
     void resized() override
     {
+        Rectangle<int> area(getLocalBounds());
+
         int xMin = hzToX(s.fMin);
         int xMax = hzToX(s.fMax);
         numPixels = xMax - xMin + 1;
-        dirPatternButtonWidth = mL/2;
+
+        mL = area.getHeight() * 0.1f;
+        dirPatternButtonWidth = mL * 0.7f;
+        dirPatternButtonHeight = mL * 0.6f;
 
         frequencies.resize(numPixels);
         for (int i = 0; i < numPixels; ++i)
@@ -694,7 +699,7 @@ public:
             dirGridPath.startNewSubPath(mL, ypos);
             dirGridPath.lineTo(mL + width, ypos);
             //Directivity primary buttons
-            tbPrimDirButtons[i].setBounds(5.f, ypos, dirPatternButtonWidth, dirPatternButtonWidth);
+            tbPrimDirButtons[i].setBounds(5.f, ypos, dirPatternButtonWidth, dirPatternButtonHeight);
             tbPrimDirButtons[i].setCentrePosition(mL/2, ypos);
         }
 
@@ -704,25 +709,25 @@ public:
         int ypos = dirToY(hCardFact);
         smallDirGridPath.startNewSubPath(mL, ypos);
         smallDirGridPath.lineTo(mL + width, ypos);
-        tbSecDirButtons[0].setBounds(5.f, ypos, dirPatternButtonWidth, dirPatternButtonWidth);
+        tbSecDirButtons[0].setBounds(5.f, ypos, dirPatternButtonWidth, dirPatternButtonHeight);
         tbSecDirButtons[0].setCentrePosition(mL / 2, ypos);
 
         ypos = dirToY(sCardFact);
         smallDirGridPath.startNewSubPath(mL, ypos);
         smallDirGridPath.lineTo(mL + width, ypos);
-        tbSecDirButtons[1].setBounds(5.f, ypos, dirPatternButtonWidth, dirPatternButtonWidth);
+        tbSecDirButtons[1].setBounds(5.f, ypos, dirPatternButtonWidth, dirPatternButtonHeight);
         tbSecDirButtons[1].setCentrePosition(mL / 2, ypos);
 
         ypos = dirToY(bCardFact);
         smallDirGridPath.startNewSubPath(mL, ypos);
         smallDirGridPath.lineTo(mL + width, ypos);
-        tbSecDirButtons[2].setBounds(5.f, ypos, dirPatternButtonWidth, dirPatternButtonWidth);
+        tbSecDirButtons[2].setBounds(5.f, ypos, dirPatternButtonWidth, dirPatternButtonHeight);
         tbSecDirButtons[2].setCentrePosition(mL / 2, ypos);
 
         ypos = dirToY(rbCardFact);
         smallDirGridPath.startNewSubPath(mL, ypos);
         smallDirGridPath.lineTo(mL + width, ypos);
-        tbSecDirButtons[3].setBounds(5.f, ypos, dirPatternButtonWidth, dirPatternButtonWidth);
+        tbSecDirButtons[3].setBounds(5.f, ypos, dirPatternButtonWidth, dirPatternButtonHeight);
         tbSecDirButtons[3].setCentrePosition(mL / 2, ypos);
 
         // frequency grid
@@ -1023,6 +1028,7 @@ private:
     Path smallDirGridPath;
 
     int dirPatternButtonWidth;
+    int dirPatternButtonHeight;
 
     std::unique_ptr<Label> tooltipValueBox[4];
     std::unique_ptr<Label> tooltipValueKnobBox[5];

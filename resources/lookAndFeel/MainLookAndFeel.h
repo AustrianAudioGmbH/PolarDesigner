@@ -78,6 +78,9 @@ public:
         auto maxTargetToSpillIconImg = juce::Drawable::createFromImageData(BinaryData::maxTargetToSpillIcon_svg, BinaryData::maximizeTargetIcon_svgSize);
         auto closePresetListIconImg = juce::Drawable::createFromImageData(BinaryData::closePresetListIcon_svg, BinaryData::closePresetListIcon_svgSize);
 
+        int cornerDirButtons = button.getTopLevelComponent()->proportionOfHeight(0.004f);
+        int reduceYDirButtons = button.getTopLevelComponent()->proportionOfHeight(0.005f);
+
         if (button.getButtonText() == "Zero latency")
         {
             g.setColour(button.isEnabled() ? textButtonActiveFrameColor : textButtonHoverBackgroundColor);
@@ -515,8 +518,8 @@ public:
         else if (button.getButtonText() == "Eight Pattern")
         {
             g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, 3.f);
-            auto imageRect = buttonArea.reduced(0, 4.f);
+            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
+            auto imageRect = buttonArea.reduced(0, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::eightPatternIcon_svg, BinaryData::eightPatternIcon_svgSize),
                 imageRect,
@@ -526,8 +529,8 @@ public:
         else if (button.getButtonText() == "HyperCardioid Pattern")
         {
             g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, 3.f);
-            auto imageRect = buttonArea.reduced(0, 4.f);
+            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
+            auto imageRect = buttonArea.reduced(0, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::hyperCardioidPatternIcon_svg, BinaryData::hyperCardioidPatternIcon_svgSize),
                 imageRect,
@@ -537,8 +540,8 @@ public:
         else if (button.getButtonText() == "SuperCardioid Pattern")
         {
             g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, 3.f);
-            auto imageRect = buttonArea.reduced(0, 4.f);
+            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
+            auto imageRect = buttonArea.reduced(0, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::superCardioidPatternIcon_svg, BinaryData::superCardioidPatternIcon_svgSize),
                 imageRect,
@@ -548,8 +551,8 @@ public:
         else if (button.getButtonText() == "Cardioid Pattern")
         {
             g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, 3.f);
-            auto imageRect = buttonArea.reduced(4.f, 4.f);
+            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
+            auto imageRect = buttonArea.reduced(reduceYDirButtons, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::cardioidPatternIcon_svg, BinaryData::cardioidPatternIcon_svgSize),
                 imageRect,
@@ -559,8 +562,8 @@ public:
         else if (button.getButtonText() == "BCardioid Pattern")
         {
             g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, 3.f);
-            auto imageRect = buttonArea.reduced(4.f, 4.f);
+            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
+            auto imageRect = buttonArea.reduced(reduceYDirButtons, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::bCardioidPatternIcon_svg, BinaryData::bCardioidPatternIcon_svgSize),
                 imageRect,
@@ -570,8 +573,8 @@ public:
         else if (button.getButtonText() == "Omni Pattern")
         {
             g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, 3.f);
-            auto imageRect = buttonArea.reduced(4.f, 4.f);
+            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
+            auto imageRect = buttonArea.reduced(reduceYDirButtons, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::omniPatternIcon_svg, BinaryData::omniPatternIcon_svgSize),
                 imageRect,
@@ -581,8 +584,8 @@ public:
         else if (button.getButtonText() == "RevBCardioid Pattern")
         {
             g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, 3.f);
-            auto imageRect = buttonArea.reduced(4.f, 4.f);
+            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
+            auto imageRect = buttonArea.reduced(reduceYDirButtons, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::revBCardioidPatternIcon_svg, BinaryData::revBCardioidPatternIcon_svgSize),
                 imageRect,
@@ -592,8 +595,8 @@ public:
         else if (button.getButtonText() == "RevCardioid Pattern")
         {
             g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, 3.f);
-            auto imageRect = buttonArea.reduced(4.f, 4.f);
+            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
+            auto imageRect = buttonArea.reduced(reduceYDirButtons, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::revBCardioidPatternIcon_svg, BinaryData::revBCardioidPatternIcon_svgSize),
                 imageRect,
