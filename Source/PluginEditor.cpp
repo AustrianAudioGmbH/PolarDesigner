@@ -482,15 +482,17 @@ void PolarDesignerAudioProcessorEditor::resized()
     muteSoloModule.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin));
 
     juce::FlexBox muteSoloComponent[5];
+    auto muteSoloButtonSize = area.getHeight() * 0.04f;
+    auto muteSoloButtonSpace = area.getHeight() * 0.025f;
     for (int i = 0; i < 5; i++)
     {
         muteSoloComponent[i].flexDirection = FlexBox::Direction::row;
         muteSoloComponent[i].justifyContent = juce::FlexBox::JustifyContent::center;
         muteSoloComponent[i].alignContent = juce::FlexBox::AlignContent::center;
         muteSoloComponent[i].items.add(juce::FlexItem().withFlex(0.4f));
-        muteSoloComponent[i].items.add(juce::FlexItem(tgbSolo[i]).withWidth(0.04 * EDITOR_MIN_HEIGHT).withHeight(0.04 * EDITOR_MIN_HEIGHT));
-        muteSoloComponent[i].items.add(juce::FlexItem().withWidth(0.025 * EDITOR_MIN_HEIGHT));
-        muteSoloComponent[i].items.add(juce::FlexItem(tgbMute[i]).withWidth(0.04 * EDITOR_MIN_HEIGHT).withHeight(0.04 * EDITOR_MIN_HEIGHT));
+        muteSoloComponent[i].items.add(juce::FlexItem(tgbSolo[i]).withMinWidth(muteSoloButtonSize).withHeight(muteSoloButtonSize));
+        muteSoloComponent[i].items.add(juce::FlexItem().withWidth(muteSoloButtonSpace));
+        muteSoloComponent[i].items.add(juce::FlexItem(tgbMute[i]).withMinWidth(muteSoloButtonSize).withHeight(muteSoloButtonSize));
         muteSoloComponent[i].items.add(juce::FlexItem().withFlex(0.4f));
     }
 
