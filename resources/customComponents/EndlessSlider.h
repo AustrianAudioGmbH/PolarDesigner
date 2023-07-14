@@ -131,7 +131,8 @@ public:
             }
             // calculate width change with circle equation
             elemWidth = sqrt(r*r - (mappedY*mappedY)); 
-            g.setColour(Colours::black);
+
+            g.setColour(i == 17 ? Colours::grey : Colours::black);
             Rectangle<float> fillRect(bounds.getWidth()*0.22f, 
                                       y - (elemWidth / (numElem*2))/2, 
                                       bounds.getWidth()*0.55f, 
