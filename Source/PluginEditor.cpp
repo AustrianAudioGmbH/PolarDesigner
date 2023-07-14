@@ -216,7 +216,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
         slBandGainAtt[i] = std::unique_ptr<SliderAttachment>(new SliderAttachment (valueTreeState, "gain" + String(i+1), slBandGain[i]));
         slBandGain[i].setSliderStyle (Slider::LinearVertical);
         slBandGain[i].setTextValueSuffix(" dB");
-        slBandGain[i].setTextBoxIsEditable(true);
+        slBandGain[i].setTextBoxStyle(Slider::NoTextBox, true, -1, -1);
         slBandGain[i].addListener (this);
 
         // First-Order directivity visualizer (The "O"verhead view)
