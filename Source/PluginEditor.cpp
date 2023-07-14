@@ -473,7 +473,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     polarVisualizersComponent.flexDirection = FlexBox::Direction::row;
     polarVisualizersComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     polarVisualizersComponent.alignContent = juce::FlexBox::AlignContent::center;
-    polarVisualizersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin + 10));
+    polarVisualizersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin));
 
     juce::FlexBox muteSoloModule;
     muteSoloModule.flexDirection = FlexBox::Direction::row;
@@ -504,7 +504,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     gainBandSlidersComponent.flexDirection = FlexBox::Direction::row;
     gainBandSlidersComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     gainBandSlidersComponent.alignContent = juce::FlexBox::AlignContent::center;
-    gainBandSlidersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin + 10));
+    gainBandSlidersComponent.items.add(juce::FlexItem().withWidth(polarVisualizersComponentLeftMargin));
 
     //Dynamic layout for polarVisualizers and dirSlider components
     //offsetDirEQ and offsetPolVis are fixed values because DirectivityEQ component has fixed margins
@@ -528,7 +528,10 @@ void PolarDesignerAudioProcessorEditor::resized()
             dirSlidersComponent.items.add(juce::FlexItem(slDir[0]).withFlex(pVisflex));
             muteSoloModule.items.add(juce::FlexItem(muteSoloComponent[0]).withFlex(pVisflex));
 
-            float gainSliderFlex = pVisflex / 2;
+            auto gainSliderHalfWidth = getLookAndFeel().getSliderLayout(slBandGain[0]).sliderBounds.getWidth() / 2;
+            float gainSliderHalfWidthFlex = gainSliderHalfWidth / dirEqSize;
+
+            float gainSliderFlex = pVisflex / 2 + gainSliderHalfWidthFlex;
             gainBandSlidersComponent.items.add(juce::FlexItem(slBandGain[0]).withFlex(gainSliderFlex));
             gainBandSlidersComponent.items.add(juce::FlexItem().withFlex(1.f - gainSliderFlex));
         }
@@ -546,10 +549,15 @@ void PolarDesignerAudioProcessorEditor::resized()
                 muteSoloModule.items.add(juce::FlexItem(muteSoloComponent[i]).withFlex(pVisflex));
 
                 //Gain sliders position calculate to fit textbox when bandwidth is narrow
-                auto gainSliderHalfWidth = getLookAndFeel().getSliderLayout(slBandGain[i]).sliderBounds.getWidth()/2;
+                int pixe1lLine = 1.f;
+                auto gainSliderHalfWidth = pixe1lLine + getLookAndFeel().getSliderLayout(slBandGain[0]).sliderBounds.getWidth() / 2;
                 float gainSliderHalfWidthFlex = gainSliderHalfWidth / dirEqSize;
 
                 float gainSliderFlex = pVisflex / 2 + tmpFlex / 2;
+
+                //Add gainSliderHalfWidthFlex only on first iteration
+                if (i == 0)
+                    gainSliderFlex = pVisflex / 2 + tmpFlex / 2 + gainSliderHalfWidthFlex;
 
                 gainBandSlidersComponent.items.add(juce::FlexItem(slBandGain[i]).withFlex(gainSliderFlex));
 
