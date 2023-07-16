@@ -50,12 +50,9 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     setSize(EDITOR_MIN_WIDTH, EDITOR_MIN_HEIGHT);
     setLookAndFeel(&mainLaF);
 
-    logoAA.setLogoColour(mainLaF.mainTextColor);
-    addAndMakeVisible(&logoAA);
+    addAndMakeVisible(&tbLogoAA);
+    tbLogoAA.setButtonText("Austrian Audio Logo");
 
-    addAndMakeVisible(&titlePD);
-    titlePD.setTitle(String("PolarDesigner"));
-    titlePD.setFont(mainLaF.normalFont);
     addAndMakeVisible(&titleCompare);
     titleCompare.setTitle(String("Compare"));
     titleCompare.setFont(mainLaF.normalFont);
@@ -423,10 +420,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     topComponent.items.add(juce::FlexItem().withFlex(0.022f));
     if (!presetListVisible)
     {
-        topComponent.items.add(juce::FlexItem(logoAA).withFlex(0.033f));
-        topComponent.items.add(juce::FlexItem().withFlex(0.007f));
-        topComponent.items.add(juce::FlexItem(titlePD).withFlex(0.14f));
-        topComponent.items.add(juce::FlexItem().withFlex(0.063f));
+        topComponent.items.add(juce::FlexItem(tbLogoAA).withFlex(0.243f));
     }
 
     topComponent.items.add(juce::FlexItem(titleCompare).withFlex(0.063f));
@@ -1546,8 +1540,7 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
 void PolarDesignerAudioProcessorEditor::showPresetList(bool shouldShow)
 {
     presetListVisible = shouldShow;
-    logoAA.setVisible(!shouldShow);
-    titlePD.setVisible(!shouldShow);
+    tbLogoAA.setVisible(!shouldShow);
     resized();
 }
 

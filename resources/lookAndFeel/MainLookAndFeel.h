@@ -69,6 +69,7 @@ public:
     {
         Rectangle<float> buttonArea(0.0f, 0.0f, button.getWidth(), button.getHeight());
 
+        auto austrianAudioLogoImg = juce::Drawable::createFromImageData(BinaryData::austrianAudioLogo_svg, BinaryData::austrianAudioLogo_svgSize);
         auto loadArrowImg = juce::Drawable::createFromImageData(BinaryData::loadArrow_svg, BinaryData::loadArrow_svgSize);
         auto freeFieldImg = juce::Drawable::createFromImageData(BinaryData::freeField_svg, BinaryData::freeField_svgSize);
         auto diffuseFieldImg = juce::Drawable::createFromImageData(BinaryData::diffuseField_svg, BinaryData::diffuseField_svgSize);
@@ -81,7 +82,12 @@ public:
         int cornerDirButtons = button.getTopLevelComponent()->proportionOfHeight(0.004f);
         int reduceYDirButtons = button.getTopLevelComponent()->proportionOfHeight(0.005f);
 
-        if (button.getButtonText() == "Zero latency")
+        if (button.getButtonText() == "Austrian Audio Logo")
+        {
+            auto austrianAudioLogoImgArea = buttonArea;
+            austrianAudioLogoImg->drawWithin(g, austrianAudioLogoImgArea, juce::RectanglePlacement::xLeft, 1.f);
+        }
+        else if (button.getButtonText() == "Zero latency")
         {
             g.setColour(button.isEnabled() ? textButtonActiveFrameColor : textButtonHoverBackgroundColor);
             g.drawRect(buttonArea, 1);
@@ -756,6 +762,10 @@ public:
             return;
         }
         else if (button.getButtonText() == "Trim Slider Pointer")
+        {
+            return;
+        }
+        else if (button.getButtonText() == "Austrian Audio Logo")
         {
             return;
         }

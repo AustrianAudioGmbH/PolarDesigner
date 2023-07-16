@@ -98,8 +98,7 @@ private:
 
     Colour eqColours[5];
  
-    AALogo logoAA;
-    TitleBarPDText titlePD;
+    TextButton tbLogoAA;
     TitleBarTextLabel titleCompare, titlePreset;
 
     Footer footer;
