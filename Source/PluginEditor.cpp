@@ -74,7 +74,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tmbABButton[1].setRadioGroupId(3344);
     tmbABButton[1].setButtonText("B");
     tmbABButton[1].addListener(this);
-    tmbABButton[1].setToggleState(processor.abLayerState, NotificationType::dontSendNotification);
 
     addAndMakeVisible(&tbZeroDelay);
     tbZeroDelayAtt = std::unique_ptr<ButtonAttachment>(new ButtonAttachment(valueTreeState, "zeroDelayMode", tbZeroDelay));
