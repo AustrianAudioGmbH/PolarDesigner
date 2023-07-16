@@ -352,7 +352,7 @@ public:
             if (i != nrActiveBands - 1)
             {
                 Path& blPath = bandLimitPaths[i].getPath();
-                
+                bandsWidth[i] = bandLimitPaths[i].getX() - mL + bandLimitDividerWidth/2;
                 blPath.addRectangle(rightBound - bandLimitDividerWidth/2, dirToY(s.yMax), bandLimitDividerWidth, dirToY(s.yMin) - mT);
 
                 g.setColour (mainLaF.textButtonFrameColor.withMultipliedAlpha(activeBandLimitPath == i ? 1.0f : 0.8f));
@@ -678,9 +678,9 @@ public:
         int xMax = hzToX(s.fMax);
         numPixels = xMax - xMin + 1;
 
-        mL = area.getHeight() * 0.1f;
-        dirPatternButtonWidth = mL * 0.7f;
-        dirPatternButtonHeight = mL * 0.6f;
+        mL = area.proportionOfHeight(0.13f);
+        dirPatternButtonWidth = mL * 0.6f;
+        dirPatternButtonHeight = mL * 0.5f;
 
         frequencies.resize(numPixels);
         for (int i = 0; i < numPixels; ++i)
@@ -1008,6 +1008,16 @@ public:
         }
     }
 
+    int getEqWidth()
+    {
+        return (hzToX(20000) - hzToX(20));
+    }
+
+    int getBandWidth(int band)
+    {
+        return bandsWidth[band];
+    }
+
 private:
     PolarDesignerAudioProcessor& processor;
 
@@ -1052,6 +1062,7 @@ private:
     RectangleComponent dirPathRects[5];
     BandLimitDividerHolder bandLimitDividerHolders[4];
     BandKnobComponent bandKnobs[5];
+    int bandsWidth[4];
 
     // ImageButtons
     TextButton tbPrimDirButtons[4];

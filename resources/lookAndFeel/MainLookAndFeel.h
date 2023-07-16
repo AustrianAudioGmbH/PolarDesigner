@@ -818,7 +818,7 @@ public:
         {
             auto layoutWidth = slider.getTopLevelComponent()->getWidth() * 0.027f;
 
-            layout.sliderBounds.setBounds(localBounds.getRight() - layoutWidth, localBounds.getY(), layoutWidth, localBounds.getHeight());
+            layout.sliderBounds.setBounds(localBounds.getRight() - layoutWidth + 1, localBounds.getY(), layoutWidth, localBounds.getHeight());
 
             Slider::TextEntryBoxPosition textBoxPos = slider.getTextBoxPosition();
 

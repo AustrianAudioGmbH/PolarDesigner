@@ -72,7 +72,7 @@ public:
         mouseOver = false;
 
         colour = mainLaF.mainBackground;
-        
+
         for (int phi = -180; phi <= 180; phi += degStep)
         {
             pointsOnCircle.add(Point<float>(cos(deg2rad * phi), sin(deg2rad * phi)));
@@ -83,7 +83,7 @@ public:
 
         subGrid.clear();
         for (int i = 1; i < 5; i++)
-            subGrid.addPath(circle, AffineTransform().scaled(i/4.0f));
+            subGrid.addPath(circle, AffineTransform().scaled(i / 4.0f));
 
         hitArea.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
     }
@@ -92,7 +92,7 @@ public:
     {
     }
 
-    void paint (Graphics& g) override
+    void paint(Graphics& g) override
     {
         if (mouseOver && isEnabled())
         {
@@ -127,23 +127,23 @@ public:
         Path gridPath;
         gridPath = subGrid;
         gridPath.applyTransform(transform);
-        g.setColour (mainLaF.polarVisualizerGrid);
+        g.setColour(mainLaF.polarVisualizerGrid);
         g.strokePath(gridPath, PathStrokeType(1.f));
 
         // draw directivity
         Path dirPath;
         g.setColour(isEnabled() ? colour : colour.withBrightness(0.5f));
-        
-        int idx=0;
+
+        int idx = 0;
         for (int phi = -180; phi <= 180; phi += degStep)
         {
-            float phiInRad = (float) phi * deg2rad;
-            float gainLin = std::abs((1 - std::abs (dirWeight)) + dirWeight * std::cos(phiInRad));
+            float phiInRad = (float)phi * deg2rad;
+            float gainLin = std::abs((1 - std::abs(dirWeight)) + dirWeight * std::cos(phiInRad));
             int dbMin = 25;
-            float gainDb = 20 * std::log10 (std::max (gainLin, static_cast<float> (std::pow (10, -dbMin / 20.0f))));
-            float effGain = std::max (std::abs ((gainDb + dbMin) / dbMin), 0.01f);
+            float gainDb = 20 * std::log10(std::max(gainLin, static_cast<float> (std::pow(10, -dbMin / 20.0f))));
+            float effGain = std::max(std::abs((gainDb + dbMin) / dbMin), 0.01f);
             Point<float> point = effGain * pointsOnCircle[idx];
-            
+
             if (phi == -180)
                 dirPath.startNewSubPath(point);
             else
@@ -168,8 +168,7 @@ public:
         Rectangle<int> strokeBounds = getLocalBounds();
         Point<int> centre = bounds.getCentre();
 
-        bounds.reduce(10,10);
-        strokeBounds.reduce(6, 6);
+        bounds.reduce(5,5);
 
         if (bounds.getWidth() > bounds.getHeight())
             bounds.setWidth(bounds.getHeight());
@@ -177,7 +176,7 @@ public:
             bounds.setHeight(bounds.getWidth());
         bounds.setCentre(centre);
 
-        transform = AffineTransform::fromTargetPoints((float) centre.x, (float) centre.y, (float)  centre.x, bounds.getY(), bounds.getX(), centre.y);
+        transform = AffineTransform::fromTargetPoints((float)centre.x, (float)centre.y, (float)centre.x, bounds.getY(), bounds.getX(), centre.y).translated((getWidth() - getHeight()) / 2, 0);
 
         if (strokeBounds.getWidth() > strokeBounds.getHeight())
             strokeBounds.setWidth(strokeBounds.getHeight());
@@ -185,7 +184,7 @@ public:
             strokeBounds.setHeight(strokeBounds.getWidth());
         strokeBounds.setCentre(centre);
 
-        strokeTransform = AffineTransform::fromTargetPoints((float)centre.x, (float)centre.y, (float)centre.x, strokeBounds.getY(), strokeBounds.getX(), centre.y);
+        strokeTransform = AffineTransform::fromTargetPoints((float)centre.x, (float)centre.y, (float)centre.x, strokeBounds.getY(), strokeBounds.getX(), centre.y).translated((getWidth() - getHeight()) / 2, 0);
 
         plotArea = bounds;
     }
@@ -200,7 +199,7 @@ public:
         dirWeight = weight;
         repaint();
     }
-    
+
     void setActive(bool active)
     {
         if (isActive != active)
@@ -220,7 +219,7 @@ public:
         soloButton = solo;
         muteButton = mute;
     }
-    
+
     float calcAlpha()
     {
         if ((soloButton == nullptr || !soloActive) && (muteButton == nullptr || !muteButton->getToggleState()))
@@ -236,13 +235,13 @@ public:
             return 0.4f;
         }
     }
-    
-    void setSoloActive (bool set)
+
+    void setSoloActive(bool set)
     {
         soloActive = set;
     }
-    
-    void setColour (Colour newColour)
+
+    void setColour(Colour newColour)
     {
         colour = newColour;
         repaint();
@@ -277,5 +276,5 @@ private:
 
     Array<Point<float>> pointsOnCircle;
     MainLookAndFeel mainLaF;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarPatternVisualizer)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PolarPatternVisualizer)
 };
