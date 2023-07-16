@@ -110,7 +110,7 @@ private:
     TooltipWindow tooltipWindow;
 
     // Groups
-    GroupComponent grpEq, grpPreset, grpDstC, grpProxComp, grpBands, grpSync, grpPresetList;
+    GroupComponent grpEq, grpPreset, grpTerminatorControl, grpProxComp, grpBands, grpSync, grpPresetList;
     // Sliders
     ReverseSlider slCrossoverPosition[4];
     DirSlider slDir[5];

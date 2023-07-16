@@ -142,8 +142,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     slProximity.setEnabled(tgbProxCtr.getToggleState());
     slProximity.addListener(this);
 
-    addAndMakeVisible(&grpDstC);
-    grpDstC.setText("Terminator control");
+    addAndMakeVisible(&grpTerminatorControl);
+    grpTerminatorControl.setText("Terminator control");
 
     addAndMakeVisible(&tbCloseTerminatorControl);
     tbCloseTerminatorControl.setComponentID("5721");
@@ -755,7 +755,7 @@ void PolarDesignerAudioProcessorEditor::resized()
 
     // Terminator control Group
     juce::FlexBox fbTerminatorControlOutComp;
-    fbTerminatorControlOutComp.items.add(juce::FlexItem{ grpDstC }.withFlex(1.0f));
+    fbTerminatorControlOutComp.items.add(juce::FlexItem{ grpTerminatorControl }.withFlex(1.0f));
     fbTerminatorControlOutComp.performLayout(sideComponent.items[6].currentBounds);
 
     juce::FlexBox fbTerminatorControlInComp;
@@ -1789,6 +1789,10 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
     grpBands.setEnabled(set);
     grpSync.setEnabled(set);
     grpPresetList.setEnabled(set);
+
+    if (processor.zeroDelayModeActive())
+        grpTerminatorControl.setEnabled(set);
+
     repaint();
 }
 

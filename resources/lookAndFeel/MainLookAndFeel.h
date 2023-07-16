@@ -269,6 +269,12 @@ public:
 
             auto iconArea = buttonArea.reduced(button.proportionOfWidth(0.45f), button.proportionOfHeight(0.33f)).translated(button.proportionOfWidth(0.38f), 0);
 
+            if (!button.isEnabled())
+            {
+                bool resultMainImg = terminateSpillIconImg->replaceColour(Colours::white, mainTextDisabledColor);
+                if (!resultMainImg)
+                    return;
+            }
             terminateSpillIconImg->drawWithin(g, iconArea, juce::RectanglePlacement::centred, 1.f);
 
             if (isMouseOverButton)
@@ -289,7 +295,13 @@ public:
             g.drawRect(reducedRect, 1);
 
             auto iconArea = buttonArea.reduced(button.proportionOfWidth(0.45f), button.proportionOfHeight(0.33f)).translated(button.proportionOfWidth(0.38f), 0);
-             
+
+            if (!button.isEnabled())
+            {
+                bool resultMainImg = maximizeTargetIconImg->replaceColour(Colours::white, mainTextDisabledColor);
+                if (!resultMainImg)
+                    return;
+            }
             maximizeTargetIconImg->drawWithin(g, iconArea, juce::RectanglePlacement::centred, 1.f);
              
             if (isMouseOverButton)
@@ -311,6 +323,12 @@ public:
 
             auto iconArea = buttonArea.reduced(button.proportionOfWidth(0.45f), button.proportionOfHeight(0.33f)).translated(button.proportionOfWidth(0.38f), 0);
 
+            if (!button.isEnabled())
+            {
+                bool resultMainImg = maxTargetToSpillIconImg->replaceColour(Colours::white, mainTextDisabledColor);
+                if (!resultMainImg)
+                    return;
+            }
             maxTargetToSpillIconImg->drawWithin(g, iconArea, juce::RectanglePlacement::centred, 1.f);
 
             if (isMouseOverButton)
