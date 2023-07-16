@@ -458,7 +458,7 @@ public:
                 bandKnobs[i].setEnabled(true);
             }
 
-            if (bandKnobs[i].isMouseOver() || tooltipValueKnobBox[i]->isMouseOver())
+            if (bandKnobs[i].isEnabled() && (bandKnobs[i].isMouseOver() || tooltipValueKnobBox[i]->isMouseOver()))
             {
                 int y = bandKnobs[i].getY() > dirToY(s.yMin - s.yMax) / 2 ? bandKnobs[i].getY() - bandKnobs[i].getHeight() - 5 : bandKnobs[i].getBottom() + 5;
                 drawTooltip(i, bandKnobs[i].getX() - 5, y, true);

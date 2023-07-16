@@ -1376,12 +1376,10 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
     {
         if (i < nActiveBands)
         {
-            slDir[i].setEnabled(true);
-            slBandGain[i].setEnabled(true);
-            tgbSolo[i].setEnabled(true);
-            tgbMute[i].setEnabled(true);
+            setBandEnabled(i, true);
             polarPatternVisualizers[i].setActive(true);
             polarPatternVisualizers[i].setVisible(true);
+            polarPatternVisualizers[i].setToggleState(false, NotificationType::dontSendNotification);
 
             slDir[i].setVisible(true);
             slBandGain[i].setVisible(true);
@@ -1390,14 +1388,12 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
         }
         else
         {
-            slDir[i].setEnabled(false);
-            slBandGain[i].setEnabled(false);
-            tgbSolo[i].setEnabled(false);
+            setBandEnabled(i, false);
             tgbSolo[i].setToggleState(false, NotificationType::sendNotification);
-            tgbMute[i].setEnabled(false);
             tgbMute[i].setToggleState(false, NotificationType::sendNotification);
             polarPatternVisualizers[i].setActive(false);
             polarPatternVisualizers[i].setVisible(false);
+            polarPatternVisualizers[i].setToggleState(false, NotificationType::dontSendNotification);
             
             slDir[i].setVisible(false);
             slBandGain[i].setVisible(false);
