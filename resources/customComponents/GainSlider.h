@@ -38,12 +38,6 @@ public:
         repaint();
     }
 
-    void mouseUp(const MouseEvent& event) override
-    {
-        setTextBoxStyle(Slider::TextBoxLeft, true, -1, -1);
-        repaint();
-    }
-
     void mouseExit(const MouseEvent& event) override
     {
         setTextBoxStyle(Slider::NoTextBox, true, -1, -1);
