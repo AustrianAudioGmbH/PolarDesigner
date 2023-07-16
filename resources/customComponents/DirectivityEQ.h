@@ -644,12 +644,12 @@ public:
             activeElem = -1;
             repaint();
         }
-        else if (event.eventComponent->getName() == "RectangleComponent")
+        else if (event.eventComponent->getName() == "RectangleComponent" || event.eventComponent->getName() == "BandKnobComponent")
         {
             activeElem = -1;
             repaint();
         }
-        else if (event.eventComponent->getName() == "PathComponent")
+        else if (event.eventComponent->getName() == "PathComponent" || event.eventComponent->getName() == "BandLimitDividerHolder")
         {
             activeBandLimitPath = -1;
             repaint();
