@@ -76,7 +76,7 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
     // margins
     float mL = 43.0f;
     const float mR = 15.0f;
-    const float mT = 30.0f;
+    float mT = 33.0f;
     float mB = 20.0f;
     const float OH = 3.0f;
     float mLabel = 5.0f;
@@ -90,7 +90,15 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
             path.preallocateSpace(1000);    // !J! Arbitrary Magic Number
         };
         ~PathComponent() {};
-        void setBounds() { Component::setBounds(path.getBounds().toNearestInt()); }
+        void setBounds() 
+        {
+#if JUCE_IOS 
+            int deltaX = path.getBounds().getWidth() * 2;
+#else
+            int deltaX = 0;
+#endif
+            Component::setBounds(path.getBounds().toNearestInt().expanded(deltaX, 0));
+        }
         Path& getPath() { return path; }
     private:
         Path path;
@@ -105,8 +113,18 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
             path.preallocateSpace(1000);
         };
         ~BandLimitDividerHolder() {};
-        void setBounds() { Component::setBounds(path.getBounds().toNearestInt()); }
-        Path& getPath() { return path; }
+        void setBounds()
+        {
+#if JUCE_IOS 
+            int deltaX = path.getBounds().getWidth();
+            int deltaY = path.getBounds().getHeight();
+#else
+            int deltaX = 0;
+            int deltaY = 0;
+#endif
+            Component::setBounds(path.getBounds().toNearestInt().expanded(deltaX, deltaY));
+        }
+        Path& getPath(){ return path; }
     private:
         Path path;
     };
@@ -358,9 +376,11 @@ public:
         int bandMargin = 20;
         int interpPointMargin = 15;
         int patternRectHeight = 14;
-        int bandLimitDividerWidth = getTopLevelComponent()->getWidth() * 0.0035f;
-        int bandLimitDividerHolderWidth = getTopLevelComponent()->getWidth() * 0.012f;
-        int bandLimitDividerHolderHeight = dirToY(s.yMax) - 4.f;
+        int bandLimitDividerWidth = proportionOfWidth(0.005f);
+        int bandLimitDividerHolderY = mT / 2;
+        int bandLimitDividerHolderWidth = proportionOfWidth(0.017f);
+        int bandLimitDividerHolderHeight = dirToY(s.yMax) - 2.f;;
+        int bandLineThickness = proportionOfHeight(0.006f);
 
         // paint dirPaths and bandLimitPaths
         for (int i = 0; i < nrActiveBands; ++i)
@@ -387,11 +407,11 @@ public:
 
                 Path& blDhPath = bandLimitDividerHolders[i].getPath();
 
-                Point<float> point1(rightBound - bandLimitDividerHolderWidth / 2, 8.f);
-                Point<float> point2(rightBound + bandLimitDividerHolderWidth / 2, 8.f);
-                Point<float> point3(rightBound + bandLimitDividerHolderWidth / 2, bandLimitDividerHolderHeight * 0.75f);
+                Point<float> point1(rightBound - bandLimitDividerHolderWidth / 2, bandLimitDividerHolderY);
+                Point<float> point2(rightBound + bandLimitDividerHolderWidth / 2, bandLimitDividerHolderY);
+                Point<float> point3(rightBound + bandLimitDividerHolderWidth / 2, bandLimitDividerHolderHeight * 0.88f);
                 Point<float> point4(rightBound, bandLimitDividerHolderHeight);
-                Point<float> point5(rightBound - bandLimitDividerHolderWidth / 2, bandLimitDividerHolderHeight * 0.75f);
+                Point<float> point5(rightBound - bandLimitDividerHolderWidth / 2, bandLimitDividerHolderHeight * 0.88f);
 
                 blDhPath.startNewSubPath(point1);
                 blDhPath.lineTo(point2);
@@ -414,7 +434,7 @@ public:
                 dirPaths[i].startNewSubPath (hzToX(s.fMin), circY);
                 dirPaths[i].lineTo (hzToX(s.fMax), circY);
                 g.setColour(dirPathRects[i].isEnabled() ? handle.colour : handle.colour.withBrightness(0.3f));
-                g.strokePath (dirPaths[i], PathStrokeType (2.0f));
+                g.strokePath (dirPaths[i], PathStrokeType (bandLineThickness));
                 break;
             }
 
@@ -434,13 +454,13 @@ public:
                 dirPaths[i-1].startNewSubPath (lastRightBound - bandMargin, lastCircY);
                 dirPaths[i-1].quadraticTo (lastRightBound - bandMargin + interpPointMargin, lastCircY, lastRightBound, (lastCircY + circY) / 2);
                 g.setColour(dirPathRects[i-1].isEnabled() ? elements.getReference(i-1).colour : elements.getReference(i - 1).colour.withBrightness(0.3f));
-                g.strokePath (dirPaths[i-1], PathStrokeType (2.0f));
+                g.strokePath (dirPaths[i-1], PathStrokeType (bandLineThickness));
 
                 dirPaths[i].startNewSubPath (lastRightBound, (lastCircY + circY) / 2);
                 dirPaths[i].quadraticTo (lastRightBound + bandMargin - interpPointMargin, circY, lastRightBound + bandMargin, circY);
                 dirPaths[i].lineTo (hzToX(s.fMax), circY);
                 g.setColour(dirPathRects[i].isEnabled() ? handle.colour : handle.colour.withBrightness(0.3f));
-                g.strokePath (dirPaths[i], PathStrokeType (2.0f));
+                g.strokePath (dirPaths[i], PathStrokeType (bandLineThickness));
             }
             else
             {
@@ -450,7 +470,7 @@ public:
                 dirPaths[i-1].startNewSubPath (lastRightBound - bandMargin, lastCircY);
                 dirPaths[i-1].quadraticTo (lastRightBound - bandMargin + interpPointMargin, lastCircY, lastRightBound, (lastCircY + circY) / 2);
                 g.setColour(dirPathRects[i-1].isEnabled() ? elements.getReference(i - 1).colour : elements.getReference(i - 1).colour.withBrightness(0.3f));
-                g.strokePath (dirPaths[i-1], PathStrokeType (2.0f));
+                g.strokePath (dirPaths[i-1], PathStrokeType (bandLineThickness));
 
                 dirPaths[i].startNewSubPath (lastRightBound, (lastCircY + circY) / 2);
                 dirPaths[i].quadraticTo (lastRightBound + bandMargin - interpPointMargin, circY, lastRightBound + bandMargin, circY);
@@ -705,6 +725,7 @@ public:
         int xMax = hzToX(s.fMax);
         numPixels = xMax - xMin + 1;
 
+        mT = area.proportionOfHeight(0.1f);
         mB = area.proportionOfHeight(0.08f);
         mL = area.proportionOfHeight(0.13f);
         dirPatternButtonWidth = mL * 0.6f;

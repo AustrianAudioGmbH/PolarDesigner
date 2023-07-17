@@ -637,9 +637,9 @@ public:
 
             Path path;
             Point<float> point1(pointerX, pointerY);
-            Point<float> point2(pointerWidth - 6.f, pointerY);
+            Point<float> point2(pointerWidth - 4.f, pointerY);
             Point<float> point3(pointerWidth, buttonArea.getCentreY());
-            Point<float> point4(pointerWidth - 6.f, pointerY + pointerHeight);
+            Point<float> point4(pointerWidth - 4.f, pointerY + pointerHeight);
             Point<float> point5(pointerX, pointerY + pointerHeight);
 
             path.startNewSubPath(point1);
