@@ -144,8 +144,10 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
             int circleSize = getLocalBounds().getWidth();
 
             auto bandHandleKnobImg = juce::Drawable::createFromImageData(BinaryData::bandHandleKnob_svg, BinaryData::bandHandleKnob_svgSize);
-            auto bandHandleKnobImageArea = Rectangle<float>(circX - (circleSize / 2), circY - (circleSize / 2), circleSize, circleSize);
-
+            bandHandleKnobImageArea = Rectangle<float>(circX - (circleSize / 2), circY - (circleSize / 2), circleSize, circleSize);
+#if JUCE_IOS 
+            bandHandleKnobImageArea.reduce(proportionOfHeight(0.23f), proportionOfHeight(0.23f));
+#endif
             if (!isEnabled())
             {
                 bool resultMainImg = bandHandleKnobImg->replaceColour(Colours::white, Colours::black);
@@ -163,8 +165,19 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
             Component::setBounds(rectangle.toNearestInt());
         }
 
+        bool hitTest(int x, int y) override
+        {
+            Path knobArea;
+#if JUCE_IOS 
+            knobArea.addRectangle(getLocalBounds());
+#else
+            knobArea.addEllipse(bandHandleKnobImageArea);
+#endif
+            return knobArea.contains(x, y);
+        }
     private:
         Rectangle<float> rectangle;
+        Rectangle<float> bandHandleKnobImageArea;
     };
 
 public:
@@ -448,7 +461,10 @@ public:
         }
 
         // band handle knobs
-        auto knobSize = getTopLevelComponent()->getHeight() * 0.03f;
+        int knobSize = proportionOfHeight(0.075f);
+#if JUCE_IOS 
+        knobSize = proportionOfHeight(0.145f);
+#endif
         for (int i = 0; i < nrActiveBands; ++i)
         {
             BandElements& handle (elements.getReference(i));
