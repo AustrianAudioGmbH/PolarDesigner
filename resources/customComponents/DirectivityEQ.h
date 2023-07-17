@@ -77,7 +77,7 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
     float mL = 43.0f;
     const float mR = 15.0f;
     const float mT = 30.0f;
-    const float mB = 20.0f;
+    float mB = 20.0f;
     const float OH = 3.0f;
     const float mLabel = 5.0f;
 
@@ -678,6 +678,7 @@ public:
         int xMax = hzToX(s.fMax);
         numPixels = xMax - xMin + 1;
 
+        mB = area.proportionOfHeight(0.06f);
         mL = area.proportionOfHeight(0.13f);
         dirPatternButtonWidth = mL * 0.6f;
         dirPatternButtonHeight = mL * 0.5f;
