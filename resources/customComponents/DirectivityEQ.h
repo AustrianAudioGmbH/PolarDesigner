@@ -728,7 +728,11 @@ public:
         mT = area.proportionOfHeight(0.1f);
         mB = area.proportionOfHeight(0.08f);
         mL = area.proportionOfHeight(0.13f);
+#if JUCE_IOS 
+        dirPatternButtonWidth = mL;
+#else
         dirPatternButtonWidth = mL * 0.6f;
+#endif
         dirPatternButtonHeight = mL * 0.5f;
 
         frequencies.resize(numPixels);

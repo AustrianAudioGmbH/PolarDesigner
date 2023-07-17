@@ -541,89 +541,89 @@ public:
         }
         else if (button.getButtonText() == "Eight Pattern")
         {
-            g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
-            auto imageRect = buttonArea.reduced(0, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::eightPatternIcon_svg, BinaryData::eightPatternIcon_svgSize),
-                imageRect,
+                buttonArea,
+                0,
+                reduceYDirButtons,
+                cornerDirButtons,
                 isMouseOverButton,
                 isButtonDown);
         }
         else if (button.getButtonText() == "HyperCardioid Pattern")
         {
-            g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
-            auto imageRect = buttonArea.reduced(0, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::hyperCardioidPatternIcon_svg, BinaryData::hyperCardioidPatternIcon_svgSize),
-                imageRect,
+                buttonArea,
+                0,
+                reduceYDirButtons,
+                cornerDirButtons,
                 isMouseOverButton,
                 isButtonDown);
         }
         else if (button.getButtonText() == "SuperCardioid Pattern")
         {
-            g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
-            auto imageRect = buttonArea.reduced(0, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::superCardioidPatternIcon_svg, BinaryData::superCardioidPatternIcon_svgSize),
-                imageRect,
+                buttonArea,
+                0,
+                reduceYDirButtons,
+                cornerDirButtons,
                 isMouseOverButton,
                 isButtonDown);
         }
         else if (button.getButtonText() == "Cardioid Pattern")
         {
-            g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
-            auto imageRect = buttonArea.reduced(reduceYDirButtons, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::cardioidPatternIcon_svg, BinaryData::cardioidPatternIcon_svgSize),
-                imageRect,
+                buttonArea,
+                reduceYDirButtons,
+                reduceYDirButtons,
+                cornerDirButtons,
                 isMouseOverButton,
                 isButtonDown);
         }
         else if (button.getButtonText() == "BCardioid Pattern")
         {
-            g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
-            auto imageRect = buttonArea.reduced(reduceYDirButtons, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::bCardioidPatternIcon_svg, BinaryData::bCardioidPatternIcon_svgSize),
-                imageRect,
+                buttonArea,
+                reduceYDirButtons,
+                reduceYDirButtons,
+                cornerDirButtons,
                 isMouseOverButton,
                 isButtonDown);
         }
         else if (button.getButtonText() == "Omni Pattern")
         {
-            g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
-            auto imageRect = buttonArea.reduced(reduceYDirButtons, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::omniPatternIcon_svg, BinaryData::omniPatternIcon_svgSize),
-                imageRect,
+                buttonArea,
+                reduceYDirButtons,
+                reduceYDirButtons,
+                cornerDirButtons,
                 isMouseOverButton,
                 isButtonDown);
         }
         else if (button.getButtonText() == "RevBCardioid Pattern")
         {
-            g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
-            auto imageRect = buttonArea.reduced(reduceYDirButtons, reduceYDirButtons);
             drawPatternImage(g,
                 juce::Drawable::createFromImageData(BinaryData::revBCardioidPatternIcon_svg, BinaryData::revBCardioidPatternIcon_svgSize),
-                imageRect,
+                buttonArea,
+                reduceYDirButtons,
+                reduceYDirButtons,
+                cornerDirButtons,
                 isMouseOverButton,
                 isButtonDown);
         }
         else if (button.getButtonText() == "RevCardioid Pattern")
         {
-            g.setColour(labelBackgroundColor);
-            g.fillRoundedRectangle(buttonArea, cornerDirButtons);
-            auto imageRect = buttonArea.reduced(reduceYDirButtons, reduceYDirButtons);
             drawPatternImage(g,
-                juce::Drawable::createFromImageData(BinaryData::revBCardioidPatternIcon_svg, BinaryData::revBCardioidPatternIcon_svgSize),
-                imageRect,
+                juce::Drawable::createFromImageData(BinaryData::revCardioidPatternIcon_svg, BinaryData::revCardioidPatternIcon_svgSize),
+                buttonArea,
+                reduceYDirButtons,
+                reduceYDirButtons,
+                cornerDirButtons,
                 isMouseOverButton,
                 isButtonDown);
         }
@@ -1127,8 +1127,17 @@ public:
     }
 
     private:
-        void drawPatternImage(Graphics &g, std::unique_ptr<Drawable> image, Rectangle<float>& imageBounds, bool mouseOver, bool mouseDown)
+        void drawPatternImage(Graphics &g, std::unique_ptr<Drawable> image, Rectangle<float>& buttonArea, int reduceX, int reduceY, int corner, bool mouseOver, bool mouseDown)
         {
+            g.setColour(labelBackgroundColor);
+#if JUCE_IOS 
+            int deltaX = buttonArea.proportionOfWidth(0.24f);
+#else
+            int deltaX = 0;
+#endif
+            int deltaY = 1;
+            g.fillRoundedRectangle(buttonArea.reduced(deltaX, deltaY), corner);
+            auto imageRect = buttonArea.reduced(reduceX, reduceY);
             if (mouseOver)
             {
                 bool resultMainImg = image->replaceColour(Colours::white, sliderHoverFrameColor);
@@ -1141,6 +1150,6 @@ public:
                 if (!resultMainImg)
                     return;
             }
-            image->drawWithin(g, imageBounds, juce::RectanglePlacement::centred, 1.f);
+            image->drawWithin(g, imageRect, juce::RectanglePlacement::centred, 1.f);
         }
 };

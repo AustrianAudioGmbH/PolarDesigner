@@ -156,9 +156,13 @@ public:
 
         Path hitCircle;
         hitCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+#if JUCE_IOS 
+        hitCircle.applyTransform(strokeTransform);
+        hitArea.addRectangle(hitCircle.getBounds().getX(), hitCircle.getBounds().getY(), hitCircle.getBounds().getWidth(), hitCircle.getBounds().getHeight());
+#else
         hitCircle.applyTransform(transform);
         hitArea = hitCircle;
-
+#endif
         g.strokePath(dirPath, PathStrokeType(2.0f));
     }
 
