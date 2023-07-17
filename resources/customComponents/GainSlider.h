@@ -40,8 +40,6 @@ public:
 
     void mouseExit(const MouseEvent& event) override
     {
-        setTextBoxStyle(Slider::NoTextBox, true, -1, -1);
-        repaint();
     }
 
 private:

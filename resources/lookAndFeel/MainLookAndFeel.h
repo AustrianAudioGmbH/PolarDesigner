@@ -850,13 +850,10 @@ public:
 
             Slider::TextEntryBoxPosition textBoxPos = slider.getTextBoxPosition();
 
-            if (textBoxPos != Slider::NoTextBox)
-            {
-                int textBoxWidth = slider.getTopLevelComponent()->getWidth() * 0.05f;
-                int textBoxHeight = slider.getTopLevelComponent()->getHeight() * 0.029f;
-                int textBoxX = layout.sliderBounds.getTopLeft().getX() - textBoxWidth + 3.f;
-                layout.textBoxBounds.setBounds(textBoxX, layout.sliderBounds.getCentreY() - textBoxHeight / 2, textBoxWidth, textBoxHeight);
-            }
+            int textBoxWidth = slider.getTopLevelComponent()->getWidth() * 0.05f;
+            int textBoxHeight = slider.getTopLevelComponent()->getHeight() * 0.029f;
+            int textBoxX = layout.sliderBounds.getTopLeft().getX() - textBoxWidth + 3.f;
+            layout.textBoxBounds.setBounds(textBoxX, layout.sliderBounds.getCentreY() - textBoxHeight / 2, textBoxWidth, textBoxHeight);
         }
 
         return layout;
