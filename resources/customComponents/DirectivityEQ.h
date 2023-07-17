@@ -79,7 +79,7 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
     const float mT = 30.0f;
     float mB = 20.0f;
     const float OH = 3.0f;
-    const float mLabel = 5.0f;
+    float mLabel = 5.0f;
 
     class PathComponent : public Component
     {
@@ -271,8 +271,9 @@ public:
         // frequency labels
         Font axisLabelFont = getLookAndFeel().getTypefaceForFont(Font(12.0f, 1));
         g.setFont (axisLabelFont);
-        g.setFont (getTopLevelComponent()->getHeight()*0.017f);
+        g.setFont (proportionOfHeight(0.05f));
         g.setColour(mainLaF.mainTextColor);
+        mLabel = proportionOfHeight(0.02f);
         for (float f=s.fMin; f <= s.fMax; f += powf(10, floorf(log10(f))))
         {
             int xpos = hzToX(f);
@@ -294,7 +295,17 @@ public:
 
             if (drawText)
             {
-                g.drawText (axislabel, xpos - axisLabelFont.getStringWidth(axislabel)/2 - mLabel, dirToY(s.yMin) + OH + 0.0f, axisLabelFont.getStringWidth(axislabel) + 2 * mLabel, axisLabelFont.getHeight(), Justification::centred, true);
+                auto justification = Justification::centred;
+                auto x = xpos - axisLabelFont.getStringWidth(axislabel) / 2 - mLabel;
+                auto y = dirToY(s.yMin) + OH + mLabel;
+                auto width = axisLabelFont.getStringWidth(axislabel) + 2 * mLabel;
+                auto height = axisLabelFont.getHeight();
+                if (axislabel == "20k" && ((x + width) > getWidth()))
+                {
+                    justification = Justification::right;
+                    x = getWidth() - width;
+                }
+                g.drawText(axislabel, x, y, width, height, justification, true);
             }
         }
 
@@ -678,7 +689,7 @@ public:
         int xMax = hzToX(s.fMax);
         numPixels = xMax - xMin + 1;
 
-        mB = area.proportionOfHeight(0.06f);
+        mB = area.proportionOfHeight(0.08f);
         mL = area.proportionOfHeight(0.13f);
         dirPatternButtonWidth = mL * 0.6f;
         dirPatternButtonHeight = mL * 0.5f;
