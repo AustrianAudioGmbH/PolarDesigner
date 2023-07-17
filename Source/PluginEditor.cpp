@@ -119,12 +119,10 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     grpEq.setText("Equalization control");
 
     addAndMakeVisible(&ibEqCtr[0]);
-    ibEqCtr[0].setClickingTogglesState(true);
     ibEqCtr[0].setButtonText("Free Field");
     ibEqCtr[0].addListener(this);
 
     addAndMakeVisible(&ibEqCtr[1]);
-    ibEqCtr[1].setClickingTogglesState(true);
     ibEqCtr[1].setButtonText("Diffuse Field");
     ibEqCtr[1].addListener(this);
 
@@ -1074,13 +1072,23 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     }
     else if (button == &ibEqCtr[0])
     {
-        processor.setEqState(0);
+        ibEqCtr[0].setToggleState(!ibEqCtr[0].getToggleState(), NotificationType::dontSendNotification);
         ibEqCtr[1].setToggleState(false, juce::NotificationType::dontSendNotification);
+
+        if (!ibEqCtr[0].getToggleState() && !ibEqCtr[1].getToggleState())
+            processor.setEqState(0);
+        else
+            processor.setEqState(1);
     }
     else if (button == &ibEqCtr[1])
     {
-        processor.setEqState(1);
+        ibEqCtr[1].setToggleState(!ibEqCtr[1].getToggleState(), NotificationType::dontSendNotification);
         ibEqCtr[0].setToggleState(false, juce::NotificationType::dontSendNotification);
+
+        if(!ibEqCtr[0].getToggleState() && !ibEqCtr[1].getToggleState())
+            processor.setEqState(0);
+        else
+            processor.setEqState(2);
     }
     else if (button == &tbTerminateSpill)
     {
@@ -1170,7 +1178,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         bool isToggled = button->getToggleState();
         if (isToggled < 0.5f)
         {
-            processor.setAbLayer(0);
+            processor.setAbLayer(1);
             button->setAlpha(getABButtonAlphaFromLayerState(isToggled));
             tmbABButton[1].setAlpha(getABButtonAlphaFromLayerState(!isToggled));
         }
@@ -1180,7 +1188,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         bool isToggled = button->getToggleState();
         if (isToggled < 0.5f)
         {
-            processor.setAbLayer(1);
+            processor.setAbLayer(0);
             button->setAlpha(getABButtonAlphaFromLayerState(isToggled));
             tmbABButton[0].setAlpha(getABButtonAlphaFromLayerState(!isToggled));
         }
@@ -1795,7 +1803,22 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
 void PolarDesignerAudioProcessorEditor::setEqMode()
 {
     int activeIdx = processor.getEqState();
-    ibEqCtr[activeIdx].setToggleState(true, NotificationType::sendNotification);
+    if (activeIdx == 0)
+    {
+        ibEqCtr[0].setToggleState(false, NotificationType::dontSendNotification);
+        ibEqCtr[1].setToggleState(false, NotificationType::dontSendNotification);
+    }
+    else if (activeIdx == 1)
+    {
+        ibEqCtr[0].setToggleState(true, NotificationType::dontSendNotification);
+        ibEqCtr[1].setToggleState(false, NotificationType::dontSendNotification);
+    }
+    else if (activeIdx == 2)
+    {
+        ibEqCtr[0].setToggleState(false, NotificationType::dontSendNotification);
+        ibEqCtr[1].setToggleState(true, NotificationType::dontSendNotification);
+    }
+    repaint();
 }
 
 // implement this for AAX automation shortchut
