@@ -1171,6 +1171,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &tbZeroDelay)
     {
         bool isToggled = button->getToggleState();
+       
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
     }
     else if (button == &tmbABButton[0])
@@ -1498,15 +1499,17 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
 void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
 {
     tbZeroDelay.setToggleState(processor.zeroDelayModeActive(), NotificationType::dontSendNotification);
-    
+
     nActiveBands = processor.getNBands();
     int nActive = nActiveBands;
-    
+
     if (processor.zeroDelayModeActive())
+    {
         nActive = 1;
-    
+        valueTreeState.getParameter("nrBands")->setValueNotifyingHost(valueTreeState.getParameter("nrBands")->convertTo0to1((0)));
+    }
     setSideAreaEnabled(!processor.zeroDelayModeActive());
-    
+
     for (int i = 0; i < 5; i++)
     {
         if (i < nActive)
@@ -1536,7 +1539,7 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
             polarPatternVisualizers[i].setVisible(false);
         }
     }
-    nActiveBandsChanged();
+
     directivityEqualiser.resetTooltipTexts();
     directivityEqualiser.repaint();
 }
