@@ -1799,6 +1799,8 @@ void PolarDesignerAudioProcessorEditor::setSideAreaEnabled(bool set)
 
     if (processor.zeroDelayModeActive())
         grpTerminatorControl.setEnabled(set);
+    else
+        grpTerminatorControl.setEnabled(true);
 
     repaint();
 }
