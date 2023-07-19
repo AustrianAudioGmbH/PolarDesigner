@@ -22,7 +22,7 @@ public:
     AnimatedLabel()
     {
         it = 0;
-        counter = 0;
+        counter = 1;
         fontHeight = 14.f;
         repaintBypassed = false;
         timerBypassedPeriods = 0;
@@ -37,7 +37,7 @@ public:
     void startAnimation(const String primText, const String secText = {})
     {
         it = 0;
-        counter = 0;
+        counter = 1;
         fontHeight = 14.f;
         repaintBypassed = false;
         timerBypassedPeriods = 0;
@@ -50,7 +50,7 @@ public:
     void stopAnimation()
     {
         it = 0;
-        counter = 0;
+        counter = 1;
         fontHeight = 14.f;
         repaintBypassed = false;
         timerBypassedPeriods = 0;
@@ -141,7 +141,7 @@ private:
             {
                 counter++;
                 repaintBypassed = false;
-                text = (!secondaryText.isEmpty() && counter%2 == 0) ? secondaryText : primaryText;
+                text = (!secondaryText.isEmpty() && counter % 2 == 0) ? secondaryText : primaryText;
                 timerBypassedPeriods = 0;
                 animatedString.clear();
             }

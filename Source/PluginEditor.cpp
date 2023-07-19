@@ -1444,7 +1444,6 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
         {
             if (!isTargetAquiring)
             {
-                DBG("PLAYING");
                 isTargetAquiring = true;
                 setSideAreaEnabled(false);
                 setMainAreaEnabled(false);
