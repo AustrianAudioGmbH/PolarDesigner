@@ -765,7 +765,7 @@ public:
             g.setColour(button.isEnabled() ? mainTextColor : mainTextInactiveColor);
             font = terminatorRegularFont;
             justification = Justification::centredLeft;
-            h = button.getTopLevelComponent()->getHeight() * 0.014f;
+            h = button.getTopLevelComponent()->getHeight() * 0.012f;
             w = buttonArea.proportionOfWidth(1.f);
         }
         else if (button.getButtonText() == "Eight Pattern" ||
