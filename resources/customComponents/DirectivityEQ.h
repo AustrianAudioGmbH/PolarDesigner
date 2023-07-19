@@ -92,11 +92,10 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
         ~PathComponent() {};
         void setBounds() 
         {
-#if JUCE_IOS 
-            int deltaX = path.getBounds().getWidth() * 2;
-#else
             int deltaX = 0;
-#endif
+            if (SystemStats::getOperatingSystemName() == "iOS")
+                int deltaX = path.getBounds().getWidth() * 2;
+
             Component::setBounds(path.getBounds().toNearestInt().expanded(deltaX, 0));
         }
         Path& getPath() { return path; }
@@ -115,13 +114,14 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
         ~BandLimitDividerHolder() {};
         void setBounds()
         {
-#if JUCE_IOS 
-            int deltaX = path.getBounds().getWidth();
-            int deltaY = path.getBounds().getHeight();
-#else
             int deltaX = 0;
             int deltaY = 0;
-#endif
+            if (SystemStats::getOperatingSystemName() == "iOS")
+            {
+                deltaX = path.getBounds().getWidth();
+                deltaY = path.getBounds().getHeight();
+            }
+
             Component::setBounds(path.getBounds().toNearestInt().expanded(deltaX, deltaY));
         }
         Path& getPath(){ return path; }
@@ -163,9 +163,10 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
 
             auto bandHandleKnobImg = juce::Drawable::createFromImageData(BinaryData::bandHandleKnob_svg, BinaryData::bandHandleKnob_svgSize);
             bandHandleKnobImageArea = Rectangle<float>(circX - (circleSize / 2), circY - (circleSize / 2), circleSize, circleSize);
-#if JUCE_IOS 
-            bandHandleKnobImageArea.reduce(proportionOfHeight(0.23f), proportionOfHeight(0.23f));
-#endif
+
+            if(SystemStats::getOperatingSystemName() == "iOS")
+                bandHandleKnobImageArea.reduce(proportionOfHeight(0.23f), proportionOfHeight(0.23f));
+
             if (!isEnabled())
             {
                 bool resultMainImg = bandHandleKnobImg->replaceColour(Colours::white, Colours::black);
@@ -186,11 +187,11 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
         bool hitTest(int x, int y) override
         {
             Path knobArea;
-#if JUCE_IOS 
-            knobArea.addRectangle(getLocalBounds());
-#else
-            knobArea.addEllipse(bandHandleKnobImageArea);
-#endif
+            if (SystemStats::getOperatingSystemName() == "iOS")
+                knobArea.addRectangle(getLocalBounds());
+            else
+                knobArea.addEllipse(bandHandleKnobImageArea);
+
             return knobArea.contains(x, y);
         }
     private:
@@ -482,9 +483,10 @@ public:
 
         // band handle knobs
         int knobSize = proportionOfHeight(0.075f);
-#if JUCE_IOS 
-        knobSize = proportionOfHeight(0.145f);
-#endif
+
+        if (SystemStats::getOperatingSystemName() == "iOS")
+            knobSize = proportionOfHeight(0.145f);
+
         for (int i = 0; i < nrActiveBands; ++i)
         {
             BandElements& handle (elements.getReference(i));
@@ -728,11 +730,12 @@ public:
         mT = area.proportionOfHeight(0.1f);
         mB = area.proportionOfHeight(0.08f);
         mL = area.proportionOfHeight(0.13f);
-#if JUCE_IOS 
-        dirPatternButtonWidth = mL;
-#else
-        dirPatternButtonWidth = mL * 0.6f;
-#endif
+
+        if (SystemStats::getOperatingSystemName() == "iOS")
+            dirPatternButtonWidth = mL;
+        else
+            dirPatternButtonWidth = mL * 0.6f;
+
         dirPatternButtonHeight = mL * 0.5f;
 
         frequencies.resize(numPixels);

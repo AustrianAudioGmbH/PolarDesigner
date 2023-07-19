@@ -1130,11 +1130,11 @@ public:
         void drawPatternImage(Graphics &g, std::unique_ptr<Drawable> image, Rectangle<float>& buttonArea, int reduceX, int reduceY, int corner, bool mouseOver, bool mouseDown)
         {
             g.setColour(labelBackgroundColor);
-#if JUCE_IOS 
-            int deltaX = buttonArea.proportionOfWidth(0.24f);
-#else
+
             int deltaX = 0;
-#endif
+            if (SystemStats::getOperatingSystemName() == "iOS")
+                int deltaX = buttonArea.proportionOfWidth(0.24f);
+
             int deltaY = 1;
             g.fillRoundedRectangle(buttonArea.reduced(deltaX, deltaY), corner);
             auto imageRect = buttonArea.reduced(reduceX, reduceY);
