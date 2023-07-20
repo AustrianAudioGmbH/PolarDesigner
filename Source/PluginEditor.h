@@ -69,8 +69,9 @@ public:
     // Helper method to calculate flex on the base of bandlimitPathComponents
     std::vector<float> getBandLimitWidthVector(float sizeDirectionalEQ, float offsetPolarVisualizer);
 
-    void incrementTrim(int nBands);
-    void decrementTrim(int nBands);
+    //void incrementTrim(int nBands);
+    void setTrimValue(int nBands);
+    void resetTrim(int nBands);
 
     int getControlParameterIndex (Component& control) override;
 
@@ -91,6 +92,8 @@ private:
     int nActiveBands;
     int syncChannelIdx;
     int oldAbLayerState;
+
+    float trimSliderPrevPos = 0.22f;
 
     bool loadingFile;
     bool recordingDisturber;

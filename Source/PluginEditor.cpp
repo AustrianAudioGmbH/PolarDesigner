@@ -339,8 +339,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     nActiveBandsChanged();
     zeroDelayModeChange();
 
-    trimSlider.sliderIncremented = [this] { incrementTrim(nActiveBands); };
-    trimSlider.sliderDecremented = [this] { decrementTrim(nActiveBands); };
+    trimSlider.sliderValueSet = [this] { setTrimValue(nActiveBands); };
+    trimSlider.sliderReset = [this] { resetTrim(nActiveBands); };
     
     nActiveBandsChanged();
     zeroDelayModeChange();
@@ -358,19 +358,24 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 }
 
 // Handle the trimSlider increment/decrement calls
-void PolarDesignerAudioProcessorEditor::incrementTrim(int nBands) {
-    for (int i = 0; i < nBands; i++)
-    {
-        if(slDir[i].isEnabled())
-            slDir[i].setValue(slDir[i].getValue() + trimSlider.step);
-    }
-}
-
-void PolarDesignerAudioProcessorEditor::decrementTrim(int nBands) {
+void PolarDesignerAudioProcessorEditor::setTrimValue(int nBands) {
+    float currPos = trimSlider.getCurrentSliderValue() - trimSliderPrevPos;
     for (int i = 0; i < nBands; i++)
     {
         if (slDir[i].isEnabled())
-            slDir[i].setValue(slDir[i].getValue() - trimSlider.step);
+        {
+            slDir[i].setValue(slDir[i].getValue() + currPos);
+        }
+    }
+    trimSliderPrevPos = trimSlider.getCurrentSliderValue();
+}
+
+void PolarDesignerAudioProcessorEditor::resetTrim(int nBands) {
+    trimSliderPrevPos = 0.22f;
+    for (int i = 0; i < nBands; i++)
+    {
+        if (slDir[i].isEnabled())
+            slDir[i].setValue(0.22f);
     }
 }
 
