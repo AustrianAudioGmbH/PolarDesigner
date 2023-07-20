@@ -169,6 +169,8 @@ public:
 
     float getCurrentSliderValue()
     {
+        // Set precision 0.00 for sliderValue
+        sliderValue = std::round(sliderValue * 100.f) / 100.f;
         return sliderValue;
     }
 
