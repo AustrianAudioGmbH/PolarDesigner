@@ -590,6 +590,7 @@ public:
                     }
                 }
                 isDraggingDirPath = true;
+                dirSliderLastChangedByDrag = true;
             }
         }
         else if (event.eventComponent->getName() == "PathComponent" || event.eventComponent->getName() == "BandLimitDividerHolder")
@@ -1074,6 +1075,16 @@ public:
         return bandsWidth[band];
     }
 
+    bool isDirSliderLastChangedByDrag()
+    {
+        return dirSliderLastChangedByDrag;
+    }
+
+    void setDirSliderLastChangedByDrag(bool changedByDrag)
+    {
+        dirSliderLastChangedByDrag = changedByDrag;
+    }
+
 private:
     PolarDesignerAudioProcessor& processor;
 
@@ -1085,6 +1096,7 @@ private:
     float dyn, zero, scale;
     bool soloActive;
     bool isDraggingDirPath = false;
+    bool dirSliderLastChangedByDrag = false;
 
     Settings s;
     Path dirGridPath;

@@ -359,15 +359,35 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
 
 // Handle the trimSlider increment/decrement calls
 void PolarDesignerAudioProcessorEditor::setTrimValue(int nBands) {
+    //Check if slider incrementing/decrementing
+    bool lockBandsOnTop = false;
+    for (int i = 0; i < nBands; i++)
+    {
+        if (slDir[i].getValue() == 1.f)
+        {
+            lockBandsOnTop = true;
+            break;
+        }
+        else if (slDir[i].getValue() == -0.5f)
+        {
+            lockBandsOnTop = false;
+            break;
+        }
+    }
+    calculateLockedBands(nBands, lockBandsOnTop);
+
     float currPos = trimSlider.getCurrentSliderValue() - trimSliderPrevPos;
     for (int i = 0; i < nBands; i++)
     {
-        if (slDir[i].isEnabled())
+        if (slDir[i].isEnabled() && !bandLockedOnMinMax[i])
         {
             slDir[i].setValue(slDir[i].getValue() + currPos);
         }
     }
     trimSliderPrevPos = trimSlider.getCurrentSliderValue();
+
+    directivityEqualiser.setDirSliderLastChangedByDrag(false);
+    directivityEqualiser.resetTooltipTexts();
 }
 
 void PolarDesignerAudioProcessorEditor::resetTrim(int nBands) {
@@ -377,6 +397,7 @@ void PolarDesignerAudioProcessorEditor::resetTrim(int nBands) {
         if (slDir[i].isEnabled())
             slDir[i].setValue(0.22f);
     }
+    directivityEqualiser.resetTooltipTexts();
 }
 
 PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
@@ -1415,7 +1436,7 @@ void PolarDesignerAudioProcessorEditor::nActiveBandsChanged()
             tgbMute[i].setVisible(false);
         }
     }
-
+    maxIt = 0;
     directivityEqualiser.resetTooltipTexts();
     directivityEqualiser.repaint();
 }
@@ -1828,6 +1849,95 @@ void PolarDesignerAudioProcessorEditor::setEqMode()
         ibEqCtr[1].setToggleState(true, NotificationType::dontSendNotification);
     }
     repaint();
+}
+
+void PolarDesignerAudioProcessorEditor::calculateLockedBands(int nBands, bool trimSliderIncr)
+{
+    // First check if any of the band reach min/max value
+    int minIt = -1;
+    for (int i = 0; i < nBands; i++)
+    {
+        if (slDir[i].getValue() == (trimSliderIncr ? 1.f : -0.5f))
+        {
+            minIt = i;
+            break;
+        }
+    }
+    // Count locked bands for future use
+    int counter = 0;
+    for (int i = 0; i < nBands; i++)
+    {
+        if (bandLockedOnMinMax[i]) counter++;
+    }
+    // Leave maxIt band always unlocked
+    if (counter < 4)
+    {
+        for (int i = 0; i < nBands; i++)
+        {
+            if (trimSliderIncr)
+            {
+                if (slDir[i].getValue() < slDir[maxIt].getValue())
+                    maxIt = i;
+            }
+            else
+            {
+                if (slDir[i].getValue() > slDir[maxIt].getValue())
+                    maxIt = i;
+            }
+        }
+    }
+    for (int i = 0; i < nBands; i++)
+    {
+        if (slDir[i].getValue() == (trimSliderIncr ? 1.f : -0.5f) && i != maxIt)
+        {
+            bandLockedOnMinMax[i] = true;
+        }
+        else
+        {
+            bandLockedOnMinMax[i] = false;
+        }
+    }
+    // Detect change of band slider when drag only one band
+    if (minIt == -1 || directivityEqualiser.isDirSliderLastChangedByDrag())
+    {
+        minBandValueDistancesSet = false;
+    }
+    // Calculate distances between min/max value and rest of bands
+    if (minIt != -1 && !minBandValueDistancesSet)
+    {
+        for (int i = 0; i < nBands; i++)
+        {
+            minBandValueDistances[i] = slDir[i].getValue() - slDir[minIt].getValue();
+        }
+        minBandValueDistancesSet = true;
+    }
+    // Unlock bands that reach given distance from min.max value
+    if (minIt != -1 && minBandValueDistancesSet)
+    {
+        for (int i = 0; i < nBands; i++)
+        {
+            if (trimSliderIncr)
+            {
+                float sliderVal = (1.f - std::abs(slDir[maxIt].getValue()));
+                if (slDir[maxIt].getValue() < 0)
+                {
+                    sliderVal = (1.f + std::abs(slDir[maxIt].getValue()));
+                }
+                if (sliderVal >= std::abs(minBandValueDistances[maxIt]) + minBandValueDistances[i])
+                {
+                    bandLockedOnMinMax[i] = false;
+                }
+            }
+            else
+            {
+                float sliderVal = std::abs(0.5f + slDir[maxIt].getValue());
+                if (sliderVal >= minBandValueDistances[maxIt] - minBandValueDistances[i])
+                {
+                    bandLockedOnMinMax[i] = false;
+                }
+            }
+        }
+    }
 }
 
 // implement this for AAX automation shortchut

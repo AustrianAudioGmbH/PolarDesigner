@@ -65,6 +65,7 @@ public:
     void sliderValueChanged (Slider* slider) override;
 
     void setEqMode();
+    void calculateLockedBands(int nBands, bool trimSliderIncr);
     float getABButtonAlphaFromLayerState(int layerState);
     // Helper method to calculate flex on the base of bandlimitPathComponents
     std::vector<float> getBandLimitWidthVector(float sizeDirectionalEQ, float offsetPolarVisualizer);
@@ -94,6 +95,10 @@ private:
     int oldAbLayerState;
 
     float trimSliderPrevPos = 0.22f;
+    float minBandValueDistances[5];
+    bool bandLockedOnMinMax[5] = { false, false, false, false, false };
+    bool minBandValueDistancesSet = false;
+    int maxIt = 0;
 
     bool loadingFile;
     bool recordingDisturber;
