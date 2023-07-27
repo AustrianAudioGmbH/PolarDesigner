@@ -22,7 +22,7 @@
 
 
 #pragma once
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 using namespace dsp;
 class Delay : private ProcessorBase
