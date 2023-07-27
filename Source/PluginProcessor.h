@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include <vector>
 #include <memory> // for unique_ptr
 #include <math.h>
