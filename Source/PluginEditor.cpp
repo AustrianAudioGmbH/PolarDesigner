@@ -1033,7 +1033,10 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
 {
     if (presetListVisible)
     {
-        showPresetList(false);
+        if (lbUserPresets.isRowDoubleClicked() || lbFactoryPresets.isRowDoubleClicked())
+        {
+            showPresetList(false);
+        }
     }
     if ((button == &tmbNrBandsButton[0]) && (button->getToggleState() > 0.5f))
     {
@@ -1571,6 +1574,8 @@ void PolarDesignerAudioProcessorEditor::zeroDelayModeChange()
 
 void PolarDesignerAudioProcessorEditor::showPresetList(bool shouldShow)
 {
+    lbUserPresets.deselectAll();
+    lbFactoryPresets.deselectAll();
     presetListVisible = shouldShow;
     tbLogoAA.setVisible(!shouldShow);
     resized();
@@ -1727,6 +1732,7 @@ void PolarDesignerAudioProcessorEditor::mouseDown(const MouseEvent& event)
     if (presetListVisible && !presetArea.contains(event.mouseDownPosition))
     {
         showPresetList(false);
+        processor.undoManager.undo();
     }
 
     for (int i = 0; i < 5; i++)
@@ -1748,8 +1754,12 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback(ChangeBroadcaster
         if (presetFile.size() == 1)
         {
             processor.loadPreset(presetFile.getFirst());
-            titlePreset.setTitle(String("Preset: " + selectedPreset));
-            showPresetList(false);
+            lbFactoryPresets.deselectAll();
+            if (lbUserPresets.isRowDoubleClicked())
+            {
+                titlePreset.setTitle(String("Preset: " + selectedPreset));
+                showPresetList(false);
+            }
         }
     }
     else if (source == &lbFactoryPresets)
@@ -1762,8 +1772,12 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback(ChangeBroadcaster
         if (presetFile.size() == 1)
         {
             processor.loadPreset(presetFile.getFirst());
-            titlePreset.setTitle(String("Preset: " + selectedPreset));
-            showPresetList(false);
+            lbUserPresets.deselectAll();
+            if (lbFactoryPresets.isRowDoubleClicked())
+            {
+                titlePreset.setTitle(String("Preset: " + selectedPreset));
+                showPresetList(false);
+            }
         }
     }
 }

@@ -68,6 +68,7 @@ public:
 
     void listBoxItemDoubleClicked(int row, const MouseEvent&) override
     {
+        rowDoubleClicked = true;
         sendChangeMessage();
         presets.deselectAllRows();
     }
@@ -79,7 +80,9 @@ public:
 
     void setHeaderText(const String& text) { presets.getHeaderComponent()->setTitle(text); }
     void listBoxItemClicked(int row, const MouseEvent&) override
-    { 
+    {
+        rowDoubleClicked = false;
+        sendChangeMessage();
         selectedRow = row;
         selectRow(row); 
     }
@@ -88,6 +91,16 @@ public:
     {
         data.add(std::make_unique<String>(presetName));
         presets.updateContent();
+    }
+
+    bool isRowDoubleClicked()
+    {
+        return rowDoubleClicked;
+    }
+
+    void deselectAll()
+    {
+        presets.deselectAllRows();
     }
 
 private:
@@ -154,4 +167,5 @@ private:
     MainLookAndFeel mainLaF;
     OwnedArray<String> data;
     int selectedRow = -1;
+    bool rowDoubleClicked = false;
 };

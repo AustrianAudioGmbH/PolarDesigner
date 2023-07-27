@@ -135,6 +135,7 @@ public:
 
     AudioVisualiserComponent termControlWaveform;
     AudioPlayHead::CurrentPositionInfo info;
+    UndoManager undoManager;
     
     // initial xover frequencies for several numbers of bands
     const float INIT_XOVER_FREQS_2B[1] = {1000.0f};

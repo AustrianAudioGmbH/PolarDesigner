@@ -34,7 +34,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() : AudioProcessor (Bus
     saveStates(saveTree),
     doEq(0), doEqA(0), doEqB(0),
     nBands(5),
-    vtsParams(*this, nullptr, "AAPolarDesigner",
+    vtsParams(*this, &undoManager, "AAPolarDesigner",
            {
         std::make_unique<AudioParameterFloat> (ParameterID {"xOverF1", 1}, "Xover1", NormalisableRange<float>(0.0f, 1.0f, 0.0001f),
                                                hzToZeroToOne(0, INIT_XOVER_FREQS_5B[0]), "",
@@ -974,6 +974,7 @@ void PolarDesignerAudioProcessor::setLastDir(File newLastDir)
 
 Result PolarDesignerAudioProcessor::loadPreset(const File& presetFile)
 {
+    undoManager.beginNewTransaction("Loading preset");
     var parsedJson;
     if (!presetFile.exists())
         return Result::fail ("File does not exist!");
