@@ -1871,7 +1871,7 @@ void PolarDesignerAudioProcessorEditor::calculateLockedBands(int nBands, bool tr
     int minIt = -1;
     for (int i = 0; i < nBands; i++)
     {
-        if (slDir[i].getValue() == (trimSliderIncr ? 1.f : -0.5f))
+        if (slDir[i].isEnabled() && slDir[i].getValue() == (trimSliderIncr ? 1.f : -0.5f))
         {
             minIt = i;
             break;
@@ -1881,7 +1881,7 @@ void PolarDesignerAudioProcessorEditor::calculateLockedBands(int nBands, bool tr
     int counter = 0;
     for (int i = 0; i < nBands; i++)
     {
-        if (bandLockedOnMinMax[i]) counter++;
+        if (slDir[i].isEnabled() && bandLockedOnMinMax[i]) counter++;
     }
     // Leave maxIt band always unlocked
     if (counter < 4)
@@ -1890,25 +1890,28 @@ void PolarDesignerAudioProcessorEditor::calculateLockedBands(int nBands, bool tr
         {
             if (trimSliderIncr)
             {
-                if (slDir[i].getValue() < slDir[maxIt].getValue())
+                if (slDir[i].isEnabled() && (slDir[i].getValue() < slDir[maxIt].getValue()))
                     maxIt = i;
             }
             else
             {
-                if (slDir[i].getValue() > slDir[maxIt].getValue())
+                if (slDir[i].isEnabled() && (slDir[i].getValue() > slDir[maxIt].getValue()))
                     maxIt = i;
             }
         }
     }
     for (int i = 0; i < nBands; i++)
     {
-        if (slDir[i].getValue() == (trimSliderIncr ? 1.f : -0.5f) && i != maxIt)
+        if (slDir[i].isEnabled())
         {
-            bandLockedOnMinMax[i] = true;
-        }
-        else
-        {
-            bandLockedOnMinMax[i] = false;
+            if (slDir[i].getValue() == (trimSliderIncr ? 1.f : -0.5f) && i != maxIt)
+            {
+                bandLockedOnMinMax[i] = true;
+            }
+            else
+            {
+                bandLockedOnMinMax[i] = false;
+            }
         }
     }
     // Detect change of band slider when drag only one band
@@ -1921,7 +1924,8 @@ void PolarDesignerAudioProcessorEditor::calculateLockedBands(int nBands, bool tr
     {
         for (int i = 0; i < nBands; i++)
         {
-            minBandValueDistances[i] = slDir[i].getValue() - slDir[minIt].getValue();
+            if (slDir[i].isEnabled())
+                minBandValueDistances[i] = slDir[i].getValue() - slDir[minIt].getValue();
         }
         minBandValueDistancesSet = true;
     }
@@ -1930,24 +1934,27 @@ void PolarDesignerAudioProcessorEditor::calculateLockedBands(int nBands, bool tr
     {
         for (int i = 0; i < nBands; i++)
         {
-            if (trimSliderIncr)
+            if (slDir[i].isEnabled())
             {
-                float sliderVal = (1.f - std::abs(slDir[maxIt].getValue()));
-                if (slDir[maxIt].getValue() < 0)
+                if (trimSliderIncr)
                 {
-                    sliderVal = (1.f + std::abs(slDir[maxIt].getValue()));
+                    float sliderVal = (1.f - std::abs(slDir[maxIt].getValue()));
+                    if (slDir[maxIt].getValue() < 0)
+                    {
+                        sliderVal = (1.f + std::abs(slDir[maxIt].getValue()));
+                    }
+                    if (sliderVal >= std::abs(minBandValueDistances[maxIt]) + minBandValueDistances[i])
+                    {
+                        bandLockedOnMinMax[i] = false;
+                    }
                 }
-                if (sliderVal >= std::abs(minBandValueDistances[maxIt]) + minBandValueDistances[i])
+                else
                 {
-                    bandLockedOnMinMax[i] = false;
-                }
-            }
-            else
-            {
-                float sliderVal = std::abs(0.5f + slDir[maxIt].getValue());
-                if (sliderVal >= minBandValueDistances[maxIt] - minBandValueDistances[i])
-                {
-                    bandLockedOnMinMax[i] = false;
+                    float sliderVal = std::abs(0.5f + slDir[maxIt].getValue());
+                    if (sliderVal >= minBandValueDistances[maxIt] - minBandValueDistances[i])
+                    {
+                        bandLockedOnMinMax[i] = false;
+                    }
                 }
             }
         }
