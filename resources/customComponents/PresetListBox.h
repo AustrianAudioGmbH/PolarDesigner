@@ -69,8 +69,25 @@ public:
     void listBoxItemDoubleClicked(int row, const MouseEvent&) override
     {
         rowDoubleClicked = true;
+        selectedRow = row;
         sendChangeMessage();
-        presets.deselectAllRows();
+    }
+
+    void selectedRowsChanged(int lastRowSelected) override
+    {
+        rowDoubleClicked = false;
+        if (lastRowSelected != -1)
+        {
+            selectedRow = lastRowSelected;
+            sendChangeMessage();
+        }
+    }
+
+    void returnKeyPressed(int lastRowSelected) override
+    {
+        rowDoubleClicked = true;
+        selectedRow = lastRowSelected;
+        sendChangeMessage();
     }
 
     String getSelectedPresetName()
@@ -79,13 +96,6 @@ public:
     }
 
     void setHeaderText(const String& text) { presets.getHeaderComponent()->setTitle(text); }
-    void listBoxItemClicked(int row, const MouseEvent&) override
-    {
-        rowDoubleClicked = false;
-        sendChangeMessage();
-        selectedRow = row;
-        selectRow(row); 
-    }
 
     void AddNewPresetToList(const String& presetName)
     {
