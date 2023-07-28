@@ -1094,6 +1094,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &tbClosePresetList)
     {
         showPresetList(false);
+        processor.undoManager.undo();
     }
     else if (button == &tbSave)
     {
