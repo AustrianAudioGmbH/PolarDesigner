@@ -290,15 +290,15 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     
     dsp::ProcessSpec eqSpec2{ currentSampleRate, static_cast<uint32>(currentBlockSize), 1 };
     dfEqEightConv.prepare (eqSpec2);
-    dfEqOmniConv.loadImpulseResponse(std::move(dfEqEightBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+    dfEqEightConv.loadImpulseResponse(std::move(dfEqEightBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
     
     dsp::ProcessSpec eqSpec3{ currentSampleRate, static_cast<uint32>(currentBlockSize), 1 };
     ffEqOmniConv.prepare (eqSpec3); // must be called before loading an ir
-    dfEqOmniConv.loadImpulseResponse(std::move(ffEqOmniBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+    ffEqOmniConv.loadImpulseResponse(std::move(ffEqOmniBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
     
     dsp::ProcessSpec eqSpec4{ currentSampleRate, static_cast<uint32>(currentBlockSize), 1 };
     ffEqEightConv.prepare (eqSpec4);
-    dfEqOmniConv.loadImpulseResponse(std::move(dfEqEightBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+    ffEqEightConv.loadImpulseResponse(std::move(dfEqEightBuffer), EQ_SAMPLE_RATE, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
     
     dfEqOmniConv.reset();
     dfEqEightConv.reset();
