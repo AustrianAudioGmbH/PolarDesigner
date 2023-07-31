@@ -1286,6 +1286,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
             vis.repaint();
         }
     }
+    notifyPresetLabelChange();
 }
 
 float PolarDesignerAudioProcessorEditor::getABButtonAlphaFromLayerState(int layerState)
@@ -1350,6 +1351,7 @@ void PolarDesignerAudioProcessorEditor::sliderValueChanged(Slider* slider)
         }
     }
     directivityEqualiser.repaint();
+    notifyPresetLabelChange();
 }
 
 void PolarDesignerAudioProcessorEditor::loadFile()
@@ -1741,6 +1743,16 @@ void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage(terminatorStag
         terminatorLabelNr1.setToggleState(true, NotificationType::dontSendNotification);
         terminatorLabelNr2.setToggleState(true, NotificationType::dontSendNotification);
         terminatorLabelNr3.setToggleState(false, NotificationType::dontSendNotification);
+    }
+}
+
+void PolarDesignerAudioProcessorEditor::notifyPresetLabelChange()
+{
+    if (presetLoaded)
+    {
+        titlePresetUndoButton.setVisible(false);
+        presetLoaded = false;
+        titlePreset.setTitle(titlePreset.getTitle()+"*");
     }
 }
 

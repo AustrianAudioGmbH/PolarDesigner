@@ -198,6 +198,7 @@ private:
     void setBandEnabled(int bandNr, bool enable);
 
     void showActiveTerminatorStage(terminatorStage stage);
+    void notifyPresetLabelChange();
 
     void mouseDown(const MouseEvent& event) override;
     

@@ -395,6 +395,10 @@ public:
         regularText = newRegularText;
     }
 
+    String &getTitle() {
+        return regularText;
+    }
+
     void setFont(Typeface::Ptr newRegularFont) {
         regularFont = newRegularFont;
     }
