@@ -83,6 +83,10 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     titlePreset.setFont(mainLaF.normalFont);
     titlePreset.setInterceptsMouseClicks(false, true);
 
+    addAndMakeVisible(&titlePresetUndoButton);
+    titlePresetUndoButton.setButtonText("Preset undo");
+    titlePresetUndoButton.addListener(this);
+
     addAndMakeVisible(&tbLoad);
     tbLoad.addListener(this);
     tbLoad.setButtonText("Load");
@@ -453,8 +457,13 @@ void PolarDesignerAudioProcessorEditor::resized()
     topComponent.items.add(juce::FlexItem().withFlex(0.042f));
     topComponent.items.add(juce::FlexItem(tbZeroDelay).withFlex(0.1f).withMargin(2));
     topComponent.items.add(juce::FlexItem().withFlex(0.1f));
-    topComponent.items.add(juce::FlexItem(titlePreset).withFlex(0.12f));
-    topComponent.items.add(juce::FlexItem().withFlex(0.022f));
+    topComponent.items.add(juce::FlexItem(titlePreset).withFlex(0.11f));
+    if (presetLoaded)
+    {
+        topComponent.items.add(juce::FlexItem().withFlex(0.01f));
+        topComponent.items.add(juce::FlexItem(titlePresetUndoButton).withFlex(0.01f));
+    }
+    topComponent.items.add(juce::FlexItem().withFlex(0.02f));
     topComponent.items.add(juce::FlexItem(tbLoad).withFlex(0.072f).withMargin(2));
     topComponent.items.add(juce::FlexItem().withFlex(0.01f));
     topComponent.items.add(juce::FlexItem(tbSave).withFlex(0.072f).withMargin(2));
@@ -1259,6 +1268,14 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
         button->setToggleState(!isToggled, NotificationType::dontSendNotification);
         repaint();
     }
+    else if (button == &titlePresetUndoButton)
+    {
+        processor.undoManager.undo();
+        titlePresetUndoButton.setVisible(false);
+        presetLoaded = false;
+        titlePreset.setTitle(String("Preset"));
+        resized();
+    }
     else // muteSoloButton!
     {
         directivityEqualiser.setSoloActive(getSoloActive());
@@ -1760,6 +1777,8 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback(ChangeBroadcaster
             {
                 titlePreset.setTitle(String("Preset: " + selectedPreset));
                 showPresetList(false);
+                presetLoaded = true;
+                titlePresetUndoButton.setVisible(true);
             }
         }
     }
@@ -1778,6 +1797,8 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback(ChangeBroadcaster
             {
                 titlePreset.setTitle(String("Preset: " + selectedPreset));
                 showPresetList(false);
+                presetLoaded = true;
+                titlePresetUndoButton.setVisible(true);
             }
         }
     }

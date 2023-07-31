@@ -103,11 +103,13 @@ private:
     bool loadingFile;
     bool recordingDisturber;
     bool presetListVisible;
+    bool presetLoaded = false;
 
     Colour eqColours[5];
  
     TextButton tbLogoAA;
     TitleBarTextLabel titleCompare, titlePreset;
+    TextButton titlePresetUndoButton;
 
     Footer footer;
     LaF globalLaF;

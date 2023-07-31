@@ -49,6 +49,8 @@
             file="Assets/superCardioidPatternIcon.svg"/>
       <FILE id="KEj4pY" name="terminateSpillIcon.svg" compile="0" resource="1"
             file="Assets/terminateSpillIcon.svg"/>
+      <FILE id="kuNfWL" name="undoPresetIcon.svg" compile="0" resource="1"
+            file="Assets/undoPresetIcon.svg"/>
     </GROUP>
     <GROUP id="{D54BFC58-8ED6-1DEF-A2B9-DAAF16495BAC}" name="resources">
       <GROUP id="{75BF05EC-024B-1F61-DA13-169C5FDE5119}" name="customComponents">

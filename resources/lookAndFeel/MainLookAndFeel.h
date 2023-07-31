@@ -78,6 +78,7 @@ public:
         auto maximizeTargetIconImg = juce::Drawable::createFromImageData(BinaryData::maximizeTargetIcon_svg, BinaryData::maximizeTargetIcon_svgSize);
         auto maxTargetToSpillIconImg = juce::Drawable::createFromImageData(BinaryData::maxTargetToSpillIcon_svg, BinaryData::maximizeTargetIcon_svgSize);
         auto closePresetListIconImg = juce::Drawable::createFromImageData(BinaryData::closePresetListIcon_svg, BinaryData::closePresetListIcon_svgSize);
+        auto undoPresetIconImg = juce::Drawable::createFromImageData(BinaryData::undoPresetIcon_svg, BinaryData::undoPresetIcon_svgSize);
 
         int cornerDirButtons = button.getTopLevelComponent()->proportionOfHeight(0.004f);
         int reduceYDirButtons = button.getTopLevelComponent()->proportionOfHeight(0.005f);
@@ -652,6 +653,11 @@ public:
             g.setColour(textButtonFrameColor);
             g.fillPath(path);
         }
+        else if (button.getButtonText() == "Preset undo")
+        {
+            auto imageArea = buttonArea.translated(0, 1);
+            undoPresetIconImg->drawWithin(g, imageArea, juce::RectanglePlacement::centred, 1.f);
+        }
         //Nr of bands buttons
         else
         {
@@ -784,6 +790,10 @@ public:
             return;
         }
         else if (button.getButtonText() == "Austrian Audio Logo")
+        {
+            return;
+        }
+        else if (button.getButtonText() == "Preset undo")
         {
             return;
         }
