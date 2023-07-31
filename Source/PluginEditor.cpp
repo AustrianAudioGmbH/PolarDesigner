@@ -1598,6 +1598,8 @@ void PolarDesignerAudioProcessorEditor::showPresetList(bool shouldShow)
     lbFactoryPresets.deselectAll();
     presetListVisible = shouldShow;
     tbLogoAA.setVisible(!shouldShow);
+    if(shouldShow)
+        processor.undoManager.beginNewTransaction("Loading preset");
     resized();
 }
 

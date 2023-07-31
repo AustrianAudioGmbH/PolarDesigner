@@ -974,7 +974,6 @@ void PolarDesignerAudioProcessor::setLastDir(File newLastDir)
 
 Result PolarDesignerAudioProcessor::loadPreset(const File& presetFile)
 {
-    undoManager.beginNewTransaction("Loading preset");
     var parsedJson;
     if (!presetFile.exists())
         return Result::fail ("File does not exist!");
