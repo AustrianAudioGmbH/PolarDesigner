@@ -5,10 +5,11 @@
               pluginAUMainType="'aufx'" version="2.1.0" companyName="Austrian Audio"
               companyCopyright="Austrian Audio" companyWebsite="www.austrian.audio"
               bundleIdentifier="audio.austrian.plugins.polardesigner" reportAppUsage="0"
-              pluginFormats="buildStandalone,buildVST3" pluginAAXCategory="8192"
-              pluginVST3Category="Fx" pluginRTASCategory="8192" pluginVSTCategory="kPlugCategEffect"
-              pluginCharacteristicsValue="pluginAAXDisableMultiMono" companyEmail="sayhello@austrianaudio.com"
-              jucerFormatVersion="1" displaySplashScreen="1" defines="JUCE_MODAL_LOOPS_PERMITTED=1"
+              pluginFormats="buildAAX,buildAU,buildAUv3,buildStandalone,buildVST3,enableIAA"
+              pluginAAXCategory="8192" pluginVST3Category="Fx" pluginRTASCategory="8192"
+              pluginVSTCategory="kPlugCategEffect" pluginCharacteristicsValue="pluginAAXDisableMultiMono"
+              companyEmail="sayhello@austrianaudio.com" jucerFormatVersion="1"
+              displaySplashScreen="1" defines="JUCE_MODAL_LOOPS_PERMITTED=1"
               headerPath="/opt/homebrew/opt/fftw/include/" pluginAUIsSandboxSafe="1"
               cppLanguageStandard="20">
   <MAINGROUP id="nmXiNr" name="PolarDesigner">
