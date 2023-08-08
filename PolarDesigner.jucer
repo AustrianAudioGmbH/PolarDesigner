@@ -10,8 +10,7 @@
               pluginVSTCategory="kPlugCategEffect" pluginCharacteristicsValue="pluginAAXDisableMultiMono"
               companyEmail="sayhello@austrianaudio.com" jucerFormatVersion="1"
               displaySplashScreen="1" defines="JUCE_MODAL_LOOPS_PERMITTED=1"
-              headerPath="/opt/homebrew/opt/fftw/include/" pluginAUIsSandboxSafe="1"
-              cppLanguageStandard="20">
+              pluginAUIsSandboxSafe="1" cppLanguageStandard="20">
   <MAINGROUP id="nmXiNr" name="PolarDesigner">
     <GROUP id="{C8EE4C48-1BA5-E054-5005-2C66E75BBE64}" name="Assets">
       <FILE id="xxzgu9" name="austrianAudioLogo.svg" compile="0" resource="1"
@@ -94,7 +93,7 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f" aaxFolder="..\..\SDKs\AAX">
+    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f" aaxFolder="../SDKs/aax-sdk-2-5-1/">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" headerPath="/opt/homebrew/opt/fftw/include&#10;../../../SDKs/vstsdk2.4"
                        libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="11.4 SDK"
