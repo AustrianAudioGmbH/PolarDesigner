@@ -28,9 +28,11 @@
 //==============================================================================
 PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesignerAudioProcessor& p,
                                                           AudioProcessorValueTreeState& vts)
-    : AudioProcessorEditor (&p), loadingFile(false), processor (p), valueTreeState(vts),
-    directivityEqualiser (p),
+    : AudioProcessorEditor (&p), loadingFile(false),
     presetListVisible(false),
+    processor (p),
+    valueTreeState(vts),
+    directivityEqualiser (p),
     showTerminatorAnimationWindow(false),
     isTargetAquiring(false),
     maximizeTarget(false),
@@ -437,13 +439,13 @@ void PolarDesignerAudioProcessorEditor::resized()
     topComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     topComponent.alignContent = juce::FlexBox::AlignContent::center;
 
-    const float marginFlex = 0.022f;
-    const float topComponentTitleFlex = 0.4f;
-    const float topComponentButtonsFlex = 0.035f;
-    const float topComponentSpacingFlex = topComponentButtonsFlex / 2;
-    const float topComponentButtonsMargin = 5;
-    const float radioButonsFlex = 0.18f;
-    const float radioButonsSpaceFlex = 0.025f;
+//    const float marginFlex = 0.022f;
+//    const float topComponentTitleFlex = 0.4f;
+//    const float topComponentButtonsFlex = 0.035f;
+//    const float topComponentSpacingFlex = topComponentButtonsFlex / 2;
+//    const float topComponentButtonsMargin = 5;
+//    const float radioButonsFlex = 0.18f;
+//    const float radioButonsSpaceFlex = 0.025f;
 
     topComponent.items.add(juce::FlexItem().withFlex(0.022f));
     if (!presetListVisible)

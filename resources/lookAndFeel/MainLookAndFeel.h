@@ -661,7 +661,7 @@ public:
         //Nr of bands buttons
         else
         {
-            auto mainColor = button.isEnabled() ? textButtonActiveBlue4FrameColor : textButtonActiveBlue4FrameColor.withAlpha(0.5f);
+//            auto mainColor = button.isEnabled() ? textButtonActiveBlue4FrameColor : textButtonActiveBlue4FrameColor.withAlpha(0.5f);
             if (isMouseOverButton)
             {
                 g.setColour(textButtonHoverRedBackgroundColor);
@@ -858,7 +858,7 @@ public:
 
             layout.sliderBounds.setBounds(localBounds.getRight() - layoutWidth + 1, localBounds.getY(), layoutWidth, localBounds.getHeight());
 
-            Slider::TextEntryBoxPosition textBoxPos = slider.getTextBoxPosition();
+//            Slider::TextEntryBoxPosition textBoxPos = slider.getTextBoxPosition();
 
             int textBoxWidth = slider.getTopLevelComponent()->getWidth() * 0.05f;
             int textBoxHeight = slider.getTopLevelComponent()->getHeight() * 0.029f;
@@ -917,7 +917,7 @@ public:
         const Slider::SliderStyle style, Slider& slider) override
     {
         const float newDiameter = slider.getTopLevelComponent()->getHeight() * 0.024f;
-        const float h = slider.getTopLevelComponent()->getHeight() * 0.005f;
+//        const float h = slider.getTopLevelComponent()->getHeight() * 0.005f;
 
         Path p;
         if (style == Slider::SliderStyle::LinearHorizontal)
@@ -1142,8 +1142,9 @@ public:
             g.setColour(labelBackgroundColor);
 
             int deltaX = 0;
+            
             if (SystemStats::getOperatingSystemName() == "iOS")
-                int deltaX = buttonArea.proportionOfWidth(0.24f);
+                deltaX = buttonArea.proportionOfWidth(0.24f);
 
             int deltaY = 1;
             g.fillRoundedRectangle(buttonArea.reduced(deltaX, deltaY), corner);

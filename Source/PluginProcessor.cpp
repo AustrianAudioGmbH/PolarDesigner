@@ -33,6 +33,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() : AudioProcessor (Bus
     layerB(nodeB),
     saveStates(saveTree),
     doEq(0), doEqA(0), doEqB(0),
+    termControlWaveform(1),
     nBands(5),
     vtsParams(*this, &undoManager, "AAPolarDesigner",
            {
@@ -122,10 +123,14 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() : AudioProcessor (Bus
            }),
     firLen(FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE),
     dfEqOmniBuffer(1, DF_EQ_LEN), dfEqEightBuffer(1, DF_EQ_LEN),
-    ffEqOmniBuffer(1, FF_EQ_LEN), ffEqEightBuffer(1, FF_EQ_LEN), isBypassed(false),
-    soloActive(false), loadingFile(false), readingSharedParams(false), trackingActive(false),
-    trackingDisturber(false), disturberRecorded(false), signalRecorded(false), currentSampleRate(48000),
-    termControlWaveform(1)
+    ffEqOmniBuffer(1, FF_EQ_LEN), ffEqEightBuffer(1, FF_EQ_LEN),
+    isBypassed(false),
+    soloActive(false), loadingFile(false), readingSharedParams(false),
+    trackingActive(false),
+    trackingDisturber(false),
+    disturberRecorded(false),
+    signalRecorded(false),
+    currentSampleRate(48000)
 {
     
     vtsParams.addParameterListener("xOverF1", this);
@@ -447,7 +452,9 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
         convolversReady = true;
     }
 
-    getPlayHead()->getCurrentPosition(info);
+    // !J! Deprecated:
+//    getPlayHead()->getCurrentPosition(info);
+    getPlayHead()->getPosition();
     termControlWaveform.pushBuffer(buffer);
 
     if (trackingActive)

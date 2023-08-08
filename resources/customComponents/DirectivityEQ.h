@@ -93,8 +93,9 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
         void setBounds() 
         {
             int deltaX = 0;
+            
             if (SystemStats::getOperatingSystemName() == "iOS")
-                int deltaX = path.getBounds().getWidth() * 2;
+                deltaX = path.getBounds().getWidth() * 2;
 
             Component::setBounds(path.getBounds().toNearestInt().expanded(deltaX, 0));
         }
@@ -160,20 +161,22 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
             int circX = getLocalBounds().getCentreX();
             int circY = getLocalBounds().getCentreY();
             int circleSize = getLocalBounds().getWidth();
-
+            bool resultMainImg;
+            
             auto bandHandleKnobImg = juce::Drawable::createFromImageData(BinaryData::bandHandleKnob_svg, BinaryData::bandHandleKnob_svgSize);
             bandHandleKnobImageArea = Rectangle<float>(circX - (circleSize / 2), circY - (circleSize / 2), circleSize, circleSize);
 
             if(SystemStats::getOperatingSystemName() == "iOS")
                 bandHandleKnobImageArea.reduce(proportionOfHeight(0.23f), proportionOfHeight(0.23f));
 
+            
             if (!isEnabled())
             {
-                bool resultMainImg = bandHandleKnobImg->replaceColour(Colours::white, Colours::black);
+                resultMainImg = bandHandleKnobImg->replaceColour(Colours::white, Colours::black);
             }
             else
             {
-                bool resultMainImg = bandHandleKnobImg->replaceColour(Colours::black, Colours::white);
+                resultMainImg = bandHandleKnobImg->replaceColour(Colours::black, Colours::white);
             }
             bandHandleKnobImg->drawWithin(g, bandHandleKnobImageArea, juce::RectanglePlacement::centred, 1.f);
         }
@@ -621,7 +624,7 @@ public:
         int oldActiveBandLimitPath = activeBandLimitPath;
         activeElem = -1;
         activeBandLimitPath = -1;
-        Point<int> pos = event.getPosition();
+//        Point<int> pos = event.getPosition();
 
         if (event.eventComponent->getName() == "RectangleComponent" || event.eventComponent->getName() == "BandKnobComponent")
         {
