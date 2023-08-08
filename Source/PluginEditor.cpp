@@ -38,7 +38,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     maxTargetToSpillFlowStarted(false),
     termStage(PolarDesignerAudioProcessorEditor::terminatorStage::DISABLED)
 {
-//    openGLContext.attachTo (*getTopLevelComponent());
+    openGLContext.attachTo (*getTopLevelComponent());
 
     nActiveBands = processor.getNBands();
     syncChannelIdx = processor.getSyncChannelIdx();
