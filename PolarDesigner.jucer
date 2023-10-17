@@ -93,14 +93,12 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="fftw3f" aaxFolder="../SDKs/aax-sdk-2-5-1/">
+    <XCODE_MAC targetFolder="Builds/MacOSX" aaxFolder="../SDKs/aax-sdk-2-5-1/">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" headerPath="/opt/homebrew/opt/fftw/include&#10;../../../SDKs/vstsdk2.4"
-                       libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="11.4 SDK"
-                       macOSDeploymentTarget="11.4"/>
-        <CONFIGURATION isDebug="0" name="Release" headerPath="/opt/homebrew/opt/fftw/include&#10;../../../SDKs/vstsdk2.4"
-                       libraryPath="/opt/homebrew/opt/fftw/lib" osxCompatibility="11.4 SDK"
-                       macOSDeploymentTarget="11.4"/>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="../../../SDKs/vstsdk2.4"
+                       osxCompatibility="11.4 SDK" macOSDeploymentTarget="11.4"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="&#10;../../../SDKs/vstsdk2.4"
+                       osxCompatibility="11.4 SDK" macOSDeploymentTarget="11.4"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../JUCE/modules"/>
