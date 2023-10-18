@@ -14,7 +14,7 @@
 #ifndef EndlessSlider_h
 #define EndlessSlider_h
 
-#include "../resources/lookAndFeel/MainLookAndFeel.h"
+#include "../lookAndFeel/MainLookAndFeel.h"
 
 class EndlessSlider : public Slider {
 public:

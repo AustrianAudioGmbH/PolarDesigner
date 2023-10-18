@@ -26,7 +26,8 @@
 //#define AA_DO_DEBUG_PATH
 
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
+
 #include "PluginProcessor.h"
 #include "../resources/lookAndFeel/AA_LaF.h"
 #include "../resources/lookAndFeel/MainLookAndFeel.h"

@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <JuceHeader.h>
+
 class MainLookAndFeel : public LookAndFeel_V4
 {
 public:

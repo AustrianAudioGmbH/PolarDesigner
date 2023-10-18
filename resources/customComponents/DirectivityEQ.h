@@ -48,7 +48,7 @@
  */
 
 #pragma once
-#include "../resources/lookAndFeel/MainLookAndFeel.h"
+#include "../lookAndFeel/MainLookAndFeel.h"
 
 class  DirectivityEQ : public Component, private Slider::Listener, private Label::Listener, private Button::Listener
 {

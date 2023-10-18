@@ -11,7 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "../resources/lookAndFeel/MainLookAndFeel.h"
+#include "../lookAndFeel/MainLookAndFeel.h"
 
 //==============================================================================
 /*

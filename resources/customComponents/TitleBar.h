@@ -51,7 +51,7 @@
 
 #include "TitleBarPaths.h"
 #include "ImgPaths.h"
-#include "../resources/lookAndFeel/MainLookAndFeel.h"
+#include "../lookAndFeel/MainLookAndFeel.h"
 
 #ifdef JUCE_OSC_H_INCLUDED
 #include "OSCStatus.h"
