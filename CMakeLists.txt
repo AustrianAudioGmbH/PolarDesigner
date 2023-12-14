@@ -21,7 +21,7 @@ set(PROJECT_NAME "PolarDesigner")
 set(PRODUCT_NAME "PolarDesigner")
 
 # Change me! Used for the MacOS bundle name and Installers
-set(COMPANY_NAME "Austrian Audio GMbH")
+set(COMPANY_NAME "Austrian Audio")
 
 # Change me! Used for the MacOS bundle identifier (and signing)
 set(BUNDLE_ID "audio.austrian.software.plugins.polardesigner")
