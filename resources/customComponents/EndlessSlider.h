@@ -14,139 +14,183 @@
 #ifndef EndlessSlider_h
 #define EndlessSlider_h
 
+#include "../lookAndFeel/MainLookAndFeel.h"
+
 class EndlessSlider : public Slider {
 public:
     EndlessSlider () :
     Slider()
     {
-        setChangeNotificationOnlyOnRelease(false);
-        sliderImage = getImageFromAssets("scrollImage.png");
-        setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
-        setSliderStyle (Slider::LinearBarVertical);
-        setScrollWheelEnabled(true);
-    };
-    
-    // Trim step value - modify it freely as needed
-    double step = 0.012725f;
-    
+        currentMoved = 0;
+        lastMoved = 0;
+        prevMoved = 0;
+        lastFilledElem = 17;
+    }
+
+    ~EndlessSlider() override {}
+
     // set these callbacks where you use this class in order to get inc/dec messages
-    std::function<void()> sliderIncremented;
-    std::function<void()> sliderDecremented;
+    std::function<void()> sliderValueSet;
+    std::function<void()> sliderReset;
     
     // calculate whether to callback to an increment or decrement, and update UI
     void mouseDrag(const MouseEvent &e) override
     {
-        int currentMoved;
-        static int lastMoved;
-
-        if (e.mouseWasDraggedSinceMouseDown()) {
+        if (e.mouseWasDraggedSinceMouseDown())
+        {
             currentMoved = e.getDistanceFromDragStartY();
-            sliderImageTransform = (AffineTransform::translation ((float) (sliderImage.getWidth()),
-                                                                 (float) (sliderImage.getHeight()) + currentMoved)
-                                      .followedBy (getTransform()));
-            
-            if ((currentMoved > lastMoved)){
-                sliderDecremented();
-            } else
-            if (currentMoved < lastMoved) {
-                sliderIncremented();
-            }
-
-            lastMoved = currentMoved;
-
+            lastMoved = currentMoved + prevMoved;
+            sliderValue = jmap(lastMoved, static_cast<float>(proportionOfHeight(0.48f)), 
+                              (-1)*static_cast<float>(proportionOfHeight(0.52f)), 
+                              -0.5f, 1.f);
+            sliderValueSet();
+            lastMovedPoportion = static_cast<float>(lastMoved / getHeight());
             repaint();
         }
     }
-    
+
+    void mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel) override
+    {
+        (void)event;
+        currentMoved = -10*wheel.deltaY;
+        lastMoved = currentMoved + prevMoved;
+        sliderValue = jmap(lastMoved, static_cast<float>(proportionOfHeight(0.48f)),
+            (-1) * static_cast<float>(proportionOfHeight(0.52f)),
+            -0.5f, 1.f);
+        sliderValueSet();
+        lastMovedPoportion = static_cast<float>(lastMoved / getHeight());
+        prevMoved = lastMoved;
+        repaint();
+    }
+
     void paint (Graphics&g) override
     {
-        Rectangle<int> bounds = getLocalBounds();
-        Path endlessPath;
-        g.setColour(getRandomColour());
+        g.fillAll(Colours::black);
 
-        g.setFillType(juce::FillType(sliderImage, sliderImageTransform));
-        g.fillRect(bounds);
-        
+        Rectangle<float> bounds = getLocalBounds().toFloat();
+        float height = bounds.getHeight();
+        int numElem = 34;
+        float spaceBetween = height / static_cast<float>(numElem);
+        float y = lastMoved;
+        int mappedY = 0;
+        int elemWidth = 0;
+        int counter = 0;
+        int r = static_cast<int>(sqrt(((height * height)) / 2)); // circle radius
+
+        ColourGradient cg = ColourGradient(mainLaF.trimSliderMainColor, 
+                                           bounds.getWidth() / 2, 
+                                           bounds.getHeight() / 2, 
+                                           Colours::black, 
+                                           bounds.getWidth() / 2, 0, true);
+        g.setGradientFill(cg);
+        g.fillRect(bounds.reduced(5, 5));
+
+        for (int i = 0; i < numElem; i++)
+        {
+            if (i == 0)
+            {
+                y += spaceBetween/2.f; // place first element
+            }
+            else
+            {
+                y += spaceBetween;
+            }
+            // calculate y when mouse out of component
+            if (y > height)
+            {
+                counter = static_cast<int>(std::abs(y / height));
+                y -= height *counter;
+            }
+            else if (y < 0)
+            {
+                counter = static_cast<int>(std::abs(y / height) + 1);
+                y += height * counter;
+            }
+            // calculate y when mousePos in component
+            if (y < height /2)
+            {
+                mappedY = static_cast<int>((-1) * (height / 2) + y);
+            }
+            else if (floatsEquivalent(y, height / 2))
+            {
+                mappedY = 0;
+            }
+            else if (y > height / 2)
+            {
+                mappedY = static_cast<int>(y - height / 2);
+            }
+            // calculate width change with circle equation
+            elemWidth = static_cast<int>(sqrt(r*r - (mappedY*mappedY)));
+
+            auto rect = Rectangle<float>(bounds.getWidth() * 0.22f,
+                y - (elemWidth / (numElem * 2)) / 2,
+                bounds.getWidth() * 0.55f,
+                elemWidth / (numElem * 2));
+
+            if (i == lastFilledElem)
+                filledRect = rect;
+            else
+            {
+                g.setColour(Colours::black);
+                g.fillRoundedRectangle(rect, 2.f);
+            }
+
+        }
+        g.setColour(Colours::grey);
+        g.fillRoundedRectangle(filledRect, 2.f);
     }
 
     void mouseExit (const MouseEvent& e) override
     {
+        (void)e;
         repaint();
     }
-    
-    ~EndlessSlider () {}
-    
+
+    void mouseDoubleClick(const MouseEvent& e) override
+    {
+        (void)e;
+        lastMoved = 0;
+        prevMoved = 0;
+        sliderReset();
+        repaint();
+    }
+
+    void mouseUp(const MouseEvent& e) override
+    {
+        (void)e;
+        prevMoved = lastMoved;
+    }
+
     void resized() override
     {
-        Slider::resized();
-        auto& lf = getLookAndFeel();
-        auto layout = lf.getSliderLayout (*this);
-        
-        sliderRect = layout.sliderBounds;
-        
+       if (!floatsEquivalent(lastMoved, 0))
+       {
+           lastMoved = proportionOfHeight(lastMovedPoportion);
+           prevMoved = lastMoved;
+       }
+       repaint();
     }
 
-    
+    float getCurrentSliderValue()
+    {
+        // Set precision 0.00 for sliderValue
+        sliderValue = std::round(sliderValue * 100.f) / 100.f;
+        return sliderValue;
+    }
+
 private:
-    Rectangle<int> sliderRect;
-    Image sliderImage;
-    AffineTransform sliderImageTransform;
-    
-    // utility functions - from DemoRunner utilities
-    static juce::Colour getRandomColour()
-    {
-        auto& random = juce::Random::getSystemRandom();
-        
-        return juce::Colour ((juce::uint8) random.nextInt (256),
-                             (juce::uint8) random.nextInt (256),
-                             (juce::uint8) random.nextInt (256));
-    }
+    float lastMoved;
+    float currentMoved;
+    int lastFilledElem;
+    float prevMoved;
 
-    
-    // creats a usable image asset from a file stream
-    inline std::unique_ptr<InputStream> createAssetInputStream (const char* resourcePath)
-    {
-#if JUCE_ANDROID
-        ZipFile apkZip (File::getSpecialLocation (File::invokedExecutableFile));
-        return std::unique_ptr<InputStream> (apkZip.createStreamForEntry (apkZip.getIndexOfFileName ("assets/" + String (resourcePath))));
-#else
-#if JUCE_IOS
- auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
-                       .getParentDirectory().getChildFile ("Assets");
-#elif JUCE_MAC
- auto assetsDir = File::getSpecialLocation (File::currentExecutableFile)
-                       .getParentDirectory().getParentDirectory().getChildFile ("Resources").getChildFile ("Assets");
-#endif
-        
-        auto resourceFile = assetsDir.getChildFile (resourcePath);
-        jassert (resourceFile.existsAsFile());
-        
-        return resourceFile.createInputStream();
-#endif
-    }
-    
-    // creates an image asset from cache if possible
-    inline Image getImageFromAssets (const char* assetName)
-    {
-        auto hashCode = (String (assetName) + "@endless_slider_assets").hashCode64();
-        auto img = ImageCache::getFromHashCode (hashCode);
-        
-        if (img.isNull())
-        {
-                        
-            std::unique_ptr<InputStream> juceIconStream (createAssetInputStream (assetName));
-            
-            if (juceIconStream == nullptr)
-                return {};
-            
-            img = ImageFileFormat::loadFrom (*juceIconStream);
-            
-            ImageCache::addImageToCache (img, hashCode);
-        }
-        
-        return img;
-    }
-    
+//    bool dragStarted;
+//    bool isMouseUp;
+    float lastMovedPoportion = 0;
+
+    float sliderValue;
+    Rectangle<float> filledRect;
+    MainLookAndFeel mainLaF;
 };
 
 #endif /* EndlessSlider_h */

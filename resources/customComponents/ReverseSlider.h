@@ -62,7 +62,7 @@ public:
     reversed(false),
     isDual(false),
     scrollWheelEnabled(true)
-    {};
+    {}
     
     ReverseSlider (const String& componentName) :
     Slider(componentName),
@@ -70,9 +70,9 @@ public:
     reversed(false),
     isDual(false),
     scrollWheelEnabled(true)
-    {};
+    {}
     
-    ~ReverseSlider () {}
+    ~ReverseSlider () override {}
     
 public:
     
@@ -84,13 +84,13 @@ public:
                           ReverseSlider& sliderToControl) : AudioProcessorValueTreeState::SliderAttachment (stateToControl, parameterID, sliderToControl)
         {
             sliderToControl.setParameter(stateToControl.getParameter(parameterID));
-        };
+        }
         
         SliderAttachment (juce::AudioProcessorValueTreeState& stateToControl,
                           const juce::String& parameterID,
                           Slider& sliderToControl) : AudioProcessorValueTreeState::SliderAttachment (stateToControl, parameterID, sliderToControl)
         {
-        };
+        }
         
         virtual ~SliderAttachment() = default;
     };
@@ -198,6 +198,7 @@ public:
         if (isRotary() && !getRotaryParameters().stopAtEnd && scrollWheelEnabled)
         {
             int delta = 0;
+
             switch (getSliderStyle())
             {
                 case RotaryVerticalDrag:
@@ -209,8 +210,20 @@ public:
                 case RotaryHorizontalVerticalDrag:
                     delta = e.getDistanceFromDragStartX() - e.getDistanceFromDragStartY() - lastDistanceFromDragStart;
                     break;
+
+                case LinearHorizontal:
+                case LinearVertical:
+                case LinearBar:
+                case LinearBarVertical:
+                case Rotary:
+                case IncDecButtons:
+                case TwoValueHorizontal:
+                case TwoValueVertical:
+                case ThreeValueHorizontal:
+                case ThreeValueVertical:
                 default:
                     break;
+
             }
             delta = delta * (reversed ? -1 : 1);
             
@@ -243,8 +256,19 @@ public:
             case RotaryHorizontalVerticalDrag:
                 lastDistanceFromDragStart = e.getDistanceFromDragStartX() - e.getDistanceFromDragStartY();
                 break;
+            case LinearHorizontal:
+            case LinearVertical:
+            case LinearBar:
+            case LinearBarVertical:
+            case Rotary:
+            case IncDecButtons:
+            case TwoValueHorizontal:
+            case TwoValueVertical:
+            case ThreeValueHorizontal:
+            case ThreeValueVertical:
             default:
                 break;
+
         }
         
         Slider::mouseDrag(e);

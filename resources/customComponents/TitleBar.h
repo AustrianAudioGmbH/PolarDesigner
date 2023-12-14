@@ -51,6 +51,7 @@
 
 #include "TitleBarPaths.h"
 #include "ImgPaths.h"
+#include "../lookAndFeel/MainLookAndFeel.h"
 
 #ifdef JUCE_OSC_H_INCLUDED
 #include "OSCStatus.h"
@@ -63,14 +64,14 @@ public:
     {
         warningSign.loadPathFromData (WarningSignData, sizeof (WarningSignData));
         setBufferedToImage(true);
-    };
-    ~AlertSymbol() {};
+    }
+    ~AlertSymbol() override {}
     void paint (Graphics& g) override
     {
         warningSign.applyTransform(warningSign.getTransformToScaleToFit(getLocalBounds().toFloat(), true, Justification::centred));
         g.setColour(Colours::yellow);
         g.fillPath(warningSign);
-    };
+    }
 private:
     Path warningSign;
 };
@@ -82,11 +83,11 @@ public:
     {
         addChildComponent(alert);
         alert.setBounds(15, 15, 15, 15);
-    };
+    }
 
-    ~IOWidget() {};
+    ~IOWidget() {}
     virtual const int getComponentSize() = 0;
-    virtual void setMaxSize (int maxSize) {};
+    virtual void setMaxSize (int maxSize) {(void)maxSize;}
 
     void setBusTooSmall (bool isBusTooSmall)
     {
@@ -107,8 +108,8 @@ private:
 class  NoIOWidget :  public IOWidget
 {
 public:
-    NoIOWidget() : IOWidget() {};
-    ~NoIOWidget() {};
+    NoIOWidget() : IOWidget() {}
+    ~NoIOWidget() override {}
     const int getComponentSize() override { return 0; }
     //void paint (Graphics& g) override {};
 };
@@ -119,18 +120,18 @@ public:
     BinauralIOWidget() : IOWidget() {
         BinauralPath.loadPathFromData (BinauralPathData, sizeof (BinauralPathData));
         setBufferedToImage(true);
-    };
+    }
 
-    ~BinauralIOWidget() {};
+    ~BinauralIOWidget() override {}
     const int getComponentSize() override { return 30; }
-    void setMaxSize (int maxSize) override {};
+    void setMaxSize (int maxSize) override {(void)maxSize;}
     void paint (Graphics& g) override
     {
         BinauralPath.applyTransform(BinauralPath.getTransformToScaleToFit(0, 0, 30, 30, true,Justification::centred));
         g.setColour((Colours::white).withMultipliedAlpha(0.5));
         g.fillPath(BinauralPath);
 
-    };
+    }
 
 private:
     Path BinauralPath;
@@ -141,22 +142,28 @@ class  AALogo :  public IOWidget
 public:
     AALogo() : IOWidget() {
         aaLogoPath.loadPathFromData (aaLogoData, sizeof (aaLogoData));
-    };
+    }
     
-    ~AALogo() {};
+    ~AALogo() override {}
     const int getComponentSize() override { return 40; }
-    void setMaxSize (int maxSize) override {};
+    void setMaxSize (int maxSize) override {(void)maxSize;}
+
+    void setLogoColour(Colour logoColour) {
+        logoColour_ = logoColour;
+        repaint();
+    }
+
     void paint (Graphics& g) override
     {
         aaLogoPath.applyTransform (aaLogoPath.getTransformToScaleToFit (getLocalBounds().toFloat(), true, Justification::centred));
-        // Colour AARed = Colour(155,35,35);
-        g.setColour (Colours::white);
+        g.setColour (logoColour_);
         g.strokePath (aaLogoPath, PathStrokeType (0.1f));
         g.fillPath (aaLogoPath);
-    };
+    }
     
 private:
     Path aaLogoPath;
+    Colour logoColour_ = Colour(Colours::white);
 };
 
 
@@ -178,8 +185,8 @@ public:
                 cbChannels->addItem(String(i), i+1);
             cbChannels->setBounds(35, 8, 70, 15);
         }
-    };
-    ~AudioChannelsIOWidget() {};
+    }
+    ~AudioChannelsIOWidget() {}
 
     const int getComponentSize() override { return selectable ? 110 : 75; }
 
@@ -253,7 +260,7 @@ public:
             g.setFont(15.0f);
             g.drawFittedText(displayTextIfNotSelectable, 35, 0, 40, 30, Justification::centredLeft, 2);
         }
-    };
+    }
 
 private:
     std::unique_ptr<ComboBox> cbChannels;
@@ -298,9 +305,9 @@ public:
         cbNormalization.addItem("N3D", 1);
         cbNormalization.addItem("SN3D", 2);
         cbNormalization.setBounds(35, 0, 70, 15);
-    };
+    }
 
-    ~DirectivityIOWidget() {};
+    ~DirectivityIOWidget() override {}
 
     const int getComponentSize() override { return 110; }
 
@@ -335,7 +342,7 @@ public:
         DirectivityPath.applyTransform(DirectivityPath.getTransformToScaleToFit(0, 0, 30, 30, true,Justification::centred));
         g.setColour((Colours::white).withMultipliedAlpha(0.5));
         g.fillPath(DirectivityPath);
-    };
+    }
 
 private:
     String orderStrings[8];
@@ -343,37 +350,11 @@ private:
     Path DirectivityPath;
 };
 
-class  TitleBarAAText : public Component
-{
-public:
-    TitleBarAAText() {
-        titlePath.loadPathFromData(aaFontData, sizeof(aaFontData));
-    };
-    ~TitleBarAAText() {};
-
-    void resized() override
-    {
-        repaint();
-    }
-
-    void paint(Graphics& g) override
-    {
-        Rectangle<int> bounds = getLocalBounds();
-        g.setColour(Colours::white);
-        titlePath.applyTransform(titlePath.getTransformToScaleToFit(getLocalBounds().toFloat(), true, Justification::left));
-        g.strokePath(titlePath, PathStrokeType(0.1f));
-        g.fillPath(titlePath);
-    };
-
-private:
-    Path titlePath;
-};
-
 class  TitleBarPDText : public Component
 {
 public:
-    TitleBarPDText() {};
-    ~TitleBarPDText() {};
+    TitleBarPDText() {}
+    ~TitleBarPDText() override {}
 
     void setTitle(String newRegularText) {
         regularText = newRegularText;
@@ -391,23 +372,36 @@ public:
     void paint(Graphics& g) override
     {
         Rectangle<int> bounds = getLocalBounds();
-        regularFont.setHeight(bounds.getHeight()/1.5f);
+        regularFont.setHeight(bounds.getHeight()*0.75f);
 
-        g.setColour(Colours::white);
+        g.setColour(isEnabled() ? mainLaF.mainTextColor : mainLaF.mainTextDisabledColor);
         g.setFont(regularFont);
         g.drawFittedText(regularText, bounds.toNearestInt(), Justification::left, 1);
-    };
+    }
 
 private:
-    Font regularFont = Font(25.f);
+    Font regularFont = Font(22.f);
     juce::String regularText = "Regular";
+    MainLookAndFeel mainLaF;
 };
 
-class  TitleLine : public Component
+class  TitleBarTextLabel : public Component
 {
 public:
-    TitleLine() {};
-    ~TitleLine() {};
+    TitleBarTextLabel() {}
+    ~TitleBarTextLabel() override {}
+
+    void setTitle(String newRegularText) {
+        regularText = newRegularText;
+    }
+
+    String &getTitle() {
+        return regularText;
+    }
+
+    void setFont(Typeface::Ptr newRegularFont) {
+        regularFont = newRegularFont;
+    }
 
     void resized() override
     {
@@ -417,12 +411,18 @@ public:
     void paint(Graphics& g) override
     {
         Rectangle<int> bounds = getLocalBounds();
+        int fontSize = static_cast<int> (getTopLevelComponent()->getHeight() * 0.025f);
+        regularFont.setHeight(fontSize);
 
-        g.setColour((Colours::white).withMultipliedAlpha(0.5));
-        g.fillAll();
-    };
+        g.setColour(isEnabled() ? mainLaF.mainTextColor : mainLaF.mainTextDisabledColor);
+        g.setFont(regularFont);
+        g.drawFittedText(regularText, bounds.toNearestInt(), Justification::right, 1);
+    }
 
 private:
+    Font regularFont = Font(16.f);
+    juce::String regularText = "Regular";
+    MainLookAndFeel mainLaF;
 };
 
 class IEMLogo : public Component
@@ -433,7 +433,7 @@ public:
         IEMPath.loadPathFromData (IEMpathData, sizeof (IEMpathData));
 //        url = URL("https://plugins.iem.at/");
     }
-    ~IEMLogo() {};
+    ~IEMLogo() override {}
 
     void paint (Graphics& g) override
     {
@@ -481,8 +481,8 @@ public:
     Footer() : Component()
     {
         addAndMakeVisible(&iemLogo);
-    };
-    ~Footer() {};
+    }
+    ~Footer() override {}
 
     void paint (Graphics& g) override
     {
@@ -498,7 +498,7 @@ public:
         versionString.append(JucePlugin_VersionString, 6);
 
         g.drawText(versionString, 0, 0, bounds.getWidth() - 8,bounds.getHeight()-2, Justification::bottomRight);
-    };
+    }
 
     void resized () override
     {

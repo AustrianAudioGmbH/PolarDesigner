@@ -116,9 +116,9 @@ public:
         }
         
             
-    };
+    }
 
-    ~AlertOverlay() {
+    ~AlertOverlay() override {
         delete tbOkay;
         if (type == Type::disturberTracking || type == Type::signalTracking)
         {
@@ -127,7 +127,7 @@ public:
             stopTimer();
             delete ppVisualizer;
         }
-    };
+    }
     
     
     void paint (Graphics& g) override
@@ -164,14 +164,14 @@ public:
         
         if (type == Type::errorMessage)
         {
-            tbOkay->setBounds(width / 2.0f - errorButtonWidth / 2.0f, height - buttonHeight - mB, errorButtonWidth, buttonHeight);
+            tbOkay->setBounds(width / 2 - errorButtonWidth / 2, height - buttonHeight - mB, errorButtonWidth, buttonHeight);
         }
         else if (type == Type::disturberTracking || type == Type::signalTracking)
         {
             tbOkay->setBounds(mL + dvWidth + horSpace, height - buttonHeight - mB, trackingButtonWidth, buttonHeight);
             tbRatio->setBounds(mL + dvWidth + trackingButtonWidth + buttonMargin + horSpace, height - buttonHeight - mB, trackingButtonWidth, buttonHeight);
             tbCancel->setBounds(mL + dvWidth + 2 * trackingButtonWidth + 2 * buttonMargin + horSpace, height - buttonHeight - mB, trackingButtonWidth, buttonHeight);
-            ppVisualizer->setBounds(mL, mT + titleHeight + textMargin - 10.0f, dvWidth, dvWidth);
+            ppVisualizer->setBounds(mL, mT + titleHeight + textMargin - 10, dvWidth, dvWidth);
         }
     }
     

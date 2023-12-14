@@ -49,17 +49,35 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <juce_audio_basics/juce_audio_basics.h>
+#include <juce_audio_devices/juce_audio_devices.h>
+#include <juce_audio_formats/juce_audio_formats.h>
+#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
+#include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_audio_utils/juce_audio_utils.h>
+#include <juce_core/juce_core.h>
+#include <juce_cryptography/juce_cryptography.h>
+#include <juce_data_structures/juce_data_structures.h>
+#include <juce_dsp/juce_dsp.h>
+#include <juce_events/juce_events.h>
+#include <juce_graphics/juce_graphics.h>
+#include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_gui_extra/juce_gui_extra.h>
+#include <juce_opengl/juce_opengl.h>
+
+#include "BinaryData.h"
+
+#include "../lookAndFeel/MainLookAndFeel.h"
 
 //==============================================================================
 /*
 */
 using namespace dsp;
-class PolarPatternVisualizer : public Component
+class PolarPatternVisualizer : public TextButton
 {
-    const float deg2rad = M_PI / 180.0f;
+    const float deg2rad = static_cast<float>(M_PI / 180.0f);
     const int degStep = 4;
-    const int nLookUpSamples = 360;
+//    const int nLookUpSamples = 360;
 
 public:
     PolarPatternVisualizer()
@@ -68,9 +86,10 @@ public:
         soloButton = nullptr;
         muteButton = nullptr;
         soloActive = false;
+        mouseOver = false;
 
-        colour = Colour(0xFFD0011B);
-        
+        colour = mainLaF.mainBackground;
+
         for (int phi = -180; phi <= 180; phi += degStep)
         {
             pointsOnCircle.add(Point<float>(cos(deg2rad * phi), sin(deg2rad * phi)));
@@ -78,95 +97,126 @@ public:
 
         Path circle;
         circle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
-        Path line;
-        line.startNewSubPath(0.0f, -1.0f);
-        line.lineTo(0.0f, 1.0f);
-        
-        grid.clear();
-        grid.addPath(circle);
 
         subGrid.clear();
         for (int i = 1; i < 5; i++)
-            subGrid.addPath(circle, AffineTransform().scaled(i/4.0f));
+            subGrid.addPath(circle, AffineTransform().scaled(i / 4.0f));
 
-        subGrid.addPath(line);
-        subGrid.addPath(line, AffineTransform().rotation(0.25f * M_PI));
-        subGrid.addPath(line, AffineTransform().rotation(0.5f * M_PI));
-        subGrid.addPath(line, AffineTransform().rotation(0.75f * M_PI));
+        hitArea.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
     }
 
-    ~PolarPatternVisualizer()
+    ~PolarPatternVisualizer() override
     {
     }
 
-    void paint (Graphics& g) override
+    void paint(Graphics& g) override
     {
-        Path path;
-        path = grid;
-        path.applyTransform(transform);
-        g.setColour (Colours::skyblue.withMultipliedAlpha(0.1f));
-        g.fillPath(path);
-        g.setColour (Colours::white.withMultipliedAlpha(!isActive ? 0.5f : calcAlpha()));
-        g.strokePath(path, PathStrokeType(1.0f));
+        if (mouseOver && isEnabled())
+        {
+            Path innerCircle;
+            innerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+            innerCircle.applyTransform(transform);
 
-        path = subGrid;
-        path.applyTransform(transform);
-        g.setColour (Colours::skyblue.withMultipliedAlpha(0.3f));
-        g.strokePath(path, PathStrokeType(0.5f));
+            Path outerCircle;
+            outerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+            outerCircle.applyTransform(strokeTransform);
+            outerCircle.setUsingNonZeroWinding(false);
+            outerCircle.addPath(innerCircle);
+
+            g.setColour(colour.withAlpha(0.1f));
+            g.fillPath(outerCircle);
+        }
+
+        if (getToggleState())
+        {
+            Path innerCircle;
+            innerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+            innerCircle.applyTransform(transform);
+
+            Path outerCircle;
+            outerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+            outerCircle.applyTransform(strokeTransform);
+
+            g.setColour(colour.withAlpha(0.1f));
+            g.fillPath(outerCircle);
+        }
+
+        Path gridPath;
+        gridPath = subGrid;
+        gridPath.applyTransform(transform);
+        g.setColour(mainLaF.polarVisualizerGrid);
+        g.strokePath(gridPath, PathStrokeType(1.f));
 
         // draw directivity
-        g.setColour (colour.withMultipliedAlpha(!isActive ? 0.0f : calcAlpha()));
-        path.clear();
-        
-        int idx=0;
+        Path dirPath;
+        g.setColour(isEnabled() ? colour : colour.withBrightness(0.5f));
+
+        int idx = 0;
         for (int phi = -180; phi <= 180; phi += degStep)
         {
-            float phiInRad = (float) phi * deg2rad;
-            float gainLin = std::abs((1 - std::abs (dirWeight)) + dirWeight * std::cos(phiInRad));
+            float phiInRad = (float)phi * deg2rad;
+            float gainLin = std::abs((1 - std::abs(dirWeight)) + dirWeight * std::cos(phiInRad));
             int dbMin = 25;
-            float gainDb = 20 * std::log10 (std::max (gainLin, static_cast<float> (std::pow (10, -dbMin / 20.0f))));
-            float effGain = std::max (std::abs ((gainDb + dbMin) / dbMin), 0.01f);
+            float gainDb = 20 * std::log10(std::max(gainLin, static_cast<float> (std::pow(10, -dbMin / 20.0f))));
+            float effGain = std::max(std::abs((gainDb + dbMin) / dbMin), 0.01f);
             Point<float> point = effGain * pointsOnCircle[idx];
-            
+
             if (phi == -180)
-                path.startNewSubPath(point);
+                dirPath.startNewSubPath(point);
             else
-                path.lineTo(point);
+                dirPath.lineTo(point);
             ++idx;
         }
 
-        path.closeSubPath();
-        path.applyTransform(transform);
-        g.strokePath(path, PathStrokeType(2.0f));
-        
-        //debug
-#ifdef AA_DO_DEBUG_PATH
-        Rectangle<int> bounds = getLocalBounds();
-        juce::Rectangle<int> area (bounds); // [1]
-        g.setColour (juce::Colours::orange);
-        g.drawRect (area);
-#endif
-        
+        dirPath.closeSubPath();
+        dirPath.applyTransform(transform);
 
+        Path hitCircle;
+        hitCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+
+        if (SystemStats::getOperatingSystemName() == "iOS")
+        {
+            hitCircle.applyTransform(strokeTransform);
+            hitArea.addRectangle(hitCircle.getBounds().getX(), hitCircle.getBounds().getY(), hitCircle.getBounds().getWidth(), hitCircle.getBounds().getHeight());
+        }
+        else
+        {
+            hitCircle.applyTransform(transform);
+            hitArea = hitCircle;
+        }
+        g.strokePath(dirPath, PathStrokeType(2.0f));
     }
 
     void resized() override
     {
         Rectangle<int> bounds = getLocalBounds();
+        Rectangle<int> strokeBounds = getLocalBounds();
         Point<int> centre = bounds.getCentre();
 
-        bounds.reduce(10,10);
+        bounds.reduce(5,5);
 
         if (bounds.getWidth() > bounds.getHeight())
             bounds.setWidth(bounds.getHeight());
         else
             bounds.setHeight(bounds.getWidth());
-        
         bounds.setCentre(centre);
 
-        transform = AffineTransform::fromTargetPoints((float) centre.x, (float) centre.y, (float)  centre.x, bounds.getY(), bounds.getX(), centre.y);
-      
+        transform = AffineTransform::fromTargetPoints((float)centre.x, (float)centre.y, (float)centre.x, bounds.getY(), bounds.getX(), centre.y).translated((getWidth() - getHeight()) / 2, 0);
+
+        if (strokeBounds.getWidth() > strokeBounds.getHeight())
+            strokeBounds.setWidth(strokeBounds.getHeight());
+        else
+            strokeBounds.setHeight(strokeBounds.getWidth());
+        strokeBounds.setCentre(centre);
+
+        strokeTransform = AffineTransform::fromTargetPoints((float)centre.x, (float)centre.y, (float)centre.x, strokeBounds.getY(), strokeBounds.getX(), centre.y).translated((getWidth() - getHeight()) / 2, 0);
+
         plotArea = bounds;
+    }
+
+    bool hitTest(int x, int y) override
+    {
+        return hitArea.contains(x, y);
     }
 
     void setDirWeight(float weight)
@@ -174,7 +224,7 @@ public:
         dirWeight = weight;
         repaint();
     }
-    
+
     void setActive(bool active)
     {
         if (isActive != active)
@@ -189,12 +239,12 @@ public:
         return isActive;
     }
 
-    void setMuteSoloButtons(MuteSoloButton* solo, MuteSoloButton* mute)
+    void setMuteSoloButtons(ToggleButton* solo, ToggleButton* mute)
     {
         soloButton = solo;
         muteButton = mute;
     }
-    
+
     float calcAlpha()
     {
         if ((soloButton == nullptr || !soloActive) && (muteButton == nullptr || !muteButton->getToggleState()))
@@ -210,29 +260,48 @@ public:
             return 0.4f;
         }
     }
-    
-    void setSoloActive (bool set)
+
+    void setSoloActive(bool set)
     {
         soloActive = set;
     }
-    
-    void setColour (Colour newColour)
+
+    void setColour(Colour newColour)
     {
         colour = newColour;
+        repaint();
+    }
+
+    void mouseEnter(const MouseEvent& e) override
+    {
+        (void)e;
+        mouseOver = true;
+        repaint();
+    }
+
+    void mouseExit(const MouseEvent& e) override
+    {
+        (void)e;
+        mouseOver = false;
+        repaint();
     }
 
 private:
     Path grid;
     Path subGrid;
-    AffineTransform transform;
+    AffineTransform transform, strokeTransform;
     Rectangle<int> plotArea;
     float dirWeight;
     bool isActive;
-    MuteSoloButton* soloButton;
-    MuteSoloButton* muteButton;
+    ToggleButton* soloButton;
+    ToggleButton* muteButton;
     bool soloActive;
     Colour colour;
+    Colour hoverColour;
+    bool mouseOver;
+    Path hitArea;
 
     Array<Point<float>> pointsOnCircle;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarPatternVisualizer)
+    MainLookAndFeel mainLaF;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PolarPatternVisualizer)
 };

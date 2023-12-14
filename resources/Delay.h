@@ -20,19 +20,36 @@
  ==============================================================================
  */
 
-
 #pragma once
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <juce_audio_basics/juce_audio_basics.h>
+
+#include <juce_audio_devices/juce_audio_devices.h>
+#include <juce_audio_formats/juce_audio_formats.h>
+#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
+#include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_audio_utils/juce_audio_utils.h>
+#include <juce_core/juce_core.h>
+#include <juce_cryptography/juce_cryptography.h>
+#include <juce_data_structures/juce_data_structures.h>
+#include <juce_dsp/juce_dsp.h>
+#include <juce_events/juce_events.h>
+#include <juce_graphics/juce_graphics.h>
+#include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_gui_extra/juce_gui_extra.h>
+#include <juce_opengl/juce_opengl.h>
+
+#include "BinaryData.h"
+
+using namespace juce;
 
 using namespace dsp;
 class Delay : private ProcessorBase
 {
 public:
 
-    Delay()
-    {
-    }
-    ~Delay() {}
+    Delay() {}
+
+    ~Delay() override {}
 
     void setDelayTime (float delayTimeInSeconds)
     {
@@ -50,18 +67,25 @@ public:
         prepare(spec);
     }
 
-    const int getDelayInSamples()
+    unsigned int getDelayInSamples()
     {
-        return bypassed ? 0 : delayInSamples;
+        if (bypassed)
+        {
+            return 0;
+        }
+        else
+        {
+            return delayInSamples;
+        }
     }
 
     void prepare (const ProcessSpec& specs) override
     {
         spec = specs;
 
-        delayInSamples = roundToInt(delay * specs.sampleRate);
+        delayInSamples = static_cast<unsigned int> (roundToInt (delay * specs.sampleRate));
 
-        buffer.setSize(specs.numChannels, specs.maximumBlockSize + delayInSamples);
+        buffer.setSize(static_cast<int> (specs.numChannels), static_cast<int> (specs.maximumBlockSize + delayInSamples));
         buffer.clear();
         writePosition = 0;
     }
@@ -74,7 +98,7 @@ public:
         {
             auto abIn = context.getInputBlock();
             auto abOut = context.getOutputBlock();
-            auto L = abIn.getNumSamples();
+            size_t L = abIn.getNumSamples();
             auto nCh = jmin((int) spec.numChannels, (int) abIn.getNumChannels());
 
             int startIndex, blockSize1, blockSize2;
@@ -84,26 +108,26 @@ public:
             getReadWritePositions(false, (int) L, startIndex, blockSize1, blockSize2);
 
             for (int ch = 0; ch < nCh; ch++)
-                buffer.copyFrom(ch, startIndex, abIn.getChannelPointer(ch), blockSize1);
+                buffer.copyFrom(ch, startIndex, abIn.getChannelPointer(static_cast<size_t> (ch)), blockSize1);
 
             if (blockSize2 > 0)
                 for (int ch = 0; ch < nCh; ch++)
-                    buffer.copyFrom(ch, 0, abIn.getChannelPointer(ch) + blockSize1, blockSize2);
+                    buffer.copyFrom(ch, 0, abIn.getChannelPointer(static_cast<size_t> (ch)) + blockSize1, blockSize2);
 
 
             // read from delay line
             getReadWritePositions(true, (int) L, startIndex, blockSize1, blockSize2);
 
             for (int ch = 0; ch < nCh; ch++)
-                FloatVectorOperations::copy(abOut.getChannelPointer(ch), buffer.getReadPointer(ch) + startIndex, blockSize1);
+                FloatVectorOperations::copy(abOut.getChannelPointer(static_cast<size_t> (ch)), buffer.getReadPointer(ch) + startIndex, blockSize1);
 
             if (blockSize2 > 0)
                 for (int ch = 0; ch < nCh; ch++)
-                    FloatVectorOperations::copy(abOut.getChannelPointer(ch) + blockSize1, buffer.getReadPointer(ch), blockSize2);
+                    FloatVectorOperations::copy(abOut.getChannelPointer(static_cast<size_t> (ch)) + blockSize1, buffer.getReadPointer(ch), blockSize2);
 
 
             writePosition += L;
-            writePosition = writePosition % buffer.getNumSamples();
+            writePosition = writePosition % static_cast<size_t>(buffer.getNumSamples());
         }
     }
 
@@ -114,11 +138,11 @@ public:
 
     void getReadWritePositions (bool read, int numSamples, int& startIndex, int& blockSize1, int& blockSize2)
     {
-        const int L = buffer.getNumSamples();
-        int pos = writePosition;
+        const size_t L = static_cast<size_t>(buffer.getNumSamples());
+        size_t pos = writePosition;
         if (read)
         {
-            pos = writePosition - delayInSamples;
+            pos = static_cast<size_t> (static_cast<unsigned int> (writePosition) - delayInSamples);
         }
         if (pos < 0)
             pos = pos + L;
@@ -134,8 +158,8 @@ public:
         }
         else
         {
-            startIndex = pos;
-            blockSize1 = jmin (L - pos, numSamples);
+            startIndex = static_cast<int>(pos);
+            blockSize1 = jmin (static_cast<int>(L - pos), numSamples);
             numSamples -= blockSize1;
             blockSize2 = numSamples <= 0 ? 0 : numSamples;
         }
@@ -145,8 +169,8 @@ private:
     //==============================================================================
     ProcessSpec spec = {-1, 0, 0};
     float delay;
-    int delayInSamples = 0;
+    unsigned int delayInSamples = 0;
     bool bypassed = false;
-    int writePosition = 0;
+    size_t writePosition = 0;
     AudioBuffer<float> buffer;
 };

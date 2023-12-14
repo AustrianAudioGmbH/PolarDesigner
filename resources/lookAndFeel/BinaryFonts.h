@@ -16,4 +16,9 @@ namespace BinaryFonts
     extern const char*   NunitoSansSemiBold_ttf;
     const int            NunitoSansSemiBold_ttfSize = 90708;
 
+    extern const char* InterBold_ttf;
+    const int           InterBold_ttfSize = 316100;
+
+    extern const char* InterRegular_ttf;
+    const int           InterRegular_ttfSize = 309828;
 }
