@@ -24,6 +24,13 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+struct MetaAudioParameterFloat  : public AudioParameterFloat
+{
+    using AudioParameterFloat::AudioParameterFloat;
+    bool isMetaParameter() const override { return true; }
+};
+
+
 //==============================================================================
 PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() : AudioProcessor (BusesProperties()
            .withInput  ("Input",  AudioChannelSet::stereo(), true)
@@ -39,22 +46,22 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() : AudioProcessor (Bus
            {
         std::make_unique<AudioParameterFloat> (ParameterID {"xOverF1", 1}, "Xover1", NormalisableRange<float>(0.0f, 1.0f, 0.0001f),
                                                hzToZeroToOne(0, INIT_XOVER_FREQS_5B[0]), "",
-                                               AudioProcessorParameter::genericParameter,
+                                               MetaAudioParameterFloat::genericParameter,
                                                [&](float value, int maximumStringLength) {return String(std::roundf(hzFromZeroToOne(0, value))) + " Hz";},
                                                nullptr),
         std::make_unique<AudioParameterFloat> (ParameterID {"xOverF2", 1}, "Xover2", NormalisableRange<float>(0.0f, 1.0f, 0.0001f),
                                                hzToZeroToOne(1, INIT_XOVER_FREQS_5B[1]), "",
-                                               AudioProcessorParameter::genericParameter,
+                                               MetaAudioParameterFloat::genericParameter,
                                                [&](float value, int maximumStringLength) {return String(std::roundf(hzFromZeroToOne(1, value))) + " Hz";},
                                                nullptr),
         std::make_unique<AudioParameterFloat> (ParameterID {"xOverF3", 1}, "Xover3", NormalisableRange<float>(0.0f, 1.0f, 0.0001f),
                                                hzToZeroToOne(2, INIT_XOVER_FREQS_5B[2]), "",
-                                               AudioProcessorParameter::genericParameter,
+                                               MetaAudioParameterFloat::genericParameter,
                                                [&](float value, int maximumStringLength) {return String(std::roundf(hzFromZeroToOne(2, value))) + " Hz";},
                                                nullptr),
         std::make_unique<AudioParameterFloat> (ParameterID {"xOverF4", 1}, "Xover4", NormalisableRange<float>(0.0f, 1.0f, 0.0001f),
                                                hzToZeroToOne(3, INIT_XOVER_FREQS_5B[3]), "",
-                                               AudioProcessorParameter::genericParameter,
+                                               MetaAudioParameterFloat::genericParameter,
                                                [&](float value, int maximumStringLength) {return String(std::roundf(hzFromZeroToOne(3, value))) + " Hz";},
                                                nullptr),
         std::make_unique<AudioParameterFloat> (ParameterID {"alpha1", 1}, "Polar1", NormalisableRange<float>(-0.5f, 1.0f, 0.01f),
