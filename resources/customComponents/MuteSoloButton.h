@@ -78,7 +78,7 @@ public:
     }
     void paint (Graphics& g) override
     {
-        Rectangle<int> bounds = getLocalBounds().reduced(1,1);
+        Rectangle<int> bounds = getLocalBounds();
         const bool state = getToggleState();
 
         getLookAndFeel().drawTickBox(g, *this, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), getToggleState(), isEnabled(), isMouseOver(), isMouseButtonDown());
@@ -88,7 +88,7 @@ public:
 
         g.setColour(!isEnabled() ? Colours::black : state ? Colours::black : findColour(ToggleButton::tickColourId));
         g.drawFittedText(type == solo ? "S" : "M", bounds, juce::Justification::centred, 1);
-
+        
     }
 
     void resized() override

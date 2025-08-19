@@ -1,0 +1,2163 @@
+Running basic validation...
+
+    AU Validation Tool
+    Version: 1.10.0 
+    Copyright 2003-2019, Apple Inc. All Rights Reserved.
+    Specify -h (-help) for command options
+
+--------------------------------------------------
+VALIDATING AUDIO UNIT: 'aufx' - 'AAPD' - 'OIDA'
+--------------------------------------------------
+Manufacturer String: Austrian Audio
+AudioUnit Name: PolarDesigner3
+Component Version: 3.0.0 (0x30000)
+
+* * PASS
+--------------------------------------------------
+TESTING OPEN TIMES:
+COLD:
+JUCE v7.0.12
+RESET TRACKING...
+Time to open AudioUnit:         14.401 ms
+RESET TRACKING...
+RESET TRACKING...
+WARM:
+RESET TRACKING...
+Time to open AudioUnit:         20.193  ms
+This AudioUnit is a version 2 implementation.
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+FIRST TIME:
+Time for initialization:        0.141 ms
+RESET TRACKING...
+
+* * PASS
+--------------------------------------------------
+VERIFYING DEFAULT SCOPE FORMATS:
+Input Scope Bus Configuration:
+ Default Bus Count:1
+    Bus Name: Input
+    Default Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+    Has Channel Layouts: 0x650002 0x660002 0x670002 0x6A0002 
+    Default Layout:
+	Tag=0x650002, Num Chan Descs=0
+
+Output Scope Bus Configuration:
+ Default Bus Count:1
+    Bus Name: Output
+    Default Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+    Has Channel Layouts: 0x640001 0x650002 0x660002 0x670002 0x6A0002 
+    Default Layout:
+	Tag=0x650002, Num Chan Descs=0
+
+* * PASS
+--------------------------------------------------
+VERIFYING REQUIRED PROPERTIES:
+
+* * PASS
+RESET TRACKING...
+RESET TRACKING...
+--------------------------------------------------
+VERIFYING RECOMMENDED PROPERTIES:
+  VERIFYING PROPERTY: Latency
+    PASS
+  VERIFYING PROPERTY: Tail Time
+    PASS
+  VERIFYING PROPERTY: Bypass Effect
+    PASS
+
+* * PASS
+--------------------------------------------------
+VERIFYING OPTIONAL PROPERTIES:
+
+* * PASS
+--------------------------------------------------
+VERIFYING SPECIAL PROPERTIES:
+
+VERIFYING CUSTOM UI
+Cocoa Views Available: 1
+  JUCE_AUCocoaViewClass_5ea75a387bf853a7
+    PASS
+
+HAS FACTORY PRESETS
+    ID:   0    Name: Untitled
+
+VERIFYING CLASS INFO
+    PASS
+
+TESTING HOST CALLBACKS
+    PASS
+
+* * PASS
+--------------------------------------------------
+PUBLISHED PARAMETER INFO:
+
+# # # 31 Global Scope Parameters:
+Parameter ID:21347706
+Name: Nr. of Bands
+Parameter Type: Generic
+Values: Minimum = 1, Default = 5, Maximum = 5
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+  -parameter PASS
+
+Parameter ID:98116754
+Name: Gain1
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116755
+Name: Gain2
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116756
+Name: Gain3
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116757
+Name: Gain4
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116758
+Name: Gain5
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263992
+Name: Mute1
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263993
+Name: Mute2
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263994
+Name: Mute3
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263995
+Name: Mute4
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263996
+Name: Mute5
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618994
+Name: Solo1
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618995
+Name: Solo2
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618996
+Name: Solo3
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618997
+Name: Solo4
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618998
+Name: Solo5
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723859
+Name: Polar1
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723860
+Name: Polar2
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723861
+Name: Polar3
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723862
+Name: Polar4
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723863
+Name: Polar5
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1233066473
+Name: Allow Reverse Patterns
+Parameter Type: Boolean
+Values: Minimum = off, Default = on, Maximum = on
+Flags: Values Have Strings, High Resolution, Not Real Time, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1244849640
+Name: Sync to Channel
+Parameter Type: Generic
+Values: Minimum = none, Default = none, Maximum = 4
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1420671993
+Name: Zero Latency
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058391
+Name: Xover1
+Parameter Type: Generic
+Values: Minimum = 120, Default = 4575, Maximum = 12000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058392
+Name: Xover2
+Parameter Type: Generic
+Values: Minimum = 12000, Default = 10020, Maximum = 120
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058393
+Name: Xover3
+Parameter Type: Generic
+Values: Minimum = 120, Default = 538, Maximum = 2000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058394
+Name: Xover4
+Parameter Type: Generic
+Values: Minimum = 2000, Default = 1800, Maximum = 1000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1653824977
+Name: ProximityOnOff
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1657442431
+Name: Proximity
+Parameter Type: Generic
+Values: Minimum = -1.00, Default = 0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1309028203
+Name: trimPosition
+Parameter Type: Generic
+Values: Minimum = 120 Hz trimPot, Default = 120 Hz trimPot, Maximum = 12000 Hz trimPot
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Testing that parameters retain value across reset and initialization
+RESET TRACKING...
+  PASS
+
+* * PASS
+--------------------------------------------------
+FORMAT TESTS:
+
+Reported Channel Capabilities (explicit):
+      [2, 1]  [2, 2]  
+
+Input/Output Channel Handling:
+1-1   1-2   1-4   1-5   1-6   1-7   1-8   2-2   2-4   2-5   2-6   2-7   2-8   4-4   4-5   5-5   6-6   7-7   8-8
+                                          X                                                                       
+RESET TRACKING...
+
+# # AudioChannelLayouts (4), Input Scope:
+ChannelLayout is Writable: T
+The Unit publishes the following Channel Layouts:
+  0x650002, 0x660002, 0x670002, 0x6A0002, 
+
+Is Audio Channel Layout Available:
+Mono    Stereo  Binau.  AU_4    Ambi.   AU_5    AU_5_0  AU_6    AU_6_0  AU_7_0  AU_7_0F AU_8    AU_5_1  AU_6_1  AU_7_1  AU_7_1F 
+        X       X                                                                                                               
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x650002, Successsful
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x6A0002, Successsful
+
+# # AudioChannelLayouts (5), Output Scope:
+ChannelLayout is Writable: T
+The Unit publishes the following Channel Layouts:
+  0x640001, 0x650002, 0x660002, 0x670002, 0x6A0002, 
+
+Is Audio Channel Layout Available:
+Mono    Stereo  Binau.  AU_4    Ambi.   AU_5    AU_5_0  AU_6    AU_6_0  AU_7_0  AU_7_0F AU_8    AU_5_1  AU_6_1  AU_7_1  AU_7_1F 
+X       X       X                                                                                                               
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x640001, Success - did not reset format with mis-matched layout
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x650002, Successsful
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x6A0002, Successsful
+
+* * PASS
+--------------------------------------------------
+RENDER TESTS:
+RESET TRACKING...
+
+Input Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Output Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Render Test at 512 frames
+RESET TRACKING...
+Slicing Render Test at 64 frames
+  PASS
+
+
+Render Test at 64 frames, sample rate: 22050 Hz
+RESET TRACKING...
+Render Test at 137 frames, sample rate: 96000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 48000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 192000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 11025 Hz
+RESET TRACKING...
+Render Test at 512 frames, sample rate: 44100 Hz
+RESET TRACKING...
+  PASS
+RESET TRACKING...
+
+Checking connection semantics:
+Connection format:
+AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+  PASS
+
+Bad Max Frames - Render should fail
+  PASS
+
+Checking parameter setting
+Using AudioUnitSetParameter
+Using AudioUnitScheduleParameter
+  PASS
+
+Checking ramped parameter scheduling
+  PASS
+
+Test MIDI
+  PASS
+
+* * PASS
+RESET TRACKING...
+--------------------------------------------------
+AU VALIDATION SUCCEEDED.
+--------------------------------------------------
+Basic validation passed
+Running strict validation...
+
+    AU Validation Tool
+    Version: 1.10.0 
+    Copyright 2003-2019, Apple Inc. All Rights Reserved.
+    Specify -h (-help) for command options
+
+--------------------------------------------------
+VALIDATING AUDIO UNIT: 'aufx' - 'AAPD' - 'OIDA'
+--------------------------------------------------
+Manufacturer String: Austrian Audio
+AudioUnit Name: PolarDesigner3
+Component Version: 3.0.0 (0x30000)
+
+* * PASS
+--------------------------------------------------
+TESTING OPEN TIMES:
+COLD:
+JUCE v7.0.12
+RESET TRACKING...
+Time to open AudioUnit:         15.199 ms
+RESET TRACKING...
+RESET TRACKING...
+WARM:
+RESET TRACKING...
+Time to open AudioUnit:         7.739  ms
+This AudioUnit is a version 2 implementation.
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+FIRST TIME:
+Time for initialization:        0.140 ms
+RESET TRACKING...
+
+* * PASS
+--------------------------------------------------
+VERIFYING DEFAULT SCOPE FORMATS:
+Input Scope Bus Configuration:
+ Default Bus Count:1
+    Bus Name: Input
+    Default Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+    Has Channel Layouts: 0x650002 0x660002 0x670002 0x6A0002 
+    Default Layout:
+	Tag=0x650002, Num Chan Descs=0
+
+Output Scope Bus Configuration:
+ Default Bus Count:1
+    Bus Name: Output
+    Default Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+    Has Channel Layouts: 0x640001 0x650002 0x660002 0x670002 0x6A0002 
+    Default Layout:
+	Tag=0x650002, Num Chan Descs=0
+
+* * PASS
+--------------------------------------------------
+VERIFYING REQUIRED PROPERTIES:
+
+* * PASS
+RESET TRACKING...
+RESET TRACKING...
+--------------------------------------------------
+VERIFYING RECOMMENDED PROPERTIES:
+  VERIFYING PROPERTY: Latency
+    PASS
+  VERIFYING PROPERTY: Tail Time
+    PASS
+  VERIFYING PROPERTY: Bypass Effect
+    PASS
+
+* * PASS
+--------------------------------------------------
+VERIFYING OPTIONAL PROPERTIES:
+
+* * PASS
+--------------------------------------------------
+VERIFYING SPECIAL PROPERTIES:
+
+VERIFYING CUSTOM UI
+Cocoa Views Available: 1
+  JUCE_AUCocoaViewClass_732991833f739ea5
+    PASS
+
+HAS FACTORY PRESETS
+    ID:   0    Name: Untitled
+
+VERIFYING CLASS INFO
+    PASS
+
+TESTING HOST CALLBACKS
+    PASS
+
+* * PASS
+--------------------------------------------------
+PUBLISHED PARAMETER INFO:
+
+# # # 31 Global Scope Parameters:
+Parameter ID:21347706
+Name: Nr. of Bands
+Parameter Type: Generic
+Values: Minimum = 1, Default = 5, Maximum = 5
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+  -parameter PASS
+
+Parameter ID:98116754
+Name: Gain1
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116755
+Name: Gain2
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116756
+Name: Gain3
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116757
+Name: Gain4
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116758
+Name: Gain5
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263992
+Name: Mute1
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263993
+Name: Mute2
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263994
+Name: Mute3
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263995
+Name: Mute4
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263996
+Name: Mute5
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618994
+Name: Solo1
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618995
+Name: Solo2
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618996
+Name: Solo3
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618997
+Name: Solo4
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618998
+Name: Solo5
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723859
+Name: Polar1
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723860
+Name: Polar2
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723861
+Name: Polar3
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723862
+Name: Polar4
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723863
+Name: Polar5
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1233066473
+Name: Allow Reverse Patterns
+Parameter Type: Boolean
+Values: Minimum = off, Default = on, Maximum = on
+Flags: Values Have Strings, High Resolution, Not Real Time, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1244849640
+Name: Sync to Channel
+Parameter Type: Generic
+Values: Minimum = none, Default = none, Maximum = 4
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1420671993
+Name: Zero Latency
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058391
+Name: Xover1
+Parameter Type: Generic
+Values: Minimum = 120, Default = 4575, Maximum = 12000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058392
+Name: Xover2
+Parameter Type: Generic
+Values: Minimum = 12000, Default = 10020, Maximum = 120
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058393
+Name: Xover3
+Parameter Type: Generic
+Values: Minimum = 120, Default = 538, Maximum = 2000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058394
+Name: Xover4
+Parameter Type: Generic
+Values: Minimum = 2000, Default = 1800, Maximum = 1000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1653824977
+Name: ProximityOnOff
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1657442431
+Name: Proximity
+Parameter Type: Generic
+Values: Minimum = -1.00, Default = 0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1309028203
+Name: trimPosition
+Parameter Type: Generic
+Values: Minimum = 120 Hz trimPot, Default = 120 Hz trimPot, Maximum = 12000 Hz trimPot
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Testing that parameters retain value across reset and initialization
+RESET TRACKING...
+  PASS
+
+* * PASS
+--------------------------------------------------
+FORMAT TESTS:
+
+Reported Channel Capabilities (explicit):
+      [2, 1]  [2, 2]  
+
+Input/Output Channel Handling:
+1-1   1-2   1-4   1-5   1-6   1-7   1-8   2-2   2-4   2-5   2-6   2-7   2-8   4-4   4-5   5-5   6-6   7-7   8-8
+                                          X                                                                       
+RESET TRACKING...
+
+# # AudioChannelLayouts (4), Input Scope:
+ChannelLayout is Writable: T
+The Unit publishes the following Channel Layouts:
+  0x650002, 0x660002, 0x670002, 0x6A0002, 
+
+Is Audio Channel Layout Available:
+Mono    Stereo  Binau.  AU_4    Ambi.   AU_5    AU_5_0  AU_6    AU_6_0  AU_7_0  AU_7_0F AU_8    AU_5_1  AU_6_1  AU_7_1  AU_7_1F 
+        X       X                                                                                                               
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x650002, Successsful
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x6A0002, Successsful
+
+# # AudioChannelLayouts (5), Output Scope:
+ChannelLayout is Writable: T
+The Unit publishes the following Channel Layouts:
+  0x640001, 0x650002, 0x660002, 0x670002, 0x6A0002, 
+
+Is Audio Channel Layout Available:
+Mono    Stereo  Binau.  AU_4    Ambi.   AU_5    AU_5_0  AU_6    AU_6_0  AU_7_0  AU_7_0F AU_8    AU_5_1  AU_6_1  AU_7_1  AU_7_1F 
+X       X       X                                                                                                               
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x640001, Success - did not reset format with mis-matched layout
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x650002, Successsful
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x6A0002, Successsful
+
+* * PASS
+--------------------------------------------------
+RENDER TESTS:
+RESET TRACKING...
+
+Input Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Output Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Render Test at 512 frames
+RESET TRACKING...
+Slicing Render Test at 64 frames
+  PASS
+
+
+Render Test at 64 frames, sample rate: 22050 Hz
+RESET TRACKING...
+Render Test at 137 frames, sample rate: 96000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 48000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 192000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 11025 Hz
+RESET TRACKING...
+Render Test at 512 frames, sample rate: 44100 Hz
+RESET TRACKING...
+  PASS
+RESET TRACKING...
+
+Checking connection semantics:
+Connection format:
+AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+  PASS
+
+Bad Max Frames - Render should fail
+  PASS
+
+Checking parameter setting
+Using AudioUnitSetParameter
+Using AudioUnitScheduleParameter
+  PASS
+
+Checking ramped parameter scheduling
+  PASS
+
+Test MIDI
+  PASS
+
+* * PASS
+RESET TRACKING...
+--------------------------------------------------
+AU VALIDATION SUCCEEDED.
+--------------------------------------------------
+Strict validation passed
+Running stress test...
+
+    AU Validation Tool
+    Version: 1.10.0 
+    Copyright 2003-2019, Apple Inc. All Rights Reserved.
+    Specify -h (-help) for command options
+
+--------------------------------------------------
+VALIDATING AUDIO UNIT: 'aufx' - 'AAPD' - 'OIDA'
+--------------------------------------------------
+Manufacturer String: Austrian Audio
+AudioUnit Name: PolarDesigner3
+Component Version: 3.0.0 (0x30000)
+
+* * PASS
+--------------------------------------------------
+TESTING OPEN TIMES:
+COLD:
+JUCE v7.0.12
+RESET TRACKING...
+Time to open AudioUnit:         14.306 ms
+RESET TRACKING...
+RESET TRACKING...
+WARM:
+RESET TRACKING...
+Time to open AudioUnit:         18.729  ms
+This AudioUnit is a version 2 implementation.
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+FIRST TIME:
+Time for initialization:        0.133 ms
+RESET TRACKING...
+
+* * PASS
+--------------------------------------------------
+VERIFYING DEFAULT SCOPE FORMATS:
+Input Scope Bus Configuration:
+ Default Bus Count:1
+    Bus Name: Input
+    Default Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+    Has Channel Layouts: 0x650002 0x660002 0x670002 0x6A0002 
+    Default Layout:
+	Tag=0x650002, Num Chan Descs=0
+
+Output Scope Bus Configuration:
+ Default Bus Count:1
+    Bus Name: Output
+    Default Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+    Has Channel Layouts: 0x640001 0x650002 0x660002 0x670002 0x6A0002 
+    Default Layout:
+	Tag=0x650002, Num Chan Descs=0
+
+* * PASS
+--------------------------------------------------
+VERIFYING REQUIRED PROPERTIES:
+
+* * PASS
+RESET TRACKING...
+RESET TRACKING...
+--------------------------------------------------
+VERIFYING RECOMMENDED PROPERTIES:
+  VERIFYING PROPERTY: Latency
+    PASS
+  VERIFYING PROPERTY: Tail Time
+    PASS
+  VERIFYING PROPERTY: Bypass Effect
+    PASS
+
+* * PASS
+--------------------------------------------------
+VERIFYING OPTIONAL PROPERTIES:
+
+* * PASS
+--------------------------------------------------
+VERIFYING SPECIAL PROPERTIES:
+
+VERIFYING CUSTOM UI
+Cocoa Views Available: 1
+  JUCE_AUCocoaViewClass_21d9cea5cbdf68f6
+    PASS
+
+HAS FACTORY PRESETS
+    ID:   0    Name: Untitled
+
+VERIFYING CLASS INFO
+    PASS
+
+TESTING HOST CALLBACKS
+    PASS
+
+* * PASS
+--------------------------------------------------
+PUBLISHED PARAMETER INFO:
+
+# # # 31 Global Scope Parameters:
+Parameter ID:21347706
+Name: Nr. of Bands
+Parameter Type: Generic
+Values: Minimum = 1, Default = 5, Maximum = 5
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+  -parameter PASS
+
+Parameter ID:98116754
+Name: Gain1
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116755
+Name: Gain2
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116756
+Name: Gain3
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116757
+Name: Gain4
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116758
+Name: Gain5
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263992
+Name: Mute1
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263993
+Name: Mute2
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263994
+Name: Mute3
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263995
+Name: Mute4
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263996
+Name: Mute5
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618994
+Name: Solo1
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618995
+Name: Solo2
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618996
+Name: Solo3
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618997
+Name: Solo4
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618998
+Name: Solo5
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723859
+Name: Polar1
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723860
+Name: Polar2
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723861
+Name: Polar3
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723862
+Name: Polar4
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723863
+Name: Polar5
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1233066473
+Name: Allow Reverse Patterns
+Parameter Type: Boolean
+Values: Minimum = off, Default = on, Maximum = on
+Flags: Values Have Strings, High Resolution, Not Real Time, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1244849640
+Name: Sync to Channel
+Parameter Type: Generic
+Values: Minimum = none, Default = none, Maximum = 4
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1420671993
+Name: Zero Latency
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058391
+Name: Xover1
+Parameter Type: Generic
+Values: Minimum = 120, Default = 4575, Maximum = 12000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058392
+Name: Xover2
+Parameter Type: Generic
+Values: Minimum = 12000, Default = 10020, Maximum = 120
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058393
+Name: Xover3
+Parameter Type: Generic
+Values: Minimum = 120, Default = 538, Maximum = 2000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058394
+Name: Xover4
+Parameter Type: Generic
+Values: Minimum = 2000, Default = 1800, Maximum = 1000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1653824977
+Name: ProximityOnOff
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1657442431
+Name: Proximity
+Parameter Type: Generic
+Values: Minimum = -1.00, Default = 0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1309028203
+Name: trimPosition
+Parameter Type: Generic
+Values: Minimum = 120 Hz trimPot, Default = 120 Hz trimPot, Maximum = 12000 Hz trimPot
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Testing that parameters retain value across reset and initialization
+RESET TRACKING...
+  PASS
+
+* * PASS
+--------------------------------------------------
+FORMAT TESTS:
+
+Reported Channel Capabilities (explicit):
+      [2, 1]  [2, 2]  
+
+Input/Output Channel Handling:
+1-1   1-2   1-4   1-5   1-6   1-7   1-8   2-2   2-4   2-5   2-6   2-7   2-8   4-4   4-5   5-5   6-6   7-7   8-8
+                                          X                                                                       
+RESET TRACKING...
+
+# # AudioChannelLayouts (4), Input Scope:
+ChannelLayout is Writable: T
+The Unit publishes the following Channel Layouts:
+  0x650002, 0x660002, 0x670002, 0x6A0002, 
+
+Is Audio Channel Layout Available:
+Mono    Stereo  Binau.  AU_4    Ambi.   AU_5    AU_5_0  AU_6    AU_6_0  AU_7_0  AU_7_0F AU_8    AU_5_1  AU_6_1  AU_7_1  AU_7_1F 
+        X       X                                                                                                               
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x650002, Successsful
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x6A0002, Successsful
+
+# # AudioChannelLayouts (5), Output Scope:
+ChannelLayout is Writable: T
+The Unit publishes the following Channel Layouts:
+  0x640001, 0x650002, 0x660002, 0x670002, 0x6A0002, 
+
+Is Audio Channel Layout Available:
+Mono    Stereo  Binau.  AU_4    Ambi.   AU_5    AU_5_0  AU_6    AU_6_0  AU_7_0  AU_7_0F AU_8    AU_5_1  AU_6_1  AU_7_1  AU_7_1F 
+X       X       X                                                                                                               
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x640001, Success - did not reset format with mis-matched layout
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x650002, Successsful
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x6A0002, Successsful
+
+* * PASS
+--------------------------------------------------
+RENDER TESTS:
+RESET TRACKING...
+
+Input Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Output Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Render Test at 512 frames
+RESET TRACKING...
+Slicing Render Test at 64 frames
+  PASS
+
+
+Render Test at 64 frames, sample rate: 22050 Hz
+RESET TRACKING...
+Render Test at 137 frames, sample rate: 96000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 48000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 192000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 11025 Hz
+RESET TRACKING...
+Render Test at 512 frames, sample rate: 44100 Hz
+RESET TRACKING...
+  PASS
+RESET TRACKING...
+
+Checking connection semantics:
+Connection format:
+AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+  PASS
+
+Bad Max Frames - Render should fail
+  PASS
+
+Checking parameter setting
+Using AudioUnitSetParameter
+Using AudioUnitScheduleParameter
+  PASS
+
+Checking ramped parameter scheduling
+  PASS
+
+Test MIDI
+  PASS
+
+Stress Test
+Render for 600 seconds of audio at frame size: 512, sample rate: 44100 Hz
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+  PASS
+Running basic validation...
+
+    AU Validation Tool
+    Version: 1.10.0 
+    Copyright 2003-2019, Apple Inc. All Rights Reserved.
+    Specify -h (-help) for command options
+
+--------------------------------------------------
+VALIDATING AUDIO UNIT: 'aufx' - 'AAPD' - 'OIDA'
+--------------------------------------------------
+Manufacturer String: Austrian Audio
+AudioUnit Name: PolarDesigner3
+Component Version: 3.0.0 (0x30000)
+
+* * PASS
+--------------------------------------------------
+TESTING OPEN TIMES:
+COLD:
+JUCE v7.0.12
+RESET TRACKING...
+Time to open AudioUnit:         68.185 ms
+RESET TRACKING...
+RESET TRACKING...
+WARM:
+RESET TRACKING...
+Time to open AudioUnit:         22.503  ms
+This AudioUnit is a version 2 implementation.
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+FIRST TIME:
+Time for initialization:        0.156 ms
+RESET TRACKING...
+
+* * PASS
+--------------------------------------------------
+VERIFYING DEFAULT SCOPE FORMATS:
+Input Scope Bus Configuration:
+ Default Bus Count:1
+    Bus Name: Input
+    Default Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+    Has Channel Layouts: 0x650002 0x660002 0x670002 0x6A0002 
+    Default Layout:
+	Tag=0x650002, Num Chan Descs=0
+
+Output Scope Bus Configuration:
+ Default Bus Count:1
+    Bus Name: Output
+    Default Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+    Has Channel Layouts: 0x640001 0x650002 0x660002 0x670002 0x6A0002 
+    Default Layout:
+	Tag=0x650002, Num Chan Descs=0
+
+* * PASS
+--------------------------------------------------
+VERIFYING REQUIRED PROPERTIES:
+
+* * PASS
+RESET TRACKING...
+RESET TRACKING...
+--------------------------------------------------
+VERIFYING RECOMMENDED PROPERTIES:
+  VERIFYING PROPERTY: Latency
+    PASS
+  VERIFYING PROPERTY: Tail Time
+    PASS
+  VERIFYING PROPERTY: Bypass Effect
+    PASS
+
+* * PASS
+--------------------------------------------------
+VERIFYING OPTIONAL PROPERTIES:
+
+* * PASS
+--------------------------------------------------
+VERIFYING SPECIAL PROPERTIES:
+
+VERIFYING CUSTOM UI
+Cocoa Views Available: 1
+  JUCE_AUCocoaViewClass_23faae3215683a8d
+    PASS
+
+HAS FACTORY PRESETS
+    ID:   0    Name: Untitled
+
+VERIFYING CLASS INFO
+    PASS
+
+TESTING HOST CALLBACKS
+    PASS
+
+* * PASS
+--------------------------------------------------
+PUBLISHED PARAMETER INFO:
+
+# # # 31 Global Scope Parameters:
+Parameter ID:21347706
+Name: Nr. of Bands
+Parameter Type: Generic
+Values: Minimum = 1, Default = 5, Maximum = 5
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+  -parameter PASS
+
+Parameter ID:98116754
+Name: Gain1
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116755
+Name: Gain2
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116756
+Name: Gain3
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116757
+Name: Gain4
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116758
+Name: Gain5
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263992
+Name: Mute1
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263993
+Name: Mute2
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263994
+Name: Mute3
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263995
+Name: Mute4
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263996
+Name: Mute5
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618994
+Name: Solo1
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618995
+Name: Solo2
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618996
+Name: Solo3
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618997
+Name: Solo4
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618998
+Name: Solo5
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723859
+Name: Polar1
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723860
+Name: Polar2
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723861
+Name: Polar3
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723862
+Name: Polar4
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723863
+Name: Polar5
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1233066473
+Name: Allow Reverse Patterns
+Parameter Type: Boolean
+Values: Minimum = off, Default = on, Maximum = on
+Flags: Values Have Strings, High Resolution, Not Real Time, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1244849640
+Name: Sync to Channel
+Parameter Type: Generic
+Values: Minimum = none, Default = none, Maximum = 4
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1420671993
+Name: Zero Latency
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058391
+Name: Xover1
+Parameter Type: Generic
+Values: Minimum = 120, Default = 4575, Maximum = 12000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058392
+Name: Xover2
+Parameter Type: Generic
+Values: Minimum = 12000, Default = 10020, Maximum = 120
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058393
+Name: Xover3
+Parameter Type: Generic
+Values: Minimum = 120, Default = 538, Maximum = 2000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058394
+Name: Xover4
+Parameter Type: Generic
+Values: Minimum = 2000, Default = 1800, Maximum = 1000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1653824977
+Name: ProximityOnOff
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1657442431
+Name: Proximity
+Parameter Type: Generic
+Values: Minimum = -1.00, Default = 0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1309028203
+Name: trimPosition
+Parameter Type: Generic
+Values: Minimum = 120 Hz trimPot, Default = 120 Hz trimPot, Maximum = 12000 Hz trimPot
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Testing that parameters retain value across reset and initialization
+RESET TRACKING...
+  PASS
+
+* * PASS
+--------------------------------------------------
+FORMAT TESTS:
+
+Reported Channel Capabilities (explicit):
+      [2, 1]  [2, 2]  
+
+Input/Output Channel Handling:
+1-1   1-2   1-4   1-5   1-6   1-7   1-8   2-2   2-4   2-5   2-6   2-7   2-8   4-4   4-5   5-5   6-6   7-7   8-8
+                                          X                                                                       
+RESET TRACKING...
+
+# # AudioChannelLayouts (4), Input Scope:
+ChannelLayout is Writable: T
+The Unit publishes the following Channel Layouts:
+  0x650002, 0x660002, 0x670002, 0x6A0002, 
+
+Is Audio Channel Layout Available:
+Mono    Stereo  Binau.  AU_4    Ambi.   AU_5    AU_5_0  AU_6    AU_6_0  AU_7_0  AU_7_0F AU_8    AU_5_1  AU_6_1  AU_7_1  AU_7_1F 
+        X       X                                                                                                               
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x650002, Successsful
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x6A0002, Successsful
+
+# # AudioChannelLayouts (5), Output Scope:
+ChannelLayout is Writable: T
+The Unit publishes the following Channel Layouts:
+  0x640001, 0x650002, 0x660002, 0x670002, 0x6A0002, 
+
+Is Audio Channel Layout Available:
+Mono    Stereo  Binau.  AU_4    Ambi.   AU_5    AU_5_0  AU_6    AU_6_0  AU_7_0  AU_7_0F AU_8    AU_5_1  AU_6_1  AU_7_1  AU_7_1F 
+X       X       X                                                                                                               
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x640001, Success - did not reset format with mis-matched layout
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x650002, Successsful
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x6A0002, Successsful
+
+* * PASS
+--------------------------------------------------
+RENDER TESTS:
+RESET TRACKING...
+
+Input Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Output Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Render Test at 512 frames
+RESET TRACKING...
+Slicing Render Test at 64 frames
+  PASS
+
+
+Render Test at 64 frames, sample rate: 22050 Hz
+RESET TRACKING...
+Render Test at 137 frames, sample rate: 96000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 48000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 192000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 11025 Hz
+RESET TRACKING...
+Render Test at 512 frames, sample rate: 44100 Hz
+RESET TRACKING...
+  PASS
+RESET TRACKING...
+
+Checking connection semantics:
+Connection format:
+AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+  PASS
+
+Bad Max Frames - Render should fail
+  PASS
+
+Checking parameter setting
+Using AudioUnitSetParameter
+Using AudioUnitScheduleParameter
+  PASS
+
+Checking ramped parameter scheduling
+  PASS
+
+Test MIDI
+  PASS
+
+* * PASS
+RESET TRACKING...
+--------------------------------------------------
+AU VALIDATION SUCCEEDED.
+--------------------------------------------------
+Basic validation passed
+Running strict validation...
+
+    AU Validation Tool
+    Version: 1.10.0 
+    Copyright 2003-2019, Apple Inc. All Rights Reserved.
+    Specify -h (-help) for command options
+
+--------------------------------------------------
+VALIDATING AUDIO UNIT: 'aufx' - 'AAPD' - 'OIDA'
+--------------------------------------------------
+Manufacturer String: Austrian Audio
+AudioUnit Name: PolarDesigner3
+Component Version: 3.0.0 (0x30000)
+
+* * PASS
+--------------------------------------------------
+TESTING OPEN TIMES:
+COLD:
+JUCE v7.0.12
+RESET TRACKING...
+Time to open AudioUnit:         13.983 ms
+RESET TRACKING...
+RESET TRACKING...
+WARM:
+RESET TRACKING...
+Time to open AudioUnit:         5.915  ms
+This AudioUnit is a version 2 implementation.
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+FIRST TIME:
+Time for initialization:        0.149 ms
+RESET TRACKING...
+
+* * PASS
+--------------------------------------------------
+VERIFYING DEFAULT SCOPE FORMATS:
+Input Scope Bus Configuration:
+ Default Bus Count:1
+    Bus Name: Input
+    Default Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+    Has Channel Layouts: 0x650002 0x660002 0x670002 0x6A0002 
+    Default Layout:
+	Tag=0x650002, Num Chan Descs=0
+
+Output Scope Bus Configuration:
+ Default Bus Count:1
+    Bus Name: Output
+    Default Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+    Has Channel Layouts: 0x640001 0x650002 0x660002 0x670002 0x6A0002 
+    Default Layout:
+	Tag=0x650002, Num Chan Descs=0
+
+* * PASS
+--------------------------------------------------
+VERIFYING REQUIRED PROPERTIES:
+
+* * PASS
+RESET TRACKING...
+RESET TRACKING...
+--------------------------------------------------
+VERIFYING RECOMMENDED PROPERTIES:
+  VERIFYING PROPERTY: Latency
+    PASS
+  VERIFYING PROPERTY: Tail Time
+    PASS
+  VERIFYING PROPERTY: Bypass Effect
+    PASS
+
+* * PASS
+--------------------------------------------------
+VERIFYING OPTIONAL PROPERTIES:
+
+* * PASS
+--------------------------------------------------
+VERIFYING SPECIAL PROPERTIES:
+
+VERIFYING CUSTOM UI
+Cocoa Views Available: 1
+  JUCE_AUCocoaViewClass_3bdcb31b369358db
+    PASS
+
+HAS FACTORY PRESETS
+    ID:   0    Name: Untitled
+
+VERIFYING CLASS INFO
+    PASS
+
+TESTING HOST CALLBACKS
+    PASS
+
+* * PASS
+--------------------------------------------------
+PUBLISHED PARAMETER INFO:
+
+# # # 31 Global Scope Parameters:
+Parameter ID:21347706
+Name: Nr. of Bands
+Parameter Type: Generic
+Values: Minimum = 1, Default = 5, Maximum = 5
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+  -parameter PASS
+
+Parameter ID:98116754
+Name: Gain1
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116755
+Name: Gain2
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116756
+Name: Gain3
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116757
+Name: Gain4
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:98116758
+Name: Gain5
+Parameter Type: Generic
+Values: Minimum = -24.0, Default = 0.0, Maximum = 18.0
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263992
+Name: Mute1
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263993
+Name: Mute2
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263994
+Name: Mute3
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263995
+Name: Mute4
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:104263996
+Name: Mute5
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618994
+Name: Solo1
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618995
+Name: Solo2
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618996
+Name: Solo3
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618997
+Name: Solo4
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:109618998
+Name: Solo5
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723859
+Name: Polar1
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723860
+Name: Polar2
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723861
+Name: Polar3
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723862
+Name: Polar4
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:732723863
+Name: Polar5
+Parameter Type: Generic
+Values: Minimum = -0.50, Default = -0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1233066473
+Name: Allow Reverse Patterns
+Parameter Type: Boolean
+Values: Minimum = off, Default = on, Maximum = on
+Flags: Values Have Strings, High Resolution, Not Real Time, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1244849640
+Name: Sync to Channel
+Parameter Type: Generic
+Values: Minimum = none, Default = none, Maximum = 4
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1420671993
+Name: Zero Latency
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058391
+Name: Xover1
+Parameter Type: Generic
+Values: Minimum = 120, Default = 4575, Maximum = 12000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058392
+Name: Xover2
+Parameter Type: Generic
+Values: Minimum = 12000, Default = 10020, Maximum = 120
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058393
+Name: Xover3
+Parameter Type: Generic
+Values: Minimum = 120, Default = 538, Maximum = 2000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1500058394
+Name: Xover4
+Parameter Type: Generic
+Values: Minimum = 2000, Default = 1800, Maximum = 1000
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1653824977
+Name: ProximityOnOff
+Parameter Type: Boolean
+Values: Minimum = off, Default = off, Maximum = on
+Flags: Values Have Strings, High Resolution, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1657442431
+Name: Proximity
+Parameter Type: Generic
+Values: Minimum = -1.00, Default = 0.00, Maximum = 1.00
+Flags: Values Have Strings, High Resolution, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Parameter ID:1309028203
+Name: trimPosition
+Parameter Type: Generic
+Values: Minimum = 120 Hz trimPot, Default = 120 Hz trimPot, Maximum = 12000 Hz trimPot
+Flags: Values Have Strings, High Resolution, Not Real Time, Can Ramp, Readable, Writable 
+  -parameter PASS
+
+Testing that parameters retain value across reset and initialization
+RESET TRACKING...
+  PASS
+
+* * PASS
+--------------------------------------------------
+FORMAT TESTS:
+
+Reported Channel Capabilities (explicit):
+      [2, 1]  [2, 2]  
+
+Input/Output Channel Handling:
+1-1   1-2   1-4   1-5   1-6   1-7   1-8   2-2   2-4   2-5   2-6   2-7   2-8   4-4   4-5   5-5   6-6   7-7   8-8
+                                          X                                                                       
+RESET TRACKING...
+
+# # AudioChannelLayouts (4), Input Scope:
+ChannelLayout is Writable: T
+The Unit publishes the following Channel Layouts:
+  0x650002, 0x660002, 0x670002, 0x6A0002, 
+
+Is Audio Channel Layout Available:
+Mono    Stereo  Binau.  AU_4    Ambi.   AU_5    AU_5_0  AU_6    AU_6_0  AU_7_0  AU_7_0F AU_8    AU_5_1  AU_6_1  AU_7_1  AU_7_1F 
+        X       X                                                                                                               
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x650002, Successsful
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x6A0002, Successsful
+
+# # AudioChannelLayouts (5), Output Scope:
+ChannelLayout is Writable: T
+The Unit publishes the following Channel Layouts:
+  0x640001, 0x650002, 0x660002, 0x670002, 0x6A0002, 
+
+Is Audio Channel Layout Available:
+Mono    Stereo  Binau.  AU_4    Ambi.   AU_5    AU_5_0  AU_6    AU_6_0  AU_7_0  AU_7_0F AU_8    AU_5_1  AU_6_1  AU_7_1  AU_7_1F 
+X       X       X                                                                                                               
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x640001, Success - did not reset format with mis-matched layout
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x650002, Successsful
+
+Current Format:AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Current Format Tag = 0x650002, New Format Tag = 0x6A0002, Successsful
+
+* * PASS
+--------------------------------------------------
+RENDER TESTS:
+RESET TRACKING...
+
+Input Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Output Format: AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+Render Test at 512 frames
+RESET TRACKING...
+Slicing Render Test at 64 frames
+  PASS
+
+
+Render Test at 64 frames, sample rate: 22050 Hz
+RESET TRACKING...
+Render Test at 137 frames, sample rate: 96000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 48000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 192000 Hz
+RESET TRACKING...
+Render Test at 4096 frames, sample rate: 11025 Hz
+RESET TRACKING...
+Render Test at 512 frames, sample rate: 44100 Hz
+RESET TRACKING...
+  PASS
+RESET TRACKING...
+
+Checking connection semantics:
+Connection format:
+AudioStreamBasicDescription:  2 ch,  44100 Hz, Float32, deinterleaved
+  PASS
+
+Bad Max Frames - Render should fail
+  PASS
+
+Checking parameter setting
+Using AudioUnitSetParameter
+Using AudioUnitScheduleParameter
+  PASS
+
+Checking ramped parameter scheduling
+  PASS
+
+Test MIDI
+  PASS
+
+* * PASS
+RESET TRACKING...
+--------------------------------------------------
+AU VALIDATION SUCCEEDED.
+--------------------------------------------------
+Strict validation passed
+Running memory leak test...
+
+    AU Validation Tool
+    Version: 1.10.0 
+    Copyright 2003-2019, Apple Inc. All Rights Reserved.
+    Specify -h (-help) for command options
+
+--------------------------------------------------
+VALIDATING AUDIO UNIT: 'aufx' - 'AAPD' - 'OIDA'
+Manufacturer String: Austrian Audio
+AudioUnit Name: PolarDesigner3
+Component Version: 3.0.0 (0x30000)
+JUCE v7.0.12
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+RESET TRACKING...
+Process 52350 is not debuggable. Due to security restrictions, leaks can only show or save contents of readonly memory of restricted processes.
+
+Process:         auvaltool [52350]
+Path:            /usr/bin/auvaltool
+Load Address:    0x104514000
+Identifier:      auvaltool
+Version:         746.6.1
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  bash [52333]
+
+Date/Time:       2025-07-15 13:41:44.405 +0200
+Launch Time:     2025-07-15 13:41:38.352 +0200
+OS Version:      macOS 14.7.6 (23H626)
+Report Version:  7
+Analysis Tool:   /Applications/Xcode.app/Contents/Developer/usr/bin/leaks
+Analysis Tool Version:  Xcode 16.2 (16C5032a)
+
+Physical footprint:         39.4M
+Physical footprint (peak):  293.1M
+Idle exit:                  untracked
+----
+
+leaks Report Version: 4.0
+Process 52350: 4416 nodes malloced for 599 KB
+Process 52350: 0 leaks for 0 total leaked bytes.
+
+No memory leaks detected
+All tests completed successfully

@@ -1,0 +1,1065 @@
+<REAPER_PROJECT 0.1 "7.39/macOS-arm64" 1747127970
+  <NOTES 0 2
+  >
+  RIPPLE 0 0
+  GROUPOVERRIDE 0 0 0
+  AUTOXFADE 129
+  ENVATTACH 3
+  POOLEDENVATTACH 0
+  MIXERUIFLAGS 11 48
+  ENVFADESZ10 40
+  PEAKGAIN 1
+  FEEDBACK 0
+  PANLAW 1
+  PROJOFFS 0 0 0
+  MAXPROJLEN 0 0
+  GRID 3199 8 1 8 1 0 0 0
+  TIMEMODE 1 5 -1 30 0 0 -1
+  VIDEO_CONFIG 0 0 65792
+  PANMODE 3
+  PANLAWFLAGS 3
+  CURSOR 0
+  ZOOM 25.47655226259539 0 0
+  VZOOMEX 0 0
+  USE_REC_CFG 0
+  RECMODE 1
+  SMPTESYNC 0 30 100 40 1000 300 0 0 1 0 0
+  LOOP 0
+  LOOPGRAN 0 4
+  RECORD_PATH "Media" ""
+  <RECORD_CFG
+    ZXZhdxgAAQ==
+  >
+  <APPLYFX_CFG
+  >
+  RENDER_FILE ""
+  RENDER_PATTERN ""
+  RENDER_FMT 0 2 0
+  RENDER_1X 0
+  RENDER_RANGE 1 0 0 0 1000
+  RENDER_RESAMPLE 3 0 1
+  RENDER_ADDTOPROJ 0
+  RENDER_STEMS 0
+  RENDER_DITHER 0
+  RENDER_TRIM 0 0 0 0
+  TIMELOCKMODE 1
+  TEMPOENVLOCKMODE 1
+  ITEMMIX 1
+  DEFPITCHMODE 589824 0
+  TAKELANE 1
+  SAMPLERATE 48000 0 0
+  <RENDER_CFG
+    ZXZhdxgAAQ==
+  >
+  LOCK 1
+  <METRONOME 6 2
+    VOL 0.25 0.125
+    BEATLEN 4
+    FREQ 1760 880 1
+    SAMPLES "" "" "" ""
+    SPLIGNORE 0 0
+    SPLDEF 2 660 "" 0 ""
+    SPLDEF 3 440 "" 0 ""
+    PATTERN 0 169
+    PATTERNSTR ABBB
+    MULT 1
+  >
+  GLOBAL_AUTO -1
+  TEMPO 120 4 4 0
+  PLAYRATE 1 0 0.25 4
+  SELECTION 0 0
+  SELECTION2 0 0
+  MASTERAUTOMODE 0
+  MASTERTRACKHEIGHT 0 0
+  MASTERPEAKCOL 16576
+  MASTERMUTESOLO 0
+  MASTERTRACKVIEW 0 0.6667 0.5 0.5 0 0 0 0 0 0 0 0 0 0
+  MASTERHWOUT 0 0 1 0 0 0 0 -1
+  MASTER_NCH 2 2
+  MASTER_VOLUME 1 0 -1 -1 1
+  MASTER_PANMODE 3
+  MASTER_PANLAWFLAGS 3
+  MASTER_FX 1
+  MASTER_SEL 0
+  <MASTERFXLIST
+    WNDRECT 24 52 655 408
+    SHOW 0
+    LASTSEL 0
+    DOCKED 0
+  >
+  <MASTERPLAYSPEEDENV
+    EGUID {8F4DABDD-5EF7-443F-A19E-392C0C85AFC2}
+    ACT 0 -1
+    VIS 0 1 1
+    LANEHEIGHT 0 0
+    ARM 0
+    DEFSHAPE 0 -1 -1
+  >
+  <TEMPOENVEX
+    EGUID {7965D436-391F-4772-9147-3659002E4BF7}
+    ACT 0 -1
+    VIS 1 0 1
+    LANEHEIGHT 0 0
+    ARM 0
+    DEFSHAPE 1 -1 -1
+  >
+  <PROJBAY
+  >
+  <TRACK {432D0D18-33C1-4D85-8D1E-B4F2CA2DEA2E}
+    NAME PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz
+    PEAKCOL 16576
+    BEAT -1
+    AUTOMODE 3
+    PANLAWFLAGS 3
+    VOLPAN 1 0 -1 -1 1
+    MUTESOLO 0 0 0
+    IPHASE 0
+    PLAYOFFS 0 1
+    ISBUS 0 0
+    BUSCOMP 0 0 0 0 0
+    SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
+    FIXEDLANES 9 0 0 0 0
+    SEL 1
+    REC 0 0 1 0 0 0 0 0
+    VU 64
+    TRACKHEIGHT 0 0 0 0 0 0 0
+    INQ 0 0 0 0.5 100 0 0 100
+    NCHAN 2
+    FX 1
+    TRACKID {432D0D18-33C1-4D85-8D1E-B4F2CA2DEA2E}
+    PERF 0
+    MIDIOUT -1
+    MAINSEND 1 0
+    <FXCHAIN
+      WNDRECT 375 172 1238 753
+      SHOW 0
+      LASTSEL 0
+      DOCKED 0
+      BYPASS 0 0 0
+      <VST "VST3: PolarDesigner3 (Austrian Audio)" PolarDesigner3.vst3 0 "" 1896437592{ABCDEF019182FAEB4F49444141415044} ""
+        WFcJce5e7f4CAAAAAQAAAAAAAAACAAAAAAAAAAIAAAABAAAAAAAAAAIAAAAAAAAA7gkAAAEAAAD//xAA
+        3gkAAAEAAABWQzIhmQkAADw/eG1sIHZlcnNpb249IjEuMCIgZW5jb2Rpbmc9IlVURi04Ij8+IDxzYXZlPjxBQVBvbGFyRGVzaWduZXIgZmZEZkVxPSIwIiBvbGRQcm94
+        RGlzdGFuY2U9Ii0wLjAwOTk5OTkzMDg1ODYxMjA2MSIgQUJMYXllcj0iMSIgb2xkTnJCYW5kcz0iMC4wIiBvbGRaZXJvTGF0ZW5jeU1vZGU9IjAuMCI+PFBBUkFNIGlk
+        PSJhbGxvd0JhY2t3YXJkc1BhdHRlcm4iIHZhbHVlPSIxLjAiLz48UEFSQU0gaWQ9ImFscGhhMSIgdmFsdWU9IjEuMCIvPjxQQVJBTSBpZD0iYWxwaGEyIiB2YWx1ZT0i
+        MS4wIi8+PFBBUkFNIGlkPSJhbHBoYTMiIHZhbHVlPSIxLjAiLz48UEFSQU0gaWQ9ImFscGhhNCIgdmFsdWU9IjEuMCIvPjxQQVJBTSBpZD0iYWxwaGE1IiB2YWx1ZT0i
+        MS4wIi8+PFBBUkFNIGlkPSJnYWluMSIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0iZ2FpbjIiIHZhbHVlPSIwLjAiLz48UEFSQU0gaWQ9ImdhaW4zIiB2YWx1ZT0iMC4w
+        Ii8+PFBBUkFNIGlkPSJnYWluNCIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0iZ2FpbjUiIHZhbHVlPSIwLjAiLz48UEFSQU0gaWQ9Im11dGUxIiB2YWx1ZT0iMC4wIi8+
+        PFBBUkFNIGlkPSJtdXRlMiIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0ibXV0ZTMiIHZhbHVlPSIwLjAiLz48UEFSQU0gaWQ9Im11dGU0IiB2YWx1ZT0iMC4wIi8+PFBB
+        UkFNIGlkPSJtdXRlNSIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0ibnJCYW5kcyIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0icHJveGltaXR5IiB2YWx1ZT0iMC4wIi8+
+        PFBBUkFNIGlkPSJwcm94aW1pdHlPbk9mZiIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0ic29sbzEiIHZhbHVlPSIwLjAiLz48UEFSQU0gaWQ9InNvbG8yIiB2YWx1ZT0i
+        MC4wIi8+PFBBUkFNIGlkPSJzb2xvMyIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0ic29sbzQiIHZhbHVlPSIwLjAiLz48UEFSQU0gaWQ9InNvbG81IiB2YWx1ZT0iMC4w
+        Ii8+PFBBUkFNIGlkPSJzeW5jQ2hhbm5lbCIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0idHJpbVBvc2l0aW9uIiB2YWx1ZT0iMC4wIi8+PFBBUkFNIGlkPSJ4T3ZlckYx
+        IiB2YWx1ZT0iMS4wIi8+PFBBUkFNIGlkPSJ4T3ZlckYyIiB2YWx1ZT0iMS4wIi8+PFBBUkFNIGlkPSJ4T3ZlckYzIiB2YWx1ZT0iMS4wIi8+PFBBUkFNIGlkPSJ4T3Zl
+        ckY0IiB2YWx1ZT0iMS4wIi8+PFBBUkFNIGlkPSJ6ZXJvTGF0ZW5jeU1vZGUiIHZhbHVlPSIwLjAiLz48L0FBUG9sYXJEZXNpZ25lcj48QUFQb2xhckRlc2lnbmVyIGZm
+        RGZFcT0iMCIgb2xkUHJveERpc3RhbmNlPSI0Ljc0OTc0NTEzMDUzODk0ZS04IiBBQkxheWVyPSIxIiBvbGROckJhbmRzPSIwLjAiIG9sZFplcm9MYXRlbmN5TW9kZT0i
+        MC4wIj48UEFSQU0gaWQ9ImFsbG93QmFja3dhcmRzUGF0dGVybiIgdmFsdWU9IjEuMCIvPjxQQVJBTSBpZD0iYWxwaGExIiB2YWx1ZT0iMS4wIi8+PFBBUkFNIGlkPSJh
+        bHBoYTIiIHZhbHVlPSIxLjAiLz48UEFSQU0gaWQ9ImFscGhhMyIgdmFsdWU9IjEuMCIvPjxQQVJBTSBpZD0iYWxwaGE0IiB2YWx1ZT0iMS4wIi8+PFBBUkFNIGlkPSJh
+        bHBoYTUiIHZhbHVlPSIxLjAiLz48UEFSQU0gaWQ9ImdhaW4xIiB2YWx1ZT0iMC4wIi8+PFBBUkFNIGlkPSJnYWluMiIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0iZ2Fp
+        bjMiIHZhbHVlPSIwLjAiLz48UEFSQU0gaWQ9ImdhaW40IiB2YWx1ZT0iMC4wIi8+PFBBUkFNIGlkPSJnYWluNSIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0ibXV0ZTEi
+        IHZhbHVlPSIwLjAiLz48UEFSQU0gaWQ9Im11dGUyIiB2YWx1ZT0iMC4wIi8+PFBBUkFNIGlkPSJtdXRlMyIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0ibXV0ZTQiIHZh
+        bHVlPSIwLjAiLz48UEFSQU0gaWQ9Im11dGU1IiB2YWx1ZT0iMC4wIi8+PFBBUkFNIGlkPSJuckJhbmRzIiB2YWx1ZT0iMC4wIi8+PFBBUkFNIGlkPSJwcm94aW1pdHki
+        IHZhbHVlPSIwLjAiLz48UEFSQU0gaWQ9InByb3hpbWl0eU9uT2ZmIiB2YWx1ZT0iMC4wIi8+PFBBUkFNIGlkPSJzb2xvMSIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0i
+        c29sbzIiIHZhbHVlPSIwLjAiLz48UEFSQU0gaWQ9InNvbG8zIiB2YWx1ZT0iMC4wIi8+PFBBUkFNIGlkPSJzb2xvNCIgdmFsdWU9IjAuMCIvPjxQQVJBTSBpZD0ic29s
+        bzUiIHZhbHVlPSIwLjAiLz48UEFSQU0gaWQ9InN5bmNDaGFubmVsIiB2YWx1ZT0iMC4wIi8+PFBBUkFNIGlkPSJ0cmltUG9zaXRpb24iIHZhbHVlPSIwLjAiLz48UEFS
+        QU0gaWQ9InhPdmVyRjEiIHZhbHVlPSIxLjAiLz48UEFSQU0gaWQ9InhPdmVyRjIiIHZhbHVlPSIxLjAiLz48UEFSQU0gaWQ9InhPdmVyRjMiIHZhbHVlPSIxLjAiLz48
+        UEFSQU0gaWQ9InhPdmVyRjQiIHZhbHVlPSIxLjAiLz48UEFSQU0gaWQ9Inplcm9MYXRlbmN5TW9kZSIgdmFsdWU9IjAuMCIvPjwvQUFQb2xhckRlc2lnbmVyPjxsYXll
+        ckIgZmZEZkVxPSIwIiBvbGRQcm94RGlzdGFuY2U9IjAuMCIgQUJMYXllcj0iMCIgb2xkTnJCYW5kcz0iNS4wIi8+PC9zYXZlPgAAAAAAAAAAAEpVQ0VQcml2YXRlRGF0
+        YQABAUJ5cGFzcwABAQMAHQAAAAAAAABKVUNFUHJpdmF0ZURhdGEAAAAAAAAAAA==
+        AAAQAAAA
+      >
+      FLOATPOS 0 0 0 0
+      FXID {33FF18E6-602B-4EB4-AAE0-D62B08C74F61}
+      <PARMENV 7:732723861 0 1 0.5 "Polar3 / PolarDesigner3"
+        EGUID {346CB7BE-563B-4BD9-BD4E-FBC9DF60FA87}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 1 0
+        PT 0.22058957 1 0
+        PT 0.92879819 1 0
+        PT 0.96362812 0.83333333 0
+        PT 1.59056689 0.83333331 0
+        PT 1.62539683 0.75333334 0
+        PT 2.2523356 0.75333333 0
+        PT 2.27555556 0.6666667 0
+        PT 2.92571429 0.66666669 0
+        PT 2.96054422 0.57999999 0
+        PT 3.56426304 0.57999998 0
+        PT 3.59909297 0.33333336 0
+        PT 4.2492517 0.33333334 0
+        PT 4.28408163 0.08666669 0
+        PT 5.17804989 0.08666667 0
+        PT 5.27804989 0.92879214 0
+        PT 5.28965986 1 0
+        PT 11 0.666667 0
+        PT 35.5 0.666667 0
+        PT 36 1 0 0 1
+        PT 36.92879819 1 0
+        PT 36.96362812 0.83333333 0
+        PT 37.59056689 0.83333331 0
+        PT 37.62539683 0.75333334 0
+        PT 38.2523356 0.75333333 0
+        PT 38.27555556 0.6666667 0
+        PT 38.92571429 0.66666669 0
+        PT 38.96054422 0.57999999 0
+        PT 39.56426304 0.57999998 0
+        PT 39.59909297 0.33333336 0
+        PT 40.2492517 0.33333334 0
+        PT 40.28408163 0.08666669 0
+        PT 41 0.08666667 0
+        PT 41.0001 1 0
+        PT 41.9999 1 0
+        PT 42 1 0
+        PT 42.22058957 1 0
+        PT 42.92879819 1 0
+        PT 42.96362812 0.83333333 0
+        PT 43.59056689 0.83333331 0
+        PT 43.62539683 0.75333334 0
+        PT 44.2523356 0.75333333 0
+        PT 44.27555556 0.6666667 0
+        PT 44.92571429 0.66666669 0
+        PT 44.96054422 0.57999999 0
+        PT 45.56426304 0.57999998 0
+        PT 45.59909297 0.33333336 0
+        PT 46.2492517 0.33333334 0
+        PT 46.28408163 0.08666669 0
+        PT 47 0.08666667 0
+        PT 47.0001 1 0
+      >
+      <PARMENV 9:732723863 0 1 0.5 "Polar5 / PolarDesigner3"
+        EGUID {BFB93836-BD27-409E-B446-6102B8A1A90A}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 1 0
+        PT 0.22058957 1 0
+        PT 0.92879819 1 0
+        PT 0.96362812 0.83333333 0
+        PT 1.59056689 0.83333331 0
+        PT 1.62539683 0.75333334 0
+        PT 2.2523356 0.75333333 0
+        PT 2.27555556 0.6666667 0
+        PT 2.92571429 0.66666669 0
+        PT 2.96054422 0.57999999 0
+        PT 3.56426304 0.57999998 0
+        PT 3.59909297 0.33333336 0
+        PT 4.2492517 0.33333334 0
+        PT 4.28408163 0.08666669 0
+        PT 5.17804989 0.08666667 0
+        PT 5.27804989 0.92879214 0
+        PT 5.28965986 1 0
+        PT 11 0.666667 0
+        PT 35.5 0.666667 0
+        PT 36 1 0
+        PT 36 1 0
+        PT 36.22058957 1 0
+        PT 36.92879819 1 0
+        PT 36.96362812 0.83333333 0
+        PT 37.59056689 0.83333331 0
+        PT 37.62539683 0.75333334 0
+        PT 38.2523356 0.75333333 0
+        PT 38.27555556 0.6666667 0
+        PT 38.92571429 0.66666669 0
+        PT 38.96054422 0.57999999 0
+        PT 39.56426304 0.57999998 0
+        PT 39.59909297 0.33333336 0
+        PT 40.2492517 0.33333334 0
+        PT 40.28408163 0.08666669 0
+        PT 41 0.08666667 0
+        PT 41.0001 1 0
+        PT 41.9999 1 0
+        PT 42 1 0
+        PT 42.22058957 1 0
+        PT 42.92879819 1 0
+        PT 42.96362812 0.83333333 0
+        PT 43.59056689 0.83333331 0
+        PT 43.62539683 0.75333334 0
+        PT 44.2523356 0.75333333 0
+        PT 44.27555556 0.6666667 0
+        PT 44.92571429 0.66666669 0
+        PT 44.96054422 0.57999999 0
+        PT 45.56426304 0.57999998 0
+        PT 45.59909297 0.33333336 0
+        PT 46.2492517 0.33333334 0
+        PT 46.28408163 0.08666669 0
+        PT 47 0.08666667 0
+        PT 47.0001 1 0
+      >
+      <PARMENV 5:732723859 0 1 0.5 "Polar1 / PolarDesigner3"
+        EGUID {94B5DBB9-909A-44F2-9BCC-749BD98FBC7D}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 1 0
+        PT 0.22058957 1 0
+        PT 0.92879819 1 0
+        PT 0.96362812 0.83333333 0
+        PT 1.59056689 0.83333331 0
+        PT 1.62539683 0.75333334 0
+        PT 2.2523356 0.75333333 0
+        PT 2.27555556 0.6666667 0
+        PT 2.92571429 0.66666669 0
+        PT 2.96054422 0.57999999 0
+        PT 3.56426304 0.57999998 0
+        PT 3.59909297 0.33333336 0
+        PT 4.2492517 0.33333334 0
+        PT 4.28408163 0.08666669 0
+        PT 5.17804989 0.08666667 0
+        PT 5.27804989 0.92879214 0
+        PT 5.28965986 1 0
+        PT 10.99569427 0.666667 0 0 1
+        PT 35.5 0.666667 0
+        PT 36 1 0
+        PT 36.92879819 1 0
+        PT 36.96362812 0.83333333 0
+        PT 37.59056689 0.83333331 0
+        PT 37.62539683 0.75333334 0
+        PT 38.2523356 0.75333333 0
+        PT 38.27555556 0.6666667 0
+        PT 38.92571429 0.66666669 0
+        PT 38.96054422 0.57999999 0
+        PT 39.56426304 0.57999998 0
+        PT 39.59909297 0.33333336 0
+        PT 40.2492517 0.33333334 0
+        PT 40.28408163 0.08666669 0
+        PT 41 0.08666667 0
+        PT 41.0001 1 0
+        PT 41.9999 1 0
+        PT 42 1 0
+        PT 42.22058957 1 0
+        PT 42.92879819 1 0
+        PT 42.96362812 0.83333333 0
+        PT 43.59056689 0.83333331 0
+        PT 43.62539683 0.75333334 0
+        PT 44.2523356 0.75333333 0
+        PT 44.27555556 0.6666667 0
+        PT 44.92571429 0.66666669 0
+        PT 44.96054422 0.57999999 0
+        PT 45.56426304 0.57999998 0
+        PT 45.59909297 0.33333336 0
+        PT 46.2492517 0.33333334 0
+        PT 46.28408163 0.08666669 0
+        PT 47 0.08666667 0
+        PT 47.0001 1 0
+      >
+      <PARMENV 6:732723860 0 1 0.5 "Polar2 / PolarDesigner3"
+        EGUID {A4218CC1-3DDE-44C2-B844-231C99D510E9}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 1 0
+        PT 0.22058957 1 0
+        PT 0.92879819 1 0
+        PT 0.96362812 0.83333333 0
+        PT 1.59056689 0.83333331 0
+        PT 1.62539683 0.75333334 0
+        PT 2.2523356 0.75333333 0
+        PT 2.27555556 0.6666667 0
+        PT 2.92571429 0.66666669 0
+        PT 2.96054422 0.57999999 0
+        PT 3.56426304 0.57999998 0
+        PT 3.59909297 0.33333336 0
+        PT 4.2492517 0.33333334 0
+        PT 4.28408163 0.08666669 0
+        PT 5.17804989 0.08666667 0
+        PT 5.27804989 0.92879214 0
+        PT 5.28965986 1 0
+        PT 10.99569427 0.666667 0 0 1
+        PT 35.5 0.666667 0
+        PT 36 1 0
+        PT 36.92879819 1 0
+        PT 36.96362812 0.83333333 0
+        PT 37.59056689 0.83333331 0
+        PT 37.62539683 0.75333334 0
+        PT 38.2523356 0.75333333 0
+        PT 38.27555556 0.6666667 0
+        PT 38.92571429 0.66666669 0
+        PT 38.96054422 0.57999999 0
+        PT 39.56426304 0.57999998 0
+        PT 39.59909297 0.33333336 0
+        PT 40.2492517 0.33333334 0
+        PT 40.28408163 0.08666669 0
+        PT 41 0.08666667 0
+        PT 41.0001 1 0
+        PT 41.9999 1 0
+        PT 42 1 0
+        PT 42.22058957 1 0
+        PT 42.92879819 1 0
+        PT 42.96362812 0.83333333 0
+        PT 43.59056689 0.83333331 0
+        PT 43.62539683 0.75333334 0
+        PT 44.2523356 0.75333333 0
+        PT 44.27555556 0.6666667 0
+        PT 44.92571429 0.66666669 0
+        PT 44.96054422 0.57999999 0
+        PT 45.56426304 0.57999998 0
+        PT 45.59909297 0.33333336 0
+        PT 46.2492517 0.33333334 0
+        PT 46.28408163 0.08666669 0
+        PT 47 0.08666667 0
+        PT 47.0001 1 0
+      >
+      <PARMENV 8:732723862 0 1 0.5 "Polar4 / PolarDesigner3"
+        EGUID {1F3B1F06-EC21-4050-9D73-E8B6AE09D42F}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 1 0
+        PT 0.22058957 1 0
+        PT 0.92879819 1 0
+        PT 0.96362812 0.83333333 0
+        PT 1.59056689 0.83333331 0
+        PT 1.62539683 0.75333334 0
+        PT 2.2523356 0.75333333 0
+        PT 2.27555556 0.6666667 0
+        PT 2.92571429 0.66666669 0
+        PT 2.96054422 0.57999999 0
+        PT 3.56426304 0.57999998 0
+        PT 3.59909297 0.33333336 0
+        PT 4.2492517 0.33333334 0
+        PT 4.28408163 0.08666669 0
+        PT 5.17804989 0.08666667 0
+        PT 5.27804989 0.92879214 0
+        PT 5.28965986 1 0
+        PT 11 0.666667 0 0 1
+        PT 35.5 0.666667 0
+        PT 36 1 0
+        PT 36.92879819 1 0
+        PT 36.96362812 0.83333333 0
+        PT 37.59056689 0.83333331 0
+        PT 37.62539683 0.75333334 0
+        PT 38.2523356 0.75333333 0
+        PT 38.27555556 0.6666667 0
+        PT 38.92571429 0.66666669 0
+        PT 38.96054422 0.57999999 0
+        PT 39.56426304 0.57999998 0
+        PT 39.59909297 0.33333336 0
+        PT 40.2492517 0.33333334 0
+        PT 40.28408163 0.08666669 0
+        PT 41 0.08666667 0
+        PT 41.0001 1 0
+        PT 41.9999 1 0
+        PT 42 1 0
+        PT 42.22058957 1 0
+        PT 42.92879819 1 0
+        PT 42.96362812 0.83333333 0
+        PT 43.59056689 0.83333331 0
+        PT 43.62539683 0.75333334 0
+        PT 44.2523356 0.75333333 0
+        PT 44.27555556 0.6666667 0
+        PT 44.92571429 0.66666669 0
+        PT 44.96054422 0.57999999 0
+        PT 45.56426304 0.57999998 0
+        PT 45.59909297 0.33333336 0
+        PT 46.2492517 0.33333334 0
+        PT 46.28408163 0.08666669 0
+        PT 47 0.08666667 0
+        PT 47.0001 1 0
+      >
+      <PARMENV 1:1500058391 0 1 0.5 "Xover1 / PolarDesigner3"
+        EGUID {61223247-65AA-4D87-924C-283454F7816B}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 5.5 1 0
+        PT 5.5 0 0
+        PT 35.9999 0 0
+        PT 36 1 0
+        PT 47 1 0
+        PT 47.0001 0 0
+      >
+      <PARMENV 2:1500058392 0 1 0.5 "Xover2 / PolarDesigner3"
+        EGUID {4B3D3D08-8F70-417E-9AFE-0FDDC80DC7F8}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 5.5 1 0
+        PT 5.5 0 0
+        PT 35.9999 0 0
+        PT 36 1 0
+        PT 47 1 0
+        PT 47.0001 0 0
+      >
+      <PARMENV 3:1500058393 0 1 0.5 "Xover3 / PolarDesigner3"
+        EGUID {AB5A36DA-01D3-4890-8060-30DE67AB46B7}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 0.375 0
+        PT 0 1 0
+        PT 5.5 1 0
+        PT 5.5 0 0
+        PT 35.9999 0 0
+        PT 36 0.375 0
+        PT 36 1 0
+        PT 47 1 0
+        PT 47.0001 0 0
+      >
+      <PARMENV 4:1500058394 0 1 0.5 "Xover4 / PolarDesigner3"
+        EGUID {B74C02F4-3891-4443-87F1-A3E787A0D82E}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 5.5 1 0
+        PT 5.5 0 0
+        PT 35.9999 0 0
+        PT 36 1 0
+        PT 47 1 0
+        PT 47.0001 0 0
+      >
+      <PARMENV 10:109618994 0 1 0.5 "Solo1 / PolarDesigner3"
+        EGUID {F3212FE4-8DFB-4C9B-9BBA-296039221EE3}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 11.5 1 1
+        PT 11.51160998 1 1
+        PT 17.48485559 1 1
+        PT 17.54062866 0 1
+        PT 35.9999 0 1
+        PT 36 0 1
+        PT 41 0 1
+        PT 41.0001 0 1
+        PT 41.9999 0 1
+        PT 42 0 1
+        PT 47 0 1
+        PT 47.0001 0 1
+      >
+      <PARMENV 11:109618995 0 1 0.5 "Solo2 / PolarDesigner3"
+        EGUID {BDC0EDF8-2BBB-4276-A139-98D898EAB80D}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 13 1 1
+        PT 17.27727891 0 1
+        PT 35.9999 0 1
+        PT 36 0 1
+        PT 41 0 1
+        PT 41.0001 0 1
+        PT 41.9999 0 1
+        PT 42 0 1
+        PT 47 0 1
+        PT 47.0001 0 1
+      >
+      <PARMENV 12:109618996 0 1 0.5 "Solo3 / PolarDesigner3"
+        EGUID {F171D9C4-4042-4ABB-94AE-89D3B06B4BDB}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 14 1 1
+        PT 17.27727891 0 1
+        PT 35.9999 0 1
+        PT 36 0 1
+        PT 41 0 1
+        PT 41.0001 0 1
+        PT 41.9999 0 1
+        PT 42 0 1
+        PT 47 0 1
+        PT 47.0001 0 1
+      >
+      <PARMENV 13:109618997 0 1 0.5 "Solo4 / PolarDesigner3"
+        EGUID {CF0E4127-884B-496C-AAC9-5783DBF8F902}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 15 1 1
+        PT 17.27727891 0 1
+        PT 35.9999 0 1
+        PT 36 0 1
+        PT 41 0 1
+        PT 41.0001 0 1
+        PT 41.9999 0 1
+        PT 42 0 1
+        PT 47 0 1
+        PT 47.0001 0 1
+      >
+      <PARMENV 14:109618998 0 1 0.5 "Solo5 / PolarDesigner3"
+        EGUID {BDBAAF66-0D42-4AA1-AEFC-AB72E9852042}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 16 1 1
+        PT 17.27727891 0 1
+        PT 35.9999 0 1
+        PT 36 0 1
+        PT 41 0 1
+        PT 41.0001 0 1
+        PT 41.9999 0 1
+        PT 42 0 1
+        PT 47 0 1
+        PT 47.0001 0 1
+      >
+      <PARMENV 15:104263992 0 1 0.5 "Mute1 / PolarDesigner3"
+        EGUID {21C51AE8-26F6-4DC5-958A-92BB4008AC7E}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 6 0 1
+        PT 6 0 1
+        PT 17.5 1 1
+        PT 17.51160998 1 1
+        PT 23.27727891 1 1
+        PT 23.27727891 0 1
+        PT 35.9999 0 1
+        PT 36 0 1
+        PT 41 0 1
+        PT 41.0001 0 1
+        PT 41.9999 0 1
+        PT 42 0 1
+        PT 47 0 1
+        PT 47.0001 0 1
+      >
+      <PARMENV 16:104263993 0 1 0.5 "Mute2 / PolarDesigner3"
+        EGUID {50BF2AF1-C10E-44E1-9E87-DAAE9C13C57A}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 6 0 1
+        PT 6 0 1
+        PT 19 1 1
+        PT 23.27727891 0 1
+        PT 35.9999 0 1
+        PT 36 0 1
+        PT 41 0 1
+        PT 41.0001 0 1
+        PT 41.9999 0 1
+        PT 42 0 1
+        PT 47 0 1
+        PT 47.0001 0 1
+      >
+      <PARMENV 17:104263994 0 1 0.5 "Mute3 / PolarDesigner3"
+        EGUID {F37A73E2-CAD6-4D9E-88DF-61D0754686B8}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 6 0 1
+        PT 20 1 1
+        PT 23.27727891 0 1
+        PT 35.9999 0 1
+        PT 36 0 1
+        PT 41 0 1
+        PT 41.0001 0 1
+        PT 41.9999 0 1
+        PT 42 0 1
+        PT 47 0 1
+        PT 47.0001 0 1
+      >
+      <PARMENV 18:104263995 0 1 0.5 "Mute4 / PolarDesigner3"
+        EGUID {A4C2D262-05B6-4F2F-90D0-56857CF78C41}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 6 0 1
+        PT 21 1 1
+        PT 23.27727891 0 1
+        PT 35.9999 0 1
+        PT 36 0 1
+        PT 41 0 1
+        PT 41.0001 0 1
+        PT 41.9999 0 1
+        PT 42 0 1
+        PT 47 0 1
+        PT 47.0001 0 1
+      >
+      <PARMENV 19:104263996 0 1 0.5 "Mute5 / PolarDesigner3"
+        EGUID {FA1116D6-B4F0-480B-AA29-9BD8BB16A5E0}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 6 0 1
+        PT 22 1 1
+        PT 23.27727891 0 1
+        PT 35.9999 0 1
+        PT 36 0 1
+        PT 41.0001 0 1
+        PT 41.9999 0 1
+        PT 47 0 1
+        PT 47.0001 0 1
+      >
+      <PARMENV 20:98116754 0 1 0.5 "Gain1 / PolarDesigner3"
+        EGUID {53E85D8C-F757-4BFD-B575-00B215D0711F}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 0.5714286 0
+        PT 24 0.571429 0
+        PT 29 0.02 0
+        PT 29.5 0.005 0
+        PT 29.5 0.571429 0 0 1
+        PT 47 0.57142868 0
+      >
+      <PARMENV 21:98116755 0 1 0.5 "Gain2 / PolarDesigner3"
+        EGUID {4269F2B9-2037-49E7-B7AF-964EEDEED998}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 0.5714286 0
+        PT 0 0.5714286 0
+        PT 24 0.571429 0
+        PT 29 0.005 0
+        PT 29.5 0.571429 0
+        PT 47 0.57142868 0
+      >
+      <PARMENV 22:98116756 0 1 0.5 "Gain3 / PolarDesigner3"
+        EGUID {CF07A9F1-1840-4F13-A67E-795CBB45C140}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 0.5714286 0
+        PT 0 0.5714286 0
+        PT 24 0.571429 0
+        PT 29 0 0
+        PT 29.5 0.01 0
+        PT 29.5 0.571429 0
+        PT 47 0.57142868 0
+      >
+      <PARMENV 23:98116757 0 1 0.5 "Gain4 / PolarDesigner3"
+        EGUID {7E5E4C2F-3EA3-4892-B75B-FBC80E590276}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 0.5714286 0
+        PT 0 0.5714286 0
+        PT 24 0.571429 0
+        PT 29 0 0
+        PT 29.67434495 0.571429 0
+        PT 47 0.57142868 0
+      >
+      <PARMENV 24:98116758 0 1 0.5 "Gain5 / PolarDesigner3"
+        EGUID {9902956A-D76D-4ED6-B6FE-FA12E7A350FD}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 0.5714286 0
+        PT 0 0.5714286 0
+        PT 24 0.571429 0
+        PT 29 0 0
+        PT 29.5 0.02 0
+        PT 29.5 0.571429 0
+        PT 47 0.57142868 0
+      >
+      <PARMENV 27:1657442431 0 1 0.5 "Proximity / PolarDesigner3"
+        EGUID {8D650590-66C7-4250-928F-A942636CA811}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 0.5 0
+        PT 0.000001 0.5 0
+        PT 29.5 0.5 0
+        PT 31 0 0
+        PT 31 1 0
+        PT 34 0 0
+        PT 35.5 0 0
+        PT 35.5 0.495 0
+      >
+      <PARMENV 28:1653824977 0 1 0.5 "ProximityOnOff / PolarDesigner3"
+        EGUID {C9757688-E0BA-4C79-BEE3-4FE1B94A8D9A}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 31 1 1
+        PT 35.5 1 1
+        PT 35.5 0 1
+      >
+      <PARMENV 29:1420671993 0 1 0.5 "Zero Latency / PolarDesigner3"
+        EGUID {6906E55E-543F-48C2-8392-4DD85A4DB0E7}
+        ACT 1 -1
+        VIS 1 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 0.000001 0 1
+        PT 29.0005 0 1
+        PT 35.5 0 1
+        PT 35.5 1 1
+        PT 41 1 1
+        PT 41.5 0 1
+        PT 41.9999 0 1
+        PT 42 0 1
+      >
+      <PARMENV 31:1652125811 0 1 0.5 "Bypass / PolarDesigner3"
+        EGUID {FFD95746-6504-4717-A00A-FDC8A042F6C7}
+        ACT 0 -1
+        VIS 0 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 0.000001 0 1
+        PT 31 0 1
+      >
+      <PARMENV 32:bypass 0 1 0.5 "Bypass / PolarDesigner3"
+        EGUID {BBBC1969-3990-48A9-A07D-A18FC03208AB}
+        ACT 0 -1
+        VIS 0 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+        PT 0.000001 0 1
+        PT 29.0005 0 1
+      >
+      <PARMENV 33:wet 0 1 0.5 "Wet / PolarDesigner3"
+        EGUID {10651401-DF1B-4573-865F-5F4782D16BD4}
+        ACT 0 -1
+        VIS 0 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 0 -1 -1
+        PT 0 1 0
+      >
+      <PARMENV 34:delta 0 1 0.5 "Delta / PolarDesigner3"
+        EGUID {5B58FA88-32F9-484C-95BD-CC920F77445B}
+        ACT 0 -1
+        VIS 0 1 1
+        LANEHEIGHT 0 0
+        ARM 0
+        DEFSHAPE 1 -1 -1
+        PT 0 0 1
+      >
+      WAK 0 0
+    >
+    <ITEM
+      POSITION 0
+      SNAPOFFS 0
+      LENGTH 5
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {E432173C-06A8-4AC5-9A28-6A2259F77276}
+      IID 1
+      NAME PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 0.13
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {35231696-A477-46BE-A132-DFA66510E837}
+      <SOURCE WAVE
+        FILE "Media/PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav"
+      >
+    >
+    <ITEM
+      POSITION 6
+      SNAPOFFS 0
+      LENGTH 5
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {AA79F252-B6F2-479F-BABE-2EC030993D61}
+      IID 4
+      NAME PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 0
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {2EEF9E86-6056-4B1D-A025-590C6C06B5D6}
+      <SOURCE WAVE
+        FILE "Media/PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav"
+      >
+    >
+    <ITEM
+      POSITION 12
+      SNAPOFFS 0
+      LENGTH 5
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {EA420C31-5419-4EF7-9A0D-8FC0F1C7DCEC}
+      IID 5
+      NAME PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 0
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {A26854A2-22DB-4B79-94C9-28CC7DD919D4}
+      <SOURCE WAVE
+        FILE "Media/PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav"
+      >
+    >
+    <ITEM
+      POSITION 18
+      SNAPOFFS 0
+      LENGTH 5
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {594DB8D2-C7FC-4740-8ADC-476002699CA8}
+      IID 6
+      NAME PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 0
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {F09668B8-2EB6-48AB-891F-83A63349B204}
+      <SOURCE WAVE
+        FILE "Media/PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav"
+      >
+    >
+    <ITEM
+      POSITION 24
+      SNAPOFFS 0
+      LENGTH 5
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {2C7F769A-5C56-47A8-ADA7-7627DB6B21F9}
+      IID 7
+      NAME PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 0
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {A9B69545-A2C2-42F9-BEDA-BB656715AE4B}
+      <SOURCE WAVE
+        FILE "Media/PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav"
+      >
+    >
+    <ITEM
+      POSITION 30
+      SNAPOFFS 0
+      LENGTH 5
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {E9594EBA-1A95-4BE1-BE1B-06EF28BB08ED}
+      IID 8
+      NAME PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 0
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {EACAABDF-D231-4478-A30D-8A4E13B5F0A3}
+      <SOURCE WAVE
+        FILE "Media/PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav"
+      >
+    >
+    <ITEM
+      POSITION 36
+      SNAPOFFS 0
+      LENGTH 5
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {B24DCDEF-45CA-4B10-A3E3-0340B169FB9D}
+      IID 1
+      NAME PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 0.13
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {1C8454F4-BCA7-45A3-A3FF-E8646BF702B9}
+      <SOURCE WAVE
+        FILE "Media/PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav"
+      >
+    >
+    <ITEM
+      POSITION 42
+      SNAPOFFS 0
+      LENGTH 5
+      LOOP 1
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 0
+      IGUID {5A315FFC-C0B7-4B76-B720-C7AD389546F8}
+      IID 1
+      NAME PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav
+      VOLPAN 1 0 1 -1
+      SOFFS 0.13
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {B75E375D-AAB5-42E9-922F-D7489DFFF939}
+      <SOURCE WAVE
+        FILE "Media/PolardesignerTestfile_-3dBEIGHT_-9dBCARDIOID_-infdBOMNI_48kHz.wav"
+      >
+    >
+  >
+  <EXTENSIONS
+  >
+>

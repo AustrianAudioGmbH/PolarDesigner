@@ -1,0 +1,161 @@
+From 309589ee3ace2f1e78ef7d8c86f6ba9477b077cc Mon Sep 17 00:00:00 2001
+From: Sudara <sudara@alonetone.com>
+Date: Tue, 2 Jul 2024 18:34:20 +0200
+Subject: [PATCH 1/2] Performance improvements to PolarPatternVisualizer
+
+---
+ .../customComponents/PolarPatternVisualizer.h | 69 +++++++++++--------
+ 1 file changed, 40 insertions(+), 29 deletions(-)
+
+diff --git a/resources/customComponents/PolarPatternVisualizer.h b/resources/customComponents/PolarPatternVisualizer.h
+index 02cf746..b44218a 100644
+--- a/resources/customComponents/PolarPatternVisualizer.h
++++ b/resources/customComponents/PolarPatternVisualizer.h
+@@ -6,20 +6,20 @@
+ /*
+  ==============================================================================
+  Author: Thomas Deppisch
+- 
++
+  Copyright (c) 2019 - Austrian Audio GmbH
+  www.austrian.audio
+- 
++
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+- 
++
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+- 
++
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ==============================================================================
+@@ -68,6 +68,8 @@
+ #include "BinaryData.h"
+ 
+ #include "../lookAndFeel/MainLookAndFeel.h"
++#include "melatonin_inspector/melatonin/helpers/timing.h"
++
+ 
+ //==============================================================================
+ /*
+@@ -111,13 +113,16 @@ public:
+ 
+     void paint(Graphics& g) override
+     {
++        melatonin::ComponentTimer timer { this };
++
++        innerCircle.clear();
++        outerCircle.clear();
++
+         if (mouseOver && isEnabled())
+         {
+-            Path innerCircle;
+             innerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+             innerCircle.applyTransform(transform);
+ 
+-            Path outerCircle;
+             outerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+             outerCircle.applyTransform(strokeTransform);
+             outerCircle.setUsingNonZeroWinding(false);
+@@ -129,11 +134,9 @@ public:
+ 
+         if (getToggleState())
+         {
+-            Path innerCircle;
+             innerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+             innerCircle.applyTransform(transform);
+ 
+-            Path outerCircle;
+             outerCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+             outerCircle.applyTransform(strokeTransform);
+ 
+@@ -148,29 +151,8 @@ public:
+         g.strokePath(gridPath, PathStrokeType(1.f));
+ 
+         // draw directivity
+-        Path dirPath;
+         g.setColour(isEnabled() ? colour : colour.withBrightness(0.5f));
+ 
+-        int idx = 0;
+-        for (int phi = -180; phi <= 180; phi += degStep)
+-        {
+-            float phiInRad = (float)phi * deg2rad;
+-            float gainLin = std::abs((1 - std::abs(dirWeight)) + dirWeight * std::cos(phiInRad));
+-            int dbMin = 25;
+-            float gainDb = 20 * std::log10(std::max(gainLin, static_cast<float> (std::pow(10, -dbMin / 20.0f))));
+-            float effGain = std::max(std::abs((gainDb + dbMin) / dbMin), 0.01f);
+-            Point<float> point = effGain * pointsOnCircle[idx];
+-
+-            if (phi == -180)
+-                dirPath.startNewSubPath(point);
+-            else
+-                dirPath.lineTo(point);
+-            ++idx;
+-        }
+-
+-        dirPath.closeSubPath();
+-        dirPath.applyTransform(transform);
+-
+         Path hitCircle;
+         hitCircle.addEllipse(-1.0f, -1.0f, 2.0f, 2.0f);
+ 
+@@ -212,6 +194,31 @@ public:
+         strokeTransform = AffineTransform::fromTargetPoints((float)centre.x, (float)centre.y, (float)centre.x, strokeBounds.getY(), strokeBounds.getX(), centre.y).translated((getWidth() - getHeight()) / 2, 0);
+ 
+         plotArea = bounds;
++        recalculateDirectivity();
++    }
++
++    void recalculateDirectivity()
++    {
++        dirPath.clear();
++        int idx = 0;
++        for (int phi = -180; phi <= 180; phi += degStep)
++        {
++            float phiInRad = (float)phi * deg2rad;
++            float gainLin = std::abs((1 - std::abs(dirWeight)) + dirWeight * std::cos(phiInRad));
++            int dbMin = 25;
++            float gainDb = 20 * std::log10(std::max(gainLin, static_cast<float> (std::pow(10, -dbMin / 20.0f))));
++            float effGain = std::max(std::abs((gainDb + dbMin) / dbMin), 0.01f);
++            Point<float> point = effGain * pointsOnCircle[idx];
++
++            if (phi == -180)
++                dirPath.startNewSubPath(point);
++            else
++                dirPath.lineTo(point);
++            ++idx;
++        }
++
++        dirPath.closeSubPath();
++        dirPath.applyTransform(transform);
+     }
+ 
+     bool hitTest(int x, int y) override
+@@ -222,6 +229,7 @@ public:
+     void setDirWeight(float weight)
+     {
+         dirWeight = weight;
++        recalculateDirectivity();
+         repaint();
+     }
+ 
+@@ -289,6 +297,9 @@ public:
+ private:
+     Path grid;
+     Path subGrid;
++    Path innerCircle;
++    Path outerCircle;
++    Path dirPath;
+     AffineTransform transform, strokeTransform;
+     Rectangle<int> plotArea;
+     float dirWeight;
+-- 
+2.38.1
+

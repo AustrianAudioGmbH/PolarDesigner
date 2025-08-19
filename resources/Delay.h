@@ -1,4 +1,4 @@
- /*
+/*
  ==============================================================================
  This file is part of the IEM plug-in suite.
  Authors: Daniel Rudrich
@@ -22,7 +22,7 @@
 
 
 #pragma once
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 using namespace dsp;
 class Delay : private ProcessorBase
@@ -32,7 +32,7 @@ public:
     Delay()
     {
     }
-    ~Delay() {}
+    ~Delay() override {}
 
     void setDelayTime (float delayTimeInSeconds)
     {
@@ -61,7 +61,7 @@ public:
 
         delayInSamples = roundToInt(delay * specs.sampleRate);
 
-        buffer.setSize(specs.numChannels, specs.maximumBlockSize + delayInSamples);
+        buffer.setSize(static_cast<int> (specs.numChannels), static_cast<int> (specs.maximumBlockSize) + delayInSamples);
         buffer.clear();
         writePosition = 0;
     }
@@ -84,22 +84,22 @@ public:
             getReadWritePositions(false, (int) L, startIndex, blockSize1, blockSize2);
 
             for (int ch = 0; ch < nCh; ch++)
-                buffer.copyFrom(ch, startIndex, abIn.getChannelPointer(ch), blockSize1);
+                buffer.copyFrom(ch, startIndex, abIn.getChannelPointer(static_cast<size_t>(ch)), blockSize1);
 
             if (blockSize2 > 0)
                 for (int ch = 0; ch < nCh; ch++)
-                    buffer.copyFrom(ch, 0, abIn.getChannelPointer(ch) + blockSize1, blockSize2);
+                    buffer.copyFrom(ch, 0, abIn.getChannelPointer(static_cast<size_t>(ch)) + blockSize1, blockSize2);
 
 
             // read from delay line
             getReadWritePositions(true, (int) L, startIndex, blockSize1, blockSize2);
 
             for (int ch = 0; ch < nCh; ch++)
-                FloatVectorOperations::copy(abOut.getChannelPointer(ch), buffer.getReadPointer(ch) + startIndex, blockSize1);
+                FloatVectorOperations::copy(abOut.getChannelPointer(static_cast<size_t>(ch)), buffer.getReadPointer(ch) + startIndex, blockSize1);
 
             if (blockSize2 > 0)
                 for (int ch = 0; ch < nCh; ch++)
-                    FloatVectorOperations::copy(abOut.getChannelPointer(ch) + blockSize1, buffer.getReadPointer(ch), blockSize2);
+                    FloatVectorOperations::copy(abOut.getChannelPointer(static_cast<size_t>(ch)) + blockSize1, buffer.getReadPointer(ch), blockSize2);
 
 
             writePosition += L;
