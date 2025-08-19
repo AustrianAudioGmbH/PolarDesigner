@@ -56,27 +56,27 @@
 class LaF : public LookAndFeel_V4
 {
 public:
-    const Colour AAGrey = Colour(180,180,185);
+//    const Colour AAGrey = Colour(180,180,185);
     const Colour AARed = Colour(155,35,35);
     const Colour ClBackground = Colour(0xFF2D2D2D);
     const Colour ClFace = Colour(0xFFD8D8D8);
     const Colour ClFaceShadow = Colour(0XFF272727);
     const Colour ClFaceShadowOutline = Colour(0xFF212121);
-    const Colour ClFaceShadowOutlineActive = Colour(0xFF7C7C7C);
+//    const Colour ClFaceShadowOutlineActive = Colour(0xFF7C7C7C);
     const Colour ClRotSliderArrow = Colour(0xFF4A4A4A);
     const Colour ClRotSliderArrowShadow = Colour(0x445D5D5D);
     const Colour ClSliderFace = Colour(0xFF191919);
     const Colour ClText = Colour(0xFFFFFFFF);
-    const Colour ClTextTextboxbg = Colour(0xFF000000);
-    const Colour ClSeperator = Colour(0xFF979797);
-    const Colour ClWidgetColours[4] = {
-        Colour(0xFF00CAFF), Colour(0xFF4FFF00), Colour(0xFFFF9F00), Colour(0xFFD0011B)
-    };
+    const Colour ClTextTextboxBackground = Colour(0xFF000000);
+    const Colour ClSeparator = Colour(0xFF979797);
+//    const Colour ClWidgetColours[4] = {
+//        Colour(0xFF00CAFF), Colour(0xFF4FFF00), Colour(0xFFFF9F00), Colour(0xFFD0011B)
+//    };
 
     Typeface::Ptr aaLight, aaRegular, aaMedium, terminator;
 
     //float sliderThumbDiameter = 14.0f;
-    float sliderBarSize = 8.0f;
+//    float sliderBarSize = 8.0f;
 
     LaF()
     {
@@ -105,7 +105,7 @@ public:
 
     }
 
-    ~LaF() {}
+    ~LaF()  override = default;
 
     Typeface::Ptr getTypefaceForFont (const Font& f) override
     {
@@ -118,7 +118,7 @@ public:
     }
     Font getLabelFont (Label& label) override
     {
-        //return label.getFont();
+        (void)label;
         Font font(aaRegular);
         font.setHeight(18.0f);
         return font;
@@ -133,6 +133,8 @@ public:
 
     Font getTextButtonFont (TextButton& button, int height) override
     {
+        (void)button;
+        (void)height;
         Font font(aaRegular);
         font.setHeight(18.0f);
         return font;
@@ -230,25 +232,25 @@ public:
 
     void drawLabel (Graphics& g, Label& label) override
     {
-        float alpha = label.isEnabled() ? 1.0f : 0.4f;
+        auto alpha = label.isEnabled() ? 1.0f : 0.4f;
         g.fillAll (label.findColour (Label::backgroundColourId));
         Rectangle<int> bounds = label.getLocalBounds();
-        float x = (float) bounds.getX();
-        float y = (float) bounds.getY();
-        float w = (float) bounds.getWidth();
-        float h = (float) bounds.getHeight();
+        auto x = (float) bounds.getX();
+        auto y = (float) bounds.getY();
+        auto w = (float) bounds.getWidth();
+        auto h = (float) bounds.getHeight();
         Path p;
         p.addRoundedRectangle(x, y, w, h, h/2.0f);
-        g.setColour (ClTextTextboxbg.withMultipliedAlpha(alpha));
+        g.setColour (ClTextTextboxBackground.withMultipliedAlpha(alpha));
         g.fillPath (p);
 
         if (! label.isBeingEdited())
         {
-            const float alpha = label.isEnabled() ? 1.0f : 0.5f;
+            const float editingAlpha = label.isEnabled() ? 1.0f : 0.5f;
             const Font font (aaRegular);
 
             //g.setColour (ClText.withMultipliedAlpha (alpha));
-            g.setColour (ClText.withMultipliedAlpha(alpha));
+            g.setColour (ClText.withMultipliedAlpha(editingAlpha));
             g.setFont (getLabelFont(label));
 
             Rectangle<int> textArea (label.getBorderSize().subtractedFrom (label.getLocalBounds()));
@@ -256,7 +258,7 @@ public:
             g.drawFittedText (label.getText(), textArea, label.getJustificationType(), 1,
                               label.getMinimumHorizontalScale());
 
-            g.setColour (label.findColour (Label::outlineColourId).withMultipliedAlpha (alpha));
+            g.setColour (label.findColour (Label::outlineColourId).withMultipliedAlpha (editingAlpha));
         }
         else if (label.isEnabled())
         {
@@ -275,9 +277,9 @@ public:
         g.setColour (Colours::white.withMultipliedAlpha(0.5f));
 
         Path triangle;
-        triangle.startNewSubPath(w, h);
-        triangle.lineTo(0.5 * w, h);
-        triangle.lineTo(w, 0.5 * h);
+        triangle.startNewSubPath(static_cast<float>(w), static_cast<float>(h));
+        triangle.lineTo(static_cast<float>(0.5 * w), static_cast<float>(h));
+        triangle.lineTo(static_cast<float>(w), static_cast<float>(0.5 * h));
         triangle.closeSubPath();
 
         g.fillPath(triangle);
@@ -296,8 +298,8 @@ public:
         else
         {
             Path p;
-            p.addRoundedRectangle(0, 0, width, height, 12.0f);
-            //g.setColour (ClTextTextboxbg);
+            p.addRoundedRectangle(static_cast<float>(0), static_cast<float>(0), static_cast<float>(width), static_cast<float>(height), 12.0f);
+            //g.setColour (ClTextTextboxBackground);
             g.setColour (textEditor.findColour (TextEditor::backgroundColourId));
             g.fillPath (p);
         }
@@ -313,13 +315,13 @@ public:
                 if (textEditor.hasKeyboardFocus (true) && ! textEditor.isReadOnly())
                 {
                     g.setColour (Colours::white.withMultipliedAlpha(0.8f));
-                    g.drawRoundedRectangle (0.5, 0.5, width-1, height-1, (height-1)/2.0f, 0.8);
+                    g.drawRoundedRectangle (0.5, 0.5, static_cast<float>(width-1), static_cast<float>(height-1), static_cast<float>(height-1)/2.0f, 0.8f);
 
                 }
                 else
                 {
                     g.setColour (Colours::white.withMultipliedAlpha(0.8f));
-                    g.drawRoundedRectangle (0, 0, width, height, height/2.0f, 0);
+                    g.drawRoundedRectangle (0, 0, static_cast<float>(width), static_cast<float>(height), static_cast<float>(height)/2.0f, 0);
                 }
             }
         }
@@ -370,7 +372,7 @@ public:
 
         g.setColour (header.findColour (TableHeaderComponent::textColourId));
         g.setFont (aaRegular);
-        g.setFont (height * 0.6f);
+        g.setFont (static_cast<float> (height) * 0.6f);
         g.drawFittedText (columnName, area, Justification::centred, 1);
     }
 
@@ -385,7 +387,7 @@ public:
 
         if (style == Slider::LinearBar || style == Slider::LinearBarVertical)
         {
-            const float fx = (float) x, fy = (float) y, fw = (float) width, fh = (float) height;
+            const auto fx = (float) x, fy = (float) y, fw = (float) width, fh = (float) height;
 
             Path p;
 
@@ -402,7 +404,7 @@ public:
             g.setColour (baseColour);
             g.fillPath (p);
 
-            const float lineThickness = jmin (15.0f, jmin (width, height) * 0.45f) * 0.1f;
+            const auto lineThickness = jmin (15.0f, static_cast<float> (jmin (width, height)) * 0.45f) * 0.1f;
             g.drawRect (slider.getLocalBounds().toFloat(), lineThickness);
         }
         else
@@ -419,48 +421,52 @@ public:
                                      const Slider::SliderStyle style, Slider& slider) override
     {
         const float sliderRadius = 8.f; //getSliderThumbRadius (slider) - 5.0f;
-        Path slbg;
-        Path clbar;
+        Path sliderBackgroundPath;
+        Path controlBarPath;
 
         Colour statusColour = slider.findColour(Slider::rotarySliderOutlineColourId).withMultipliedAlpha (0.8f);
 
 
-        const float min = slider.getMinimum();
-        const float max = slider.getMaximum();
-        const float zeroPos = -min/(max-min);
+        const double min = slider.getMinimum();
+        const double max = slider.getMaximum();
+        const auto zeroPos = -min/(max-min);
         bool isTwoValue = (style == Slider::SliderStyle::TwoValueVertical || style == Slider::SliderStyle::TwoValueHorizontal);
 
         if (slider.isHorizontal())
         {
-            const float iy = y + height * 0.5f - sliderRadius * 0.5f;
-            Rectangle<float> r (x - sliderRadius * 0.5f, iy, width + sliderRadius, sliderRadius);
-            slbg.addRoundedRectangle (r,sliderRadius/2.0,sliderRadius/2.0);
+            const auto iy = static_cast<float> (static_cast<float> (y) + static_cast<float> (height) * 0.5f - sliderRadius * 0.5f);
+            Rectangle<float> r (static_cast<float> (static_cast<float> (x) - sliderRadius * 0.5f), iy, static_cast<float> (static_cast<float> (width) + sliderRadius), sliderRadius);
+            sliderBackgroundPath.addRoundedRectangle (r,static_cast<float> (sliderRadius/2.0),static_cast<float> (sliderRadius/2.0));
 
             if (isTwoValue)
             {
-                clbar.addRoundedRectangle(Rectangle<float>(Point<float>(minSliderPos, iy), Point<float>(maxSliderPos, iy+sliderRadius)),sliderRadius/2.0,sliderRadius/2.0);
+                controlBarPath.addRoundedRectangle(
+                    Rectangle<float>(Point<float>(minSliderPos, iy), Point<float>(maxSliderPos, iy+sliderRadius)),
+                        static_cast<float> (sliderRadius/2.0),static_cast<float> (sliderRadius/2.0));
             }
             else
             {
-                clbar.addRoundedRectangle(Rectangle<float>(Point<float>(x+width*zeroPos, iy), Point<float>(sliderPos, iy+sliderRadius)),sliderRadius/2.0,sliderRadius/2.0);
+                controlBarPath.addRoundedRectangle(
+                    Rectangle<float>(Point<float>(static_cast<float> (x + width * (zeroPos)), iy), Point<float>(sliderPos, iy+sliderRadius)),
+                        static_cast<float> (sliderRadius/2.0),static_cast<float> (sliderRadius/2.0));
             }
         }
         else
         {
-            const float ix = x + width * 0.5f - sliderRadius * 0.5f;
-            Rectangle<float> r (ix, y - sliderRadius * 0.5f, sliderRadius, height + sliderRadius);
-            slbg.addRoundedRectangle (r,sliderRadius/2.0,sliderRadius/2.0);
-            clbar.addRoundedRectangle(Rectangle<float>(Point<float>(ix+1.0f,y+ height * (1.0f-zeroPos)), Point<float>(ix-1.0f+sliderRadius,sliderPos)),sliderRadius/2.0,sliderRadius/2.0);
+            const auto ix = static_cast<float> (static_cast<float> (x) + static_cast<float> (width) * 0.5f - sliderRadius * 0.5f);
+            Rectangle<float> r (ix, static_cast<float> (y) - sliderRadius * 0.5f, sliderRadius, static_cast<float> (height) + sliderRadius);
+            sliderBackgroundPath.addRoundedRectangle (r,static_cast<float> (sliderRadius/2.0),static_cast<float> (sliderRadius/2.0));
+            controlBarPath.addRoundedRectangle(Rectangle<float>(Point<float>(ix+1.0f, static_cast<float> (y + height * (1.0f - zeroPos))), Point<float>(ix-1.0f+sliderRadius,sliderPos)),static_cast<float> (sliderRadius/2.0),static_cast<float> (sliderRadius/2.0));
         }
 
 
         g.setColour(ClSliderFace);
-        g.fillPath(slbg);
+        g.fillPath(sliderBackgroundPath);
         g.setColour(statusColour);
-        g.fillPath(clbar);
+        g.fillPath(controlBarPath);
         g.setColour(ClFaceShadowOutline);
 
-        g.strokePath(slbg, PathStrokeType(1.0f));
+        g.strokePath(sliderBackgroundPath, PathStrokeType(1.0f));
 
 
     }
@@ -479,15 +485,15 @@ public:
     {
         bool isEnabled = slider.isEnabled();
         const float alpha = isEnabled ? 1.0f : 0.4f;
-        const float radius = jmin (width / 2, height / 2);
-        const float centreX = x + width * 0.5f;
-        const float centreY = y + height * 0.5f;
+        const auto radius = static_cast<const float> (jmin (width / 2, height / 2));
+        const float centreX = static_cast<float> (x) + static_cast<float> (width) * 0.5f;
+        const float centreY = static_cast<float> (y) + static_cast<float> (height) * 0.5f;
         const float rx = centreX - radius;
         const float ry = centreY - radius;
         const float rw = radius * 2.0f;
 
-        const float min = slider.getMinimum();
-        const float max = slider.getMaximum();
+        const auto min = static_cast<const float> (slider.getMinimum());
+        const auto max = static_cast<const float> (slider.getMaximum());
         const float zeroPos = -min/(max-min);
         const float zeroAngle =rotaryStartAngle + zeroPos * (rotaryEndAngle - rotaryStartAngle);
         const float angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
@@ -565,13 +571,13 @@ public:
 
             if (style == Slider::LinearVertical)
             {
-                kx = x + width * 0.5f;
+                kx = static_cast<float> (x + width) * 0.5f;
                 ky = sliderPos;
             }
             else
             {
                 kx = sliderPos;
-                ky = y + height * 0.5f;
+                ky = static_cast<float>(y + height) * 0.5f;
             }
 
 
@@ -585,13 +591,13 @@ public:
         else if (style == Slider::TwoValueVertical)
         {
             drawRoundThumb (g,
-                            jmax (sliderRadius, x + width * 0.5f),
+                            jmax (sliderRadius, static_cast<float>(x + width) * 0.5f),
                             minSliderPos,
                             sliderRadius * 2.0f,
                             knobColour, outlineThickness);
 
             drawRoundThumb (g,
-                            jmax (sliderRadius, x + width * 0.5f),
+                            jmax (sliderRadius, static_cast<float>(x + width) * 0.5f),
                             maxSliderPos,
                             sliderRadius * 2.0f,
                             knobColour, outlineThickness);
@@ -600,13 +606,13 @@ public:
         {
             drawRoundThumb (g,
                             minSliderPos,
-                            jmax (sliderRadius, y + height * 0.5f),
+                            jmax (sliderRadius, static_cast<float>(y + height) * 0.5f),
                             sliderRadius * 2.0f,
                             knobColour, outlineThickness);
 
             drawRoundThumb (g,
                             maxSliderPos,
-                            jmax (sliderRadius, y + height * 0.5f),
+                            jmax (sliderRadius, static_cast<float>(y + height) * 0.5f),
                             sliderRadius * 2.0f,
                             knobColour, outlineThickness);
 
@@ -650,7 +656,7 @@ public:
     void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
                                bool isMouseOverButton, bool isButtonDown) override
     {
-        Rectangle<float> buttonArea(0.0f, 0.0f, button.getWidth(), button.getHeight());
+        Rectangle<float> buttonArea(0.0f, 0.0f, static_cast<float> (button.getWidth()), static_cast<float> (button.getHeight()));
         buttonArea.reduce(1.0f, 1.0f);
         
         g.setColour(backgroundColour);
@@ -708,8 +714,8 @@ public:
                                .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.8f));
 
 
-            const float width  = button.getWidth();
-            const float height = button.getHeight() ;
+            const auto width  = static_cast<const float> (button.getWidth());
+            const auto height = static_cast<const float>(button.getHeight());
             bool isOn = button.getToggleState();
             const float cornerSize = jmin (15.0f, jmin (width, height) * 0.45f);
 
@@ -729,17 +735,17 @@ public:
             g.setFont(aaRegular);
             g.setFont(height-1);
             g.setColour (isOn ? button.findColour(ToggleButton::tickColourId) : Colours::white);
-            g.drawText(isOn ? "ON" : "OFF" , 0, 0, width, height, Justification::centred);
+            g.drawText(isOn ? "ON" : "OFF" , 0, 0, (int) width, (int) height, Justification::centred);
 
         }
 
         else
         {
 
-            const auto fontSize = jmin (15.0f, button.getHeight() * 0.75f);
+            const auto fontSize = jmin (15.0f, static_cast<float> (button.getHeight()) * 0.75f);
             const auto tickWidth = fontSize * 1.1f;
 
-            drawTickBox (g, button, 4.0f, (button.getHeight() - tickWidth) * 0.5f,
+            drawTickBox (g, button, 4.0f, (static_cast<float> (button.getHeight()) - tickWidth) * 0.5f,
                          tickWidth, tickWidth,
                          button.getToggleState(),
                          button.isEnabled(),
@@ -771,9 +777,8 @@ public:
                       bool isMouseOverButton,
                       bool isButtonDown) override
     {
-        const float boxSize = w * 0.8f;
 
-        Rectangle<float> buttonArea(x + (w - boxSize) * 0.5f, y + (h - boxSize) * 0.5f, boxSize, boxSize);
+        Rectangle<float> buttonArea(x, y, w, h);
 
         g.setColour(component.findColour(ToggleButton::tickColourId).withMultipliedAlpha(!isEnabled ? 0.1f : ticked ? 1.0f : isMouseOverButton ? 0.7f : 0.5f) );
 
@@ -797,8 +802,8 @@ public:
         Path p;
         Path stroke;
         stroke.addRoundedRectangle(Rectangle<float>(-0.5f, -5.0f, 1.0f, 10.0f), 0.1f, 0.1f);
-        p.addPath(stroke, AffineTransform().rotation(0.25f*M_PI));
-        p.addPath(stroke, AffineTransform().rotation(-0.25f*M_PI));
+        p.addPath(stroke, AffineTransform().rotation(static_cast<float> (0.25f * M_PI)));
+        p.addPath(stroke, AffineTransform().rotation(static_cast<float> (-0.25f * M_PI)));
         p.scaleToFit (0, 0, height * 2.0f, height, true);
         return p;
     }
@@ -807,14 +812,16 @@ public:
                                     const String& text, const Justification& position,
                                     GroupComponent& group) override
     {
+        (void)height;
+        (void)group;
         Rectangle<int> r(6,0,width-6,15);
         g.setColour(ClText);
         g.setFont(aaRegular);
         g.setFont(20.0f);
         g.drawFittedText (text, r, position,1,0.f);
 
-        g.setColour(ClSeperator);
-        g.drawLine(0, 18, width, 18 ,.8f);
+        g.setColour(ClSeparator);
+        g.drawLine(0, 18, static_cast<float> (width), 18 ,.8f);
     }
     void positionComboBoxText (ComboBox& box, Label& label) override
     {
@@ -831,6 +838,9 @@ public:
                        int buttonX, int buttonY, int buttonW, int buttonH,
                        ComboBox& box) override
     {
+        (void)width;
+        (void)height;
+        (void)isButtonDown;
         //const auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
         //        const Rectangle<int> boxBounds (0, 0, width, height);
         //
@@ -842,9 +852,9 @@ public:
 
         Rectangle<int> buttonArea (buttonX, buttonY, buttonW, buttonH);
         Path path;
-        path.startNewSubPath (buttonX + 3.0f, buttonArea.getCentreY() - 2.0f);
-        path.lineTo (buttonArea.getCentreX(), buttonArea.getCentreY() + 3.0f);
-        path.lineTo (buttonArea.getRight() - 3.0f, buttonArea.getCentreY() - 2.0f);
+        path.startNewSubPath (static_cast<float> (buttonX) + 3.0f, static_cast<float> (buttonArea.getCentreY()) - 2.0f);
+        path.lineTo (static_cast<float> (buttonArea.getCentreX()), static_cast<float> (buttonArea.getCentreY()) + 3.0f);
+        path.lineTo (static_cast<float> (buttonArea.getRight()) - 3.0f, static_cast<float> (buttonArea.getCentreY()) - 2.0f);
 
         g.setColour (Colours::white.withAlpha ((box.isEnabled() ? 0.9f : 0.2f)));
         g.strokePath (path, PathStrokeType (2.0f));
@@ -857,7 +867,7 @@ public:
         g.setColour (findColour (PopupMenu::headerTextColourId));
 
         g.drawFittedText (sectionName,
-                          area.getX() + 12, area.getY(), area.getWidth() - 16, (int) (area.getHeight() * 0.8f),
+                          area.getX() + 12, area.getY(), area.getWidth() - 16, (int) (static_cast<float> (area.getHeight()) * 0.8f),
                           Justification::bottomLeft, 1);
     }
 
@@ -906,7 +916,7 @@ public:
             Font font (getPopupMenuFont());
             font.setHeight(18.0f);
 
-            const float maxFontHeight = area.getHeight() / 1.3f;
+            const float maxFontHeight = static_cast<float> (area.getHeight()) / 1.3f;
 
             if (font.getHeight() > maxFontHeight)
                 font.setHeight (maxFontHeight);
@@ -930,7 +940,7 @@ public:
                 const float arrowH = 0.6f * getPopupMenuFont().getAscent();
 
                 const float x = (float) r.removeFromRight ((int) arrowH).getX();
-                const float halfH = (float) r.getCentreY();
+                const auto halfH = static_cast<float>(r.getCentreY());
 
                 Path p;
                 p.addTriangle (x, halfH - arrowH * 0.5f,

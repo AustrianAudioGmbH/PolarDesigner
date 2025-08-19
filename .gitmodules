@@ -1,0 +1,6 @@
+[submodule "modules/melatonin_inspector"]
+	path = modules/melatonin_inspector
+	url = https://github.com/sudara/melatonin_inspector.git
+[submodule "modules/melatonin_perfetto"]
+	path = modules/melatonin_perfetto
+	url = https://github.com/sudara/melatonin_perfetto.git

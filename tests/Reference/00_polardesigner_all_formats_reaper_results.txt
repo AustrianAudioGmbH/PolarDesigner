@@ -1,0 +1,3 @@
+2025-08-05 11:23:22.884 REAPER[23988:3496313] swell-cocoa: creating metal device context for 0x12a83ba00 Apple M1
+PolarDesigner3 Build:beta-2-6cd772c
+PolarDesigner3 Build:beta-2-6cd772c

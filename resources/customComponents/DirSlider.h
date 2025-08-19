@@ -60,13 +60,13 @@ public:
     DirSlider () :
         Slider(),
         lastDistanceFromDragStart(0),
-        reversed(false),
-        isDual(false),
-        scrollWheelEnabled(true),
+//        reversed(false),
+//        isDual(false),
+//        scrollWheelEnabled(true),
         tooltipActive(false),
         tooltipWidth(40),
         tooltipHeight(20),
-        activePolarPatternPath(-1.0f),
+//        activePolarPatternPath(-1.0f),
         patternStripSize(12),
         dirStrip(this)
     {
@@ -75,7 +75,7 @@ public:
         addAndMakeVisible(&dirStrip);
     }
 
-    ~DirSlider () {}
+    ~DirSlider () override {}
     
     class DirPatternStrip : public Component
     {
@@ -90,10 +90,10 @@ public:
             eightPath.loadPathFromData (eightData, sizeof (eightData));
             omniPath.loadPathFromData (omniData, sizeof (omniData));
             revCardPath.loadPathFromData (cardData, sizeof (cardData));
-            revCardPath.applyTransform (AffineTransform::rotation(M_PI));
+            revCardPath.applyTransform (AffineTransform::rotation(static_cast<float> (M_PI)));
         }
         
-        ~DirPatternStrip() {}
+        ~DirPatternStrip() override {}
         
         void paint (Graphics& g) override
         {
@@ -104,26 +104,52 @@ public:
             int boundsY = bounds.getY() + topMargin;
             int width = bounds.getWidth() - 2*lrMargin;
             
-            revCardPath.applyTransform (revCardPath.getTransformToScaleToFit(boundsX,
-                                                                             boundsY, dirImgSize, dirImgSize,
+            revCardPath.applyTransform (revCardPath.getTransformToScaleToFit(boundsX * 1.0f,
+                                                                             boundsY * 1.0f, dirImgSize * 1.0f, dirImgSize * 1.0f,
                                                                              true, Justification::centred));
             (slider->isEnabled()) ? g.setColour (Colours::white) : g.setColour (Colours::white.withMultipliedAlpha(0.5f));
-            g.strokePath (revCardPath, PathStrokeType (activePatternPath == revCardFact ? 2.0f : 1.0f));
-            
-            omniPath.applyTransform (omniPath.getTransformToScaleToFit(boundsX + 0.33 * width - dirImgSize/2.0f + 2.0f ,
-                                                                       boundsY, dirImgSize, dirImgSize,
-                                                                       true, Justification::centred));
-            g.strokePath (omniPath, PathStrokeType (activePatternPath == omniFact ? 2.0f : 1.0f));
+            if (juce::approximatelyEqual(activePatternPath, revCardFact))
+            {
+                g.strokePath (revCardPath, PathStrokeType (2.0f));
+            }
+            else
+            {
+                g.strokePath (revCardPath, PathStrokeType (1.0f));
+            }
 
-            cardPath.applyTransform (cardPath.getTransformToScaleToFit(boundsX + 0.66 * width - dirImgSize/2.0f - 1.0f,
-                                                                       boundsY, dirImgSize, dirImgSize,
+            omniPath.applyTransform (omniPath.getTransformToScaleToFit(static_cast<float> (boundsX + 0.33 * width - dirImgSize / 2.0f + 2.0f),
+                                                                       boundsY * 1.0f, dirImgSize * 1.0f, dirImgSize * 1.0f,
                                                                        true, Justification::centred));
-            g.strokePath (cardPath, PathStrokeType (activePatternPath == cardFact ? 2.0f : 1.0f));
+            if (juce::approximatelyEqual(activePatternPath, omniFact))
+            {
+                g.strokePath (omniPath, PathStrokeType (2.0f));
+            }
+            else
+            {
+                g.strokePath (omniPath, PathStrokeType (1.0f));
+            }
 
-            eightPath.applyTransform (eightPath.getTransformToScaleToFit(boundsX + width - dirImgSize,
-                                                                         boundsY, dirImgSize, dirImgSize,
+            cardPath.applyTransform (cardPath.getTransformToScaleToFit(static_cast<float> (boundsX + 0.66 * width - dirImgSize / 2.0f - 1.0f),
+                                                                       boundsY * 1.0f, dirImgSize * 1.0f, dirImgSize * 1.0f,
+                                                                       true, Justification::centred));
+            if (juce::approximatelyEqual(activePatternPath, cardFact))
+            {
+                g.strokePath (cardPath, PathStrokeType (2.0f));
+            }
+            else
+            {
+                g.strokePath (cardPath, PathStrokeType (1.0f));
+            }
+
+            eightPath.applyTransform (eightPath.getTransformToScaleToFit((boundsX + width - dirImgSize) * 1.0f,
+                                                                         boundsY * 1.0f, dirImgSize * 1.0f, dirImgSize * 1.0f,
                                                                          true, Justification::centred));
-            g.strokePath (eightPath, PathStrokeType (activePatternPath == eightFact ? 2.0f : 1.0f));
+            if (juce::approximatelyEqual(activePatternPath, eightFact)) {
+                g.strokePath (eightPath, PathStrokeType (2.0f));
+            }
+            else {
+                g.strokePath (eightPath, PathStrokeType (1.0f));
+            }
         }
         
         void mouseMove(const MouseEvent &e) override
@@ -141,16 +167,17 @@ public:
             else if (cardPath.getBounds().contains(posf)) activePatternPath = cardFact;
             else if (revCardPath.getBounds().contains(posf)) activePatternPath = revCardFact;
             
-            if (oldActivePath != activePatternPath)
+            if (!juce::approximatelyEqual(oldActivePath, activePatternPath))
                 repaint();
         }
         
         void mouseUp (const MouseEvent &e) override
         {
+            (void)e;
             if (!slider->isEnabled())
                 return;
             
-            if (activePatternPath != -1)
+            if (!juce::approximatelyEqual(activePatternPath,-1.0f))
             {
                 slider->setValue (activePatternPath, NotificationType::sendNotification);
             }
@@ -158,6 +185,7 @@ public:
         
         void mouseExit (const MouseEvent& e) override
         {
+            (void)e;
             activePatternPath = -1;
             repaint();
         }
@@ -225,6 +253,7 @@ public:
     
     void mouseExit (const MouseEvent& e) override
     {
+        (void)e;
         tooltipActive = false;
 
         if (tooltipValueBox != nullptr && !tooltipValueBox->isMouseOver() && !tooltipValueBox->isBeingEdited())
@@ -248,9 +277,9 @@ public:
         auto layout = lf.getSliderLayout (*this);
         
         sliderRect = layout.sliderBounds;
-        sliderRect.removeFromTop(patternStripSize);
+        sliderRect.removeFromTop(static_cast<int> (patternStripSize));
         
-        dirPatternBounds = getLocalBounds().removeFromTop(patternStripSize);
+        dirPatternBounds = getLocalBounds().removeFromTop(static_cast<int> (patternStripSize));
         dirStrip.setBounds(dirPatternBounds);
         
         initValueBox();
@@ -279,12 +308,12 @@ public:
     
     void tooltipTextChanged()
     {
-        if (getValueFromText (tooltipValueBox->getText()) == getValue())
+        if (juce::approximatelyEqual(getValueFromText (tooltipValueBox->getText()), getValue()))
             return;
         
         double newValue = snapValueToRange (getValueFromText (tooltipValueBox->getText()));
         
-        if (newValue != static_cast<double> (getValue()))
+        if (!juce::approximatelyEqual(newValue, getValue()))
         {
             setValue (newValue, NotificationType::sendNotification);
             tooltipValueBox->setText (getTextFromValue (newValue), NotificationType::dontSendNotification);
@@ -307,16 +336,16 @@ public:
 
 private:
     int lastDistanceFromDragStart;
-    bool reversed;
-    bool isDual;
-    bool scrollWheelEnabled;
+//    bool reversed;
+//    bool isDual;
+//    bool scrollWheelEnabled;
     bool tooltipActive;
     Rectangle<int> sliderRect;
     Rectangle<int> dirPatternBounds;
     
     int tooltipWidth;
     int tooltipHeight;
-    float activePolarPatternPath;
+//    float activePolarPatternPath;
     float patternStripSize;
     
     std::unique_ptr<Label> tooltipValueBox;

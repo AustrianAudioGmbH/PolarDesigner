@@ -1,0 +1,205 @@
+From cb030cdcdb190c5322150ca3389f4f23b4677973 Mon Sep 17 00:00:00 2001
+From: Sudara <sudara@alonetone.com>
+Date: Tue, 2 Jul 2024 13:52:27 +0200
+Subject: [PATCH 1/2] Remove juce::Drawable from paint call. Add component
+ timers
+
+---
+ resources/customComponents/DirectivityEQ.h | 68 +++++++++++-----------
+ 1 file changed, 33 insertions(+), 35 deletions(-)
+
+diff --git a/resources/customComponents/DirectivityEQ.h b/resources/customComponents/DirectivityEQ.h
+index ee24d43..0182e36 100644
+--- a/resources/customComponents/DirectivityEQ.h
++++ b/resources/customComponents/DirectivityEQ.h
+@@ -6,20 +6,20 @@
+ /*
+  ==============================================================================
+  Author: Thomas Deppisch
+- 
++
+  Copyright (c) 2019 - Austrian Audio GmbH
+  www.austrian.audio
+- 
++
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+- 
++
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+- 
++
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ==============================================================================
+@@ -49,6 +49,7 @@
+ 
+ #pragma once
+ #include "../lookAndFeel/MainLookAndFeel.h"
++#include "melatonin_inspector/melatonin/helpers/timing.h"
+ 
+ class  DirectivityEQ : public Component, private Slider::Listener, private Label::Listener, private Button::Listener
+ {
+@@ -90,10 +91,10 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
+             path.preallocateSpace(1000);    // !J! Arbitrary Magic Number
+         }
+         ~PathComponent() {}
+-        void setBounds() 
++        void setBounds()
+         {
+             int deltaX = 0;
+-            
++
+             if (SystemStats::getOperatingSystemName() == "iOS")
+                 deltaX = static_cast<int> (path.getBounds().getWidth() * 2);
+ 
+@@ -154,31 +155,13 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
+         BandKnobComponent() : Component() {
+             setAlwaysOnTop(true);
+             setName("BandKnobComponent");
++            bandHandleKnobImg = juce::Drawable::createFromImageData(BinaryData::bandHandleKnob_svg, BinaryData::bandHandleKnob_svgSize);
+         }
++
+         ~BandKnobComponent() override {}
+         void paint(Graphics& g) override
+         {
+-            int circX = getLocalBounds().getCentreX();
+-            int circY = getLocalBounds().getCentreY();
+-            int circleSize = getLocalBounds().getWidth();
+-            bool resultMainImg;
+-            
+-            auto bandHandleKnobImg = juce::Drawable::createFromImageData(BinaryData::bandHandleKnob_svg, BinaryData::bandHandleKnob_svgSize);
+-            bandHandleKnobImageArea = Rectangle<float>(circX - (circleSize / 2), circY - (circleSize / 2), circleSize, circleSize);
+-
+-            if(SystemStats::getOperatingSystemName() == "iOS")
+-                bandHandleKnobImageArea.reduce(proportionOfHeight(0.23f), proportionOfHeight(0.23f));
+-
+-            
+-            if (!isEnabled())
+-            {
+-                resultMainImg = bandHandleKnobImg->replaceColour(Colours::white, Colours::black);
+-            }
+-            else
+-            {
+-                resultMainImg = bandHandleKnobImg->replaceColour(Colours::black, Colours::white);
+-            }
+-            (void)resultMainImg; // !J! TODO: Remove
++            melatonin::ComponentTimer timer { this };
+ 
+             bandHandleKnobImg->drawWithin(g, bandHandleKnobImageArea, juce::RectanglePlacement::centred, 1.f);
+         }
+@@ -189,6 +172,18 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
+             Component::setBounds(rectangle.toNearestInt());
+         }
+ 
++        void resized() override
++        {
++            int circX = getLocalBounds().getCentreX();
++            int circY = getLocalBounds().getCentreY();
++            int circleSize = getLocalBounds().getWidth();
++
++            bandHandleKnobImageArea = Rectangle<float>(circX - (circleSize / 2), circY - (circleSize / 2), circleSize, circleSize);
++
++            if(SystemStats::getOperatingSystemName() == "iOS")
++                bandHandleKnobImageArea.reduce(proportionOfHeight(0.23f), proportionOfHeight(0.23f));
++        }
++
+         bool hitTest(int x, int y) override
+         {
+             Path knobArea;
+@@ -202,6 +197,7 @@ class  DirectivityEQ : public Component, private Slider::Listener, private Label
+     private:
+         Rectangle<float> rectangle;
+         Rectangle<float> bandHandleKnobImageArea;
++        std::unique_ptr<juce::Drawable> bandHandleKnobImg;
+     };
+ 
+ public:
+@@ -262,13 +258,15 @@ public:
+         dyn = s.yMax - s.yMin;
+         zero = s.yMax / dyn;
+     }
+-    
++
+     ~DirectivityEQ() override {
+         setLookAndFeel(nullptr);
+     }
+ 
+     void paint (Graphics& g) override
+     {
++        melatonin::ComponentTimer timer { this };
++
+         nrActiveBands = processor.getNBands();
+ 
+         if (processor.zeroDelayModeActive())
+@@ -296,7 +294,7 @@ public:
+                 {
+                     bandLimitPaths[i].setVisible(true);
+                     bandLimitDividerHolders[i].setVisible(true);
+-                } 
++                }
+                 else
+                 {
+                     bandLimitPaths[i].setVisible(false);
+@@ -359,7 +357,7 @@ public:
+         // set path colours and stroke
+         g.setColour (mainLaF.mainTextInactiveColor);
+         g.strokePath (dirGridPath, PathStrokeType (0.25f));
+-        
++
+         g.setColour(mainLaF.mainTextInactiveColor);
+         g.strokePath (smallDirGridPath, PathStrokeType (0.25f));
+ 
+@@ -368,7 +366,7 @@ public:
+ 
+         g.setColour(mainLaF.mainTextInactiveColor);
+         g.strokePath (hzGridPath, PathStrokeType (0.25f));
+-        
++
+         for (PathComponent& p : bandLimitPaths)
+         {
+             p.getPath().clear();
+@@ -376,7 +374,7 @@ public:
+         for (BandLimitDividerHolder& p : bandLimitDividerHolders)
+         {
+             p.getPath().clear();
+-        }        
++        }
+         for (Path& p : dirPaths)
+         {
+             p.clear();
+@@ -441,7 +439,7 @@ public:
+             {
+                 // set surrounding rectangle to trigger mouse drag and for aax automation shortcut
+                 dirPathRects[i].setBounds(hzToX(s.fMin), circY - patternRectHeight/2, hzToX(s.fMax) - hzToX(s.fMin), patternRectHeight);
+-                
++
+                 dirPaths[i].startNewSubPath (hzToX(s.fMin), circY);
+                 dirPaths[i].lineTo (hzToX(s.fMax), circY);
+                 g.setColour(dirPathRects[i].isEnabled() ? handle.colour : handle.colour.withBrightness(0.3f));
+@@ -453,7 +451,7 @@ public:
+             {
+                 // set surrounding rectangle to trigger mouse drag and for aax automation shortcut
+                 dirPathRects[i].setBounds(hzToX(s.fMin), circY - patternRectHeight/2, rightBound - bandMargin - hzToX(s.fMin), patternRectHeight);
+-                
++
+                 dirPaths[i].startNewSubPath (hzToX(s.fMin), circY);
+                 dirPaths[i].lineTo (rightBound - bandMargin, circY);
+             }
+@@ -856,7 +854,7 @@ public:
+         float maxGain = std::max(static_cast<float>(elem.gainSlider->getMaximum()), std::abs(static_cast<float>(elem.gainSlider->getMinimum())));
+         float absRange = static_cast<float>(elem.gainSlider->getMaximum()) + std::abs(static_cast<float>(elem.gainSlider->getMinimum()));
+         float gain = (static_cast<float>(elem.gainSlider->getValue()) + maxGain) / (7.0f/5.0f * absRange) + 2.0f/7.0f;
+-        
++
+         if (!active)
+         {
+             return 2.0f/7.0f;
+-- 
+2.38.1
+
