@@ -1,4 +1,7 @@
 # PolarDesigner
+
+This is PolarDesigner version 3, currently in development.
+
 Our open-source plug-in developed by [Thomas](https://github.com/thomasdeppisch), [Simon](https://github.com/becksimon), [IEM](https://iem.kug.ac.at/en/) and [Austrian Audio](https://austrian.audio/).
 
 PolarDesigner allows you to control the polar pattern of your OC818 microphone in up to five frequency bands.  
