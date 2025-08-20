@@ -4,3 +4,6 @@
 [submodule "modules/melatonin_perfetto"]
 	path = modules/melatonin_perfetto
 	url = https://github.com/sudara/melatonin_perfetto.git
+[submodule "JUCE"]
+	path = JUCE
+	url = https://github.com/juce-framework/JUCE/
