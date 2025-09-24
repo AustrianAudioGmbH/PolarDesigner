@@ -105,11 +105,13 @@ public:
     PolarDesignerAudioProcessor();
     ~PolarDesignerAudioProcessor() override;
 
-    // This is the ProTools PageFile for PolarDesigner3
+    void registerParameterListeners();
+
+        // This is the ProTools PageFile for PolarDesigner3
     String getPageFileName() const override { return "PolarDesigner3.xml"; }
 
     //==============================================================================
-    void resampleBuffer(const AudioBuffer<float>& src, AudioBuffer<float>& dst, float srcSampleRate, float dstSampleRate);
+    void resampleBuffer(const AudioBuffer<float>& src, AudioBuffer<float>& dst, float srcSampleRate, double dstSampleRate);
     void resampleBufferLagrange(const AudioBuffer<float>& src, AudioBuffer<float>& dst, float srcSampleRate, float dstSampleRate);
 
     void loadEqImpulseResponses();
@@ -173,15 +175,17 @@ public:
 
     unsigned int getNProcessorBands();
 
+    CriticalSection convolutionLock;
+
     float getXoverSliderRangeStart (int sliderNum);
     float getXoverSliderRangeEnd (int sliderNum);
 
-    Atomic<bool> repaintDEQ = true;
-    Atomic<bool> activeBandsChanged = true;
-    Atomic<bool> zeroLatencyModeChanged = true;
-    Atomic<bool> ffDfEqChanged = true;
+    std::atomic<bool> repaintDEQ = true;
+    std::atomic<bool> activeBandsChanged = true;
+    std::atomic<bool> zeroLatencyModeChanged = true;
+    std::atomic<bool> ffDfEqChanged = true;
     std::array<Atomic<bool>, 4> recomputeFilterCoefficients;
-    Atomic<bool> recomputeAllFilterCoefficients;
+    std::atomic<bool> recomputeAllFilterCoefficients;
 
     bool getDisturberRecorded() { return disturberRecorded; }
     bool getSignalRecorded() { return signalRecorded; }
@@ -209,9 +213,9 @@ public:
     float oldProxDistanceB = 0;
 
     // when the A/B Buttons are pressed, the prior nrBands state is remembered
-    float oldNrBands = 0;
-    float oldNrBandsA = MAX_NUM_EQS;
-    float oldNrBandsB = MAX_NUM_EQS;
+    std::atomic<float> oldNrBands = 0;
+    std::atomic<float> oldNrBandsA = MAX_NUM_EQS;
+    std::atomic<float> oldNrBandsB = MAX_NUM_EQS;
 
     Atomic<bool> abLayerChanged = false;
     float zeroLatencyModeA; // Zero Latency setting for Layer A
@@ -280,7 +284,7 @@ private:
 
     // use odd FIR_LEN for even filter order (FIR_LEN = N+1)
     // (lowpass and highpass need even filter order to put a zero at f=0 and f=pi)
-    int firLen;
+    std::atomic<int> firLen{FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE};
 
     // free field / diffuse field eq
     dsp::Convolution dfEqOmniConv;
@@ -340,7 +344,7 @@ private:
     AudioBuffer<float> filterBankBuffer; // holds filtered data, size: N_CH_IN*5
     AudioBuffer<float> firFilterBuffer; // holds filter coefficients, size: 5
     AudioBuffer<float> omniEightBuffer; // holds omni and fig-of-eight signals, size: 2
-    dsp::Convolution convolvers[2 * MAX_NUM_EQS]; // holds 2*nProcessorBands mono convolvers
+    std::array<dsp::Convolution, 2 * MAX_NUM_EQS> convolvers;
 
     double currentSampleRate = 0.0f;
     double previousSampleRate = 0.0f;

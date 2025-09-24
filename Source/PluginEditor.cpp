@@ -1674,27 +1674,27 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
         needsRepaint = true;
     }
 
-    if (polarDesignerProcessor.repaintDEQ.get())
+    if (polarDesignerProcessor.repaintDEQ.load())
     {
         polarDesignerProcessor.repaintDEQ = false;
         needsRepaint = true;
     }
 
-    if (polarDesignerProcessor.activeBandsChanged.get())
+    if (polarDesignerProcessor.activeBandsChanged.load())
     {
         polarDesignerProcessor.activeBandsChanged = false;
         nEditorBandsChanged();
         needsRepaint = true;
     }
 
-    if (polarDesignerProcessor.zeroLatencyModeChanged.get())
+    if (polarDesignerProcessor.zeroLatencyModeChanged.load())
     {
         activateEditingForZeroLatency();
         polarDesignerProcessor.zeroLatencyModeChanged = false;
         needsRepaint = true;
     }
 
-    if (polarDesignerProcessor.ffDfEqChanged.get())
+    if (polarDesignerProcessor.ffDfEqChanged.load())
     {
         polarDesignerProcessor.ffDfEqChanged = false;
         setEqMode();
