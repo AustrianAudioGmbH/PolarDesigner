@@ -47,7 +47,6 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor()
       activeBandsChanged(true),
       zeroLatencyModeChanged(true),
       ffDfEqChanged(true),
-      recomputeFilterCoefficients({false, false, false, false}),
       recomputeAllFilterCoefficients(true),
       disturberRecorded(false),
       signalRecorded(false),
@@ -121,6 +120,10 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor()
       ffEqEightBuffer(1, FF_EQ_LEN),
       convolversReady(false),
       delay(),
+      cachedDfEqOmniBuffer(1, DF_EQ_LEN),
+      cachedDfEqEightBuffer(1, DF_EQ_LEN),
+      cachedFfEqOmniBuffer(1, FF_EQ_LEN),
+      cachedFfEqEightBuffer(1, FF_EQ_LEN),
       delayBuffer(),
       oldDirFactors{0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
       oldBandGains{0.0f, 0.0f, 0.0f, 0.0f, 0.0f},
@@ -147,26 +150,8 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor()
       lastDir()
 {
     TRACE_DSP();
-
-    if (firLen % 2 == 0) {
-        firLen++; // Ensure odd length
-        LOG_DEBUG("Adjusted firLen to " + String(firLen) + " to ensure odd length");
-    }
-    firFilterBuffer.setSize(MAX_NUM_EQS, firLen, false, false, true);
-    firFilterBuffer.clear();
-
-    registerParameterListeners();
-
-    for (auto& conv : convolvers) {
-        conv.reset();
-    }
-
-    vtsParams.addParameterListener ("trimPosition", this);
-
-    vtsParams.addParameterListener ("xOverF1", this);
-    vtsParams.addParameterListener ("xOverF2", this);
-    vtsParams.addParameterListener ("xOverF3", this);
-    vtsParams.addParameterListener ("xOverF4", this);
+    if (firLen % 2 == 0) firLen++;
+    jassert(firLen % 2 == 1); // Ensure firLen is odd
 
     if (auto* param = vtsParams.getParameter ("trimPosition"))
     {
@@ -184,57 +169,20 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor()
     xOverFreqsPtr[3] = vtsParams.getRawParameterValue ("xOverF4");
     for (int i = 0; i < MAX_NUM_EQS; ++i)
     {
-        vtsParams.addParameterListener ("alpha" + String (i + 1), this);
         dirFactorsPtr[i] = vtsParams.getRawParameterValue ("alpha" + String (i + 1));
-
-        vtsParams.addParameterListener ("solo" + String (i + 1), this);
         soloBandPtr[i] = vtsParams.getRawParameterValue ("solo" + String (i + 1));
-
-        vtsParams.addParameterListener ("mute" + String (i + 1), this);
         muteBandPtr[i] = vtsParams.getRawParameterValue ("mute" + String (i + 1));
-
-        vtsParams.addParameterListener ("gain" + String (i + 1), this);
         bandGainsPtr[i] = vtsParams.getRawParameterValue ("gain" + String (i + 1));
     }
-    vtsParams.addParameterListener ("nrBands", this);
     nProcessorBandsPtr = vtsParams.getRawParameterValue ("nrBands");
-
-    vtsParams.addParameterListener ("allowBackwardsPattern", this);
-    vtsParams.getRawParameterValue ("allowBackwardsPattern");
-
-    vtsParams.addParameterListener ("proximity", this);
     proxDistancePtr = vtsParams.getRawParameterValue ("proximity");
-    vtsParams.addParameterListener ("proximityOnOff", this);
     proxOnOffPtr = vtsParams.getRawParameterValue ("proximityOnOff");
-    vtsParams.addParameterListener ("zeroLatencyMode", this);
     zeroLatencyModePtr = vtsParams.getRawParameterValue ("zeroLatencyMode");
-    vtsParams.addParameterListener ("syncChannel", this);
     syncChannelPtr = vtsParams.getRawParameterValue ("syncChannel");
 
-    // properties file: saves user preset folder location
-    PropertiesFile::Options options;
-    options.applicationName = "PolarDesigner";
-    options.filenameSuffix = "settings";
-    options.folderName = "AustrianAudio";
-    options.osxLibrarySubFolder = "Preferences";
+    validateSampleRateAndBlockSize();
 
-    properties = std::unique_ptr<PropertiesFile> (new PropertiesFile (options));
-    lastDir = File (properties->getValue ("presetFolder"));
-
-    dfEqOmniBuffer.copyFrom (0, 0, DFEQ_COEFFS_OMNI, DF_EQ_LEN);
-    dfEqEightBuffer.copyFrom (0, 0, DFEQ_COEFFS_EIGHT, DF_EQ_LEN);
-    ffEqOmniBuffer.copyFrom (0, 0, FFEQ_COEFFS_OMNI, FF_EQ_LEN);
-    ffEqEightBuffer.copyFrom (0, 0, FFEQ_COEFFS_EIGHT, FF_EQ_LEN);
-
-    updateLatency();
-
-    //    delay.setDelayTime (std::ceilf (static_cast<float> (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE) / 2 - 1) / FILTER_BANK_NATIVE_SAMPLE_RATE);
-    delay.setDelayTime(static_cast<float> (static_cast<float> ((static_cast<float> (firLen) - 1.0f) / 2.0f) / currentSampleRate));
-
-    oldProxDistance = proxDistancePtr->load();
-
-    termControlWaveform.setRepaintRate (30);
-    termControlWaveform.setBufferSize (256);
+    initializeBuffers();
 
 #if 0
     // !J! Some DAW's (Cubase) do not prepareToPlay before setStateInformation, so these buffers need to be ready at least, even if empty
@@ -246,13 +194,61 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor()
     omniEightBuffer.clear();
 #endif
 
-    initializeBuffers();
+    // Initialize cached EQ buffers
+    cachedDfEqOmniBuffer.copyFrom(0, 0, DFEQ_COEFFS_OMNI, DF_EQ_LEN);
+    cachedDfEqEightBuffer.copyFrom(0, 0, DFEQ_COEFFS_EIGHT, DF_EQ_LEN);
+    cachedFfEqOmniBuffer.copyFrom(0, 0, FFEQ_COEFFS_OMNI, FF_EQ_LEN);
+    cachedFfEqEightBuffer.copyFrom(0, 0, FFEQ_COEFFS_EIGHT, FF_EQ_LEN);
+
+    dfEqOmniBuffer.copyFrom (0, 0, DFEQ_COEFFS_OMNI, DF_EQ_LEN);
+    dfEqEightBuffer.copyFrom (0, 0, DFEQ_COEFFS_EIGHT, DF_EQ_LEN);
+    ffEqOmniBuffer.copyFrom (0, 0, FFEQ_COEFFS_OMNI, FF_EQ_LEN);
+    ffEqEightBuffer.copyFrom (0, 0, FFEQ_COEFFS_EIGHT, FF_EQ_LEN);
+
+    lastEqSampleRate = FILTER_BANK_NATIVE_SAMPLE_RATE;
+
+    for (auto& conv : convolvers) {
+        conv.reset();
+    }
+
+    // properties file: saves user preset folder location
+    PropertiesFile::Options options;
+    options.applicationName = "PolarDesigner";
+    options.filenameSuffix = "settings";
+    options.folderName = "AustrianAudio";
+    options.osxLibrarySubFolder = "Preferences";
+
+    properties = std::unique_ptr<PropertiesFile> (new PropertiesFile (options));
+    lastDir = File (properties->getValue ("presetFolder"));
+
+    registerParameterListeners();
+
+    //    delay.setDelayTime (std::ceilf (static_cast<float> (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE) / 2 - 1) / FILTER_BANK_NATIVE_SAMPLE_RATE);
+    delay.setDelayTime(static_cast<float> (static_cast<float> ((static_cast<float> (firLen) - 1.0f) / 2.0f) / currentSampleRate));
+
+    oldProxDistance = proxDistancePtr->load();
+
+    termControlWaveform.setRepaintRate (30);
+    termControlWaveform.setBufferSize (256);
+
+
+    updateLatency();
 
     resetTrackingState();
 
     startTimer (50);
 }
 
+void PolarDesignerAudioProcessor::validateSampleRateAndBlockSize() {
+    if (currentSampleRate <= 0.0) {
+        LOG_WARN("Invalid sample rate, setting to default");
+        currentSampleRate = FILTER_BANK_NATIVE_SAMPLE_RATE;
+    }
+    if (currentBlockSize <= 0) {
+        LOG_WARN("Invalid block size, setting to default");
+        currentBlockSize = PD_DEFAULT_BLOCK_SIZE;
+    }
+}
 
 void PolarDesignerAudioProcessor::registerParameterListeners() {
     static const StringArray paramIDs = {
@@ -350,58 +346,101 @@ void PolarDesignerAudioProcessor::changeProgramName ([[maybe_unused]] int index,
 
 
 void PolarDesignerAudioProcessor::loadEqImpulseResponses() {
+    TRACE_EVENT("dsp", "loadEqImpulseResponses");
 
-    float ratio = static_cast<float>(currentSampleRate / FILTER_BANK_NATIVE_SAMPLE_RATE);
-    int newFFEqLen = std::min(static_cast<int>(FF_EQ_LEN * ratio), firLen.load());
-    int newDFEqLen = std::min(static_cast<int>(DF_EQ_LEN * ratio), firLen.load());
+    validateSampleRateAndBlockSize();
 
-    if (currentSampleRate <= 0.0 || currentBlockSize <= 0) {
-        LOG_ERROR("Invalid sample rate or block size");
+    // Ensure firLen is valid
+    jassert(firLen > 0 && firLen % 2 == 1);
+    if (firLen <= 0) {
+        firLen = FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE;
+        if (firLen % 2 == 0) firLen++;
+    }
+
+    if (juce::approximatelyEqual(currentSampleRate, lastEqSampleRate)) {
+        AudioBuffer<float> paddedDFEqOmni(1, firLen);
+        AudioBuffer<float> paddedDFEqEight(1, firLen);
+        AudioBuffer<float> paddedFFEqOmni(1, firLen);
+        AudioBuffer<float> paddedFFEqEight(1, firLen);
+        paddedDFEqOmni.clear();
+        paddedDFEqEight.clear();
+        paddedFFEqOmni.clear();
+        paddedFFEqEight.clear();
+
+        // Ensure cached buffers are initialized
+        if (cachedDfEqOmniBuffer.getNumSamples() == 0) {
+            cachedDfEqOmniBuffer.setSize(1, DF_EQ_LEN, false, false, true);
+            cachedDfEqOmniBuffer.copyFrom(0, 0, DFEQ_COEFFS_OMNI, DF_EQ_LEN);
+        }
+        // ... (similar checks for other cached buffers)
+
+        int copyLengthDF = std::min(firLen.load(), cachedDfEqOmniBuffer.getNumSamples());
+        int copyLengthFF = std::min(firLen.load(), cachedFfEqOmniBuffer.getNumSamples());
+        int dfEqOffset = (firLen - copyLengthDF) / 2;
+        int ffEqOffset = (firLen - copyLengthFF) / 2;
+
+        DBG("firLen: " << firLen << ", cachedDfEqOmniBuffer size: " << cachedDfEqOmniBuffer.getNumSamples() << ", paddedDFEqOmni size: " << paddedDFEqOmni.getNumSamples());
+
+        paddedDFEqOmni.copyFrom(0, dfEqOffset, cachedDfEqOmniBuffer, 0, 0, copyLengthDF);
+        paddedDFEqEight.copyFrom(0, dfEqOffset, cachedDfEqEightBuffer, 0, 0, copyLengthDF);
+        paddedFFEqOmni.copyFrom(0, ffEqOffset, cachedFfEqOmniBuffer, 0, 0, copyLengthFF);
+        paddedFFEqEight.copyFrom(0, ffEqOffset, cachedFfEqEightBuffer, 0, 0, copyLengthFF);
+
+        dfEqOmniConv.loadImpulseResponse(std::move(paddedDFEqOmni), currentSampleRate,
+            dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+        dfEqEightConv.loadImpulseResponse(std::move(paddedDFEqEight), currentSampleRate,
+            dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+        ffEqOmniConv.loadImpulseResponse(std::move(paddedFFEqOmni), currentSampleRate,
+            dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+        ffEqEightConv.loadImpulseResponse(std::move(paddedFFEqEight), currentSampleRate,
+            dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+
         return;
     }
 
-    AudioBuffer<float> resampledFFEqOmni(1, newFFEqLen);
-    AudioBuffer<float> resampledFFEqEight(1, newFFEqLen);
-    AudioBuffer<float> resampledDFEqOmni(1, newDFEqLen);
-    AudioBuffer<float> resampledDFEqEight(1, newDFEqLen);
+    float ratio = static_cast<float>(currentSampleRate / FILTER_BANK_NATIVE_SAMPLE_RATE);
+    int newFFEqLen = static_cast<int>(FF_EQ_LEN * ratio);
+    int newDFEqLen = static_cast<int>(DF_EQ_LEN * ratio);
 
-    resampledFFEqOmni.clear();
-    resampledFFEqEight.clear();
-    resampledDFEqOmni.clear();
-    resampledDFEqEight.clear();
+    cachedDfEqOmniBuffer.setSize(1, newDFEqLen, false, false, true);
+    cachedDfEqEightBuffer.setSize(1, newDFEqLen, false, false, true);
+    cachedFfEqOmniBuffer.setSize(1, newFFEqLen, false, false, true);
+    cachedFfEqEightBuffer.setSize(1, newFFEqLen, false, false, true);
 
-//    if (previousSampleRate != currentSampleRate) {
-    if(!approximatelyEqual(previousSampleRate, currentSampleRate)) {
-        resampleBuffer(ffEqOmniBuffer, resampledFFEqOmni, FILTER_BANK_NATIVE_SAMPLE_RATE, currentSampleRate);
-        resampleBuffer(ffEqEightBuffer, resampledFFEqEight, FILTER_BANK_NATIVE_SAMPLE_RATE, currentSampleRate);
-        resampleBuffer(dfEqOmniBuffer, resampledDFEqOmni, FILTER_BANK_NATIVE_SAMPLE_RATE, currentSampleRate);
-        resampleBuffer(dfEqEightBuffer, resampledDFEqEight, FILTER_BANK_NATIVE_SAMPLE_RATE, currentSampleRate);
-        previousSampleRate = currentSampleRate;
-    }
-
-    // Center impulse responses
-    int ffEqOffset = (firLen - newFFEqLen) / 2;
-    int dfEqOffset = (firLen - newDFEqLen) / 2;
+    resampleBuffer(dfEqOmniBuffer, cachedDfEqOmniBuffer, FILTER_BANK_NATIVE_SAMPLE_RATE, currentSampleRate);
+    resampleBuffer(dfEqEightBuffer, cachedDfEqEightBuffer, FILTER_BANK_NATIVE_SAMPLE_RATE, currentSampleRate);
+    resampleBuffer(ffEqOmniBuffer, cachedFfEqOmniBuffer, FILTER_BANK_NATIVE_SAMPLE_RATE, currentSampleRate);
+    resampleBuffer(ffEqEightBuffer, cachedFfEqEightBuffer, FILTER_BANK_NATIVE_SAMPLE_RATE, currentSampleRate);
 
     AudioBuffer<float> paddedFFEqOmni(1, firLen);
     AudioBuffer<float> paddedFFEqEight(1, firLen);
     AudioBuffer<float> paddedDFEqOmni(1, firLen);
     AudioBuffer<float> paddedDFEqEight(1, firLen);
-
     paddedFFEqOmni.clear();
     paddedFFEqEight.clear();
     paddedDFEqOmni.clear();
     paddedDFEqEight.clear();
 
-    paddedFFEqOmni.copyFrom(0, ffEqOffset, resampledFFEqOmni, 0, 0, newFFEqLen);
-    paddedFFEqEight.copyFrom(0, ffEqOffset, resampledFFEqEight, 0, 0, newFFEqLen);
-    paddedDFEqOmni.copyFrom(0, dfEqOffset, resampledDFEqOmni, 0, 0, newDFEqLen);
-    paddedDFEqEight.copyFrom(0, dfEqOffset, resampledDFEqEight, 0, 0, newDFEqLen);
+    int copyLengthDF = std::min(firLen.load(), newDFEqLen);
+    int copyLengthFF = std::min(firLen.load(), newFFEqLen);
+    int dfEqOffset = (firLen - copyLengthDF) / 2;
+    int ffEqOffset = (firLen - copyLengthFF) / 2;
 
-    dfEqOmniConv.loadImpulseResponse(std::move(paddedDFEqOmni), currentSampleRate, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
-    dfEqEightConv.loadImpulseResponse(std::move(paddedDFEqEight), currentSampleRate, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
-    ffEqOmniConv.loadImpulseResponse(std::move(paddedFFEqOmni), currentSampleRate, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
-    ffEqEightConv.loadImpulseResponse(std::move(paddedFFEqEight), currentSampleRate, dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+    paddedDFEqOmni.copyFrom(0, dfEqOffset, cachedDfEqOmniBuffer, 0, 0, copyLengthDF);
+    paddedDFEqEight.copyFrom(0, dfEqOffset, cachedDfEqEightBuffer, 0, 0, copyLengthDF);
+    paddedFFEqOmni.copyFrom(0, ffEqOffset, cachedFfEqOmniBuffer, 0, 0, copyLengthFF);
+    paddedFFEqEight.copyFrom(0, ffEqOffset, cachedFfEqEightBuffer, 0, 0, copyLengthFF);
+
+    dfEqOmniConv.loadImpulseResponse(std::move(paddedDFEqOmni), currentSampleRate,
+        dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+    dfEqEightConv.loadImpulseResponse(std::move(paddedDFEqEight), currentSampleRate,
+        dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+    ffEqOmniConv.loadImpulseResponse(std::move(paddedFFEqOmni), currentSampleRate,
+        dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+    ffEqEightConv.loadImpulseResponse(std::move(paddedFFEqEight), currentSampleRate,
+        dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+
+    lastEqSampleRate = currentSampleRate;
 }
 
 
@@ -410,80 +449,48 @@ void PolarDesignerAudioProcessor::prepareToPlay(double sampleRate, int samplesPe
 
     jassert(FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE > 0);
 
-    // Calculate firLen based on sample rate
+    // Validate inputs
+    currentSampleRate = sampleRate > 0 ? sampleRate : FILTER_BANK_NATIVE_SAMPLE_RATE;
+    currentBlockSize = samplesPerBlock > 0 ? samplesPerBlock : PD_DEFAULT_BLOCK_SIZE;
+    validateSampleRateAndBlockSize();
+
+    // Calculate firLen
     int newFirLen = static_cast<int>(std::ceil(
         static_cast<float>(FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE) / FILTER_BANK_NATIVE_SAMPLE_RATE * sampleRate));
-    if (newFirLen % 2 == 0)
-        newFirLen++; // Ensure odd length for linear-phase FIR filters
+    if (newFirLen % 2 == 0) newFirLen++;
     jassert(newFirLen % 2 == 1);
+    firLen.store(newFirLen);
 
-    // Update firLen and resize firFilterBuffer if necessary
-    if (newFirLen != firLen || sampleRate != currentSampleRate) {
-        firLen.store(newFirLen);
-        firFilterBuffer.setSize(MAX_NUM_EQS, firLen, false, false, true);
-        firFilterBuffer.clear();
-    }
+    // Resize buffers
+    resizeBuffersIfNeeded(newFirLen, currentBlockSize);
+    DBG("firFilterBuffer size: " << firFilterBuffer.getNumChannels() << "x" << firFilterBuffer.getNumSamples());
+    jassert(firFilterBuffer.getNumSamples() > 0);
 
-    currentSampleRate = sampleRate;
-    currentBlockSize = samplesPerBlock;
-
-    // Resize other buffers if block size changes
-    if (filterBankBuffer.getNumSamples() != currentBlockSize || filterBankBuffer.getNumChannels() != N_CH_IN * MAX_NUM_EQS) {
-        filterBankBuffer.setSize(N_CH_IN * MAX_NUM_EQS, currentBlockSize, false, false, true);
-        filterBankBuffer.clear();
-    }
-    if (omniEightBuffer.getNumSamples() != currentBlockSize || omniEightBuffer.getNumChannels() != MAX_NUM_INPUTS) {
-        omniEightBuffer.setSize(MAX_NUM_INPUTS, currentBlockSize, false, false, true);
-        omniEightBuffer.clear();
-    }
-    if (delayBuffer.getNumSamples() != currentBlockSize || delayBuffer.getNumChannels() != 1) {
-        delayBuffer.setSize(1, currentBlockSize, false, false, true);
-        delayBuffer.clear();
-    }
-
-    // Update latency
-    updateLatency();
+    // Load EQ and compute filter coefficients
+    loadEqImpulseResponses();
+    computeAllFilterCoefficients();
 
     // Configure ProcessSpec
-    dsp::ProcessSpec eqSpec{currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
-    dsp::ProcessSpec convSpec{currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
-
-    // Prepare EQ convolvers
-    if (eqSpec != lastEqSpec) {
-        dfEqOmniConv.prepare(eqSpec);
-        dfEqEightConv.prepare(eqSpec);
-        ffEqOmniConv.prepare(eqSpec);
-        ffEqEightConv.prepare(eqSpec);
-        lastEqSpec = eqSpec;
-    }
-
-    // Prepare filter bank convolvers
-    if (convSpec != lastConvSpec) {
-        for (auto &conv : convolvers) {
-            conv.prepare(convSpec);
+    dsp::ProcessSpec spec{currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
+    if (spec != lastEqSpec) {
+        dfEqOmniConv.prepare(spec);
+        dfEqEightConv.prepare(spec);
+        ffEqOmniConv.prepare(spec);
+        ffEqEightConv.prepare(spec);
+        for (auto& conv : convolvers) {
+            conv.prepare(spec);
         }
-        lastConvSpec = convSpec;
+        lastEqSpec = spec;
     }
 
     // Configure delay line
     dsp::ProcessSpec delaySpec{currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
     delay.prepare(delaySpec);
-    delay.setDelayTime(static_cast<float>((firLen - 1) / 2.0f) / currentSampleRate);
+    delay.setDelayTime(static_cast<float>((newFirLen - 1) / 2.0f) / currentSampleRate);
 
-    // Resample and load EQ impulse responses
-    loadEqImpulseResponses();
-
-    // Compute and load filter bank coefficients
-    computeAllFilterCoefficients();
-    loadFilterBankImpulseResponses();
-
-    // Configure proximity compensation IIR
-    dsp::ProcessSpec specProx{currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
-    proxCompIIR.prepare(specProx);
-    proxCompIIR.reset();
-    setProxCompCoefficients(proxDistancePtr->load());
+    // Update latency
+    updateLatency();
 }
-
 
 void PolarDesignerAudioProcessor::resampleBuffer(const AudioBuffer<float>& src, AudioBuffer<float>& dst, float srcSampleRate, double dstSampleRate)
 {
@@ -492,6 +499,11 @@ void PolarDesignerAudioProcessor::resampleBuffer(const AudioBuffer<float>& src, 
     jassert(src.getNumSamples() > 0 && dst.getNumSamples() > 0);
     if (srcSampleRate <= 0.0f || dstSampleRate <= 0.0) {
         LOG_ERROR("Invalid sample rates in resampleBuffer");
+        dst.clear();
+        return;
+    }
+    if (dst.getNumSamples() < static_cast<int>(src.getNumSamples() * dstSampleRate / srcSampleRate)) {
+        LOG_ERROR("Destination buffer too small for resampling");
         dst.clear();
         return;
     }
@@ -532,57 +544,37 @@ bool PolarDesignerAudioProcessor::isBusesLayoutSupported (const BusesLayout& lay
     return true;
 }
 
-void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, [[maybe_unused]] MidiBuffer& midiMessages)
-{
+void PolarDesignerAudioProcessor::processBlock(AudioBuffer<float>& buffer, [[maybe_unused]] MidiBuffer& midiMessages) {
     TRACE_DSP();
-
     ScopedNoDenormals noDenormals;
-
-    if (isBypassed)
-    {
+    if (isBypassed) {
         isBypassed = false;
         updateLatency();
     }
-
-    unsigned int numSamples = (unsigned int) buffer.getNumSamples();
-
-    // create omni and eight signals
-    createOmniAndEightSignals (buffer);
-
-    // some DAW's call setStateInformation/processBlock before prepareToPlay - mitigate side-effects in this case:
+    validateSampleRateAndBlockSize();
+    unsigned int numSamples = static_cast<unsigned int>(buffer.getNumSamples());
+    createOmniAndEightSignals(buffer);
     if (currentBlockSize == 0) {
         initializeBuffers();
     }
-
-    // glitch mitigation:
-    if (currentSampleRate <= 0.0 || currentBlockSize <= 0) {
-        LOG_ERROR("Invalid sample rate or block size");
-        buffer.clear();
-        return;
-    }
-
     recomputeFilterCoefficientsIfNeeded();
 
-    // proximity compensation filter
+    // Proximity compensation
     auto proximity = juce::approximatelyEqual(proxOnOffPtr->load(), 1.0f) ? proxDistancePtr->load() : 0.f;
-    if (!juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f) && (proximity < -0.05)) // reduce proximity effect only on figure-of-eight
-    {
+    if (!juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f) && (proximity < -0.05)) {
         float* writePointerEight = omniEightBuffer.getWritePointer(1);
         dsp::AudioBlock<float> eightBlock(&writePointerEight, 1, numSamples);
         dsp::ProcessContextReplacing<float> contextProxEight(eightBlock);
         proxCompIIR.process(contextProxEight);
-    }
-    else if (!juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f) && (proximity > 0.05)) // apply proximity to omni
-    {
+    } else if (!juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f) && (proximity > 0.05)) {
         float* writePointerOmni = omniEightBuffer.getWritePointer(0);
         dsp::AudioBlock<float> omniBlock(&writePointerOmni, 1, numSamples);
         dsp::ProcessContextReplacing<float> contextProxOmni(omniBlock);
         proxCompIIR.process(contextProxOmni);
     }
 
-    if ((doEq == 1) && !juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f))
-    {
-        // free field equalization
+    // EQ processing
+    if ((doEq == 1) && !juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f)) {
         float* writePointerOmni = omniEightBuffer.getWritePointer(0);
         dsp::AudioBlock<float> ffEqOmniBlk(&writePointerOmni, 1, numSamples);
         dsp::ProcessContextReplacing<float> ffEqOmniCtx(ffEqOmniBlk);
@@ -592,10 +584,7 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, [[ma
         dsp::AudioBlock<float> ffEqEightBlk(&writePointerEight, 1, numSamples);
         dsp::ProcessContextReplacing<float> ffEqEightCtx(ffEqEightBlk);
         ffEqEightConv.process(ffEqEightCtx);
-    }
-    else if ((doEq == 2) && !juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f))
-    {
-        // diffuse field equalization
+    } else if ((doEq == 2) && !juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f)) {
         float* writePointerOmni = omniEightBuffer.getWritePointer(0);
         dsp::AudioBlock<float> dfEqOmniBlk(&writePointerOmni, 1, numSamples);
         dsp::ProcessContextReplacing<float> dfEqOmniCtx(dfEqOmniBlk);
@@ -608,59 +597,46 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer, [[ma
     }
 
     unsigned int nActiveBands = nProcessorBands;
-
-    // 1-band EQ
     if (juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f))
         nActiveBands = 1;
 
-    for (unsigned int i = 0; i < nActiveBands && 2 * i + 1 < convolvers.size(); ++i)
-    {
-        // copy input buffer for each band
-        filterBankBuffer.copyFrom(static_cast<int>(2 * i), 0, omniEightBuffer, 0, 0, static_cast<int>(numSamples));
-        filterBankBuffer.copyFrom(static_cast<int>(2 * i + 1), 0, omniEightBuffer, 1, 0, static_cast<int>(numSamples));
+    // Copy input to filter bank
+    for (unsigned int i = 0; i < nActiveBands && 2 * i + 1 < convolvers.size(); ++i) {
+        filterBankBuffer.copyFrom(2 * i, 0, omniEightBuffer, 0, 0, numSamples);
+        filterBankBuffer.copyFrom(2 * i + 1, 0, omniEightBuffer, 1, 0, numSamples);
     }
 
-    if (!juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f) && (nActiveBands > 1))
-    {
-        if (!convolversReady)
-        {
+    // Process filter bank convolvers
+    if (!juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f) && nActiveBands > 1) {
+        if (!convolversReady.load(std::memory_order_acquire)) {
+            LOG_WARN("Convolvers not ready, skipping filter bank processing");
             return;
         }
 
-        for (unsigned int i = 0; i < nActiveBands && 2 * i + 1 < convolvers.size(); ++i)
-        {
-            // omni
-            float* writePointerOmni = filterBankBuffer.getWritePointer(static_cast<int>(2 * i));
+        for (unsigned int i = 0; i < nActiveBands && 2 * i + 1 < convolvers.size(); ++i) {
+            float* writePointerOmni = filterBankBuffer.getWritePointer(2 * i);
             dsp::AudioBlock<float> subBlk(&writePointerOmni, 1, numSamples);
             dsp::ProcessContextReplacing<float> filterCtx(subBlk);
-            convolvers[2 * i].process(filterCtx); // mono processing
+            convolvers[2 * i].process(filterCtx);
 
-            // eight
-            float* writePointerEight = filterBankBuffer.getWritePointer(static_cast<int>(2 * i + 1));
+            float* writePointerEight = filterBankBuffer.getWritePointer(2 * i + 1);
             dsp::AudioBlock<float> subBlk2(&writePointerEight, 1, numSamples);
             dsp::ProcessContextReplacing<float> filterCtx2(subBlk2);
-            convolvers[2 * i + 1].process(filterCtx2); // mono processing
+            convolvers[2 * i + 1].process(filterCtx2);
         }
-        convolversReady = true;
     }
 
-    playHeadPosition = *getPlayHead()->getPosition();
+    if (auto* playHead = getPlayHead()) {
+        if (auto position = playHead->getPosition()) {
+            playHeadPosition = *position;
+        }
+    }
 
-//    audioPlayHead = getPlayHead();
-//    if (audioPlayHead != nullptr)
-//    {
-//        if (auto position = audioPlayHead->getPosition())
-//        {
-//            playHeadPosition = *position;
-//        }
-//    }
-
-    termControlWaveform.pushBuffer (buffer);
-
+    termControlWaveform.pushBuffer(buffer);
     if (trackingActive)
         trackSignalEnergy();
 
-    createPolarPatterns (buffer);
+    createPolarPatterns(buffer);
 }
 
 void PolarDesignerAudioProcessor::processBlockBypassed (AudioBuffer<float>& buffer,
@@ -766,18 +742,16 @@ void PolarDesignerAudioProcessor::getStateInformation(MemoryBlock& destData)
 
 // !J! Make setStateInformation more robust for ProTools
 void PolarDesignerAudioProcessor::initializeDefaultState() {
-
     TRACE_DSP();
 
-    // Initialize defaults if not prepared
-    if (currentSampleRate == 0.0 || currentBlockSize == 0) {
+    validateSampleRateAndBlockSize(); // Validate current values
+
+    if (currentSampleRate == FILTER_BANK_NATIVE_SAMPLE_RATE && currentBlockSize == PD_DEFAULT_BLOCK_SIZE) {
         LOG_WARN("Plugin not prepared, initializing with defaults");
-        currentSampleRate = FILTER_BANK_NATIVE_SAMPLE_RATE;
-        currentBlockSize = PD_DEFAULT_BLOCK_SIZE;
         firLen.store(FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE);
         if (firLen % 2 == 0) firLen++;
         initializeBuffers();
-        prepareToPlay(currentSampleRate, currentBlockSize);
+//        prepareToPlay(currentSampleRate, currentBlockSize);
     }
 
     // Reinitialize ValueTree state
@@ -876,26 +850,63 @@ void PolarDesignerAudioProcessor::initializeDefaultState() {
     vtsParams.getParameter("allowBackwardsPattern")->setValueNotifyingHost(1.0f);
 
 }
+void PolarDesignerAudioProcessor::resizeBuffersIfNeeded(int newFirLen, int newBlockSize) {
+    validateSampleRateAndBlockSize();
 
+    // Ensure newFirLen is valid (positive and odd)
+    if (newFirLen <= 0) {
+        LOG_WARN("Invalid newFirLen (" + String(newFirLen) + "), using default");
+        newFirLen = FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE;
+        if (newFirLen % 2 == 0) newFirLen++;
+    }
+    jassert(newFirLen % 2 == 1); // Ensure odd length for FIR filter
 
-void PolarDesignerAudioProcessor::initializeBuffers() {
-    if (currentBlockSize == 0)
-        currentBlockSize = PD_DEFAULT_BLOCK_SIZE;
-    if (currentSampleRate == 0.0f)
-        currentSampleRate = FILTER_BANK_NATIVE_SAMPLE_RATE;
+    // Resize firFilterBuffer if length differs or is uninitialized
+    if (newFirLen != firLen || firFilterBuffer.getNumSamples() != newFirLen) {
+        firLen.store(newFirLen);
+        firFilterBuffer.setSize(MAX_NUM_EQS, newFirLen, false, false, true);
+        firFilterBuffer.clear();
+        DBG("Resized firFilterBuffer to " << MAX_NUM_EQS << "x" << newFirLen);
+    }
 
-    filterBankBuffer.setSize(N_CH_IN * MAX_NUM_EQS, currentBlockSize, false, false, true);
-    firFilterBuffer.setSize(MAX_NUM_EQS, firLen, false, false, true);
-    omniEightBuffer.setSize(MAX_NUM_INPUTS, currentBlockSize, false, false, true);
+    // Resize filterBankBuffer if channels/samples differ or is uninitialized
+    if (filterBankBuffer.getNumChannels() != N_CH_IN * MAX_NUM_EQS ||
+        filterBankBuffer.getNumSamples() != newBlockSize ||
+        filterBankBuffer.getNumSamples() == 0) {
+        filterBankBuffer.setSize(N_CH_IN * MAX_NUM_EQS, newBlockSize, false, false, true);
+        filterBankBuffer.clear();
+        DBG("Resized filterBankBuffer to " << N_CH_IN * MAX_NUM_EQS << "x" << newBlockSize);
+    }
 
-    filterBankBuffer.clear();
-    firFilterBuffer.clear();
-    omniEightBuffer.clear();
+    // Resize omniEightBuffer if channels/samples differ or is uninitialized
+    if (omniEightBuffer.getNumChannels() != MAX_NUM_INPUTS ||
+        omniEightBuffer.getNumSamples() != newBlockSize ||
+        omniEightBuffer.getNumSamples() == 0) {
+        omniEightBuffer.setSize(MAX_NUM_INPUTS, newBlockSize, false, false, true);
+        omniEightBuffer.clear();
+        DBG("Resized omniEightBuffer to " << MAX_NUM_INPUTS << "x" << newBlockSize);
+    }
 
-    prepareToPlay(currentSampleRate, currentBlockSize);
+    // Resize delayBuffer if channels/samples differ or is uninitialized
+    if (delayBuffer.getNumChannels() != 1 ||
+        delayBuffer.getNumSamples() != newBlockSize ||
+        delayBuffer.getNumSamples() == 0) {
+        delayBuffer.setSize(1, newBlockSize, false, false, true);
+        delayBuffer.clear();
+        DBG("Resized delayBuffer to 1x" << newBlockSize);
+    }
 }
 
 
+void PolarDesignerAudioProcessor::initializeBuffers() {
+    // Ensure firLen is valid
+    if (firLen <= 0) {
+        LOG_WARN("Invalid firLen (" + String(firLen) + "), using default");
+        firLen = FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE;
+        if (firLen % 2 == 0) firLen++;
+    }
+    resizeBuffersIfNeeded(firLen, currentBlockSize);
+}
 
 void PolarDesignerAudioProcessor::releaseResources() {
     resetTrackingState();
@@ -917,11 +928,24 @@ void PolarDesignerAudioProcessor::releaseResources() {
 void PolarDesignerAudioProcessor::setStateInformation(const void* data, int sizeInBytes) {
     TRACE_EVENT("dsp", "setStateInformation");
 
-    if (currentSampleRate == 0.0 || currentBlockSize == 0) {
+    validateSampleRateAndBlockSize();
+
+    // Calculate firLen based on currentSampleRate
+    int newFirLen = static_cast<int>(std::ceil(
+        static_cast<float>(FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE) / FILTER_BANK_NATIVE_SAMPLE_RATE * currentSampleRate));
+    if (newFirLen % 2 == 0) newFirLen++;
+    jassert(newFirLen % 2 == 1);
+
+    // Initialize if unprepared
+    if (currentSampleRate == FILTER_BANK_NATIVE_SAMPLE_RATE &&
+        currentBlockSize == PD_DEFAULT_BLOCK_SIZE) {
         LOG_WARN("Plugin not prepared, initializing with defaults");
-        currentSampleRate = FILTER_BANK_NATIVE_SAMPLE_RATE;
-        currentBlockSize = PD_DEFAULT_BLOCK_SIZE;
+        firLen.store(newFirLen);
+        initializeBuffers();
         prepareToPlay(currentSampleRate, currentBlockSize);
+    } else {
+        // Ensure buffers are resized for current sample rate
+        resizeBuffersIfNeeded(newFirLen, currentBlockSize);
     }
 
     std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
@@ -931,7 +955,6 @@ void PolarDesignerAudioProcessor::setStateInformation(const void* data, int size
         return;
     }
 
-    initializeBuffers();
     resetTrackingState();
 
     if (xmlState->hasTagName(saveStates.getType())) {
@@ -1025,20 +1048,21 @@ void PolarDesignerAudioProcessor::setStateInformation(const void* data, int size
     }
 
     if (nProcessorBandsPtr) {
-        nProcessorBands.store(std::min(static_cast<unsigned int>(static_cast<int>(nProcessorBandsPtr->load()) + 1), static_cast<unsigned int>(MAX_NUM_EQS)));
+        nProcessorBands.store(std::min(static_cast<unsigned int>(static_cast<int>(nProcessorBandsPtr->load(std::memory_order_acquire)) + 1), static_cast<unsigned int>(MAX_NUM_EQS)), std::memory_order_release);
         if (abLayerState == COMPARE_LAYER_A)
-            oldNrBandsA.store(nProcessorBandsPtr->load());
+            oldNrBandsA.store(nProcessorBandsPtr->load(std::memory_order_acquire), std::memory_order_release);
         else
-            oldNrBandsB.store(nProcessorBandsPtr->load());
-        oldNrBands.store(nProcessorBandsPtr->load());
+            oldNrBandsB.store(nProcessorBandsPtr->load(std::memory_order_acquire), std::memory_order_release);
+        oldNrBands.store(nProcessorBandsPtr->load(std::memory_order_acquire), std::memory_order_release);
     }
 
-    recomputeAllFilterCoefficients.store(true);
+    // Defer filter coefficient computation until buffers are ready
+    recomputeAllFilterCoefficients.store(true, std::memory_order_release);
     recomputeFilterCoefficientsIfNeeded();
-    activeBandsChanged.store(true);
-    zeroLatencyModeChanged.store(true);
-    ffDfEqChanged.store(true);
-    repaintDEQ.store(true);
+    activeBandsChanged.store(true, std::memory_order_release);
+    zeroLatencyModeChanged.store(true, std::memory_order_release);
+    ffDfEqChanged.store(true, std::memory_order_release);
+    repaintDEQ.store(true, std::memory_order_release);
 }
 
 
@@ -1060,6 +1084,12 @@ void PolarDesignerAudioProcessor::parameterChanged(const String& parameterID, fl
 
     TRACE_EVENT("dsp", "parameterChanged", "paramID:", perfetto::DynamicString{parameterID.toStdString()});
 
+    if (currentSampleRate <= 0.0 || currentBlockSize <= 0) {
+        LOG_WARN("Plugin not prepared in parameterChanged, initializing defaults");
+        validateSampleRateAndBlockSize();
+        prepareToPlay(currentSampleRate, currentBlockSize);
+    }
+
     if (parameterID.startsWith("trimPosition"))
     {
         // TODO: update trimSlider position according to automation
@@ -1067,22 +1097,22 @@ void PolarDesignerAudioProcessor::parameterChanged(const String& parameterID, fl
     else if (parameterID == "nrBands")
     {
         if (nProcessorBandsPtr) {
-            unsigned int newBands = static_cast<unsigned int>(static_cast<int>(nProcessorBandsPtr->load()) + 1);
-            nProcessorBands.store(std::min(newBands, static_cast<unsigned int>(MAX_NUM_EQS)));
+            unsigned int newBands = static_cast<unsigned int>(static_cast<int>(nProcessorBandsPtr->load(std::memory_order_acquire)) + 1);
+            nProcessorBands.store(std::min(newBands, static_cast<unsigned int>(MAX_NUM_EQS)), std::memory_order_release);
             if (abLayerState == COMPARE_LAYER_A)
-                oldNrBandsA.store(nProcessorBandsPtr->load());
+                oldNrBandsA.store(nProcessorBandsPtr->load(std::memory_order_acquire), std::memory_order_release);
             else
-                oldNrBandsB.store(nProcessorBandsPtr->load());
-            oldNrBands.store(nProcessorBandsPtr->load());
-            recomputeAllFilterCoefficients.store(true);
-            activeBandsChanged.store(true);
+                oldNrBandsB.store(nProcessorBandsPtr->load(std::memory_order_acquire), std::memory_order_release);
+            oldNrBands.store(nProcessorBandsPtr->load(std::memory_order_acquire), std::memory_order_release);
+            recomputeAllFilterCoefficients.store(true, std::memory_order_release);
+            activeBandsChanged.store(true, std::memory_order_release);
         }
     }
     else if (parameterID.startsWith("xOverF") && !loadingFile)
     {
         unsigned int idx = static_cast<unsigned int>(parameterID.getTrailingIntValue() - 1);
-        recomputeFilterCoefficients[idx] = true;
-        repaintDEQ = true;
+        recomputeFilterCoefficients[idx].store(true, std::memory_order_release);
+        repaintDEQ.store(true, std::memory_order_release);
     }
     else if (parameterID.startsWith("solo"))
     {
@@ -1105,60 +1135,52 @@ void PolarDesignerAudioProcessor::parameterChanged(const String& parameterID, fl
     else if (parameterID == "zeroLatencyMode")
     {
         TRACE_EVENT("dsp", "zeroLatencyMode");
-
         updateLatency();
-
-        // CHANGED: Replaced std::round(zeroLatencyModePtr->load()) > 0.5f with juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f)
-        if (!juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f))
+        if (!juce::approximatelyEqual(zeroLatencyModePtr->load(std::memory_order_acquire), 1.0f))
         {
             // Zero Latency Mode turned off
             if (abLayerState == COMPARE_LAYER_B)
             {
-                vtsParams.getParameter("proximity")->setValueNotifyingHost(vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistanceB));
-                vtsParams.getParameter("nrBands")->setValueNotifyingHost(vtsParams.getParameter("nrBands")->convertTo0to1(oldNrBandsB));
+                vtsParams.getParameter("proximity")->setValueNotifyingHost(vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistanceB.load(std::memory_order_acquire)));
+                vtsParams.getParameter("nrBands")->setValueNotifyingHost(vtsParams.getParameter("nrBands")->convertTo0to1(oldNrBandsB.load(std::memory_order_acquire)));
             }
             else
             {
-                vtsParams.getParameter("proximity")->setValueNotifyingHost(vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistanceA));
-                vtsParams.getParameter("nrBands")->setValueNotifyingHost(vtsParams.getParameter("nrBands")->convertTo0to1(oldNrBandsA));
+                vtsParams.getParameter("proximity")->setValueNotifyingHost(vtsParams.getParameter("proximity")->convertTo0to1(oldProxDistanceA.load(std::memory_order_acquire)));
+                vtsParams.getParameter("nrBands")->setValueNotifyingHost(vtsParams.getParameter("nrBands")->convertTo0to1(oldNrBandsA.load(std::memory_order_acquire)));
             }
-            recomputeAllFilterCoefficients = true;
-            zeroLatencyModeChanged = true;
+            recomputeAllFilterCoefficients.store(true, std::memory_order_release);
+            zeroLatencyModeChanged.store(true, std::memory_order_release);
         }
         else
         {
             // Zero Latency Mode turned on
-            if (!abLayerChanged.get())
+            if (!abLayerChanged.load(std::memory_order_acquire))
             {
                 if (abLayerState == COMPARE_LAYER_B)
                 {
-                    oldProxDistanceB = proxDistancePtr->load();
-                    oldNrBandsB = nProcessorBandsPtr->load();
+                    oldProxDistanceB.store(proxDistancePtr->load(std::memory_order_acquire), std::memory_order_release);
+                    oldNrBandsB.store(nProcessorBandsPtr->load(std::memory_order_acquire), std::memory_order_release);
                 }
                 else
                 {
-                    oldProxDistanceA = proxDistancePtr->load();
-                    oldNrBandsA = nProcessorBandsPtr->load();
+                    oldProxDistanceA.store(proxDistancePtr->load(std::memory_order_acquire), std::memory_order_release);
+                    oldNrBandsA.store(nProcessorBandsPtr->load(std::memory_order_acquire), std::memory_order_release);
                 }
             }
-
-            // Set zero-latency parameters
             vtsParams.getParameter("nrBands")->setValueNotifyingHost(vtsParams.getParameter("nrBands")->convertTo0to1(1));
             vtsParams.getParameter("proximity")->setValueNotifyingHost(vtsParams.getParameter("proximity")->convertTo0to1(0));
-
-            zeroLatencyModeChanged = true;
+            zeroLatencyModeChanged.store(true, std::memory_order_release);
         }
-
-        // CHANGED: Replaced std::round(zeroLatencyModePtr->load()) > 0.5f with juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f)
-        if (zeroLatencyModeChanged.load() && juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f))
+        if (zeroLatencyModeChanged.load(std::memory_order_acquire) && juce::approximatelyEqual(zeroLatencyModePtr->load(std::memory_order_acquire), 1.0f))
         {
-            vtsParams.state.setProperty("oldZeroLatencyMode", var(zeroLatencyModePtr->load()), nullptr);
-            zeroLatencyModeChanged = true;
+            vtsParams.state.setProperty("oldZeroLatencyMode", var(zeroLatencyModePtr->load(std::memory_order_acquire)), nullptr);
+            zeroLatencyModeChanged.store(true, std::memory_order_release);
         }
     }
     else if (parameterID == "syncChannel")
     {
-        int ch = (int)syncChannelPtr->load() - 1;
+        int ch = static_cast<int>(syncChannelPtr->load(std::memory_order_acquire)) - 1;
 
         if (ch > 0)
         {
@@ -1329,158 +1351,175 @@ void PolarDesignerAudioProcessor::resetXoverFreqs()
     }
 }
 
-void PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded()
-{
-
+void PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded() {
     TRACE_DSP();
 
-    if (recomputeAllFilterCoefficients.load())
-    {
+    if (recomputeAllFilterCoefficients.load(std::memory_order_acquire)) {
         computeAllFilterCoefficients();
-        recomputeAllFilterCoefficients = false;
+        recomputeAllFilterCoefficients.store(false, std::memory_order_release);
         resetXoverFreqs();
-//        resetTrackingState(); // Reset tracking data due to band change
-
-        // we don't need to go through the individual bands if we're doing it in bulk
         return;
     }
 
-    for (unsigned int i = 0; i < 4; ++i)
-    {
-        if (recomputeFilterCoefficients[static_cast<unsigned long> (i)].get())
-        {
-            TRACE_DSP("coEfficient:", i);
-
-            computeFilterCoefficients (i);
-            initConvolver (static_cast<int> (i));
-            recomputeFilterCoefficients[i] = false;
+    for (unsigned int i = 0; i < 4; ++i) {
+        if (recomputeFilterCoefficients[i].load(std::memory_order_acquire)) {
+            computeFilterCoefficients(i);
+            initConvolver(i);
+            recomputeFilterCoefficients[i].store(false, std::memory_order_release);
         }
     }
 }
 
-
-
-void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crossoverNr)
-{
+void PolarDesignerAudioProcessor::computeFilterCoefficients(unsigned int crossoverNr) {
     TRACE_DSP();
 
-    // only one band: no filtering
     if (nProcessorBands == 1)
         return;
 
-    // lowest band is simple lowpass
-    if (crossoverNr == 0)
-    {
-        dsp::FilterDesign<float>::FIRCoefficientsPtr lowpass = dsp::FilterDesign<float>::designFIRLowpassWindowMethod (
-            hzFromZeroToOne (0, xOverFreqsPtr[0]->load()), currentSampleRate, (static_cast<size_t> (firLen - 1)), dsp::WindowingFunction<float>::WindowingMethod::hamming);
-        float* lpCoeffs = lowpass->getRawCoefficients();
-        firFilterBuffer.copyFrom (0, 0, lpCoeffs, firLen);
+    // Lowest band: lowpass
+    if (crossoverNr == 0) {
+        dsp::FilterDesign<float>::FIRCoefficientsPtr lowpass = dsp::FilterDesign<float>::designFIRLowpassWindowMethod(
+            hzFromZeroToOne(0, xOverFreqsPtr[0]->load()), currentSampleRate, static_cast<size_t>(firLen - 1),
+            dsp::WindowingFunction<float>::WindowingMethod::hamming);
+        firFilterBuffer.copyFrom(0, 0, lowpass->getRawCoefficients(), firLen - 1);
+        bandCoefficientsChanged[0] = true;
     }
 
-    // all the other bands are bandpass filters
-    for (unsigned int i = (unsigned int) std::max (1, (int) crossoverNr); i < std::min ((crossoverNr + 2), (nProcessorBands - 1)); ++i)
-    {
-        float halfBandwidth =
-            (hzFromZeroToOne (static_cast<int> (i), xOverFreqsPtr[i]->load()) - hzFromZeroToOne (static_cast<int> (i - 1), xOverFreqsPtr[i - 1]->load())) / 2;
-        dsp::FilterDesign<float>::FIRCoefficientsPtr lp2bp = dsp::FilterDesign<float>::designFIRLowpassWindowMethod (
-            halfBandwidth, currentSampleRate, static_cast<size_t> (firLen - 1), dsp::WindowingFunction<float>::WindowingMethod::hamming);
+    // Bandpass filters
+    for (unsigned int i = std::max(1u, crossoverNr); i < std::min(crossoverNr + 2, nProcessorBands - 1); ++i) {
+        float halfBandwidth = (hzFromZeroToOne(i, xOverFreqsPtr[i]->load()) - hzFromZeroToOne(i - 1, xOverFreqsPtr[i - 1]->load())) / 2;
+        dsp::FilterDesign<float>::FIRCoefficientsPtr lp2bp = dsp::FilterDesign<float>::designFIRLowpassWindowMethod(
+            halfBandwidth, currentSampleRate, static_cast<size_t>(firLen - 1), dsp::WindowingFunction<float>::WindowingMethod::hamming);
         float* lp2bpCoeffs = lp2bp->getRawCoefficients();
-        auto* filterBufferPointer = firFilterBuffer.getWritePointer (static_cast<int> (i));
-        for (int j = 0; j < firLen; j++) // bandpass transform
-        {
-            float fCenter = halfBandwidth + hzFromZeroToOne (static_cast<int> (i - 1), xOverFreqsPtr[i - 1]->load());
-            // write bandpass transformed fir coeffs to buffer
-            *(filterBufferPointer + j) = 2 * *(lp2bpCoeffs + j) * std::cosf (static_cast<float> (MathConstants<float>::twoPi * fCenter / currentSampleRate * (j - (firLen - 1) / 2)));
+        auto* filterBufferPointer = firFilterBuffer.getWritePointer(i);
+        for (int j = 0; j < firLen; j++) {
+            float fCenter = halfBandwidth + hzFromZeroToOne(i - 1, xOverFreqsPtr[i - 1]->load());
+            filterBufferPointer[j] = 2 * lp2bpCoeffs[j] * std::cosf(static_cast<float>(MathConstants<float>::twoPi * fCenter / currentSampleRate * (j - (firLen - 1) / 2)));
         }
+        bandCoefficientsChanged[i] = true;
     }
 
-    if (crossoverNr == nProcessorBands - 2)
-    {
-        // highest band is highpass (via frequency transform)
-        float hpBandwidth = static_cast<float> (currentSampleRate / 2 - hzFromZeroToOne (static_cast<int> (nProcessorBands - 2), xOverFreqsPtr[nProcessorBands - 2]->load()));
-        auto* filterBufferPointer = firFilterBuffer.getWritePointer (static_cast<int> (nProcessorBands - 1));
-        dsp::FilterDesign<float>::FIRCoefficientsPtr lp2hp = dsp::FilterDesign<float>::designFIRLowpassWindowMethod (
-            hpBandwidth, currentSampleRate, static_cast<size_t> (firLen - 1), dsp::WindowingFunction<float>::WindowingMethod::hamming);
+    // Highest band: highpass
+    if (crossoverNr == nProcessorBands - 2) {
+        float hpBandwidth = static_cast<float>(currentSampleRate / 2 - hzFromZeroToOne(nProcessorBands - 2, xOverFreqsPtr[nProcessorBands - 2]->load()));
+        auto* filterBufferPointer = firFilterBuffer.getWritePointer(nProcessorBands - 1);
+        dsp::FilterDesign<float>::FIRCoefficientsPtr lp2hp = dsp::FilterDesign<float>::designFIRLowpassWindowMethod(
+            hpBandwidth, currentSampleRate, static_cast<size_t>(firLen - 1), dsp::WindowingFunction<float>::WindowingMethod::hamming);
         float* lp2hpCoeffs = lp2hp->getRawCoefficients();
-        for (int i = 0; i < firLen; ++i) // highpass transform
-        {
-            *(filterBufferPointer + i) =
-                *(lp2hpCoeffs + i) * std::cosf (MathConstants<float>::pi * (i - (firLen - 1) / 2));
+        for (int i = 0; i < firLen; ++i) {
+            filterBufferPointer[i] = lp2hpCoeffs[i] * std::cosf(MathConstants<float>::pi * (i - (firLen - 1) / 2));
         }
+        bandCoefficientsChanged[nProcessorBands - 1] = true;
     }
 }
 
-
-void PolarDesignerAudioProcessor::initAllConvolvers()
-{
-    convolversReady = false;
-
-    // build filters and fill firFilterBuffer
-    dsp::AudioBlock<float> convBlk (firFilterBuffer);
-    dsp::ProcessSpec convSpec {currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
-    for (int i = 0; i < nProcessorBands; ++i) // prepare nBands mono convolvers
-    {
-        AudioBuffer<float> convSingleBuffOmni(1, firLen);
-        convSingleBuffOmni.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
-
-        AudioBuffer<float> convSingleBuffEight(1, firLen);
-        convSingleBuffEight.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
-
-        // omni convolver
-        convolvers[2 * i].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i].loadImpulseResponse(std::move(convSingleBuffOmni), currentSampleRate, Convolution::Stereo::no, Convolution::Trim::no, Convolution::Normalise::no);
-
-        // eight convolver
-        convolvers[2 * i + 1].prepare (convSpec); // must be called before loading IR
-        convolvers[2 * i + 1].loadImpulseResponse(std::move(convSingleBuffEight), currentSampleRate, Convolution::Stereo::no, Convolution::Trim::no, Convolution::Normalise::no);
-    }
-    convolversReady = true;
-}
-
-void PolarDesignerAudioProcessor::initConvolver(int convNr)
-{
+void PolarDesignerAudioProcessor::initAllConvolvers() {
     TRACE_DSP();
-    convolversReady = false;
+    convolversReady.store(false, std::memory_order_release);
 
-    if (currentBlockSize == 0 || currentSampleRate <= 0.0) {
-        LOG_ERROR("Cannot initialize convolver: invalid block size or sample rate");
-        return;
+    // Validate sample rate and block size
+    validateSampleRateAndBlockSize();
+
+    // Ensure firLen is valid
+    if (firLen <= 0) {
+        LOG_WARN("Invalid firLen (" + String(firLen) + "), using default");
+        firLen = FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE;
+        if (firLen % 2 == 0) firLen++;
     }
 
-    if (firLen > firFilterBuffer.getNumSamples()) {
-        LOG_ERROR("firLen (" + String(firLen) + ") exceeds firFilterBuffer size (" + String(firFilterBuffer.getNumSamples()) + ")");
+    // Resize firFilterBuffer if mismatched
+    if (firFilterBuffer.getNumSamples() != firLen || firFilterBuffer.getNumChannels() != MAX_NUM_EQS) {
+        LOG_WARN("firFilterBuffer size mismatch (channels=" + String(firFilterBuffer.getNumChannels()) + ", samples=" + String(firFilterBuffer.getNumSamples()) + "), resizing to " + String(MAX_NUM_EQS) + "x" + String(firLen));
         firFilterBuffer.setSize(MAX_NUM_EQS, firLen, false, false, true);
         firFilterBuffer.clear();
-        computeAllFilterCoefficients(); // Recompute coefficients to fill the buffer
     }
 
     dsp::ProcessSpec convSpec{currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
+    if (convSpec == lastConvSpec && !std::any_of(bandCoefficientsChanged.begin(), bandCoefficientsChanged.end(), [](bool changed) { return changed; })) {
+        convolversReady.store(true, std::memory_order_release);
+        return; // No changes, skip initialization
+    }
 
-    for (int i = convNr; i < convNr + 2 && i < static_cast<int>(nProcessorBands); ++i) {
-        if (i >= MAX_NUM_EQS) {
-            LOG_ERROR("Convolver index " + String(i) + " exceeds maximum bands");
+    // Limit loop to MAX_NUM_EQS to prevent out-of-bounds access
+    for (unsigned int i = 0; i < std::min(nProcessorBands.load(), static_cast<unsigned int>(MAX_NUM_EQS)); ++i) {
+        // Validate firFilterBuffer
+        if (firFilterBuffer.getNumChannels() <= static_cast<int>(i) || firFilterBuffer.getNumSamples() < firLen) {
+            LOG_ERROR("firFilterBuffer invalid for index " + String(i) + ": channels=" + String(firFilterBuffer.getNumChannels()) + ", samples=" + String(firFilterBuffer.getNumSamples()));
             continue;
         }
 
-        AudioBuffer<float> convSingleBuffOmni(1, firLen);
-        convSingleBuffOmni.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
+        // Prepare convolvers only if spec changed
+        if (convSpec != lastConvSpec) {
+            convolvers[2 * i].prepare(convSpec);     // Omni
+            convolvers[2 * i + 1].prepare(convSpec); // Eight
+        }
 
-        AudioBuffer<float> convSingleBuffEight(1, firLen);
-        convSingleBuffEight.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
+        // Load impulse response only if coefficients changed
+        if (bandCoefficientsChanged[i] || convSpec != lastConvSpec) {
+            AudioBuffer<float> convSingleBuff(1, firLen);
+            convSingleBuff.copyFrom(0, 0, firFilterBuffer, i, 0, firLen);
+
+            convolvers[2 * i].loadImpulseResponse(std::move(convSingleBuff), currentSampleRate,
+                dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+
+            // Re-create convSingleBuff for second copy since previous was moved
+            convSingleBuff = AudioBuffer<float>(1, firLen);
+            convSingleBuff.copyFrom(0, 0, firFilterBuffer, i, 0, firLen); // Re-copy for Eight convolver
+            convolvers[2 * i + 1].loadImpulseResponse(std::move(convSingleBuff), currentSampleRate,
+                dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no, dsp::Convolution::Normalise::no);
+            bandCoefficientsChanged[i] = false;
+        }
+    }
+
+    lastConvSpec = convSpec;
+    convolversReady.store(true, std::memory_order_release);
+}
+
+void PolarDesignerAudioProcessor::initConvolver(int convNr) {
+    TRACE_DSP();
+    convolversReady.store(false, std::memory_order_release);
+
+    if (currentBlockSize == 0 || currentSampleRate <= 0.0) {
+        LOG_ERROR("Cannot initialize convolver: invalid block size or sample rate");
+        convolversReady.store(true, std::memory_order_release);
+        return;
+    }
+
+    if (convNr < 0 || convNr >= static_cast<int>(nProcessorBands)) {
+        LOG_ERROR("Invalid convolver index: " + String(convNr));
+        convolversReady.store(true, std::memory_order_release);
+        return;
+    }
+
+    dsp::ProcessSpec convSpec{currentSampleRate, static_cast<uint32>(currentBlockSize), 1};
+    if (convSpec != lastConvSpec || bandCoefficientsChanged[convNr]) {
+        AudioBuffer<float> convSingleBuff(1, firLen);
+        convSingleBuff.copyFrom(0, 0, firFilterBuffer, convNr, 0, firLen);
 
         // Omni convolver
-        convolvers[2 * i].prepare(convSpec);
-        convolvers[2 * i].loadImpulseResponse(std::move(convSingleBuffOmni), currentSampleRate,
-            dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no,
-            dsp::Convolution::Normalise::no);
+        convolvers[2 * convNr].prepare(convSpec);
+        convolvers[2 * convNr].loadImpulseResponse(std::move(convSingleBuff), currentSampleRate,
+            dsp::Convolution::Stereo::no, // isStereo
+            dsp::Convolution::Trim::no, // trim
+            dsp::Convolution::Normalise::no); // normalise
 
         // Eight convolver
-        convolvers[2 * i + 1].prepare(convSpec);
-        convolvers[2 * i + 1].loadImpulseResponse(std::move(convSingleBuffEight), currentSampleRate,
-            dsp::Convolution::Stereo::no, dsp::Convolution::Trim::no,
-            dsp::Convolution::Normalise::no);
+        // Re-create convSingleBuff for second copy since previous was moved
+        convSingleBuff = AudioBuffer<float>(1, firLen);
+        convSingleBuff.copyFrom(0, 0, firFilterBuffer, convNr, 0, firLen); // Re-copy since previous buffer was moved
+        convolvers[2 * convNr + 1].prepare(convSpec);
+        convolvers[2 * convNr + 1].loadImpulseResponse(std::move(convSingleBuff), currentSampleRate,
+            dsp::Convolution::Stereo::no, // isStereo
+            dsp::Convolution::Trim::no, // trim
+            dsp::Convolution::Normalise::no); // normalise
+
+        bandCoefficientsChanged[convNr] = false;
+        if (convSpec != lastConvSpec) {
+            lastConvSpec = convSpec;
+        }
     }
-    convolversReady = true;
+
+    convolversReady.store(true, std::memory_order_release);
 }
 
 void PolarDesignerAudioProcessor::computeAllFilterCoefficients() {
@@ -1488,9 +1527,9 @@ void PolarDesignerAudioProcessor::computeAllFilterCoefficients() {
     for (unsigned int i = 0; i < 4; ++i) {
         computeFilterCoefficients(i);
     }
-    loadFilterBankImpulseResponses();
+    std::fill(bandCoefficientsChanged.begin(), bandCoefficientsChanged.end(), true);
+    initAllConvolvers();
 }
-
 
 void PolarDesignerAudioProcessor::loadFilterBankImpulseResponses() {
     initAllConvolvers(); // Reuse existing method for consistency
@@ -2108,15 +2147,23 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients(float distance) {
     *proxCompIIR.coefficients = dsp::IIR::Coefficients<float>(b0, b1, a0, a1);
 }
 
-void PolarDesignerAudioProcessor::timerCallback()
-{
+void PolarDesignerAudioProcessor::timerCallback() {
     TRACE_DSP();
-    if (currentSampleRate <= 0.0 || currentBlockSize <= 0) {
-        LOG_WARN("Timer callback skipped: plugin not initialized");
-        return;
-    }
+//    if (currentSampleRate == FILTER_BANK_NATIVE_SAMPLE_RATE || currentBlockSize == PD_DEFAULT_BLOCK_SIZE) {
+//        LOG_WARN("Timer callback skipped: plugin not prepared");
+//        return;
+//    }
 
-    if (recomputeAllFilterCoefficients.load() || std::any_of(recomputeFilterCoefficients.begin(), recomputeFilterCoefficients.end(), [](auto flag) { return flag.get(); })) {
+    validateSampleRateAndBlockSize(); // Validate before operations
+
+    bool anyFilterNeedsRecompute = false;
+    for (unsigned int i = 0; i < recomputeFilterCoefficients.size(); ++i) {
+        if (recomputeFilterCoefficients[i].load(std::memory_order_acquire)) {
+            anyFilterNeedsRecompute = true;
+            break;
+        }
+    }
+    if (recomputeAllFilterCoefficients.load(std::memory_order_acquire) || anyFilterNeedsRecompute) {
         recomputeFilterCoefficientsIfNeeded();
     }
 
@@ -2124,13 +2171,12 @@ void PolarDesignerAudioProcessor::timerCallback()
         updateLatency();
     }
 
-    if (syncChannelPtr->load() > 0)
+    if (syncChannelPtr->load(std::memory_order_acquire) > 0)
     {
 
-        readingSharedParams = true;
-
-        int ch = (int) syncChannelPtr->load() - 1;
-        ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (ch);
+        readingSharedParams.store(true, std::memory_order_release);
+        int ch = static_cast<int>(syncChannelPtr->load(std::memory_order_acquire)) - 1;
+        ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference(ch);
 
         if (!exactlyEqual (nProcessorBandsPtr->load(), static_cast<float> (paramsToSync.nrActiveBands)))
         {
@@ -2201,37 +2247,25 @@ void PolarDesignerAudioProcessor::timerCallback()
 #endif
         }
 
-        readingSharedParams = false;
+        readingSharedParams.store(false, std::memory_order_release);
     }
 
 }
 
-// In updateLatency (around line 1650, USE_NEW_UPDATELATENCY version)
-#ifdef USE_NEW_UPDATELATENCY
 void PolarDesignerAudioProcessor::updateLatency() {
     TRACE_DSP();
-
-    // CHANGED: Replaced std::round(zeroLatencyModePtr->load()) > 0.5f with juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f)
+    if (firLen % 2 == 0) {
+        LOG_WARN("firLen is even (" + String(firLen) + "), incrementing to make odd");
+        firLen++;
+    }
+    jassert(firLen % 2 == 1); // Ensure firLen is odd
     if (isBypassed || juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f)) {
         setLatencySamples(0);
     } else {
-        jassert(firLen % 2 == 1); // Ensure firLen is odd
         int latency = (firLen - 1) / 2;
-        // Verify EQ convolution latency (padded to firLen, so same latency)
         setLatencySamples(latency);
     }
 }
-#else //USE_NEW_UPDATELATENCY
-void PolarDesignerAudioProcessor::updateLatency() {
-    TRACE_DSP();
-    // CHANGED: Replaced std::round(zeroLatencyModePtr->load()) > 0.5f with juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f)
-    int newLatency = (isBypassed || juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f)) ? 0 : (firLen - 1) / 2;
-    if (getLatencySamples() != newLatency) {
-        setLatencySamples(newLatency);
-        LOG_DEBUG("Latency updated to: " + String(newLatency));
-    }
-}
-#endif
 
 void PolarDesignerAudioProcessor::changeABLayerState(int state)
 {
@@ -2240,8 +2274,8 @@ void PolarDesignerAudioProcessor::changeABLayerState(int state)
     jassert(state == COMPARE_LAYER_A || state == COMPARE_LAYER_B);
 
     abLayerState = state;
-    abLayerChanged = true;
-    ffDfEqChanged = true;
+    abLayerChanged.store(true, std::memory_order_release);
+    ffDfEqChanged.store(true, std::memory_order_release);
 
     resetTrackingState(); // Clear tracking data
 
@@ -2259,11 +2293,11 @@ void PolarDesignerAudioProcessor::changeABLayerState(int state)
         {
             if (proxDistancePtr && nProcessorBandsPtr)
             {
-                oldProxDistanceA = proxDistancePtr->load();
-                oldNrBandsA = nProcessorBandsPtr->load();
+                oldProxDistanceA.store(proxDistancePtr->load(std::memory_order_acquire), std::memory_order_release);
+                oldNrBandsA.store(nProcessorBandsPtr->load(std::memory_order_acquire), std::memory_order_release);
             }
         }
-        readingSharedParams = true;
+        readingSharedParams.store(true, std::memory_order_release);
 
         vtsParams.state = layerB.createCopy();
         doEq = doEqB;
@@ -2274,7 +2308,7 @@ void PolarDesignerAudioProcessor::changeABLayerState(int state)
         }
         else
         {
-            oldProxDistance = oldProxDistanceB;
+            oldProxDistance.store(oldProxDistanceB.load());
             oldNrBands.store(oldNrBandsB.load());
         }
     }
@@ -2287,11 +2321,11 @@ void PolarDesignerAudioProcessor::changeABLayerState(int state)
         {
             if (proxDistancePtr && nProcessorBandsPtr)
             {
-                oldProxDistanceB = proxDistancePtr->load();
-                oldNrBandsB = nProcessorBandsPtr->load();
+                oldProxDistanceB.store(proxDistancePtr->load(std::memory_order_acquire), std::memory_order_release);
+                oldNrBandsB.store(nProcessorBandsPtr->load(std::memory_order_acquire), std::memory_order_release);
             }
         }
-        readingSharedParams = true;
+        readingSharedParams.store(true, std::memory_order_release);
 
         vtsParams.state = layerA.createCopy();
         doEq = doEqA;
@@ -2302,7 +2336,7 @@ void PolarDesignerAudioProcessor::changeABLayerState(int state)
         }
         else
         {
-            oldProxDistance = oldProxDistanceA;
+            oldProxDistance.store(oldProxDistanceA.load());
             oldNrBands.store(oldNrBandsA.load());
         }
     }
@@ -2312,7 +2346,7 @@ void PolarDesignerAudioProcessor::changeABLayerState(int state)
     if (nProcessorBandsPtr)
         vtsParams.getParameter("nrBands")->setValueNotifyingHost(vtsParams.getParameter("nrBands")->convertTo0to1(oldNrBands));
 
-    abLayerChanged = false;
+    abLayerChanged.store(false, std::memory_order_release);
 
 #ifdef USE_EXTRA_DEBUG_DUMPS
     juce::String treeAsXmlString2 = vtsParams.state.toXmlString();

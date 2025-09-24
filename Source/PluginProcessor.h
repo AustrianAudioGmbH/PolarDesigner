@@ -105,6 +105,8 @@ public:
     PolarDesignerAudioProcessor();
     ~PolarDesignerAudioProcessor() override;
 
+    void validateSampleRateAndBlockSize();
+
     void registerParameterListeners();
 
         // This is the ProTools PageFile for PolarDesigner3
@@ -145,6 +147,8 @@ public:
     void changeProgramName (int index, const String& newName) override;
 
     //==============================================================================
+    void resizeBuffersIfNeeded(int newFirLen, int newBlockSize);
+
     void initializeBuffers();
     void initializeDefaultState();
     void getStateInformation (MemoryBlock& destData) override;
@@ -184,7 +188,7 @@ public:
     std::atomic<bool> activeBandsChanged = true;
     std::atomic<bool> zeroLatencyModeChanged = true;
     std::atomic<bool> ffDfEqChanged = true;
-    std::array<Atomic<bool>, 4> recomputeFilterCoefficients;
+    std::array<std::atomic<bool>, 4> recomputeFilterCoefficients;
     std::atomic<bool> recomputeAllFilterCoefficients;
 
     bool getDisturberRecorded() { return disturberRecorded; }
@@ -208,16 +212,16 @@ public:
     int doEqB;
 
     // when the A/B buttons are pressed, the proximity values are remembered
-    float oldProxDistance;
-    float oldProxDistanceA = 0;
-    float oldProxDistanceB = 0;
+    std::atomic<float> oldProxDistance;
+    std::atomic<float> oldProxDistanceA = 0;
+    std::atomic<float> oldProxDistanceB = 0;
 
     // when the A/B Buttons are pressed, the prior nrBands state is remembered
     std::atomic<float> oldNrBands = 0;
     std::atomic<float> oldNrBandsA = MAX_NUM_EQS;
     std::atomic<float> oldNrBandsB = MAX_NUM_EQS;
 
-    Atomic<bool> abLayerChanged = false;
+    std::atomic<bool> abLayerChanged = false;
     float zeroLatencyModeA; // Zero Latency setting for Layer A
     float zeroLatencyModeB; // Zero Latency setting for Layer B
 
@@ -271,9 +275,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarDesignerAudioProcessor)
 
     std::unique_ptr<PropertiesFile> properties;
-
-    dsp::ProcessSpec lastEqSpec{0.0, 0, 0}; // Last spec for EQ convolvers
-    dsp::ProcessSpec lastConvSpec{0.0, 0, 0}; // Last spec for filter bank convolvers
 
     std::atomic<unsigned int> nProcessorBands;
 
@@ -333,7 +334,7 @@ private:
     bool isBypassed;
     bool soloActive;
     bool loadingFile;
-    bool readingSharedParams;
+    std::atomic<bool>readingSharedParams;
     bool trackingActive;
     bool trackingDisturber;
     int nrBlocksRecorded;
@@ -345,6 +346,17 @@ private:
     AudioBuffer<float> firFilterBuffer; // holds filter coefficients, size: 5
     AudioBuffer<float> omniEightBuffer; // holds omni and fig-of-eight signals, size: 2
     std::array<dsp::Convolution, 2 * MAX_NUM_EQS> convolvers;
+
+    // convolver cache
+    // New members for optimization
+    dsp::ProcessSpec lastEqSpec{0.0, 0, 0}; // Last spec for EQ convolvers
+    dsp::ProcessSpec lastConvSpec{0.0, 0, 0}; // Track last convolver spec
+    std::array<bool, MAX_NUM_EQS> bandCoefficientsChanged{false}; // Track which bands need updating
+    AudioBuffer<float> cachedDfEqOmniBuffer; // Cached resampled EQ buffers
+    AudioBuffer<float> cachedDfEqEightBuffer;
+    AudioBuffer<float> cachedFfEqOmniBuffer;
+    AudioBuffer<float> cachedFfEqEightBuffer;
+    double lastEqSampleRate{0.0}; // Track last sample rate for EQ buffers
 
     double currentSampleRate = 0.0f;
     double previousSampleRate = 0.0f;
