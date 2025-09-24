@@ -52,6 +52,7 @@
 #include "TitleBarPaths.h"
 #include "ImgPaths.h"
 #include "../lookAndFeel/MainLookAndFeel.h"
+#include <memory>
 
 #ifdef JUCE_OSC_H_INCLUDED
 #include "OSCStatus.h"
@@ -176,8 +177,8 @@ public:
         setBufferedToImage(true);
 
         if (selectable) {
-            cbChannels = new ComboBox();
-            addAndMakeVisible(cbChannels);
+            cbChannels = std::make_unique<ComboBox>();
+            addAndMakeVisible(cbChannels.get());
             cbChannels->setJustificationType(Justification::centred);
             cbChannels->addSectionHeading("Number of channels");
             cbChannels->addItem("Auto", 1);
@@ -243,7 +244,7 @@ public:
 
     ComboBox* getChannelsCbPointer()
     {
-        if (selectable) return cbChannels;
+        if (selectable) return cbChannels.get();
         return nullptr;
     }
 

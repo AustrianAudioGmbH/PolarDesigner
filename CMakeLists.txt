@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.24.1)
 
+set (CMAKE_CXX_STANDARD 20)
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
 
 option(WITH_ADDRESS_SANITIZER "Enable Address Sanitizer" ON)
@@ -200,7 +203,7 @@ endif ()
 
 target_compile_features(SharedCode INTERFACE cxx_std_20)
 
-set(SourceFiles source/PluginEditor.h source/PluginProcessor.h source/PluginEditor.cpp source/PluginProcessor.cpp)
+set(SourceFiles Source/PluginEditor.h Source/PluginProcessor.h Source/PluginEditor.cpp Source/PluginProcessor.cpp)
 file(GLOB_RECURSE SourceLookAndFeelFiles CONFIGURE_DEPENDS" ${CMAKE_CURRENT_SOURCE_DIR}/resources/lookAndFeel/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/resources/lookAndFeel/*.cpp")
 
 juce_generate_juce_header(${PROJECT_NAME})

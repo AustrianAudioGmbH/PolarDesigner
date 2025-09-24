@@ -1394,7 +1394,7 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients(unsigned int crossov
         auto* filterBufferPointer = firFilterBuffer.getWritePointer(i);
         for (int j = 0; j < firLen; j++) {
             float fCenter = halfBandwidth + hzFromZeroToOne(i - 1, xOverFreqsPtr[i - 1]->load());
-            filterBufferPointer[j] = 2 * lp2bpCoeffs[j] * std::cosf(static_cast<float>(MathConstants<float>::twoPi * fCenter / currentSampleRate * (j - (firLen - 1) / 2)));
+            filterBufferPointer[j] = 2 * lp2bpCoeffs[j] * std::cos(static_cast<float>(MathConstants<float>::twoPi * fCenter / currentSampleRate * (j - (firLen - 1) / 2)));
         }
         bandCoefficientsChanged[i] = true;
     }
@@ -1407,7 +1407,7 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients(unsigned int crossov
             hpBandwidth, currentSampleRate, static_cast<size_t>(firLen - 1), dsp::WindowingFunction<float>::WindowingMethod::hamming);
         float* lp2hpCoeffs = lp2hp->getRawCoefficients();
         for (int i = 0; i < firLen; ++i) {
-            filterBufferPointer[i] = lp2hpCoeffs[i] * std::cosf(MathConstants<float>::pi * (i - (firLen - 1) / 2));
+            filterBufferPointer[i] = lp2hpCoeffs[i] * std::cos(MathConstants<float>::pi * (i - (firLen - 1) / 2));
         }
         bandCoefficientsChanged[nProcessorBands - 1] = true;
     }
