@@ -56,7 +56,7 @@ public:
 
         setColour(ListBox::backgroundColourId, groupComponentBackgroundColor);
 
-        DBG("MainLookAndFeel Scale Factor: " << Desktop::getInstance().getGlobalScaleFactor());
+//        DBG("MainLookAndFeel Scale Factor: " << Desktop::getInstance().getGlobalScaleFactor());
 
     }
 
