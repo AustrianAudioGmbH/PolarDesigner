@@ -10,7 +10,7 @@ local function SavedLogMessage(msg)
         f:write(tostring(msg) .. "\n")
         f:close()
         -- Optional: Also print to internal console
-        reaper.ShowConsoleMsg(tostring(msg) .. "\n")
+        reaper.SthowConsoleMsg(tostring(msg) .. "\n")
     end
 end
 
