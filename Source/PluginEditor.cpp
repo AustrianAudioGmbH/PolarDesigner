@@ -36,16 +36,18 @@
 //==============================================================================
 PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesignerAudioProcessor& p,
                                                           AudioProcessorValueTreeState& vts)
-    : AudioProcessorEditor (&p), loadingFile(false),
-    presetListVisible(false), polarDesignerProcessor (p),
-    valueTreeState(vts),
-    directivityEqualiser (p),
-      uiTerminatorAnimationWindowIsVisible (false),
-      uiMaxToSpillWindowIsVisible (false),
-      uiTargetAquisitionWindowIsVisible (false),
-      uiMaximizeTargetWindowIsVisible (false),
-      uiMaxTargetToSpillFlowStarted (false),
-    termStage(PolarDesignerAudioProcessorEditor::terminatorStage::DISABLED)
+    : AudioProcessorEditor (&p),
+        loadingFile(false),
+        presetListVisible(false),
+        polarDesignerProcessor (p),
+        valueTreeState(vts),
+        directivityEqualiser (p),
+        uiTerminatorAnimationWindowIsVisible (false),
+        uiTargetAquisitionWindowIsVisible (false),
+        uiMaxToSpillWindowIsVisible (false),
+        uiMaximizeTargetWindowIsVisible (false),
+        uiMaxTargetToSpillFlowStarted (false),
+        termStage(PolarDesignerAudioProcessorEditor::terminatorStage::DISABLED)
 {
 
     nActiveBands = polarDesignerProcessor.getNProcessorBands();
@@ -121,16 +123,16 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tmbNrBandsButton.setButtonsNumber(static_cast<int> (MAX_EDITOR_BANDS));
     tmbNrBandsButton.setAlwaysOnTop(true);
 
-    for (uint32 i = 0; i < MAX_EDITOR_BANDS; ++i)
+    for (unsigned int i = 0; i < MAX_EDITOR_BANDS; ++i)
     {
-        tmbNrBandsButton[i].setClickingTogglesState(true);
-        tmbNrBandsButton[i].setRadioGroupId(34567);
+        tmbNrBandsButton[static_cast<int> (i)].setClickingTogglesState(true);
+        tmbNrBandsButton[static_cast<int> (i)].setRadioGroupId(34567);
 
-        tmbNrBandsButton[i].setButtonText(String(i + 1));
-        tmbNrBandsButton[i].addListener(this);
+        tmbNrBandsButton[static_cast<int> (i)].setButtonText(String(i + 1));
+        tmbNrBandsButton[static_cast<int> (i)].addListener(this);
 
         if (i == (nActiveBands - 1)) {
-            tmbNrBandsButton[i].setToggleState (true, NotificationType::dontSendNotification);
+            tmbNrBandsButton[static_cast<int> (i)].setToggleState (true, NotificationType::dontSendNotification);
         }
     }
 
@@ -188,7 +190,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     tmbSyncChannelButton.setButtonsNumber(4);
     tmbSyncChannelButton.setAlwaysOnTop(true);
 
-    for (uint32 i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i)
     {
         tmbSyncChannelButton[i].setClickingTogglesState(true);
 
@@ -211,7 +213,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     // directivity eq
     addAndMakeVisible (&directivityEqualiser);
 
-    for (uint32 i = 0; i < MAX_EDITOR_BANDS; ++i)
+    for (unsigned int i = 0; i < MAX_EDITOR_BANDS; ++i)
     {
         // SOLO button
         addAndMakeVisible (&tgbSolo[i]);
@@ -381,7 +383,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (PolarDesig
     initializeSavedStates();
 
     // Save initial state for the current layer
-    uint32 currentLayer = polarDesignerProcessor.abLayerState;
+    int currentLayer = polarDesignerProcessor.abLayerState;
     saveLayerState(currentLayer);
 
     // Prime the UI
@@ -479,9 +481,9 @@ PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
 
     stopTimer();
 
-    for (uint32 i = 0; i < 2; ++i) tmbABButton[i].removeListener(this);
+    for (int i = 0; i < 2; ++i) tmbABButton[i].removeListener(this);
 
-    for (uint32 i = 0; i < MAX_EDITOR_BANDS; ++i) {
+    for (int i = 0; i < MAX_EDITOR_BANDS; ++i) {
         tmbNrBandsButton[i].removeListener(this);
         tgbSolo[i].removeListener(this);
         tgbMute[i].removeListener(this);
@@ -506,7 +508,7 @@ PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
     tbZeroLatency.removeListener(this);
     ibEqCtr[0].removeListener(this);
     ibEqCtr[1].removeListener(this);
-    for (uint32 i = 0; i < 4; ++i) tmbSyncChannelButton[i].removeListener(this);
+    for (int i = 0; i < 4; ++i) tmbSyncChannelButton[i].removeListener(this);
     lbUserPresets.removeChangeListener(this);
     lbFactoryPresets.removeChangeListener(this);
     trimSlider.removeListener(this);
@@ -514,7 +516,7 @@ PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
     tgbProxCtrAtt.reset();
     slProximityAtt.reset();
     tbAllowBackwardsPatternAtt.reset();
-    for (uint32 i = 0; i < MAX_EDITOR_BANDS; ++i) {
+    for (int i = 0; i < MAX_EDITOR_BANDS; ++i) {
         tgbSoloAtt[i].reset();
         tgbMuteAtt[i].reset();
         slDirAtt[i].reset();
@@ -703,7 +705,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     }
     else
     {
-        for (uint32 i = 0; i < nActiveBands; i++)
+        for (unsigned int i = 0; i < nActiveBands; i++)
         {
             if (polarPatternVisualizers[i].isPvisActive())
             {
@@ -1342,7 +1344,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
     else if (button == &tbZeroLatency)
     {
         bool newState = button->getToggleState();
-        uint32 currentLayer = polarDesignerProcessor.abLayerState;
+        int currentLayer = polarDesignerProcessor.abLayerState;
 
         if (newState && !polarDesignerProcessor.zeroLatencyModeActive()) {
             // Save state before enabling zero latency
@@ -1446,7 +1448,7 @@ std::vector<float> PolarDesignerAudioProcessorEditor::getBandLimitWidthVector(fl
     //First calculate bandLimit vector
     std::vector<float> bandLimit;
     bandLimit.push_back(0);
-    for (uint32 i = 0; i < (nActiveBands - 1); i++)
+    for (unsigned int i = 0; i < (nActiveBands - 1); i++)
     {
         bandLimit.push_back(static_cast<float> (directivityEqualiser.getBandWidth (static_cast<int> (i))));
     }
@@ -1494,7 +1496,7 @@ void PolarDesignerAudioProcessorEditor::sliderValueChanged(Slider* slider)
     else
     {
         // Check for direction sliders
-        for (uint32 i = 0; i < MAX_EDITOR_BANDS; i++)
+        for (int i = 0; i < MAX_EDITOR_BANDS; i++)
         {
             if (slider == &slDir[i])
             {
@@ -1505,7 +1507,7 @@ void PolarDesignerAudioProcessorEditor::sliderValueChanged(Slider* slider)
             }
         }
         // Check for band gain sliders
-        for (uint32 i = 0; i < MAX_EDITOR_BANDS; i++)
+        for (int i = 0; i < MAX_EDITOR_BANDS; i++)
         {
             if (slider == &slBandGain[i])
             {
@@ -1546,7 +1548,7 @@ void PolarDesignerAudioProcessorEditor::loadFile()
         {
             setEqMode();
             // Save current state for the active layer
-            uint32 currentLayer = polarDesignerProcessor.abLayerState;
+            int currentLayer = polarDesignerProcessor.abLayerState;
             saveLayerState(currentLayer);
         }
         loadingFile = false;
@@ -1606,9 +1608,9 @@ void PolarDesignerAudioProcessorEditor::nEditorBandsChanged()
     nActiveBands = polarDesignerProcessor.getNProcessorBands();
 
     // Set nrbands button state when preset load
-    tmbNrBandsButton[nActiveBands - 1].setToggleState(1, NotificationType::dontSendNotification);
+    tmbNrBandsButton[(static_cast<int> (nActiveBands - 1))].setToggleState(1, NotificationType::dontSendNotification);
 
-    for (uint32 i = 0; i < 5; i++)
+    for (unsigned int i = 0; i < 5; i++)
     {
         if (i < nActiveBands)
         {
@@ -1672,27 +1674,27 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
         needsRepaint = true;
     }
 
-    if (polarDesignerProcessor.repaintDEQ.get())
+    if (polarDesignerProcessor.repaintDEQ.load())
     {
         polarDesignerProcessor.repaintDEQ = false;
         needsRepaint = true;
     }
 
-    if (polarDesignerProcessor.activeBandsChanged.get())
+    if (polarDesignerProcessor.activeBandsChanged.load())
     {
         polarDesignerProcessor.activeBandsChanged = false;
         nEditorBandsChanged();
         needsRepaint = true;
     }
 
-    if (polarDesignerProcessor.zeroLatencyModeChanged.get())
+    if (polarDesignerProcessor.zeroLatencyModeChanged.load())
     {
         activateEditingForZeroLatency();
         polarDesignerProcessor.zeroLatencyModeChanged = false;
         needsRepaint = true;
     }
 
-    if (polarDesignerProcessor.ffDfEqChanged.get())
+    if (polarDesignerProcessor.ffDfEqChanged.load())
     {
         polarDesignerProcessor.ffDfEqChanged = false;
         setEqMode();
@@ -1827,10 +1829,10 @@ void PolarDesignerAudioProcessorEditor::activateEditingForZeroLatency()
 {
 //    ScopedLock lock(polarDesignerProcessor.abLayerLock); // Add lock
     bool zlIsActive = polarDesignerProcessor.zeroLatencyModeActive();
-    uint32 currentLayer = polarDesignerProcessor.abLayerState;
+    int currentLayer = polarDesignerProcessor.abLayerState;
 
     if (!zlIsActive) {
-        if (isStateSaved[currentLayer]) {
+        if (isStateSaved[static_cast<size_t> (currentLayer)]) {
             restoreLayerState(currentLayer);
         }
         activateMainUI(true);
@@ -1840,7 +1842,7 @@ void PolarDesignerAudioProcessorEditor::activateEditingForZeroLatency()
         return;
     }
 
-    if (!isStateSaved[currentLayer]) {
+    if (!isStateSaved[static_cast<size_t> (currentLayer)]) {
         saveLayerState(currentLayer);
     }
 
@@ -1848,7 +1850,7 @@ void PolarDesignerAudioProcessorEditor::activateEditingForZeroLatency()
     valueTreeState.getParameter("nrBands")->setValueNotifyingHost(
         valueTreeState.getParameter("nrBands")->convertTo0to1(0));
 
-    for (uint32 i = 0; i < MAX_EDITOR_BANDS; i++) {
+    for (unsigned int i = 0; i < MAX_EDITOR_BANDS; i++) {
         if (i < nActiveBands) {
             slDir[i].setEnabled(true);
             slBandGain[i].setEnabled(true);
@@ -2089,7 +2091,7 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback(ChangeBroadcaster
                 presetLoaded = true;
                 titlePresetUndoButton.setVisible(true);
                 // Save current state for the active layer
-                uint32 currentLayer = polarDesignerProcessor.abLayerState;
+                int currentLayer = polarDesignerProcessor.abLayerState;
                 saveLayerState(currentLayer);
             }
         }
@@ -2116,7 +2118,7 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback(ChangeBroadcaster
                 presetLoaded = true;
                 titlePresetUndoButton.setVisible(true);
                 // Save current state for the active layer
-                uint32 currentLayer = polarDesignerProcessor.abLayerState;
+                int currentLayer = polarDesignerProcessor.abLayerState;
                 saveLayerState(currentLayer);
             }
         }
@@ -2129,7 +2131,7 @@ void PolarDesignerAudioProcessorEditor::setMainAreaEnabled(bool enable)
     directivityEqualiser.setActive(enable);
     directivityEqualiser.setEnabled(enable);
 
-    for (uint32 i = 0; i < nActiveBands; i++)
+    for (unsigned int i = 0; i < nActiveBands; i++)
     {
         directivityEqualiser.getDirPathComponent(static_cast<int> (i)).setEnabled(enable);
         slDir[i].setEnabled(enable);
@@ -2324,14 +2326,14 @@ int PolarDesignerAudioProcessorEditor::getControlParameterIndex (Component& cont
 }
 
 
-void PolarDesignerAudioProcessorEditor::saveLayerState(uint32 layer)
+void PolarDesignerAudioProcessorEditor::saveLayerState(int layer)
 {
 //    ScopedLock lock(polarDesignerProcessor.abLayerLock);
 
-    LayerState& state = savedStates[layer];
+    LayerState& state = savedStates[static_cast<size_t> (layer)];
     state.nrBandsValue = polarDesignerProcessor.getNProcessorBands();
 
-    for (uint32 i = 0; i < MAX_EDITOR_BANDS; ++i) {
+    for (unsigned int i = 0; i < MAX_EDITOR_BANDS; ++i) {
         state.dirValues[i] = static_cast<float>(slDir[i].getValue());
         state.bandGainValues[i] = static_cast<float>(slBandGain[i].getValue());
         state.soloStates[i] = tgbSolo[i].getToggleState();
@@ -2345,36 +2347,36 @@ void PolarDesignerAudioProcessorEditor::saveLayerState(uint32 layer)
     state.proxValue = static_cast<float>(slProximity.getValue());
     state.eqState = polarDesignerProcessor.getEqState();
 
-    isStateSaved[layer] = true;
-    DBG("Saved state for layer " + String(layer) + ": nrBands=" + String(state.nrBandsValue));
+    isStateSaved[static_cast<size_t> (layer)] = true;
+    DBG("Saved state for layer " << layer << ": nrBands=" << std::to_string (state.nrBandsValue));
 }
 
 
-void PolarDesignerAudioProcessorEditor::restoreLayerState(uint32 layer)
+void PolarDesignerAudioProcessorEditor::restoreLayerState(int layer)
 {
-    if (!isStateSaved[layer]) {
-        DBG("No state saved for layer " + String(layer));
+    if (!isStateSaved[static_cast<size_t> (layer)]) {
+        DBG("No state saved for layer " << layer);
         return;
     }
 
     isRestoringState = true;
 //    ScopedLock lock(polarDesignerProcessor.abLayerLock);
-    const LayerState& state = savedStates[layer];
+    const LayerState& state = savedStates[static_cast<size_t> (layer)];
 
     // Validate nrBandsValue
     if (state.nrBandsValue < 1 || state.nrBandsValue > MAX_EDITOR_BANDS) {
-        DBG("Invalid nrBandsValue " << std::to_string(state.nrBandsValue) << " for layer " + String(layer) + "; resetting to default");
+        DBG("Invalid nrBandsValue " << std::to_string(state.nrBandsValue) << " for layer " << layer << "; resetting to default");
         initializeSavedStates(); // Reset to safe state
-        isStateSaved[layer] = false;
+        isStateSaved[static_cast<size_t> (layer)] = false;
         isRestoringState = false;
         return;
     }
 
-    DBG("Restoring state for layer " + String(layer) + ": nrBands=" << std::to_string(state.nrBandsValue));
+    DBG("Restoring state for layer " << layer << ": nrBands=" << std::to_string(state.nrBandsValue));
 
     // Begin batch update
     valueTreeState.getParameter("nrBands")->beginChangeGesture();
-    for (uint32 i = 0; i < MAX_EDITOR_BANDS; ++i) {
+    for (unsigned int i = 0; i < MAX_EDITOR_BANDS; ++i) {
         valueTreeState.getParameter("alpha" + String(i+1))->beginChangeGesture();
         valueTreeState.getParameter("gain" + String(i+1))->beginChangeGesture();
         valueTreeState.getParameter("solo" + String(i+1))->beginChangeGesture();
@@ -2393,7 +2395,7 @@ void PolarDesignerAudioProcessorEditor::restoreLayerState(uint32 layer)
     nActiveBands = state.nrBandsValue;
 
     // Restore band parameters
-    for (uint32 i = 0; i < MAX_EDITOR_BANDS; ++i) {
+    for (unsigned int i = 0; i < MAX_EDITOR_BANDS; ++i) {
         if (i < state.nrBandsValue) {
             valueTreeState.getParameter("alpha" + String(i+1))->setValueNotifyingHost(
                 valueTreeState.getParameter("alpha" + String(i+1))->convertTo0to1(state.dirValues[i]));
@@ -2418,7 +2420,7 @@ void PolarDesignerAudioProcessorEditor::restoreLayerState(uint32 layer)
 
     // End batch update
     valueTreeState.getParameter("nrBands")->endChangeGesture();
-    for (uint32 i = 0; i < MAX_EDITOR_BANDS; ++i) {
+    for (unsigned int i = 0; i < MAX_EDITOR_BANDS; ++i) {
         valueTreeState.getParameter("alpha" + String(i+1))->endChangeGesture();
         valueTreeState.getParameter("gain" + String(i+1))->endChangeGesture();
         valueTreeState.getParameter("solo" + String(i+1))->endChangeGesture();

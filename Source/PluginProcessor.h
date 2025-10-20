@@ -32,40 +32,37 @@
 
 #include <cfloat>
 
-// For internal use during debugging:
-#define AA_USE_SIMPLER_LOADSAVE
-
-#define LOG_ERROR(message) juce::Logger::outputDebugString("ERROR: " + String(message))
-#define LOG_DEBUG(message) juce::Logger::outputDebugString("DEBUG: " + String(message))
-
 // For performance tuning
 #ifdef PERFETTO
     #include "melatonin_perfetto/melatonin_perfetto.h"
 #endif
 
+static const int PD_DEFAULT_BLOCK_SIZE = 1024;
+
+/* PolarDesigner has a maximum of 5 EQ's .. */
+static const int MAX_NUM_EQS = 5;
+/* .. and functions on a maximum of 2 inputs only. */
+static const int MAX_NUM_INPUTS = 2;
+
+//
+//static inline bool doublesEquivalent(double a, double b)
+//{
+//    return fabs(a - b) < DBL_EPSILON;
+//}
+//
+//static inline bool floatsEquivalent(double a, double b)
+//{
+//    return fabs(a - b) < FLT_EPSILON;
+//}
+
 using namespace juce;
-
-namespace PolarDesigner
-{
-    constexpr int MAX_NUM_EQS = 5; ///< Maximum number of EQ bands supported
-    constexpr int FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE = 401; ///< FIR filter length at native sample rate
-    constexpr float FILTER_BANK_NATIVE_SAMPLE_RATE = 48000.0f; ///< Native sample rate for filter bank
-    constexpr int PD_MAX_BLOCK_SIZE = 8192; ///< Maximum block size for buffer allocation
-    constexpr int PD_DEFAULT_BLOCK_SIZE = 512; ///< Default block size for initialization
-    constexpr int MAX_NUM_INPUTS = 2;    ///< function on a maximum of 2 inputs only.
-    constexpr int DF_EQ_LEN = 512;
-    constexpr int FF_EQ_LEN = 512;
-    constexpr int EQ_SAMPLE_RATE = 48000;
-
-}
-
 
 // these params can be synced between plugin instances
 struct ParamsToSync
 {
     int nrActiveBands, ffDfEq;
-    float xOverFreqs[4], dirFactors[PolarDesigner::MAX_NUM_EQS], gains[PolarDesigner::MAX_NUM_EQS], proximity;
-    bool solo[PolarDesigner::MAX_NUM_EQS], mute[PolarDesigner::MAX_NUM_EQS], allowBackwardsPattern, proximityOnOff, zeroLatencyMode, abLayer;
+    float xOverFreqs[4], dirFactors[MAX_NUM_EQS], gains[MAX_NUM_EQS], proximity;
+    bool solo[MAX_NUM_EQS], mute[MAX_NUM_EQS], allowBackwardsPattern, proximityOnOff, zeroLatencyMode, abLayer;
     bool paramsValid = false;
 };
 
@@ -100,23 +97,23 @@ enum eqBandStates : unsigned int {
 //==============================================================================
 /**
 */
-class PolarDesignerAudioProcessor : public AudioProcessor,
-                                    public AudioProcessorValueTreeState::Listener,
-                                    private Timer,
-                                    private AsyncUpdater
+class PolarDesignerAudioProcessor : public AudioProcessor, public AudioProcessorValueTreeState::Listener, private Timer
+
 {
 public:
     //==============================================================================
     PolarDesignerAudioProcessor();
     ~PolarDesignerAudioProcessor() override;
 
-    void handleAsyncUpdate() override;
+    void validateSampleRateAndBlockSize();
 
-    // This is the ProTools PageFile for PolarDesigner3
+    void registerParameterListeners();
+
+        // This is the ProTools PageFile for PolarDesigner3
     String getPageFileName() const override { return "PolarDesigner3.xml"; }
 
     //==============================================================================
-    void resampleBuffer(const AudioBuffer<float>& src, AudioBuffer<float>& dst, float srcSampleRate, float dstSampleRate);
+    void resampleBuffer(const AudioBuffer<float>& src, AudioBuffer<float>& dst, float srcSampleRate, double dstSampleRate);
     void resampleBufferLagrange(const AudioBuffer<float>& src, AudioBuffer<float>& dst, float srcSampleRate, float dstSampleRate);
 
     void loadEqImpulseResponses();
@@ -150,34 +147,29 @@ public:
     void changeProgramName (int index, const String& newName) override;
 
     //==============================================================================
+    void resizeBuffersIfNeeded(int newFirLen, int newBlockSize);
+
     void initializeBuffers();
     void initializeDefaultState();
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
-    uint32 getSyncChannelIdx();
+    int getSyncChannelIdx();
 
     //==============================================================================
     void parameterChanged (const String& parameterID, float newValue) override;
 
     //==============================================================================
     Result loadPreset (const File& presetFile);
-
-#ifndef AA_USE_SIMPLER_LOADSAVE
     Result savePreset (File destination);
-#else
-    Result savePreset(const File& destination);
-#endif
-
-
     File getLastDir() { return lastDir; }
     void setLastDir (File newLastDir);
 
     void startTracking (bool trackDisturber);
     void stopTracking (int applyOptimalPattern);
 
-    void setNProcessorBands(uint32 numBands)
+    void setNProcessorBands(unsigned int numBands)
     {
-        if (numBands >= 1 && numBands <= PolarDesigner::MAX_NUM_EQS) {
+        if (numBands >= 1 && numBands <= MAX_NUM_EQS) {
             nProcessorBands = numBands;
             activeBandsChanged = true;
             // Update any internal state as needed
@@ -187,61 +179,56 @@ public:
 
     unsigned int getNProcessorBands();
 
+    CriticalSection convolutionLock;
+
     float getXoverSliderRangeStart (int sliderNum);
     float getXoverSliderRangeEnd (int sliderNum);
 
-    std::atomic<bool> parameterUpdatePending{false};
-    String parameterToUpdate;
-    float newParameterValue;
-    bool readingSharedParams{false};
-
-    Atomic<bool> repaintDEQ = true;
-    Atomic<bool> activeBandsChanged = true;
-    Atomic<bool> zeroLatencyModeChanged = true;
-    Atomic<bool> ffDfEqChanged = true;
-    std::array<Atomic<bool>, 4> recomputeFilterCoefficients;
-    Atomic<bool> recomputeAllFilterCoefficients;
+    std::atomic<bool> repaintDEQ = true;
+    std::atomic<bool> activeBandsChanged = true;
+    std::atomic<bool> zeroLatencyModeChanged = true;
+    std::atomic<bool> ffDfEqChanged = true;
+    std::array<std::atomic<bool>, 4> recomputeFilterCoefficients;
+    std::atomic<bool> recomputeAllFilterCoefficients;
 
     bool getDisturberRecorded() { return disturberRecorded; }
     bool getSignalRecorded() { return signalRecorded; }
 
     void changeABLayerState (int state);
-    bool abLayerState = COMPARE_LAYER_A; // 1 = A is active, 0 = B is active
-    //    int oldAbLayerState;
+    bool disturberRecorded;
+    bool signalRecorded;
+
+    bool abLayerState = COMPARE_LAYER_A;
 
     Identifier saveTree = "save";
     Identifier nodeA = "layerA";
     Identifier nodeB = "layerB";
     Identifier nodeParams = "vtsParams";
-
     ValueTree layerA;
     ValueTree layerB;
-
-    ValueTree saveStates{"save"}; // Set type during construction
-
+    ValueTree saveStates;
     int doEq;
     int doEqA;
     int doEqB;
 
     // when the A/B buttons are pressed, the proximity values are remembered
-    float oldProxDistance;
-    float oldProxDistanceA = 0;
-    float oldProxDistanceB = 0;
+    std::atomic<float> oldProxDistance;
+    std::atomic<float> oldProxDistanceA = 0;
+    std::atomic<float> oldProxDistanceB = 0;
 
     // when the A/B Buttons are pressed, the prior nrBands state is remembered
-    float oldNrBands = 0;
-    float oldNrBandsA = PolarDesigner::MAX_NUM_EQS;
-    float oldNrBandsB = PolarDesigner::MAX_NUM_EQS;
+    std::atomic<float> oldNrBands = 0;
+    std::atomic<float> oldNrBandsA = MAX_NUM_EQS;
+    std::atomic<float> oldNrBandsB = MAX_NUM_EQS;
 
-    Atomic<bool> abLayerChanged = false;
+    std::atomic<bool> abLayerChanged = false;
     float zeroLatencyModeA; // Zero Latency setting for Layer A
     float zeroLatencyModeB; // Zero Latency setting for Layer B
 
-    bool convolversReady;
 
     AudioVisualiserComponent termControlWaveform;
 
-    AudioPlayHead* playHeadPtr;
+    AudioPlayHead* audioPlayHead;
     AudioPlayHead::PositionInfo playHeadPosition;
 
     // deprecated
@@ -287,8 +274,7 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarDesignerAudioProcessor)
 
-    dsp::ProcessSpec lastEqSpec{0.0, 0, 0}; // Last spec for EQ convolvers
-    dsp::ProcessSpec lastConvSpec{0.0, 0, 0}; // Last spec for filter bank convolvers
+    std::unique_ptr<PropertiesFile> properties;
 
     std::atomic<unsigned int> nProcessorBands;
 
@@ -299,7 +285,7 @@ private:
 
     // use odd FIR_LEN for even filter order (FIR_LEN = N+1)
     // (lowpass and highpass need even filter order to put a zero at f=0 and f=pi)
-    int firLen;
+    std::atomic<int> firLen{FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE};
 
     // free field / diffuse field eq
     dsp::Convolution dfEqOmniConv;
@@ -317,6 +303,8 @@ private:
     // proximity compensation filter
     dsp::IIR::Filter<float> proxCompIIR;
 
+    std::atomic<bool> convolversReady;
+
     // delay (in case of 1 active band)
     Delay delay;
     AudioBuffer<float> delayBuffer;
@@ -324,11 +312,11 @@ private:
     std::atomic<float>* nProcessorBandsPtr;
     std::atomic<float>* syncChannelPtr;
     //    float oldSyncChannelPtr;
-    std::atomic<float>* xOverFreqsPtr[PolarDesigner::MAX_NUM_EQS - 1];
-    std::atomic<float>* dirFactorsPtr[PolarDesigner::MAX_NUM_EQS];
-    float oldDirFactors[PolarDesigner::MAX_NUM_EQS];
-    std::atomic<float>* bandGainsPtr[PolarDesigner::MAX_NUM_EQS];
-    float oldBandGains[PolarDesigner::MAX_NUM_EQS];
+    std::atomic<float>* xOverFreqsPtr[MAX_NUM_EQS - 1];
+    std::atomic<float>* dirFactorsPtr[MAX_NUM_EQS];
+    float oldDirFactors[MAX_NUM_EQS];
+    std::atomic<float>* bandGainsPtr[MAX_NUM_EQS];
+    float oldBandGains[MAX_NUM_EQS];
     std::atomic<float>* allowBackwardsPatternPtr;
     // !J! Note: allowBackwardsPatternPtr is being maintained, even though the UI for changing its value has been removed
     // in PolarDesigner3.  The reason for maintenance is for compatability purposes, even though it should ALWAYS be
@@ -338,35 +326,44 @@ private:
     std::atomic<float>* proxOnOffPtr;
 
     std::atomic<float>* zeroLatencyModePtr;
-    std::atomic<float>* soloBandPtr[PolarDesigner::MAX_NUM_EQS];
-    std::atomic<float>* muteBandPtr[PolarDesigner::MAX_NUM_EQS];
+    std::atomic<float>* soloBandPtr[MAX_NUM_EQS];
+    std::atomic<float>* muteBandPtr[MAX_NUM_EQS];
 
     std::atomic<float>* trimPositionPtr;
 
     bool isBypassed;
     bool soloActive;
     bool loadingFile;
-
+    std::atomic<bool>readingSharedParams;
     bool trackingActive;
     bool trackingDisturber;
-    bool disturberRecorded;
-    bool signalRecorded;
     int nrBlocksRecorded;
 
-    float omniSqSumDist[PolarDesigner::MAX_NUM_EQS], eightSqSumDist[PolarDesigner::MAX_NUM_EQS], omniEightSumDist[PolarDesigner::MAX_NUM_EQS],
-        omniSqSumSig[PolarDesigner::MAX_NUM_EQS], eightSqSumSig[PolarDesigner::MAX_NUM_EQS], omniEightSumSig[PolarDesigner::MAX_NUM_EQS];
+    float omniSqSumDist[MAX_NUM_EQS], eightSqSumDist[MAX_NUM_EQS], omniEightSumDist[MAX_NUM_EQS],
+        omniSqSumSig[MAX_NUM_EQS], eightSqSumSig[MAX_NUM_EQS], omniEightSumSig[MAX_NUM_EQS];
 
     AudioBuffer<float> filterBankBuffer; // holds filtered data, size: N_CH_IN*5
     AudioBuffer<float> firFilterBuffer; // holds filter coefficients, size: 5
     AudioBuffer<float> omniEightBuffer; // holds omni and fig-of-eight signals, size: 2
-    dsp::Convolution convolvers[2 * PolarDesigner::MAX_NUM_EQS]; // holds 2*nProcessorBands mono convolvers
+    std::array<dsp::Convolution, 2 * MAX_NUM_EQS> convolvers;
 
-    // These sample rates are defined as double because this is what prepareToPlay uses:
-    double previousSampleRate;
-    double currentSampleRate;
+    // convolver cache
+    // New members for optimization
+    dsp::ProcessSpec lastEqSpec{0.0, 0, 0}; // Last spec for EQ convolvers
+    dsp::ProcessSpec lastConvSpec{0.0, 0, 0}; // Track last convolver spec
+    std::array<bool, MAX_NUM_EQS> bandCoefficientsChanged{false}; // Track which bands need updating
+    AudioBuffer<float> cachedDfEqOmniBuffer; // Cached resampled EQ buffers
+    AudioBuffer<float> cachedDfEqEightBuffer;
+    AudioBuffer<float> cachedFfEqOmniBuffer;
+    AudioBuffer<float> cachedFfEqEightBuffer;
+    double lastEqSampleRate{0.0}; // Track last sample rate for EQ buffers
+
+    double currentSampleRate = 0.0f;
+    double previousSampleRate = 0.0f;
 
     // This is intentionally set to match Pro Tools expectations ...
-    int currentBlockSize = PolarDesigner::PD_DEFAULT_BLOCK_SIZE;
+    int currentBlockSize = PD_DEFAULT_BLOCK_SIZE;
+    File lastDir;
 
     //==============================================================================
     void resetXoverFreqs();
@@ -394,13 +391,14 @@ private:
 //    void valueTreePropertyChanged(ValueTree& treeWhosePropertyHasChanged, const Identifier& property);
 
     // file handling
-    File lastDir;
-    std::unique_ptr<PropertiesFile> properties;
-
-#ifndef AA_USE_SIMPLER_LOADSAVE
     const String presetProperties[27] = { "nrActiveBands", "xOverF1", "xOverF2", "xOverF3", "xOverF4", "dirFactor1", "dirFactor2", "dirFactor3", "dirFactor4", "dirFactor5", "gain1", "gain2", "gain3", "gain4", "gain5", "solo1", "solo2", "solo3", "solo4", "solo5", "mute1", "mute2", "mute3", "mute4", "mute5", "ffDfEq", "proximity" };
-#endif
 
+    static const int FILTER_BANK_NATIVE_SAMPLE_RATE = 48000;
+    static const int FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE = 401;
+
+    static const int DF_EQ_LEN = 512;
+    static const int FF_EQ_LEN = 512;
+    static const int EQ_SAMPLE_RATE = 48000;
 };
 
 // DF = Diffuse Field
