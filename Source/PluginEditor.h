@@ -47,16 +47,6 @@
     #include <melatonin_inspector/melatonin_inspector.h>
 #endif
 
-#ifdef DEBUG
-#define LOG_ERROR(message) Logger::writeToLog("ERROR: " + String(message))
-#define LOG_DEBUG(message) Logger::writeToLog("DEBUG: " + String(message))
-#define LOG_WARN(message) Logger::writeToLog("WARNING: " + String(message))
-#else
-#define LOG_ERROR(message)
-#define LOG_DEBUG(message)
-#define LOG_WARN(message)
-#endif
-
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
@@ -102,8 +92,8 @@ public:
 
     void initializeSavedStates();
 
-    void saveLayerState(int layer);
-    void restoreLayerState(int layer);
+    void saveLayerState(uint32 layer);
+    void restoreLayerState(uint32 layer);
 
     TooltipWindow sharedTooltipWindow;
 
@@ -123,11 +113,11 @@ private:
     String presetFilename;
     String errorMessage;
 
-    static const int MAX_EDITOR_BANDS = 5;
+    static const unsigned int MAX_EDITOR_BANDS = 5;
 
     unsigned int nActiveBands;
 
-    int syncChannelIdx;
+    uint32 syncChannelIdx;
 
     float trimSliderPrevPos = 0.22f;
     float minBandValueDistances[5];
@@ -202,8 +192,8 @@ private:
 
     /* Flags governing the display of the Terminator/Spill/Maximize UI */
     bool uiTerminatorAnimationWindowIsVisible;
-    bool uiTargetAquisitionWindowIsVisible;
     bool uiMaxToSpillWindowIsVisible;
+    bool uiTargetAquisitionWindowIsVisible;
     bool uiMaximizeTargetWindowIsVisible;
     bool uiMaxTargetToSpillFlowStarted;
 
