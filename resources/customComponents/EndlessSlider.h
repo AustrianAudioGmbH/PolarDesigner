@@ -16,10 +16,10 @@
 
 #include "../lookAndFeel/MainLookAndFeel.h"
 
-class EndlessSlider : public Slider {
+class EndlessSlider : public Slider
+{
 public:
-    EndlessSlider () :
-    Slider()
+    EndlessSlider() : Slider()
     {
         currentMoved = 0;
         lastMoved = 0;
@@ -32,64 +32,70 @@ public:
     // set these callbacks where you use this class in order to get inc/dec messages
     std::function<void()> sliderValueSet;
     std::function<void()> sliderReset;
-    
+
     // calculate whether to callback to an increment or decrement, and update UI
-    void mouseDrag(const MouseEvent &e) override
+    void mouseDrag (const MouseEvent& e) override
     {
         if (e.mouseWasDraggedSinceMouseDown())
         {
             currentMoved = e.getDistanceFromDragStartY() * 1.0f;
             lastMoved = currentMoved + prevMoved;
-            sliderValue = jmap(lastMoved, static_cast<float>(proportionOfHeight(0.48f)), 
-                              (-1)*static_cast<float>(proportionOfHeight(0.52f)), 
-                              -0.5f, 1.f);
+            sliderValue = jmap (lastMoved,
+                                static_cast<float> (proportionOfHeight (0.48f)),
+                                (-1) * static_cast<float> (proportionOfHeight (0.52f)),
+                                -0.5f,
+                                1.f);
             sliderValueSet();
             lastMovedPoportion = (lastMoved / (getHeight() * 1.0f));
             repaint();
         }
     }
 
-    void mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel) override
+    void mouseWheelMove (const MouseEvent& event, const MouseWheelDetails& wheel) override
     {
-        (void)event;
-        currentMoved = -10*wheel.deltaY;
+        (void) event;
+        currentMoved = -10 * wheel.deltaY;
         lastMoved = currentMoved + prevMoved;
-        sliderValue = jmap(lastMoved, static_cast<float>(proportionOfHeight(0.48f)),
-            (-1) * static_cast<float>(proportionOfHeight(0.52f)),
-            -0.5f, 1.f);
+        sliderValue = jmap (lastMoved,
+                            static_cast<float> (proportionOfHeight (0.48f)),
+                            (-1) * static_cast<float> (proportionOfHeight (0.52f)),
+                            -0.5f,
+                            1.f);
         sliderValueSet();
-        lastMovedPoportion = static_cast<float>(lastMoved / getHeight());
+        lastMovedPoportion = static_cast<float> (lastMoved / getHeight());
         prevMoved = lastMoved;
         repaint();
     }
 
-    void paint (Graphics&g) override
+    void paint (Graphics& g) override
     {
-        g.fillAll(Colours::black);
+        g.fillAll (Colours::black);
 
         Rectangle<float> bounds = getLocalBounds().toFloat();
         float height = bounds.getHeight();
         int numElem = 34;
-        float spaceBetween = height / static_cast<float>(numElem);
+        float spaceBetween = height / static_cast<float> (numElem);
         float y = lastMoved;
         int mappedY = 0;
         int elemWidth = 0;
         int counter = 0;
-        int r = static_cast<int>(sqrt(((height * height)) / 2)); // circle radius
+        int r = static_cast<int> (sqrt (((height * height)) / 2)); // circle radius
 
-        ColourGradient cg = ColourGradient(mainLaF.trimSliderMainColor, 
-                                           bounds.getWidth() / 2, 
-                                           bounds.getHeight() / 2, 
-                                           Colours::black, 
-                                           bounds.getWidth() / 2, 0, true);
-        g.setGradientFill(cg);
-        g.fillRect(bounds.reduced(5, 5));
+        ColourGradient cg = ColourGradient (mainLaF.trimSliderMainColor,
+                                            bounds.getWidth() / 2,
+                                            bounds.getHeight() / 2,
+                                            Colours::black,
+                                            bounds.getWidth() / 2,
+                                            0,
+                                            true);
+        g.setGradientFill (cg);
+        g.fillRect (bounds.reduced (5, 5));
 
         for (int i = 0; i < numElem; i++)
         {
             if (i == 0)
             {
-                y += spaceBetween/2.f; // place first element
+                y += spaceBetween / 2.f; // place first element
             }
             else
             {
@@ -98,83 +104,82 @@ public:
             // calculate y when mouse out of component
             if (y > height)
             {
-                counter = static_cast<int>(std::abs(y / height));
-                y -= height *counter;
+                counter = static_cast<int> (std::abs (y / height));
+                y -= height * counter;
             }
             else if (y < 0)
             {
-                counter = static_cast<int>(std::abs(y / height) + 1);
+                counter = static_cast<int> (std::abs (y / height) + 1);
                 y += height * counter;
             }
             // calculate y when mousePos in component
-            if (y < height /2)
+            if (y < height / 2)
             {
-                mappedY = static_cast<int>((-1) * (height / 2) + y);
+                mappedY = static_cast<int> ((-1) * (height / 2) + y);
             }
-            else if (juce::approximatelyEqual(y, height / 2))
+            else if (juce::approximatelyEqual (y, height / 2))
             {
                 mappedY = 0;
             }
             else if (y > height / 2)
             {
-                mappedY = static_cast<int>(y - height / 2);
+                mappedY = static_cast<int> (y - height / 2);
             }
             // calculate width change with circle equation
-            elemWidth = static_cast<int>(sqrt(r*r - (mappedY*mappedY)));
+            elemWidth = static_cast<int> (sqrt (r * r - (mappedY * mappedY)));
 
-            auto rect = Rectangle<float>(bounds.getWidth() * 0.22f,
-                y - (elemWidth / (numElem * 2)) / 2.0f,
-                bounds.getWidth() * 0.55f,
-                elemWidth / (numElem * 2.0f));
+            auto rect = Rectangle<float> (bounds.getWidth() * 0.22f,
+                                          y - (elemWidth / (numElem * 2)) / 2.0f,
+                                          bounds.getWidth() * 0.55f,
+                                          elemWidth / (numElem * 2.0f));
 
             if (i == lastFilledElem)
                 filledRect = rect;
             else
             {
-                g.setColour(Colours::black);
-                g.fillRoundedRectangle(rect, 2.f);
+                g.setColour (Colours::black);
+                g.fillRoundedRectangle (rect, 2.f);
             }
-
         }
-        g.setColour(Colours::grey);
-        g.fillRoundedRectangle(filledRect, 2.f);
+        g.setColour (Colours::grey);
+        g.fillRoundedRectangle (filledRect, 2.f);
     }
 
     void mouseExit (const MouseEvent& e) override
     {
-        (void)e;
+        (void) e;
         repaint();
     }
 
-    void mouseDoubleClick(const MouseEvent& e) override
+    void mouseDoubleClick (const MouseEvent& e) override
     {
-        (void)e;
+        (void) e;
         lastMoved = 0;
         prevMoved = 0;
         sliderReset();
         repaint();
     }
 
-    void mouseUp(const MouseEvent& e) override
+    void mouseUp (const MouseEvent& e) override
     {
-        (void)e;
+        (void) e;
         prevMoved = lastMoved;
     }
 
     void resized() override
     {
-       if (!juce::approximatelyEqual(lastMoved, 0.0f))
-       {
-           lastMoved = proportionOfHeight(lastMovedPoportion) * 1.0f;
-           prevMoved = lastMoved;
-       }
-       repaint();
+        if (! juce::approximatelyEqual (lastMoved, 0.0f))
+        {
+            lastMoved = proportionOfHeight (lastMovedPoportion) * 1.0f;
+            prevMoved = lastMoved;
+        }
+        repaint();
     }
 
     float getCurrentSliderValue()
     {
         // Set precision 0.00 for sliderValue
-        sliderValue = std::round(sliderValue * 100.f) / 100.f;
+        sliderValue = std::round (sliderValue * 100.f) / 100.f;
         return sliderValue;
     }
 
@@ -184,8 +189,8 @@ private:
     int lastFilledElem;
     float prevMoved;
 
-//    bool dragStarted;
-//    bool isMouseUp;
+    //    bool dragStarted;
+    //    bool isMouseUp;
     float lastMovedPoportion = 0;
 
     float sliderValue;

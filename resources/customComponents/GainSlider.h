@@ -28,38 +28,30 @@
 
 #include "BinaryData.h"
 
-
 //==============================================================================
 /*
 */
-class GainSlider  : public Slider
+class GainSlider : public Slider
 {
 public:
-    GainSlider()
+    GainSlider() {}
+
+    ~GainSlider() override {}
+
+    bool hitTest (int x, int y) override
     {
+        auto rect = getLookAndFeel().getSliderLayout (*this).sliderBounds;
+        return rect.contains (x, y);
     }
 
-    ~GainSlider() override
+    void mouseMove (const MouseEvent& event) override
     {
-    }
-
-    bool hitTest(int x, int y) override
-    {
-        auto rect = getLookAndFeel().getSliderLayout(*this).sliderBounds;
-        return rect.contains(x, y);
-    }
-
-    void mouseMove(const MouseEvent& event) override
-    {
-        (void)event;
-        setTextBoxStyle(Slider::TextBoxLeft, true, -1, -1);
+        (void) event;
+        setTextBoxStyle (Slider::TextBoxLeft, true, -1, -1);
         repaint();
     }
 
-    void mouseExit(const MouseEvent& event) override
-    {
-        (void)event;
-    }
+    void mouseExit (const MouseEvent& event) override { (void) event; }
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GainSlider)

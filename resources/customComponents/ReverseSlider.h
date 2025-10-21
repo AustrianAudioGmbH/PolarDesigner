@@ -56,46 +56,52 @@
 class ReverseSlider : public Slider
 {
 public:
-    ReverseSlider () :
-    Slider(),
-    lastDistanceFromDragStart(0),
-    reversed(false),
-    isDual(false),
-    scrollWheelEnabled(true)
-    {}
-    
+    ReverseSlider() :
+        Slider(),
+        lastDistanceFromDragStart (0),
+        reversed (false),
+        isDual (false),
+        scrollWheelEnabled (true)
+    {
+    }
+
     ReverseSlider (const String& componentName) :
-    Slider(componentName),
-    lastDistanceFromDragStart(0),
-    reversed(false),
-    isDual(false),
-    scrollWheelEnabled(true)
-    {}
-    
-    ~ReverseSlider () override {}
-    
+        Slider (componentName),
+        lastDistanceFromDragStart (0),
+        reversed (false),
+        isDual (false),
+        scrollWheelEnabled (true)
+    {
+    }
+
+    ~ReverseSlider() override {}
+
 public:
-    
     class SliderAttachment : public juce::AudioProcessorValueTreeState::SliderAttachment
     {
     public:
         SliderAttachment (juce::AudioProcessorValueTreeState& stateToControl,
                           const juce::String& parameterID,
-                          ReverseSlider& sliderToControl) : AudioProcessorValueTreeState::SliderAttachment (stateToControl, parameterID, sliderToControl)
+                          ReverseSlider& sliderToControl) :
+            AudioProcessorValueTreeState::SliderAttachment (stateToControl,
+                                                            parameterID,
+                                                            sliderToControl)
         {
-            sliderToControl.setParameter(stateToControl.getParameter(parameterID));
+            sliderToControl.setParameter (stateToControl.getParameter (parameterID));
         }
-        
+
         SliderAttachment (juce::AudioProcessorValueTreeState& stateToControl,
                           const juce::String& parameterID,
-                          Slider& sliderToControl) : AudioProcessorValueTreeState::SliderAttachment (stateToControl, parameterID, sliderToControl)
+                          Slider& sliderToControl) :
+            AudioProcessorValueTreeState::SliderAttachment (stateToControl,
+                                                            parameterID,
+                                                            sliderToControl)
         {
         }
-        
+
         virtual ~SliderAttachment() = default;
     };
-    
-    
+
     void setReverse (bool shouldBeReversed)
     {
         if (reversed != shouldBeReversed)
@@ -112,7 +118,7 @@ public:
             repaint();
         }
     }
-    
+
     void setParameter (const AudioProcessorParameter* p)
     {
         if (parameter == p)
@@ -121,94 +127,107 @@ public:
         updateText();
         repaint();
     }
-    
-    String getTextFromValue(double value) override
+
+    String getTextFromValue (double value) override
     {
         if (parameter == nullptr)
             return Slider::getTextFromValue (value);
-        
+
         // juce::AudioProcessorValueTreeState::SliderAttachment sets the slider minimum and maximum to custom values.
         // We map the range to a 0 to 1 range.
-        const NormalisableRange<double> range (getMinimum(), getMaximum(), getInterval(), getSkewFactor());
+        const NormalisableRange<double> range (getMinimum(),
+                                               getMaximum(),
+                                               getInterval(),
+                                               getSkewFactor());
         const float normalizedVal = (float) range.convertTo0to1 (value);
-        
-        String result = parameter->getText (normalizedVal, getNumDecimalPlacesToDisplay()) + " " + parameter->getLabel();
+
+        String result = parameter->getText (normalizedVal, getNumDecimalPlacesToDisplay()) + " "
+                        + parameter->getLabel();
         return result;
     }
-    
+
     double getValueFromText (const String& text) override
     {
         if (parameter == nullptr)
-            return Slider::getValueFromText(text);
-        const NormalisableRange<double> range (getMinimum(), getMaximum(), getInterval(), getSkewFactor());
-        return range.convertFrom0to1(parameter->getValueForText(text));
+            return Slider::getValueFromText (text);
+        const NormalisableRange<double> range (getMinimum(),
+                                               getMaximum(),
+                                               getInterval(),
+                                               getSkewFactor());
+        return range.convertFrom0to1 (parameter->getValueForText (text));
     }
-    
+
     double proportionOfLengthToValue (double proportion) override
     {
         double ret = 0;
         if (reversed)
-            ret = getMaximum() + getMinimum() - Slider::proportionOfLengthToValue(proportion);
+            ret = getMaximum() + getMinimum() - Slider::proportionOfLengthToValue (proportion);
         else
-            ret = Slider::proportionOfLengthToValue(proportion);
+            ret = Slider::proportionOfLengthToValue (proportion);
         return ret;
     }
-    
+
     double valueToProportionOfLength (double value) override
     {
         double ret = 0;
         if (reversed)
-            ret = jlimit(0., 1., 1.0 - Slider::valueToProportionOfLength(value));
+            ret = jlimit (0., 1., 1.0 - Slider::valueToProportionOfLength (value));
         else
-            ret = Slider::valueToProportionOfLength(value);
+            ret = Slider::valueToProportionOfLength (value);
         return ret;
     }
-    
-    void setScrollWheelEnabled(bool enabled) {
+
+    void setScrollWheelEnabled (bool enabled)
+    {
         scrollWheelEnabled = enabled;
-        Slider::setScrollWheelEnabled(enabled);
+        Slider::setScrollWheelEnabled (enabled);
     }
     void mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel) override
     {
-        if (isRotary() && !getRotaryParameters().stopAtEnd && scrollWheelEnabled)
+        if (isRotary() && ! getRotaryParameters().stopAtEnd && scrollWheelEnabled)
         {
-            const double delta = (std::abs (wheel.deltaX) > std::abs (wheel.deltaY) ? -wheel.deltaX : wheel.deltaY)* (wheel.isReversed ? -1.0f : 1.0f) * (reversed ? -1.0f : 1.0f);
+            const double delta =
+                (std::abs (wheel.deltaX) > std::abs (wheel.deltaY) ? -wheel.deltaX : wheel.deltaY)
+                * (wheel.isReversed ? -1.0f : 1.0f) * (reversed ? -1.0f : 1.0f);
             bool positiveDelta = delta >= 0.0;
-            
-            if (std::abs(getValue() - getMaximum()) < getInterval() || std::abs(getValue() - getMaximum()) < RS_FLT_EPSILON)
+
+            if (std::abs (getValue() - getMaximum()) < getInterval()
+                || std::abs (getValue() - getMaximum()) < RS_FLT_EPSILON)
             {
                 if (positiveDelta)
-                    setValue(getMinimum());
+                    setValue (getMinimum());
             }
-            else if (std::abs(getValue() - getMinimum()) < getInterval() || std::abs(getValue() - getMinimum()) < RS_FLT_EPSILON)
+            else if (std::abs (getValue() - getMinimum()) < getInterval()
+                     || std::abs (getValue() - getMinimum()) < RS_FLT_EPSILON)
             {
-                if (!positiveDelta)
-                    setValue(getMaximum());
+                if (! positiveDelta)
+                    setValue (getMaximum());
             }
         }
-        Slider::mouseWheelMove(e, wheel);
+        Slider::mouseWheelMove (e, wheel);
     }
     void mouseDown (const MouseEvent& e) override
     {
         lastDistanceFromDragStart = 0;
-        Slider::mouseDown(e);
+        Slider::mouseDown (e);
     }
     void mouseDrag (const MouseEvent& e) override
     {
-        if (isRotary() && !getRotaryParameters().stopAtEnd && scrollWheelEnabled)
+        if (isRotary() && ! getRotaryParameters().stopAtEnd && scrollWheelEnabled)
         {
             int delta = 0;
 
             switch (getSliderStyle())
             {
                 case RotaryVerticalDrag:
-                    delta = - e.getDistanceFromDragStartY() - lastDistanceFromDragStart;
+                    delta = -e.getDistanceFromDragStartY() - lastDistanceFromDragStart;
                     break;
                 case RotaryHorizontalDrag:
                     delta = e.getDistanceFromDragStartX() - lastDistanceFromDragStart;
                     break;
                 case RotaryHorizontalVerticalDrag:
-                    delta = e.getDistanceFromDragStartX() - e.getDistanceFromDragStartY() - lastDistanceFromDragStart;
+                    delta = e.getDistanceFromDragStartX() - e.getDistanceFromDragStartY()
+                            - lastDistanceFromDragStart;
                     break;
 
                 case LinearHorizontal:
@@ -223,38 +242,40 @@ public:
                 case ThreeValueVertical:
                 default:
                     break;
-
             }
             delta = delta * (reversed ? -1 : 1);
-            
-            if (std::abs(getValue() - getMaximum()) < getInterval() || std::abs(getValue() - getMaximum()) < RS_FLT_EPSILON)
+
+            if (std::abs (getValue() - getMaximum()) < getInterval()
+                || std::abs (getValue() - getMaximum()) < RS_FLT_EPSILON)
             {
                 if (delta > 0)
                 {
-                    setValue(getMinimum());
-                    Slider::mouseDown(e); //hack
+                    setValue (getMinimum());
+                    Slider::mouseDown (e); //hack
                 }
             }
-            else if (std::abs(getValue() - getMinimum()) < getInterval() || std::abs(getValue() - getMinimum()) < RS_FLT_EPSILON)
+            else if (std::abs (getValue() - getMinimum()) < getInterval()
+                     || std::abs (getValue() - getMinimum()) < RS_FLT_EPSILON)
             {
                 if (delta < 0)
                 {
-                    setValue(getMaximum());
-                    Slider::mouseDown(e); //hack
+                    setValue (getMaximum());
+                    Slider::mouseDown (e); //hack
                 }
             }
         }
-        
+
         switch (getSliderStyle())
         {
             case RotaryVerticalDrag:
-                lastDistanceFromDragStart = - e.getDistanceFromDragStartY();
+                lastDistanceFromDragStart = -e.getDistanceFromDragStartY();
                 break;
             case RotaryHorizontalDrag:
                 lastDistanceFromDragStart = e.getDistanceFromDragStartX();
                 break;
             case RotaryHorizontalVerticalDrag:
-                lastDistanceFromDragStart = e.getDistanceFromDragStartX() - e.getDistanceFromDragStartY();
+                lastDistanceFromDragStart =
+                    e.getDistanceFromDragStartX() - e.getDistanceFromDragStartY();
                 break;
             case LinearHorizontal:
             case LinearVertical:
@@ -268,16 +289,15 @@ public:
             case ThreeValueVertical:
             default:
                 break;
-
         }
-        
-        Slider::mouseDrag(e);
+
+        Slider::mouseDrag (e);
     }
-    
+
 private:
     int lastDistanceFromDragStart;
     bool reversed;
     bool isDual;
     bool scrollWheelEnabled;
-    const AudioProcessorParameter* parameter {nullptr};
+    const AudioProcessorParameter* parameter { nullptr };
 };
