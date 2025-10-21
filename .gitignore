@@ -16,3 +16,5 @@ tests/Results/**
 tests/Reference/*.txt
 tests/Reaper/Media/peaks/**
 tests/Reaper/Media/*Render*.wav
+
+build/
