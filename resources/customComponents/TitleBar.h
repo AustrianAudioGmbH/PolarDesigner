@@ -417,7 +417,8 @@ public:
     void paint (Graphics& g) override
     {
         Rectangle<int> bounds = getLocalBounds();
-        float fontSize = (getTopLevelComponent()->getHeight() * 0.025f);
+        auto scale = getApproximateScaleFactorForComponent (this);
+        float fontSize = (getTopLevelComponent()->getHeight() * 0.025f / scale);
         regularFont.setHeight (fontSize);
 
         g.setColour (isEnabled() ? mainLaF.mainTextColor : mainLaF.mainTextDisabledColor);
