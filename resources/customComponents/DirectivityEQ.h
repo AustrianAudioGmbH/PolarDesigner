@@ -488,7 +488,7 @@ public:
                 (handle.upperFrequencySlider == nullptr || nrActiveBands == i + 1)
                     ? hzToX (s.fMax)
                     : static_cast<float> (hzToX (processor.hzFromZeroToOne (
-                          (int) i,
+                          i,
                           static_cast<float> (handle.upperFrequencySlider->getValue()))));
 
             float circY = handle.dirSlider == nullptr
@@ -638,13 +638,13 @@ public:
                 handle.lowerFrequencySlider == nullptr
                     ? hzToX (s.fMin)
                     : static_cast<float> (hzToX (processor.hzFromZeroToOne (
-                          (int) i - 1,
+                          i - 1,
                           static_cast<float> (handle.lowerFrequencySlider->getValue()))));
             float rightBound =
                 (handle.upperFrequencySlider == nullptr || nrActiveBands == i + 1)
                     ? hzToX (s.fMax)
                     : static_cast<float> (hzToX (processor.hzFromZeroToOne (
-                          (int) i,
+                          i,
                           static_cast<float> (handle.upperFrequencySlider->getValue()))));
             float circX = (rightBound + leftBound) / 2;
             float circY = handle.dirSlider == nullptr
@@ -777,7 +777,7 @@ public:
                 if (slider != nullptr)
                 {
                     slider->setValue (processor.hzToZeroToOne (
-                        activeBandLimitPath,
+                        static_cast<size_t> (activeBandLimitPath),
                         getXoverValueInRange (activeBandLimitPath, frequency)));
                 }
             }
@@ -1162,11 +1162,12 @@ public:
 
                 if (juce::approximatelyEqual (attemptedVal, 0.0f))
                     attemptedVal =
-                        processor.hzFromZeroToOne (i, static_cast<float> (slider->getValue()));
+                        processor.hzFromZeroToOne (static_cast<size_t> (i),
+                                                   static_cast<float> (slider->getValue()));
 
                 float newValue = getXoverValueInRange (i, attemptedVal);
 
-                slider->setValue (processor.hzToZeroToOne (i, newValue),
+                slider->setValue (processor.hzToZeroToOne (static_cast<size_t> (i), newValue),
                                   NotificationType::sendNotification);
                 tooltipValueBox[i]->setText (slider->getTextFromValue (slider->getValue()),
                                              NotificationType::dontSendNotification);

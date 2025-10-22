@@ -65,8 +65,8 @@ public:
     {
     }
 
-    ReverseSlider (const String& componentName) :
-        Slider (componentName),
+    ReverseSlider (const String& cName) :
+        Slider (cName),
         lastDistanceFromDragStart (0),
         reversed (false),
         isDual (false),
