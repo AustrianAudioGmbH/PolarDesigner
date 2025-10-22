@@ -442,15 +442,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
         firLen++;
     jassert (firLen % 2 == 1); // Ensure firLen is odd
 
-    if (vtsParams.getParameter ("trimPosition"))
-    {
-        trimPositionPtr = vtsParams.getRawParameterValue ("trimPosition");
-    }
-    else
-    {
-        jassertfalse; // Log error or set default
-        trimPositionPtr = nullptr;
-    }
+    trimPositionPtr = vtsParams.getRawParameterValue ("trimPosition");
 
     xOverFreqsPtr[0] = vtsParams.getRawParameterValue ("xOverF1");
     xOverFreqsPtr[1] = vtsParams.getRawParameterValue ("xOverF2");
@@ -2653,7 +2645,7 @@ void PolarDesignerAudioProcessor::setMinimumDisturbancePattern()
         }
 
         // do not apply changes, if playback is not active
-        if (! juce::approximatelyEqual (disturberPower, 0.0f))
+        if (disturberPower > 0.0f)
         {
             vtsParams.getParameter ("alpha" + String (i + 1))
                 ->setValueNotifyingHost (
@@ -2686,7 +2678,8 @@ void PolarDesignerAudioProcessor::setMaximumSignalPattern()
                 maxPowerAlpha = alpha;
             }
         }
-        if (! juce::approximatelyEqual (signalPower, 0.0f))
+
+        if (signalPower > 0.0f)
         {
             vtsParams.getParameter ("alpha" + String (i + 1))
                 ->setValueNotifyingHost (
