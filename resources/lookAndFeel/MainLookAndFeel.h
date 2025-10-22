@@ -82,7 +82,7 @@ public:
     // Helper function to get the scale factor
     float getScaleFactor (Component* component) const
     {
-        return component ? component->getDesktopScaleFactor()
+        return component ? Component::getApproximateScaleFactorForComponent (component)
                          : Desktop::getInstance().getGlobalScaleFactor();
     }
 
@@ -92,8 +92,9 @@ public:
                                bool isMouseOverButton,
                                bool isButtonDown) override
     {
-        (void) backgroundColour;
-        float scale = getScaleFactor (button.getTopLevelComponent());
+        juce::ignoreUnused (backgroundColour);
+
+        float scale = getScaleFactor (&button);
         Rectangle<float> buttonArea (0.0f,
                                      0.0f,
                                      button.getWidth() * 1.0f,
@@ -826,7 +827,7 @@ public:
                          bool /*isMouseOverButton*/,
                          bool /*isButtonDown*/) override
     {
-        float scale = getScaleFactor (button.getTopLevelComponent());
+        float scale = getScaleFactor (&button);
         Rectangle<int> buttonArea (0, 0, button.getWidth(), button.getHeight());
 
         g.setColour (button.isEnabled() ? mainTextColor : mainTextDisabledColor);
@@ -955,7 +956,7 @@ public:
         (void) width;
         (void) height;
         (void) position;
-        float scale = getScaleFactor (group.getTopLevelComponent());
+        float scale = getScaleFactor (&group);
         Rectangle<float> groupArea (0, 0, group.getWidth() * 1.0f, group.getHeight() * 1.0f);
         g.setColour (groupComponentBackgroundColor);
 
@@ -966,7 +967,7 @@ public:
         }
         else
         {
-            path.addRoundedRectangle (groupArea, 10.f / scale);
+            path.addRoundedRectangle (groupArea, 10.f);
         }
 
         path.closeSubPath();
@@ -992,7 +993,7 @@ public:
 
     Slider::SliderLayout getSliderLayout (Slider& slider) override
     {
-        float scale = getScaleFactor (slider.getTopLevelComponent());
+        float scale = getScaleFactor (&slider);
         Rectangle<int> localBounds (0, 0, slider.getWidth(), slider.getHeight());
         Slider::SliderLayout layout;
 
@@ -1081,7 +1082,7 @@ public:
     {
         (void) minSliderPos;
         (void) maxSliderPos;
-        float scale = getScaleFactor (slider.getTopLevelComponent());
+        float scale = getScaleFactor (&slider);
         const float h = slider.getTopLevelComponent()->getHeight() * 0.005f / scale;
         const float newDiameter = slider.getTopLevelComponent()->getHeight() * 0.024f / scale;
 
@@ -1143,7 +1144,7 @@ public:
     {
         (void) minSliderPos;
         (void) maxSliderPos;
-        float scale = getScaleFactor (slider.getTopLevelComponent());
+        float scale = getScaleFactor (&slider);
         const float newDiameter = slider.getTopLevelComponent()->getHeight() * 0.024f / scale;
 
         Path p;
@@ -1180,7 +1181,7 @@ public:
 
     void drawLabel (Graphics& g, Label& label) override
     {
-        float scale = getScaleFactor (label.getTopLevelComponent());
+        float scale = getScaleFactor (&label);
         Rectangle<float> labelArea (0.0f, 0.0f, label.getWidth() * 1.0f, label.getHeight() * 1.0f);
 
         g.setColour (labelBackgroundColor);
@@ -1224,9 +1225,9 @@ public:
 
     void drawTextEditorOutline (Graphics& g, int width, int height, TextEditor& textEditor) override
     {
-        (void) width;
-        (void) height;
-        float scale = getScaleFactor (textEditor.getTopLevelComponent());
+        juce::ignoreUnused (width, height);
+
+        float scale = getScaleFactor (&textEditor);
         Rectangle<float> textEditorArea (0.0f,
                                          0.0f,
                                          textEditor.getWidth() * 1.0f,
@@ -1243,7 +1244,7 @@ public:
                            bool isMouseOverButton,
                            bool isButtonDown) override
     {
-        float scale = getScaleFactor (button.getTopLevelComponent());
+        float scale = getScaleFactor (&button);
         Rectangle<float> toggleButtonBounds (0.0f,
                                              0.0f,
                                              button.getWidth() * 1.0f,
@@ -1261,7 +1262,7 @@ public:
 
         if (button.getButtonText() == "S" || button.getButtonText() == "M")
         {
-            toggleButtonBounds.reduce (4 / scale, 4 / scale);
+            toggleButtonBounds.reduce (4, 4);
             if (button.getToggleState())
             {
                 Colour soloMainColour = button.isEnabled()
@@ -1289,7 +1290,7 @@ public:
                 g.fillRect (toggleButtonBounds);
 
                 g.setColour (mainColour.withAlpha (0.5f));
-                g.drawRect (toggleButtonBounds, 1.f / scale);
+                g.drawRect (toggleButtonBounds, 1.f);
                 g.setColour (textColour);
                 g.drawFittedText (button.getButtonText(), x, y, w, h, Justification::centred, 1);
             }
@@ -1326,10 +1327,10 @@ public:
             Path outline;
             outline.addRoundedRectangle (toggleButtonBounds.reduced ((button.getWidth() * 0.19f),
                                                                      (button.getHeight() * 0.28f)),
-                                         button.getHeight() * 0.23f / scale,
-                                         button.getHeight() * 0.23f / scale);
+                                         button.getHeight() * 0.23f,
+                                         button.getHeight() * 0.23f);
 
-            g.strokePath (outline, PathStrokeType (2.0f / scale));
+            g.strokePath (outline, PathStrokeType (2.0f));
 
             if (button.getToggleState() != true)
             {
@@ -1379,14 +1380,9 @@ public:
                       bool isMouseOverButton,
                       bool isButtonDown) override
     {
-        (void) x;
-        (void) y;
-        (void) isEnabled;
-        (void) isMouseOverButton;
-        (void) isButtonDown;
-        float scale = getScaleFactor (component.getTopLevelComponent());
+        juce::ignoreUnused (x, y, isEnabled, isMouseOverButton, isButtonDown);
 
-        const float newDiameter = h * 0.34f / scale;
+        const float newDiameter = h * 0.34f;
 
         Path p;
 
@@ -1418,11 +1414,9 @@ public:
                         bool isMouseOver,
                         bool isMouseDown) override
     {
-        (void) scrollbar;
-        (void) isScrollbarVertical;
-        (void) isMouseOver;
-        (void) isMouseDown;
-        float scale = getScaleFactor (scrollbar.getTopLevelComponent());
+        juce::ignoreUnused (scrollbar, isScrollbarVertical, isMouseOver, isMouseDown);
+
+        float scale = getScaleFactor (&scrollbar);
 
         Path pathBgr;
         pathBgr.addRoundedRectangle (x * 1.0f,
@@ -1452,8 +1446,8 @@ private:
                            bool mouseOver,
                            bool mouseDown)
     {
-        float scale = getScaleFactor (
-            nullptr); // Use global scale factor since no specific component is passed
+        // Use global scale factor since no specific component is passed
+        float scale = getScaleFactor (nullptr);
         g.setColour (labelBackgroundColor);
 
         int deltaX = 0;
