@@ -446,7 +446,7 @@ void PolarDesignerAudioProcessorEditor::setTrimValue (int nBands)
     bool lockBandsOnTop = false;
     for (int i = 0; i < nBands; i++)
     {
-        if (slDir[i].getValue() == 1.f)
+        if (slDir[i].getValue() > 0.5f)
         {
             lockBandsOnTop = true;
             break;

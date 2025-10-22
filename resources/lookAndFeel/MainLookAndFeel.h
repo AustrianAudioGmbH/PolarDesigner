@@ -772,7 +772,7 @@ public:
             g.setColour (Colours::red);
             int pointerHeight = static_cast<int> (buttonArea.getHeight() * 0.05f);
             int pointerX = 3;
-            int pointerY = static_cast<int> (buttonArea.getCentreY() - pointerHeight / 2);
+            int pointerY = static_cast<int> (buttonArea.getCentreY() - pointerHeight / 2.0f);
             int pointerWidth = static_cast<int> (buttonArea.getWidth() - 1.f);
 
             Path path;
@@ -1100,15 +1100,15 @@ public:
                                              width * 1.0f,
                                              h * 1.0f);
             pathBgr.addRoundedRectangle (backgroundRect, h);
-            Rectangle<float> foregroundRect ((width / 2 + x) * 1.0f,
+            Rectangle<float> foregroundRect ((width / 2.0f + x) * 1.0f,
                                              0.5f * height - h / 2,
-                                             (sliderPos - (width / 2 + x) * 1.0f),
+                                             (sliderPos - (width / 2.0f + x) * 1.0f),
                                              h * 1.0f);
             pathFrg.addRectangle (foregroundRect);
         }
         else if (style == Slider::SliderStyle::LinearVertical)
         {
-            Rectangle<float> backgroundRect (x + width / 2 - h / 2,
+            Rectangle<float> backgroundRect (x + width / 2.0f - h / 2,
                                              y + newDiameter / 2,
                                              h,
                                              height - newDiameter);
@@ -1118,7 +1118,7 @@ public:
                                          static_cast<float> (height),
                                          y + newDiameter / 2,
                                          height - newDiameter / 2);
-            Rectangle<float> foregroundRect (x + width / 2 - h / 2,
+            Rectangle<float> foregroundRect (x + width / 2.0f - h / 2,
                                              y + backgroundRect.getHeight() * 0.43f,
                                              h,
                                              mappedSliderPos
@@ -1162,7 +1162,7 @@ public:
                                          static_cast<float> (height),
                                          y + newDiameter / 2,
                                          height - newDiameter / 2);
-            p.addEllipse (x + width / 2 - newDiameter / 2,
+            p.addEllipse (x + width / 2.0f - newDiameter / 2,
                           mappedSliderPos - newDiameter / 2,
                           newDiameter,
                           newDiameter);

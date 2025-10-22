@@ -97,9 +97,9 @@ enum eqBandStates : unsigned int
 //==============================================================================
 /**
 */
-class PolarDesignerAudioProcessor : public AudioProcessor,
-                                    public AudioProcessorValueTreeState::Listener,
-                                    private Timer
+class PolarDesignerAudioProcessor final : public AudioProcessor,
+                                          public AudioProcessorValueTreeState::Listener,
+                                          private Timer
 
 {
 public:
@@ -135,6 +135,8 @@ public:
 
     void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
     void processBlockBypassed (AudioBuffer<float>&, MidiBuffer&) override;
+    using AudioProcessor::processBlock;
+    using AudioProcessor::processBlockBypassed;
     //==============================================================================
     AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
@@ -179,7 +181,7 @@ public:
     {
         if (numBands >= 1 && numBands <= MAX_NUM_EQS)
         {
-            nProcessorBands = numBands;
+            nProcessorBands.store (numBands);
             activeBandsChanged = true;
             // Update any internal state as needed
             recomputeAllFilterCoefficients = true;
@@ -262,8 +264,8 @@ public:
 
     int getEqState() { return doEq; }
     void setEqState (int idx);
-    float hzToZeroToOne (int idx, float hz);
-    float hzFromZeroToOne (int idx, float val);
+    float hzToZeroToOne (size_t idx, float hz);
+    float hzFromZeroToOne (size_t idx, float val);
 
 #if PERFETTO
     // perfetto
@@ -381,7 +383,7 @@ private:
     void computeFilterCoefficients (unsigned int crossoverNr);
     void setProxCompCoefficients (float distance);
     void initAllConvolvers();
-    void initConvolver (int convNr);
+    void initConvolver (size_t convNr);
     void loadFilterBankImpulseResponses();
 
     void createOmniAndEightSignals (AudioBuffer<float>& buffer);
