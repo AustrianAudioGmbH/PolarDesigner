@@ -28,33 +28,31 @@
 #include <JuceHeader.h>
 
 #include "PluginProcessor.h"
-#include "../resources/lookAndFeel/AA_LaF.h"
-#include "../resources/lookAndFeel/MainLookAndFeel.h"
-#include "../resources/customComponents/TitleBar.h"
-#include "../resources/customComponents/SimpleLabel.h"
-#include "../resources/customComponents/ReverseSlider.h"
-#include "../resources/customComponents/DirSlider.h"
-#include "../resources/customComponents/PolarPatternVisualizer.h"
-#include "../resources/customComponents/DirectivityEQ.h"
-#include "../resources/customComponents/AlertOverlay.h"
-#include "../resources/customComponents/EndlessSlider.h"
-#include "../resources/customComponents/MultiTextButton.h"
-#include "../resources/customComponents/PresetListBox.h"
+
 #include "../resources/customComponents/AnimatedLabel.h"
+#include "../resources/customComponents/DirSlider.h"
+#include "../resources/customComponents/DirectivityEQ.h"
+#include "../resources/customComponents/EndlessSlider.h"
 #include "../resources/customComponents/GainSlider.h"
+#include "../resources/customComponents/MultiTextButton.h"
+#include "../resources/customComponents/PolarPatternVisualizer.h"
+#include "../resources/customComponents/PresetListBox.h"
+#include "../resources/customComponents/ReverseSlider.h"
+#include "../resources/customComponents/TitleBar.h"
+#include "../resources/lookAndFeel/MainLookAndFeel.h"
 
 #ifdef USE_MELATONIN_INSPECTOR
     #include <melatonin_inspector/melatonin_inspector.h>
 #endif
 
 #ifdef DEBUG
-#define LOG_ERROR(message) Logger::writeToLog("ERROR: " + String(message))
-#define LOG_DEBUG(message) Logger::writeToLog("DEBUG: " + String(message))
-#define LOG_WARN(message) Logger::writeToLog("WARNING: " + String(message))
+    #define LOG_ERROR(message) Logger::writeToLog ("ERROR: " + String (message))
+    #define LOG_DEBUG(message) Logger::writeToLog ("DEBUG: " + String (message))
+    #define LOG_WARN(message) Logger::writeToLog ("WARNING: " + String (message))
 #else
-#define LOG_ERROR(message)
-#define LOG_DEBUG(message)
-#define LOG_WARN(message)
+    #define LOG_ERROR(message)
+    #define LOG_DEBUG(message)
+    #define LOG_WARN(message)
 #endif
 
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
@@ -63,9 +61,12 @@ typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class PolarDesignerAudioProcessorEditor  : public AudioProcessorEditor, private Button::Listener,
-                                           private Slider::Listener, private Timer, public ChangeListener,
-                                           private ValueTree::Listener
+class PolarDesignerAudioProcessorEditor : public AudioProcessorEditor,
+                                          private Button::Listener,
+                                          private Slider::Listener,
+                                          private Timer,
+                                          public ChangeListener,
+                                          private ValueTree::Listener
 {
 private:
     //    LaF globalLaF;
@@ -80,40 +81,39 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
-    void buttonStateChanged(Button* button) override;
+    void buttonStateChanged (Button* button) override;
     void buttonClicked (Button* button) override;
     void sliderValueChanged (Slider* slider) override;
 
     void setEqMode();
-    void calculateLockedBands(int nBands, bool trimSliderIncr);
-    float getABButtonAlphaFromLayerState(int layerState);
+    void calculateLockedBands (int nBands, bool trimSliderIncr);
+    float getABButtonAlphaFromLayerState (int layerState);
     // Helper method to calculate flex on the base of bandlimitPathComponents
-    std::vector<float> getBandLimitWidthVector(float sizeDirectionalEQ, float offsetPolarVisualizer);
+    std::vector<float> getBandLimitWidthVector (float sizeDirectionalEQ,
+                                                float offsetPolarVisualizer);
 
     //void incrementTrim(int nProcessorBands);
-    void setTrimValue(int nBands);
-    void resetTrim(int nBands);
+    void setTrimValue (int nBands);
+    void resetTrim (int nBands);
 
     int getControlParameterIndex (Component& control) override;
 
     void loadSavedPresetsToList();
 
-    void changeListenerCallback(ChangeBroadcaster* source) override;
+    void changeListenerCallback (ChangeBroadcaster* source) override;
 
     void initializeSavedStates();
 
-    void saveLayerState(int layer);
-    void restoreLayerState(int layer);
+    void saveLayerState (int layer);
+    void restoreLayerState (int layer);
 
     TooltipWindow sharedTooltipWindow;
 
 private:
-
     // UI repainting is 'debounced' to avoid overwhelm
     bool repaintPending = false;
     double lastRepaintTime = 0.0;
     static constexpr double repaintDebounceInterval = 0.03;
-
 
     static const int EDITOR_MIN_WIDTH = 992; // 1194;
     static const int EDITOR_MIN_HEIGHT = 640; // 834;
@@ -136,12 +136,11 @@ private:
     int maxIt = 0;
 
     bool loadingFile;
-//    bool recordingDisturber;
+    //    bool recordingDisturber;
     bool presetListVisible;
     bool presetLoaded = false;
 
     Colour eqColours[5];
-
 
     TitleBarTextLabel titleCompare, titlePreset;
     TextButton titlePresetUndoButton;
@@ -155,7 +154,8 @@ private:
     PolarPatternVisualizer polarPatternVisualizers[5];
 
     // Groups
-    GroupComponent grpEq, grpPreset, grpTerminatorControl, grpProxComp, grpBands, grpSync, grpPresetList;
+    GroupComponent grpEq, grpPreset, grpTerminatorControl, grpProxComp, grpBands, grpSync,
+        grpPresetList;
     // Sliders
     ReverseSlider slCrossoverPosition[4];
     DirSlider slDir[5];
@@ -168,7 +168,8 @@ private:
     // Solo Buttons
     ToggleButton tgbSolo[5], tgbMute[5];
     // Text Buttons
-    TextButton tbLoad, tbSave, tbTerminateSpill, tbMaximizeTarget, tbMaxTargetToSpill, tbZeroLatency, tbOpenFromFile;
+    TextButton tbLoad, tbSave, tbTerminateSpill, tbMaximizeTarget, tbMaxTargetToSpill,
+        tbZeroLatency, tbOpenFromFile;
     // ToggleButtons
     ToggleButton tbAllowBackwardsPattern, tgbProxCtr;
     // ImageButtons
@@ -183,8 +184,8 @@ private:
     std::unique_ptr<SliderAttachment> slBandGainAtt[5];
     std::unique_ptr<SliderAttachment> slProximityAtt;
     std::unique_ptr<SliderAttachment> slDirAtt[5];
-    std::unique_ptr<ButtonAttachment> tgbSoloAtt[5], tgbMuteAtt[5], tbAllowBackwardsPatternAtt, tbZeroLatencyAtt, tgbProxCtrAtt;
-
+    std::unique_ptr<ButtonAttachment> tgbSoloAtt[5], tgbMuteAtt[5], tbAllowBackwardsPatternAtt,
+        tbZeroLatencyAtt, tgbProxCtrAtt;
 
     Rectangle<float> presetArea;
     AnimatedLabel albPlaybackSpill, albAcquiringTarget;
@@ -215,7 +216,8 @@ private:
         MAXTOSPILL = 3
     } termStage;
 
-    struct LayerState {
+    struct LayerState
+    {
         unsigned int nrBandsValue; // Changed from nrBands
         std::array<float, MAX_EDITOR_BANDS> dirValues;
         std::array<float, MAX_EDITOR_BANDS> bandGainValues;
@@ -230,7 +232,7 @@ private:
     bool isRestoringState = false;
 
     std::array<LayerState, 2> savedStates; // One for each A/B layer
-    std::array<bool, 2> isStateSaved = {false, false}; // Track if state is saved for each layer
+    std::array<bool, 2> isStateSaved = { false, false }; // Track if state is saved for each layer
 
 #ifdef AA_DO_DEBUG_PATH
     Path debugPath;
@@ -242,27 +244,27 @@ private:
     void saveFile();
     void timerCallback() override;
     bool getSoloActive();
-    void setMainAreaEnabled(bool enable);
+    void setMainAreaEnabled (bool enable);
     void activateMainUI (bool shouldBeActive);
     void activateEditingForZeroLatency();
-    void showPresetList(bool shouldShow);
-    void setBandEnabled(int bandNr, bool enable);
+    void showPresetList (bool shouldShow);
+    void setBandEnabled (int bandNr, bool enable);
 
-    void showActiveTerminatorStage(terminatorStage stage);
+    void showActiveTerminatorStage (terminatorStage stage);
     void notifyPresetLabelChange();
 
-    void mouseDown(const MouseEvent& event) override;
+    void mouseDown (const MouseEvent& event) override;
 
     void updateABButtonState();
 
-    #ifdef USE_MELATONIN_INSPECTOR
+#ifdef USE_MELATONIN_INSPECTOR
     #if defined(_MSC_VER)
-    #pragma message("MELATONIN INSPECTOR IS CONFIGURED TO BE INCLUDED IN BUILD")
+        #pragma message("MELATONIN INSPECTOR IS CONFIGURED TO BE INCLUDED IN BUILD")
     #elif defined(__GNUC__) || defined(__clang__)
         #warning "MELATONIN INSPECTOR IS CONFIGURED TO BE INCLUDED IN BUILD"
     #endif
-        melatonin::Inspector inspector { *this, true };
-    #endif
+    melatonin::Inspector inspector { *this, true };
+#endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarDesignerAudioProcessorEditor)
 };

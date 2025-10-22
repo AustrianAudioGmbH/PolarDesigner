@@ -20,7 +20,6 @@
  ==============================================================================
  */
 
-
 #pragma once
 #include <JuceHeader.h>
 
@@ -28,10 +27,7 @@ using namespace dsp;
 class Delay : private ProcessorBase
 {
 public:
-
-    Delay()
-    {
-    }
+    Delay() {}
     ~Delay() override {}
 
     void setDelayTime (float delayTimeInSeconds)
@@ -47,21 +43,19 @@ public:
             bypassed = false;
         }
 
-        prepare(spec);
+        prepare (spec);
     }
 
-    const int getDelayInSamples()
-    {
-        return bypassed ? 0 : delayInSamples;
-    }
+    const int getDelayInSamples() { return bypassed ? 0 : delayInSamples; }
 
     void prepare (const ProcessSpec& specs) override
     {
         spec = specs;
 
-        delayInSamples = roundToInt(delay * specs.sampleRate);
+        delayInSamples = roundToInt (delay * specs.sampleRate);
 
-        buffer.setSize(static_cast<int> (specs.numChannels), static_cast<int> (specs.maximumBlockSize) + delayInSamples);
+        buffer.setSize (static_cast<int> (specs.numChannels),
+                        static_cast<int> (specs.maximumBlockSize) + delayInSamples);
         buffer.clear();
         writePosition = 0;
     }
@@ -75,44 +69,53 @@ public:
             auto abIn = context.getInputBlock();
             auto abOut = context.getOutputBlock();
             auto L = abIn.getNumSamples();
-            auto nCh = jmin((int) spec.numChannels, (int) abIn.getNumChannels());
+            auto nCh = jmin ((int) spec.numChannels, (int) abIn.getNumChannels());
 
             int startIndex, blockSize1, blockSize2;
 
-
             // write in delay line
-            getReadWritePositions(false, (int) L, startIndex, blockSize1, blockSize2);
+            getReadWritePositions (false, (int) L, startIndex, blockSize1, blockSize2);
 
             for (int ch = 0; ch < nCh; ch++)
-                buffer.copyFrom(ch, startIndex, abIn.getChannelPointer(static_cast<size_t>(ch)), blockSize1);
+                buffer.copyFrom (ch,
+                                 startIndex,
+                                 abIn.getChannelPointer (static_cast<size_t> (ch)),
+                                 blockSize1);
 
             if (blockSize2 > 0)
                 for (int ch = 0; ch < nCh; ch++)
-                    buffer.copyFrom(ch, 0, abIn.getChannelPointer(static_cast<size_t>(ch)) + blockSize1, blockSize2);
-
+                    buffer.copyFrom (ch,
+                                     0,
+                                     abIn.getChannelPointer (static_cast<size_t> (ch)) + blockSize1,
+                                     blockSize2);
 
             // read from delay line
-            getReadWritePositions(true, (int) L, startIndex, blockSize1, blockSize2);
+            getReadWritePositions (true, (int) L, startIndex, blockSize1, blockSize2);
 
             for (int ch = 0; ch < nCh; ch++)
-                FloatVectorOperations::copy(abOut.getChannelPointer(static_cast<size_t>(ch)), buffer.getReadPointer(ch) + startIndex, blockSize1);
+                FloatVectorOperations::copy (abOut.getChannelPointer (static_cast<size_t> (ch)),
+                                             buffer.getReadPointer (ch) + startIndex,
+                                             blockSize1);
 
             if (blockSize2 > 0)
                 for (int ch = 0; ch < nCh; ch++)
-                    FloatVectorOperations::copy(abOut.getChannelPointer(static_cast<size_t>(ch)) + blockSize1, buffer.getReadPointer(ch), blockSize2);
-
+                    FloatVectorOperations::copy (abOut.getChannelPointer (static_cast<size_t> (ch))
+                                                     + blockSize1,
+                                                 buffer.getReadPointer (ch),
+                                                 blockSize2);
 
             writePosition += L;
             writePosition = writePosition % buffer.getNumSamples();
         }
     }
 
-    void reset() override
-    {
+    void reset() override {}
 
-    }
-
-    void getReadWritePositions (bool read, int numSamples, int& startIndex, int& blockSize1, int& blockSize2)
+    void getReadWritePositions (bool read,
+                                int numSamples,
+                                int& startIndex,
+                                int& blockSize1,
+                                int& blockSize2)
     {
         const int L = buffer.getNumSamples();
         int pos = writePosition;
@@ -124,7 +127,7 @@ public:
             pos = pos + L;
         pos = pos % L;
 
-        jassert(pos >= 0 && pos < L);
+        jassert (pos >= 0 && pos < L);
 
         if (numSamples <= 0)
         {
@@ -143,7 +146,7 @@ public:
 
 private:
     //==============================================================================
-    ProcessSpec spec = {-1, 0, 0};
+    ProcessSpec spec = { -1, 0, 0 };
     float delay;
     int delayInSamples = 0;
     bool bypassed = false;

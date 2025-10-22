@@ -30,16 +30,15 @@
 
 #include "../lookAndFeel/MainLookAndFeel.h"
 
-class PresetListBox : public Component,
-    public ListBoxModel, public ChangeBroadcaster
+class PresetListBox : public Component, public ListBoxModel, public ChangeBroadcaster
 {
 public:
     PresetListBox()
     {
-        addAndMakeVisible(presets);
-        presets.setModel(this);
-        presets.setRowHeight(40);
-        presets.setHeaderComponent(std::make_unique<PresetListHeaderComponent>(*this));
+        addAndMakeVisible (presets);
+        presets.setModel (this);
+        presets.setRowHeight (40);
+        presets.setHeaderComponent (std::make_unique<PresetListHeaderComponent> (*this));
     }
 
     void resized() override
@@ -47,50 +46,56 @@ public:
         FlexBox fb;
         fb.flexDirection = FlexBox::Direction::column;
         fb.justifyContent = juce::FlexBox::JustifyContent::center;
-        fb.items.add(juce::FlexItem(presets).withFlex(1.f));
-        fb.performLayout(getLocalBounds());
+        fb.items.add (juce::FlexItem (presets).withFlex (1.f));
+        fb.performLayout (getLocalBounds());
 
-        presets.setRowHeight(static_cast<int>(fb.items[0].currentBounds.getHeight() * 0.1f));
+        presets.setRowHeight (static_cast<int> (fb.items[0].currentBounds.getHeight() * 0.1f));
     }
 
-    void paintListBoxItem(int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override
+    void paintListBoxItem (int rowNumber,
+                           Graphics& g,
+                           int width,
+                           int height,
+                           bool rowIsSelected) override
     {
-        auto eyeDropImg = juce::Drawable::createFromImageData(BinaryData::eyeDrop_svg, BinaryData::eyeDrop_svgSize);
-        auto eyeDropArea = Rectangle<float>(0, 0, (width * 1.0f), (height * 1.0f)).reduced( (width * 0.03f), (height * 0.15f));
-        eyeDropImg->drawWithin(g, eyeDropArea, juce::RectanglePlacement::xRight, 1.f);
+        auto eyeDropImg = juce::Drawable::createFromImageData (BinaryData::eyeDrop_svg,
+                                                               BinaryData::eyeDrop_svgSize);
+        auto eyeDropArea = Rectangle<float> (0, 0, (width * 1.0f), (height * 1.0f))
+                               .reduced ((width * 0.03f), (height * 0.15f));
+        eyeDropImg->drawWithin (g, eyeDropArea, juce::RectanglePlacement::xRight, 1.f);
 
-        if (rowIsSelected) 
-            g.fillAll(mainLaF.textButtonHoverBackgroundColor.withAlpha(0.5f));
+        if (rowIsSelected)
+            g.fillAll (mainLaF.textButtonHoverBackgroundColor.withAlpha (0.5f));
 
-        g.setColour(mainLaF.mainTextColor);
+        g.setColour (mainLaF.mainTextColor);
 
         float h = (getTopLevelComponent()->getHeight() * 0.023f);
         float y = (height - h) / 2;
 
-        Font font(mainLaF.normalFont);
-        font.setHeight(h );
-        g.setFont(font);
-        g.drawFittedText(*data.getUnchecked(rowNumber), 2, static_cast<int>(y), width - 2 * eyeDropImg->getWidth(), static_cast<int>(h), Justification::left, 1);
+        Font font (mainLaF.normalFont);
+        font.setHeight (h);
+        g.setFont (font);
+        g.drawFittedText (*data.getUnchecked (rowNumber),
+                          2,
+                          static_cast<int> (y),
+                          width - 2 * eyeDropImg->getWidth(),
+                          static_cast<int> (h),
+                          Justification::left,
+                          1);
     }
 
-    int getNumRows() override
-    {
-        return data.size();
-    }
+    int getNumRows() override { return data.size(); }
 
-    void backgroundClicked(const MouseEvent&) override
-    {
-        presets.deselectAllRows();
-    }
+    void backgroundClicked (const MouseEvent&) override { presets.deselectAllRows(); }
 
-    void listBoxItemDoubleClicked(int row, const MouseEvent&) override
+    void listBoxItemDoubleClicked (int row, const MouseEvent&) override
     {
         rowDoubleClicked = true;
         selectedRow = row;
         sendChangeMessage();
     }
 
-    void selectedRowsChanged(int lastRowSelected) override
+    void selectedRowsChanged (int lastRowSelected) override
     {
         rowDoubleClicked = false;
         if (lastRowSelected != -1)
@@ -100,76 +105,66 @@ public:
         }
     }
 
-    void returnKeyPressed(int lastRowSelected) override
+    void returnKeyPressed (int lastRowSelected) override
     {
         rowDoubleClicked = true;
         selectedRow = lastRowSelected;
         sendChangeMessage();
     }
 
-    String getSelectedPresetName()
-    {
-        return *data.getUnchecked(selectedRow);
-    }
+    String getSelectedPresetName() { return *data.getUnchecked (selectedRow); }
 
-    void setHeaderText(const String& text) { presets.getHeaderComponent()->setTitle(text); }
+    void setHeaderText (const String& text) { presets.getHeaderComponent()->setTitle (text); }
 
-    void AddNewPresetToList(const String& presetName)
+    void AddNewPresetToList (const String& presetName)
     {
-        data.add(std::make_unique<String>(presetName));
+        data.add (std::make_unique<String> (presetName));
         presets.updateContent();
     }
 
-    bool isRowDoubleClicked()
-    {
-        return rowDoubleClicked;
-    }
+    bool isRowDoubleClicked() { return rowDoubleClicked; }
 
-    void deselectAll()
-    {
-        presets.deselectAllRows();
-    }
+    void deselectAll() { presets.deselectAllRows(); }
 
 private:
     class PresetListHeaderComponent : public Button
     {
     public:
-        explicit PresetListHeaderComponent(PresetListBox& o)
-            : Button({})
-//            owner(o)
+        explicit PresetListHeaderComponent (PresetListBox& o) : Button ({})
+        //            owner(o)
         {
-            (void)o;
-            setToggleable(true);
-            setClickingTogglesState(true);
-            setSize(0, 30);
+            (void) o;
+            setToggleable (true);
+            setClickingTogglesState (true);
+            setSize (0, 30);
         }
 
-        void paintButton(Graphics& g, bool isMouseOverButton, bool isButtonDown) override
+        void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
         {
-            (void)isMouseOverButton;
-            (void)isButtonDown;
-            Rectangle<float> buttonArea(0.0f, 0.0f, getWidth() * 1.0f, getHeight() * 1.0f);
-            g.fillAll(mainLaF.groupComponentBackgroundColor);
+            (void) isMouseOverButton;
+            (void) isButtonDown;
+            Rectangle<float> buttonArea (0.0f, 0.0f, getWidth() * 1.0f, getHeight() * 1.0f);
+            g.fillAll (mainLaF.groupComponentBackgroundColor);
 
             int x = 0;
-            int w = static_cast<int>(buttonArea.getWidth()*0.65f);
-            int h = static_cast<int>(getTopLevelComponent()->getHeight() * 0.023f);
-            int y = static_cast<int>((buttonArea.getHeight() - h) / 2);
+            int w = static_cast<int> (buttonArea.getWidth() * 0.65f);
+            int h = static_cast<int> (getTopLevelComponent()->getHeight() * 0.023f);
+            int y = static_cast<int> ((buttonArea.getHeight() - h) / 2);
 
-            g.setColour(mainLaF.textButtonHoverBackgroundColor);
+            g.setColour (mainLaF.textButtonHoverBackgroundColor);
 
-            Font font(mainLaF.normalFont);
-            font.setHeight(h * 1.0f);
-            g.setFont(font);
-            g.drawFittedText(getTitle(), x, y, w, h, Justification::left, 1);
+            Font font (mainLaF.normalFont);
+            font.setHeight (h * 1.0f);
+            g.setFont (font);
+            g.drawFittedText (getTitle(), x, y, w, h, Justification::left, 1);
         }
 
     private:
-//        PresetListBox& owner;
+        //        PresetListBox& owner;
         MainLookAndFeel mainLaF;
     };
 
-    void selectRow(int row)
+    void selectRow (int row)
     {
         if (row < 0)
             return;

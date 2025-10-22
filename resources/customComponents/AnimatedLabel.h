@@ -32,8 +32,7 @@
 //==============================================================================
 /*
 */
-class AnimatedLabel  : public juce::Component,
-    private juce::Timer
+class AnimatedLabel : public juce::Component, private juce::Timer
 {
 public:
     AnimatedLabel()
@@ -43,15 +42,13 @@ public:
         fontHeight = 14;
         repaintBypassed = false;
         timerBypassedPeriods = 0;
-        addAndMakeVisible(&animatedRectangle);
-        animatedRectangle.setVisible(false);
+        addAndMakeVisible (&animatedRectangle);
+        animatedRectangle.setVisible (false);
     }
 
-    ~AnimatedLabel() override
-    {
-    }
+    ~AnimatedLabel() override {}
 
-    void startAnimation(const String primText, const String secText = {})
+    void startAnimation (const String primText, const String secText = {})
     {
         it = 0;
         counter = 1;
@@ -59,9 +56,9 @@ public:
         repaintBypassed = false;
         timerBypassedPeriods = 0;
         animatedString.clear();
-        startTimer(80);
-        setLabelText(primText, secText);
-        animatedRectangle.setVisible(true);
+        startTimer (80);
+        setLabelText (primText, secText);
+        animatedRectangle.setVisible (true);
     }
 
     void stopAnimation()
@@ -73,51 +70,64 @@ public:
         timerBypassedPeriods = 0;
         animatedString.clear();
         stopTimer();
-        animatedRectangle.setVisible(false);
+        animatedRectangle.setVisible (false);
     }
 
     void paint (juce::Graphics& g) override
     {
-        fontHeight = static_cast<int>(getTopLevelComponent()->getHeight() * 0.018f);
-        textArea = getLocalBounds().reduced(static_cast<int>(getLocalBounds().getWidth() * 0.06f), (getLocalBounds().getHeight() - fontHeight)/2);
+        fontHeight = static_cast<int> (getTopLevelComponent()->getHeight() * 0.018f);
+        textArea = getLocalBounds().reduced (static_cast<int> (getLocalBounds().getWidth() * 0.06f),
+                                             (getLocalBounds().getHeight() - fontHeight) / 2);
         g.fillAll (mainLaF.labelBackgroundColor);
 
         g.setColour (mainLaF.mainTextColor);
         g.setFont (fontHeight * 1.0f);
 
-        g.drawMultiLineText(animatedString, textArea.getX(), textArea.getY() + fontHeight/2, textArea.getWidth(),
-            juce::Justification::left, true);
+        g.drawMultiLineText (animatedString,
+                             textArea.getX(),
+                             textArea.getY() + fontHeight / 2,
+                             textArea.getWidth(),
+                             juce::Justification::left,
+                             true);
     }
 
     void resized() override
     {
-        fontHeight = static_cast<int>(getTopLevelComponent()->getHeight() * 0.018f);
+        fontHeight = static_cast<int> (getTopLevelComponent()->getHeight() * 0.018f);
 
-        Font font(fontHeight * 1.0f);
-        textArea = getLocalBounds().reduced(static_cast<int>(getLocalBounds().getWidth() * 0.06f), (getLocalBounds().getHeight() - fontHeight) / 2);
-        auto centredTextArea = Rectangle<int>(textArea.getX(), textArea.getY() - fontHeight/4, textArea.getWidth(), fontHeight);
-        int equalSignWidth = static_cast<int>(getLocalBounds().getWidth() * 0.042f);
-        float rowProportion = static_cast<float>(font.getStringWidth(animatedString)) / static_cast<float>(centredTextArea.getWidth());
+        Font font (fontHeight * 1.0f);
+        textArea = getLocalBounds().reduced (static_cast<int> (getLocalBounds().getWidth() * 0.06f),
+                                             (getLocalBounds().getHeight() - fontHeight) / 2);
+        auto centredTextArea = Rectangle<int> (textArea.getX(),
+                                               textArea.getY() - fontHeight / 4,
+                                               textArea.getWidth(),
+                                               fontHeight);
+        int equalSignWidth = static_cast<int> (getLocalBounds().getWidth() * 0.042f);
+        float rowProportion = static_cast<float> (font.getStringWidth (animatedString))
+                              / static_cast<float> (centredTextArea.getWidth());
 
         if (animatedString.length() > 0)
         {
             auto currStringLength = animatedString.length();
-            equalSignWidth = font.getStringWidth(animatedString) / animatedString.length();
-            if (font.getStringWidth(animatedString) > centredTextArea.getWidth())
+            equalSignWidth = font.getStringWidth (animatedString) / animatedString.length();
+            if (font.getStringWidth (animatedString) > centredTextArea.getWidth())
             {
-                int nrOfSignsInNewRow = static_cast<int>((rowProportion - 1.f) * (centredTextArea.getWidth()/ equalSignWidth));
-                rectArea = centredTextArea.withWidth(equalSignWidth).translated(equalSignWidth * nrOfSignsInNewRow, fontHeight);
+                int nrOfSignsInNewRow = static_cast<int> (
+                    (rowProportion - 1.f) * (centredTextArea.getWidth() / equalSignWidth));
+                rectArea = centredTextArea.withWidth (equalSignWidth)
+                               .translated (equalSignWidth * nrOfSignsInNewRow, fontHeight);
             }
             else
             {
-                rectArea = centredTextArea.withWidth(equalSignWidth).translated(equalSignWidth * currStringLength, 0);
+                rectArea = centredTextArea.withWidth (equalSignWidth)
+                               .translated (equalSignWidth * currStringLength, 0);
             }
         }
         else
         {
-            rectArea = centredTextArea.withWidth(equalSignWidth);
+            rectArea = centredTextArea.withWidth (equalSignWidth);
         }
-        animatedRectangle.setBounds(rectArea);
+        animatedRectangle.setBounds (rectArea);
     }
 
 private:
@@ -132,7 +142,7 @@ private:
     String secondaryText;
     int counter;
 
-    void setLabelText(const String primText, const String secText = {})
+    void setLabelText (const String primText, const String secText = {})
     {
         primaryText = primText;
         secondaryText = secText;
@@ -143,7 +153,7 @@ private:
     {
         auto charStr = text.getCharPointer();
 
-        if (!repaintBypassed && it < text.length())
+        if (! repaintBypassed && it < text.length())
         {
             animatedString += charStr[it];
             it++;
@@ -158,7 +168,8 @@ private:
             {
                 counter++;
                 repaintBypassed = false;
-                text = (!secondaryText.isEmpty() && counter % 2 == 0) ? secondaryText : primaryText;
+                text =
+                    (! secondaryText.isEmpty() && counter % 2 == 0) ? secondaryText : primaryText;
                 timerBypassedPeriods = 0;
                 animatedString.clear();
             }
@@ -166,34 +177,26 @@ private:
         resized();
     }
 
-    class AnimatedRectangle : public juce::Component,
-        private juce::Timer
+    class AnimatedRectangle : public juce::Component, private juce::Timer
     {
     public:
-        AnimatedRectangle()
-        {
-            startTimer(300);
-        }
+        AnimatedRectangle() { startTimer (300); }
 
-        ~AnimatedRectangle() override
-        {
-        }
+        ~AnimatedRectangle() override {}
 
-        void paint(juce::Graphics& g) override
+        void paint (juce::Graphics& g) override
         {
             if (show)
-                g.fillAll(mainLaF.mainTextColor);
+                g.fillAll (mainLaF.mainTextColor);
         }
 
-        void resized() override
-        {
-        }
+        void resized() override {}
 
     private:
         bool show = false;
         void timerCallback() override
         {
-            show = !show;
+            show = ! show;
             repaint();
         }
         MainLookAndFeel mainLaF;

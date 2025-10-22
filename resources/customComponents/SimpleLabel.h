@@ -49,33 +49,31 @@
 
 #pragma once
 
-
 //==============================================================================
 /*
 */
-class SimpleLabel    : public Component
+class SimpleLabel : public Component
 {
 public:
     SimpleLabel()
     {
         // In your constructor, you should add any child components, and
         // initialise any special settings that your component needs.
-
     }
-    ~SimpleLabel() override   {}
+    ~SimpleLabel() override {}
 
-    void setText(String newText)
+    void setText (String newText)
     {
         text = newText;
         repaint();
     }
-    void setText(String newText, bool newBold)
+    void setText (String newText, bool newBold)
     {
         text = newText;
         isBold = newBold;
         repaint();
     }
-    void setText(String newText, bool newBold, Justification newJustification)
+    void setText (String newText, bool newBold, Justification newJustification)
     {
         text = newText;
         isBold = newBold;
@@ -83,13 +81,13 @@ public:
         repaint();
     }
 
-    void setJustification(Justification newJustification)
+    void setJustification (Justification newJustification)
     {
         justification = newJustification;
         repaint();
     }
 
-    void setTextColour(const Colour newColour)
+    void setTextColour (const Colour newColour)
     {
         if (colour != newColour)
         {
@@ -98,28 +96,28 @@ public:
         }
     }
 
-    void enablementChanged() override
-    {
-        repaint();
-    }
+    void enablementChanged() override { repaint(); }
 
     void paint (Graphics& g) override
     {
         Rectangle<int> bounds = getLocalBounds();
-        paintSimpleLabel(g, bounds, text, isBold, justification);
+        paintSimpleLabel (g, bounds, text, isBold, justification);
     }
 
-    virtual void paintSimpleLabel(Graphics& g, Rectangle<int> bounds, String labelText, bool isLabelBold, Justification labelJustification)
+    virtual void paintSimpleLabel (Graphics& g,
+                                   Rectangle<int> bounds,
+                                   String labelText,
+                                   bool isLabelBold,
+                                   Justification labelJustification)
     {
-        g.setColour (colour.withMultipliedAlpha(this->isEnabled() ? 1.0f : 0.4f));
+        g.setColour (colour.withMultipliedAlpha (this->isEnabled() ? 1.0f : 0.4f));
         g.setFont (bounds.getHeight() * 1.0f);
-        g.setFont(getLookAndFeel().getTypefaceForFont(Font(bounds.getHeight() * 1.0f, isLabelBold ? 1 : 0)));
+        g.setFont (getLookAndFeel().getTypefaceForFont (
+            Font (bounds.getHeight() * 1.0f, isLabelBold ? 1 : 0)));
         g.drawText (labelText, bounds, labelJustification, true);
     }
 
-    void resized() override
-    {
-    }
+    void resized() override {}
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleLabel)
@@ -129,23 +127,27 @@ private:
     Justification justification = Justification::centred;
 };
 
-
 //==============================================================================
 /*
  */
-class TripleLabel    : public Component
+class TripleLabel : public Component
 {
 public:
     TripleLabel()
     {
         // In your constructor, you should add any child components, and
         // initialise any special settings that your component needs.
-
     }
 
     ~TripleLabel() override {}
 
-    void setText(String newLeftText, String newMiddleText, String newRightText, bool newLeftBold, bool newMiddleBold, bool newRightBold) {
+    void setText (String newLeftText,
+                  String newMiddleText,
+                  String newRightText,
+                  bool newLeftBold,
+                  bool newMiddleBold,
+                  bool newRightBold)
+    {
         leftText = newLeftText;
         middleText = newMiddleText;
         rightText = newRightText;
@@ -159,37 +161,48 @@ public:
     void paint (Graphics& g) override
     {
         Rectangle<int> bounds = getLocalBounds();
-        paintTripleLabel(g, bounds, leftText, middleText, rightText, leftBold, middleBold, rightBold);
+        paintTripleLabel (g,
+                          bounds,
+                          leftText,
+                          middleText,
+                          rightText,
+                          leftBold,
+                          middleBold,
+                          rightBold);
     }
 
-    virtual void paintTripleLabel(Graphics& g, Rectangle<int> bounds, String newLeftText, String newMiddleText, String newRightText, bool newLeftBold, bool newMiddleBold, bool newRightBold)
+    virtual void paintTripleLabel (Graphics& g,
+                                   Rectangle<int> bounds,
+                                   String newLeftText,
+                                   String newMiddleText,
+                                   String newRightText,
+                                   bool newLeftBold,
+                                   bool newMiddleBold,
+                                   bool newRightBold)
     {
-        (void)newRightBold;
+        (void) newRightBold;
         g.setColour (Colours::white);
         Font tempFont;
-        tempFont.setHeight(bounds.getHeight() * 1.0f);
+        tempFont.setHeight (bounds.getHeight() * 1.0f);
         int height = bounds.getHeight();
 
-        tempFont.setStyleFlags(newLeftBold ? 1 : 0);
-        g.setFont(getLookAndFeel().getTypefaceForFont(tempFont));
-        g.setFont(height * 1.0f);
+        tempFont.setStyleFlags (newLeftBold ? 1 : 0);
+        g.setFont (getLookAndFeel().getTypefaceForFont (tempFont));
+        g.setFont (height * 1.0f);
         g.drawText (newLeftText, bounds, Justification::left, true);
 
-        tempFont.setStyleFlags(newMiddleBold ? 1 : 0);
-        g.setFont(getLookAndFeel().getTypefaceForFont(tempFont));
-        g.setFont((height * 1.0f) + (newMiddleBold ? 2.0f : 0.0f));
+        tempFont.setStyleFlags (newMiddleBold ? 1 : 0);
+        g.setFont (getLookAndFeel().getTypefaceForFont (tempFont));
+        g.setFont ((height * 1.0f) + (newMiddleBold ? 2.0f : 0.0f));
         g.drawText (newMiddleText, bounds, Justification::centred, true);
 
-        tempFont.setStyleFlags(rightBold ? 1 : 0);
-        g.setFont(getLookAndFeel().getTypefaceForFont(tempFont));
-        g.setFont(height * 1.0f);
+        tempFont.setStyleFlags (rightBold ? 1 : 0);
+        g.setFont (getLookAndFeel().getTypefaceForFont (tempFont));
+        g.setFont (height * 1.0f);
         g.drawText (newRightText, bounds, Justification::right, true);
     }
 
-
-    void resized() override
-    {
-    }
+    void resized() override {}
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TripleLabel)
@@ -197,5 +210,4 @@ private:
     String middleText = "";
     String rightText = "";
     bool leftBold, middleBold, rightBold;
-
 };
