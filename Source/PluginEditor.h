@@ -40,7 +40,6 @@
 #include "../resources/customComponents/ReverseSlider.h"
 #include "../resources/customComponents/TitleBar.h"
 #include "../resources/lookAndFeel/MainLookAndFeel.h"
-#include "FilterCoefficients.h"
 
 #ifdef USE_MELATONIN_INSPECTOR
     #include <melatonin_inspector/melatonin_inspector.h>
