@@ -957,7 +957,7 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer,
     }
 
     auto nActiveBands = static_cast<int> (nProcessorBands);
-    if (juce::approximatelyEqual (zeroLatencyModePtr->load(), 1.0f))
+    if (zeroLatencyModePtr->load() > 0.5f)
         nActiveBands = 1;
 
     // Copy input to filter bank
@@ -968,7 +968,7 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer,
     }
 
     // Process filter bank convolvers
-    if (! juce::approximatelyEqual (zeroLatencyModePtr->load(), 1.0f) && nActiveBands > 1)
+    if (zeroLatencyModePtr->load() < 0.5f && nActiveBands > 1)
     {
         if (! convolversReady.load (std::memory_order_acquire))
         {
@@ -1605,7 +1605,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const String& parameterID,
     {
         TRACE_EVENT ("dsp", "zeroLatencyMode");
         updateLatency();
-        if (! juce::approximatelyEqual (zeroLatencyModePtr->load (std::memory_order_acquire), 1.0f))
+        if (zeroLatencyModePtr->load (std::memory_order_acquire) < 0.5f)
         {
             // Zero Latency Mode turned off
             if (abLayerState == COMPARE_LAYER_B)
@@ -1658,8 +1658,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const String& parameterID,
             zeroLatencyModeChanged.store (true, std::memory_order_release);
         }
         if (zeroLatencyModeChanged.load (std::memory_order_acquire)
-            && juce::approximatelyEqual (zeroLatencyModePtr->load (std::memory_order_acquire),
-                                         1.0f))
+            && zeroLatencyModePtr->load (std::memory_order_acquire) > 0.5f)
         {
             vtsParams.state.setProperty ("oldZeroLatencyMode",
                                          var (zeroLatencyModePtr->load (std::memory_order_acquire)),
@@ -1683,12 +1682,8 @@ void PolarDesignerAudioProcessor::parameterChanged (const String& parameterID,
             {
                 for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
                 {
-                    // CHANGED: Replaced std::round(soloBandPtr[i]->load()) > 0.5f with juce::approximatelyEqual(soloBandPtr[i]->load(), 1.0f)
-                    paramsToSync.solo[i] =
-                        soloBandPtr[i] && juce::approximatelyEqual (soloBandPtr[i]->load(), 1.0f);
-                    // CHANGED: Replaced std::round(muteBandPtr[i]->load()) > 0.5f with juce::approximatelyEqual(muteBandPtr[i]->load(), 1.0f)
-                    paramsToSync.mute[i] =
-                        muteBandPtr[i] && juce::approximatelyEqual (muteBandPtr[i]->load(), 1.0f);
+                    paramsToSync.solo[i] = soloBandPtr[i] && soloBandPtr[i]->load() > 0.5f;
+                    paramsToSync.mute[i] = muteBandPtr[i] && muteBandPtr[i]->load() > 0.5f;
 
                     paramsToSync.dirFactors[i] = dirFactorsPtr[i] ? dirFactorsPtr[i]->load() : 0.0f;
                     paramsToSync.gains[i] = bandGainsPtr[i] ? bandGainsPtr[i]->load() : 0.0f;
@@ -1860,21 +1855,19 @@ void PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded()
 {
     TRACE_DSP();
 
-    if (recomputeAllFilterCoefficients.load (std::memory_order_acquire))
+    if (recomputeAllFilterCoefficients.exchange (false, std::memory_order_relaxed))
     {
         computeAllFilterCoefficients();
-        recomputeAllFilterCoefficients.store (false, std::memory_order_release);
         resetXoverFreqs();
         return;
     }
 
     for (unsigned int i = 0; i < 4; ++i)
     {
-        if (recomputeFilterCoefficients[i].load (std::memory_order_acquire))
+        if (recomputeFilterCoefficients[i].exchange (false, std::memory_order_relaxed))
         {
             computeFilterCoefficients (i);
             initConvolver (i);
-            recomputeFilterCoefficients[i].store (false, std::memory_order_release);
         }
     }
 }
@@ -2810,21 +2803,9 @@ void PolarDesignerAudioProcessor::timerCallback()
 
     validateSampleRateAndBlockSize(); // Validate before operations
 
-    bool anyFilterNeedsRecompute = false;
-    for (unsigned int i = 0; i < recomputeFilterCoefficients.size(); ++i)
-    {
-        if (recomputeFilterCoefficients[i].load (std::memory_order_acquire))
-        {
-            anyFilterNeedsRecompute = true;
-            break;
-        }
-    }
-    if (recomputeAllFilterCoefficients.load (std::memory_order_acquire) || anyFilterNeedsRecompute)
-    {
-        recomputeFilterCoefficientsIfNeeded();
-    }
+    recomputeFilterCoefficientsIfNeeded();
 
-    if (zeroLatencyModeChanged.exchange (false))
+    if (zeroLatencyModeChanged.exchange (false, std::memory_order_relaxed))
     {
         updateLatency();
     }
