@@ -5,8 +5,8 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set (CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
 
-option (WITH_ADDRESS_SANITIZER "Enable Address Sanitizer" ON)
-option (WITH_THREAD_SANITIZER "Enable Thread Sanitizer" ON)
+option (WITH_ADDRESS_SANITIZER "Enable Address Sanitizer" OFF)
+option (WITH_THREAD_SANITIZER "Enable Thread Sanitizer" OFF)
 
 message (STATUS "Sanitizers: ASan=${WITH_ADDRESS_SANITIZER} TSan=${WITH_THREAD_SANITIZER}")
 if (WITH_ADDRESS_SANITIZER)
