@@ -23,7 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "PluginProcessor.h"
+#include "Constants.h"
 #include "PluginEditor.h"
+#include <atomic>
 
 /* We use versionHint of ParameterID from now on - rigorously! */
 #define PD_PARAMETER_V1 1
@@ -1581,6 +1583,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const String& parameterID,
     {
         unsigned int idx = static_cast<unsigned int> (parameterID.getTrailingIntValue() - 1);
         recomputeFilterCoefficients[idx].store (true, std::memory_order_release);
+        recomputeFilterCoefficients[idx + 1].store (true, std::memory_order_release);
         repaintDEQ.store (true, std::memory_order_release);
     }
     else if (parameterID.startsWith ("solo"))
@@ -1862,7 +1865,7 @@ void PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded()
         return;
     }
 
-    for (unsigned int i = 0; i < 4; ++i)
+    for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
     {
         if (recomputeFilterCoefficients[i].exchange (false, std::memory_order_relaxed))
         {
@@ -1875,7 +1878,7 @@ void PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded()
 void PolarDesignerAudioProcessor::computeAllFilterCoefficients()
 {
     TRACE_DSP();
-    for (unsigned int i = 0; i < 4; ++i)
+    for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
     {
         computeFilterCoefficients (i);
     }
@@ -1995,8 +1998,8 @@ void PolarDesignerAudioProcessor::initAllConvolvers()
         return; // No changes, skip initialization
     }
 
-    // Limit loop to MAX_NUM_EQS to prevent out-of-bounds access
-    for (unsigned int i = 0; i < std::min (nProcessorBands.load(), MAX_NUM_EQS); ++i)
+    const auto nBands = nProcessorBands.load();
+    for (unsigned int i = 0; i < nBands; ++i)
     {
         // Validate firFilterBuffer
         if (firFilterBuffer.getNumChannels() <= static_cast<int> (i)
@@ -2796,19 +2799,13 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients (float distance)
 void PolarDesignerAudioProcessor::timerCallback()
 {
     TRACE_DSP();
-    //    if (currentSampleRate == FILTER_BANK_NATIVE_SAMPLE_RATE || currentBlockSize == PD_DEFAULT_BLOCK_SIZE) {
-    //        LOG_WARN("Timer callback skipped: plugin not prepared");
-    //        return;
-    //    }
 
     validateSampleRateAndBlockSize(); // Validate before operations
 
     recomputeFilterCoefficientsIfNeeded();
 
-    if (zeroLatencyModeChanged.exchange (false, std::memory_order_relaxed))
-    {
+    if (zeroLatencyModeChanged.exchange (false, std::memory_order_acquire))
         updateLatency();
-    }
 
     if (syncChannelPtr->load (std::memory_order_acquire) > 0)
     {

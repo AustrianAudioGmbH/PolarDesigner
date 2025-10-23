@@ -193,7 +193,7 @@ public:
     std::atomic<bool> activeBandsChanged = true;
     std::atomic<bool> zeroLatencyModeChanged = true;
     std::atomic<bool> ffDfEqChanged = true;
-    std::array<std::atomic<bool>, 4> recomputeFilterCoefficients;
+    std::array<std::atomic<bool>, MAX_NUM_EQS> recomputeFilterCoefficients;
     std::atomic<bool> recomputeAllFilterCoefficients;
 
     bool getDisturberRecorded() { return disturberRecorded; }
