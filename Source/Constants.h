@@ -3,7 +3,7 @@
 static constexpr int PD_DEFAULT_BLOCK_SIZE = 1024;
 
 /* PolarDesigner has a maximum of 5 EQ's .. */
-static constexpr int MAX_NUM_EQS = 5;
+static constexpr unsigned int MAX_NUM_EQS = 5;
 /* .. and functions on a maximum of 2 inputs only. */
 static constexpr int MAX_NUM_INPUTS = 2;
 

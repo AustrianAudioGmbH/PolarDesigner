@@ -448,7 +448,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     xOverFreqsPtr[1] = vtsParams.getRawParameterValue ("xOverF2");
     xOverFreqsPtr[2] = vtsParams.getRawParameterValue ("xOverF3");
     xOverFreqsPtr[3] = vtsParams.getRawParameterValue ("xOverF4");
-    for (int i = 0; i < MAX_NUM_EQS; ++i)
+    for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
     {
         dirFactorsPtr[i] = vtsParams.getRawParameterValue ("alpha" + String (i + 1));
         soloBandPtr[i] = vtsParams.getRawParameterValue ("solo" + String (i + 1));
@@ -1239,7 +1239,7 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
     firFilterBuffer.setSize (MAX_NUM_EQS, firLen, false, false, true);
     omniEightBuffer.setSize (MAX_NUM_INPUTS, currentBlockSize, false, false, true);
 
-    for (int i = 0; i < MAX_NUM_EQS; ++i)
+    for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
     {
         oldDirFactors[i] = 0.0f; // Default to cardioid
         oldBandGains[i] = 0.0f; // Default to 0 dB
@@ -1268,7 +1268,7 @@ void PolarDesignerAudioProcessor::resizeBuffersIfNeeded (int newFirLen, int newB
         firLen.store (newFirLen);
         firFilterBuffer.setSize (MAX_NUM_EQS, newFirLen, false, false, true);
         firFilterBuffer.clear();
-        DBG ("Resized firFilterBuffer to " << MAX_NUM_EQS << "x" << newFirLen);
+        DBG ("Resized firFilterBuffer to " << String (MAX_NUM_EQS) << "x" << newFirLen);
     }
 
     // Resize filterBankBuffer if channels/samples differ or is uninitialized
@@ -1278,7 +1278,8 @@ void PolarDesignerAudioProcessor::resizeBuffersIfNeeded (int newFirLen, int newB
     {
         filterBankBuffer.setSize (N_CH_IN * MAX_NUM_EQS, newBlockSize, false, false, true);
         filterBankBuffer.clear();
-        DBG ("Resized filterBankBuffer to " << N_CH_IN * MAX_NUM_EQS << "x" << newBlockSize);
+        DBG ("Resized filterBankBuffer to " << String (N_CH_IN * MAX_NUM_EQS) << "x"
+                                            << newBlockSize);
     }
 
     // Resize omniEightBuffer if channels/samples differ or is uninitialized
@@ -1532,7 +1533,8 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
 // parameterChanged: Add thread-safety and consistent oldNrBands updates
 
 // In parameterChanged (around line 1050)
-void PolarDesignerAudioProcessor::parameterChanged (const String& parameterID, float newValue)
+void PolarDesignerAudioProcessor::parameterChanged (const String& parameterID,
+                                                    [[maybe_unused]] float newValue)
 {
 #ifdef USE_EXTRA_DEBUG_DUMPS
     LOG_DEBUG ("Parameter changed: " + parameterID + " new Value: " + std::to_string (newValue)
@@ -1679,7 +1681,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const String& parameterID, f
 
             if (! paramsToSync.paramsValid) // Initialize all params
             {
-                for (int i = 0; i < MAX_NUM_EQS; ++i)
+                for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
                 {
                     // CHANGED: Replaced std::round(soloBandPtr[i]->load()) > 0.5f with juce::approximatelyEqual(soloBandPtr[i]->load(), 1.0f)
                     paramsToSync.solo[i] =
@@ -1877,6 +1879,17 @@ void PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded()
     }
 }
 
+void PolarDesignerAudioProcessor::computeAllFilterCoefficients()
+{
+    TRACE_DSP();
+    for (unsigned int i = 0; i < 4; ++i)
+    {
+        computeFilterCoefficients (i);
+    }
+    std::fill (bandCoefficientsChanged.begin(), bandCoefficientsChanged.end(), true);
+    initAllConvolvers();
+}
+
 void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crossoverNr)
 {
     TRACE_DSP();
@@ -1902,25 +1915,27 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
          i < std::min (crossoverNr + 2, nProcessorBands - 1);
          ++i)
     {
-        float halfBandwidth = (hzFromZeroToOne (i, xOverFreqsPtr[i]->load())
-                               - hzFromZeroToOne (i - 1, xOverFreqsPtr[i - 1]->load()))
-                              / 2;
+        const float halfBandwidth = (hzFromZeroToOne (i, xOverFreqsPtr[i]->load())
+                                     - hzFromZeroToOne (i - 1, xOverFreqsPtr[i - 1]->load()))
+                                    / 2;
         dsp::FilterDesign<float>::FIRCoefficientsPtr lp2bp =
             dsp::FilterDesign<float>::designFIRLowpassWindowMethod (
                 halfBandwidth,
                 currentSampleRate,
                 static_cast<size_t> (firLen - 1),
                 dsp::WindowingFunction<float>::WindowingMethod::hamming);
-        float* lp2bpCoeffs = lp2bp->getRawCoefficients();
+
+        const auto* lp2bpCoeffs = lp2bp->getRawCoefficients();
         auto* filterBufferPointer = firFilterBuffer.getWritePointer (static_cast<int> (i));
+        const auto fCenter = halfBandwidth + hzFromZeroToOne (i - 1, xOverFreqsPtr[i - 1]->load());
+
         for (int j = 0; j < firLen; j++)
         {
-            float fCenter = halfBandwidth + hzFromZeroToOne (i - 1, xOverFreqsPtr[i - 1]->load());
-            filterBufferPointer[j] =
-                2 * lp2bpCoeffs[j]
-                * std::cos (static_cast<float> (MathConstants<float>::twoPi * fCenter
-                                                / currentSampleRate * (j - (firLen - 1.0f) / 2)));
+            filterBufferPointer[j] = 2 * lp2bpCoeffs[j]
+                                     * std::cos (MathConstants<float>::twoPi * fCenter
+                                                 / currentSampleRate * (j - (firLen - 1.0f) / 2));
         }
+
         bandCoefficientsChanged[i] = true;
     }
 
@@ -1988,9 +2003,7 @@ void PolarDesignerAudioProcessor::initAllConvolvers()
     }
 
     // Limit loop to MAX_NUM_EQS to prevent out-of-bounds access
-    for (unsigned int i = 0;
-         i < std::min (nProcessorBands.load(), static_cast<unsigned int> (MAX_NUM_EQS));
-         ++i)
+    for (unsigned int i = 0; i < std::min (nProcessorBands.load(), MAX_NUM_EQS); ++i)
     {
         // Validate firFilterBuffer
         if (firFilterBuffer.getNumChannels() <= static_cast<int> (i)
@@ -2093,17 +2106,6 @@ void PolarDesignerAudioProcessor::initConvolver (size_t convNr)
     }
 
     convolversReady.store (true, std::memory_order_release);
-}
-
-void PolarDesignerAudioProcessor::computeAllFilterCoefficients()
-{
-    TRACE_DSP();
-    for (unsigned int i = 0; i < 4; ++i)
-    {
-        computeFilterCoefficients (i);
-    }
-    std::fill (bandCoefficientsChanged.begin(), bandCoefficientsChanged.end(), true);
-    initAllConvolvers();
 }
 
 void PolarDesignerAudioProcessor::loadFilterBankImpulseResponses()
@@ -2248,7 +2250,7 @@ Result PolarDesignerAudioProcessor::loadPreset (const File& presetFile)
 
     NormalisableRange<float> dfRange = vtsParams.getParameter ("alpha1")->getNormalisableRange();
 
-    for (int i = 0; i < MAX_NUM_EQS; ++i)
+    for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
     {
         x = parsedJson.getProperty ("dirFactor" + String (i + 1), parsedJson);
         if (x < dfRange.start || x > dfRange.end)
@@ -2464,7 +2466,7 @@ void PolarDesignerAudioProcessor::startTracking (bool trackDisturber)
     signalRecorded = false;
     disturberRecorded = false;
     trackingDisturber = trackDisturber;
-    for (int i = 0; i < MAX_NUM_EQS; ++i)
+    for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
     {
         omniSqSumSig[i] = 0.0f;
         eightSqSumSig[i] = 0.0f;
@@ -2488,7 +2490,7 @@ void PolarDesignerAudioProcessor::resetTrackingState()
     signalRecorded = false;
     disturberRecorded = false;
     nrBlocksRecorded = 0;
-    for (int i = 0; i < MAX_NUM_EQS; ++i)
+    for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
     {
         omniSqSumSig[i] = 0.0f;
         eightSqSumSig[i] = 0.0f;
@@ -2518,7 +2520,7 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
         {
             if (nrBlocksRecorded != 0)
             {
-                for (int i = 0; i < MAX_NUM_EQS; ++i)
+                for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
                 {
                     omniSqSumDist[i] = omniSqSumDist[i] / nrBlocksRecorded;
                     eightSqSumDist[i] = eightSqSumDist[i] / nrBlocksRecorded;
@@ -2531,7 +2533,7 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
         {
             if (nrBlocksRecorded != 0)
             {
-                for (int i = 0; i < MAX_NUM_EQS; ++i)
+                for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
                 {
                     omniSqSumSig[i] = omniSqSumSig[i] / nrBlocksRecorded;
                     eightSqSumSig[i] = eightSqSumSig[i] / nrBlocksRecorded;
@@ -2550,7 +2552,7 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
         {
             if (nrBlocksRecorded != 0)
             {
-                for (int i = 0; i < MAX_NUM_EQS; ++i)
+                for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
                 {
                     omniSqSumDist[i] = omniSqSumDist[i] / nrBlocksRecorded;
                     eightSqSumDist[i] = eightSqSumDist[i] / nrBlocksRecorded;
@@ -2563,7 +2565,7 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
         {
             if (nrBlocksRecorded != 0)
             {
-                for (int i = 0; i < MAX_NUM_EQS; ++i)
+                for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
                 {
                     omniSqSumSig[i] = omniSqSumSig[i] / nrBlocksRecorded;
                     eightSqSumSig[i] = eightSqSumSig[i] / nrBlocksRecorded;
@@ -2841,7 +2843,7 @@ void PolarDesignerAudioProcessor::timerCallback()
                                                                        * 1.0f));
         }
 
-        for (int i = 0; i < MAX_NUM_EQS; ++i)
+        for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
         {
             if (! exactlyEqual (dirFactorsPtr[i]->load(), paramsToSync.dirFactors[i]))
             {
