@@ -11,8 +11,6 @@
 
 #include "BinaryFonts.h"
 
-#include <JuceHeader.h>
-
 using namespace juce;
 
 class MainLookAndFeel : public LookAndFeel_V4

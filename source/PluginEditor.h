@@ -25,21 +25,21 @@
 
 //#define AA_DO_DEBUG_PATH
 
-#include <JuceHeader.h>
-
 #include "PluginProcessor.h"
 
-#include "../resources/customComponents/AnimatedLabel.h"
-#include "../resources/customComponents/DirSlider.h"
-#include "../resources/customComponents/DirectivityEQ.h"
-#include "../resources/customComponents/EndlessSlider.h"
-#include "../resources/customComponents/GainSlider.h"
-#include "../resources/customComponents/MultiTextButton.h"
-#include "../resources/customComponents/PolarPatternVisualizer.h"
-#include "../resources/customComponents/PresetListBox.h"
-#include "../resources/customComponents/ReverseSlider.h"
-#include "../resources/customComponents/TitleBar.h"
-#include "../resources/lookAndFeel/MainLookAndFeel.h"
+#include "resources/customComponents/AnimatedLabel.h"
+#include "resources/customComponents/DirSlider.h"
+#include "resources/customComponents/DirectivityEQ.h"
+#include "resources/customComponents/EndlessSlider.h"
+#include "resources/customComponents/GainSlider.h"
+#include "resources/customComponents/MultiTextButton.h"
+#include "resources/customComponents/PolarPatternVisualizer.h"
+#include "resources/customComponents/PresetListBox.h"
+#include "resources/customComponents/ReverseSlider.h"
+#include "resources/customComponents/TitleBar.h"
+#include "resources/lookAndFeel/MainLookAndFeel.h"
+
+#include <juce_audio_processors/juce_audio_processors.h>
 
 #ifdef USE_MELATONIN_INSPECTOR
     #include <melatonin_inspector/melatonin_inspector.h>

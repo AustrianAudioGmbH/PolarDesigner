@@ -14,11 +14,70 @@ message (STATUS "Sanitizers: ASan=${WITH_ADDRESS_SANITIZER} TSan=${WITH_THREAD_S
 if (WITH_ADDRESS_SANITIZER)
     if (MSVC)
         add_compile_options (/fsanitize=address)
-    elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        # also enable UndefinedBehaviorSanitizer
-        # https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
-        add_compile_options (-fsanitize=address,undefined -fno-omit-frame-pointer)
-        link_libraries (-fsanitize=address)
+    else ()
+        if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+            set (
+                sanitizer_flags
+                -fno-omit-frame-pointer
+                -g
+                -fno-sanitize-recover=all
+                -fsanitize=address
+                -fsanitize=undefined
+                -fsanitize=shift
+                -fsanitize=shift-exponent
+                -fsanitize=shift-base
+                -fsanitize=float-divide-by-zero
+                -fsanitize=integer-divide-by-zero
+                -fsanitize=unreachable
+                -fsanitize=vla-bound
+                -fsanitize=null
+                -fsanitize=return
+                -fsanitize=signed-integer-overflow
+                -fsanitize=bounds
+                -fsanitize=bounds-strict
+                -fsanitize=alignment
+                -fsanitize=object-size
+                -fsanitize=float-cast-overflow
+                -fsanitize=nonnull-attribute
+                -fsanitize=bool
+                -fsanitize=enum
+                -fsanitize=vptr
+                -fsanitize=pointer-overflow
+                -fsanitize=builtin
+                -fsanitize=pointer-compare
+                -fsanitize=pointer-subtract
+                -fsanitize=leak
+            )
+
+        elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            set (
+                sanitizer_flags
+                -fno-sanitize-recover=all
+                -fsanitize=alignment
+                -fsanitize=bool
+                -fsanitize=bounds
+                -fsanitize=enum
+                -fsanitize=vptr
+                -fsanitize=integer-divide-by-zero
+                -fsanitize=float-divide-by-zero
+                -fsanitize=float-cast-overflow
+                -fsanitize=nonnull-attribute
+                -fsanitize=nullability-arg
+                -fsanitize=nullability-assign
+                -fsanitize=returns-nonnull-attribute
+                -fsanitize=nullability-return
+                -fsanitize=null
+                -fsanitize=shift
+                -fsanitize=signed-integer-overflow
+                -fsanitize=unreachable
+                -fsanitize=vla-bound
+                -fsanitize=address
+            )
+
+        endif ()
+
+        add_compile_options ("$<$<COMPILE_LANGUAGE:CXX>:${sanitizer_flags}>")
+        add_link_options (${sanitizer_flags})
     endif ()
     message ("Address Sanitizer enabled")
 endif ()
@@ -127,16 +186,14 @@ set (JUCE_BUILD_LV2 OFF CACHE BOOL "Disable LV2")
 set (JUCE_BUILD_ARA OFF CACHE BOOL "Disable ARA")
 
 # Include Melatonin Inspector only for Debug builds
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-    include (FetchContent)
-    FetchContent_Declare (
-        melatonin_inspector
-        GIT_REPOSITORY https://github.com/sudara/melatonin_inspector.git
-        GIT_TAG origin/main
-        SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/melatonin_inspector
-    )
-    FetchContent_MakeAvailable (melatonin_inspector)
-endif ()
+include (FetchContent)
+FetchContent_Declare (
+    melatonin_inspector
+    GIT_REPOSITORY https://github.com/sudara/melatonin_inspector.git
+    GIT_TAG origin/main
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/melatonin_inspector
+)
+FetchContent_MakeAvailable (melatonin_inspector)
 
 # Include Melatonin Perfetto only for Release builds
 include (FetchContent)
@@ -220,26 +277,22 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     if (CMAKE_OSX_DEPLOYMENT_TARGET)
         message ("The minimum macOS version is set to " $CACHE{CMAKE_OSX_DEPLOYMENT_TARGET}.)
     endif ()
-else ()
+elseif (UNIX AND NOT APPLE)
+    message ("Building on Linux")
+elseif (WIN32)
     message ("Building on Windows")
     set (FORMATS VST3)
+else ()
+    message (FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif ()
 
 target_compile_features (SharedCode INTERFACE cxx_std_20)
 
-set (SourceFiles Source/PluginEditor.h Source/PluginProcessor.h Source/PluginEditor.cpp
-                 Source/PluginProcessor.cpp
-)
-file (GLOB_RECURSE SourceLookAndFeelFiles
-      CONFIGURE_DEPENDS" ${CMAKE_CURRENT_SOURCE_DIR}/resources/lookAndFeel/*.h"
-      "${CMAKE_CURRENT_SOURCE_DIR}/resources/lookAndFeel/*.cpp"
+file (GLOB_RECURSE SourceFiles CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.h"
+      "${CMAKE_CURRENT_SOURCE_DIR}/source/*.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp"
 )
 
-juce_generate_juce_header (${PROJECT_NAME})
-
-target_sources (SharedCode INTERFACE ${SourceFiles} ${SourceLookAndFeelFiles})
-
-target_include_directories (${PROJECT_NAME} INTERFACE ${juce_generated_headers_directory})
+target_sources (SharedCode INTERFACE ${SourceFiles})
 
 include (Assets)
 
@@ -259,8 +312,9 @@ target_compile_definitions (
               AA_BUILD_JUCE_VERSION="${AA_JUCE_GIT_TAG}"
               PRODUCT_NAME_WITHOUT_VERSION="PolarDesigner"
               # For debugging Performance issues:
-              $<$<CONFIG:Debug>:PERFETTO=0>
-              $<$<CONFIG:Release>:PERFETTO=0>
+              # $<$<CONFIG:Debug>:PERFETTO=OFF>
+              # $<$<CONFIG:Release>:PERFETTO=OFF>
+              PERFETTO=OFF
     # Define USE_MELATONIN_INSPECTOR for Debug builds
     #	$<$<CONFIG:Debug>:USE_MELATONIN_INSPECTOR>
     # For debugging UI issues:
@@ -278,6 +332,8 @@ endif ()
 target_link_libraries (
     SharedCode
     INTERFACE Assets
+              melatonin_inspector
+              Melatonin::Perfetto
               juce_audio_basics
               juce_audio_devices
               juce_audio_formats
@@ -301,19 +357,6 @@ else ()
     target_link_libraries (SharedCode INTERFACE fftw3f)
 endif ()
 
-# Link melatonin_inspector only for Debug builds
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-    target_link_libraries (SharedCode INTERFACE melatonin_inspector)
-endif ()
-
-# Link melatonin_perfetto in both Debug and Release builds (disabled in Debug with PERFETTO=0)
-target_link_libraries ("${PROJECT_NAME}" PRIVATE Melatonin::Perfetto)
-
-add_custom_target (
-    host_header
-    DEPENDS $<TARGET_PROPERTY:${PROJECT_NAME},JUCE_GENERATED_SOURCES_DIRECTORY>/JuceHeader.h
-)
-
 target_link_libraries ("${PROJECT_NAME}" PRIVATE SharedCode)
 
 if ("AAX" IN_LIST FORMATS)
@@ -330,3 +373,5 @@ if ("AAX" IN_LIST FORMATS)
         COMMENT "Copying PolarDesigner3.xml to the Resources folder for macOS AAX build"
     )
 endif ()
+
+include (Tests)

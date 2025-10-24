@@ -23,11 +23,12 @@
 
 #pragma once
 
-#include "../resources/Delay.h"
 #include "Constants.h"
+#include "resources/Delay.h"
 
-#include <JuceHeader.h>
 #include <atomic>
+#include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_audio_utils/juce_audio_utils.h>
 #include <math.h>
 #include <memory>
 
