@@ -53,7 +53,6 @@
 #pragma once
 #include "ImgPaths.h"
 
-#include <JuceHeader.h>
 #include <numbers>
 
 #define RS_FLT_EPSILON 1.19209290E-07F
