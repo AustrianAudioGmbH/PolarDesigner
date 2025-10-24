@@ -1257,9 +1257,8 @@ void PolarDesignerAudioProcessorEditor::resized()
     presetArea = mainfb.items[1].currentBounds;
 }
 
-void PolarDesignerAudioProcessorEditor::buttonStateChanged (juce::Button* button)
+void PolarDesignerAudioProcessorEditor::buttonStateChanged ([[maybe_unused]] juce::Button* button)
 {
-    (void) button; // UNUSED
 }
 
 void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)

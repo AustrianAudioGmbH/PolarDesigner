@@ -24,8 +24,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "PluginProcessor.h"
 #include "Constants.h"
+#include "FilterCoefficients.h"
 #include "PluginEditor.h"
+
 #include <atomic>
+#include <juce_audio_basics/juce_audio_basics.h>
 
 /* We use versionHint of ParameterID from now on - rigorously! */
 #define PD_PARAMETER_V1 1
@@ -406,7 +409,6 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     dfEqEightBuffer (1, DF_EQ_LEN),
     ffEqOmniBuffer (1, FF_EQ_LEN),
     ffEqEightBuffer (1, FF_EQ_LEN),
-    convolversReady (false),
     delay(),
     delayBuffer(),
     oldDirFactors { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f },
@@ -912,7 +914,6 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer,
     {
         initializeBuffers();
     }
-    recomputeFilterCoefficientsIfNeeded();
 
     // Proximity compensation
     auto proximity =
@@ -972,11 +973,7 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer,
     // Process filter bank convolvers
     if (zeroLatencyModePtr->load() < 0.5f && nActiveBands > 1)
     {
-        if (! convolversReady.load (std::memory_order_acquire))
-        {
-            LOG_WARN ("Convolvers not ready, skipping filter bank processing");
-            return;
-        }
+        recomputeFilterCoefficientsIfNeeded();
 
         for (unsigned int i = 0;
              i < static_cast<size_t> (nActiveBands) && 2 * i + 1 < convolvers.size();
@@ -1583,7 +1580,6 @@ void PolarDesignerAudioProcessor::parameterChanged (const String& parameterID,
     {
         unsigned int idx = static_cast<unsigned int> (parameterID.getTrailingIntValue() - 1);
         recomputeFilterCoefficients[idx].store (true, std::memory_order_release);
-        recomputeFilterCoefficients[idx + 1].store (true, std::memory_order_release);
         repaintDEQ.store (true, std::memory_order_release);
     }
     else if (parameterID.startsWith ("solo"))
@@ -1860,17 +1856,17 @@ void PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded()
 
     if (recomputeAllFilterCoefficients.exchange (false, std::memory_order_relaxed))
     {
-        computeAllFilterCoefficients();
         resetXoverFreqs();
+        computeAllFilterCoefficients();
         return;
     }
 
-    for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
+    for (unsigned int i = 0; i < MAX_NUM_EQS - 1; ++i)
     {
         if (recomputeFilterCoefficients[i].exchange (false, std::memory_order_relaxed))
         {
             computeFilterCoefficients (i);
-            initConvolver (i);
+            updateConvolver (i);
         }
     }
 }
@@ -1878,11 +1874,10 @@ void PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded()
 void PolarDesignerAudioProcessor::computeAllFilterCoefficients()
 {
     TRACE_DSP();
-    for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
+    for (unsigned int i = 0; i < MAX_NUM_EQS - 1; ++i)
     {
         computeFilterCoefficients (i);
     }
-    std::fill (bandCoefficientsChanged.begin(), bandCoefficientsChanged.end(), true);
     initAllConvolvers();
 }
 
@@ -1903,7 +1898,6 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
                 static_cast<size_t> (firLen - 1),
                 dsp::WindowingFunction<float>::WindowingMethod::hamming);
         firFilterBuffer.copyFrom (0, 0, lowpass->getRawCoefficients(), firLen - 1);
-        bandCoefficientsChanged[0] = true;
     }
 
     // Bandpass filters
@@ -1931,8 +1925,6 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
                                      * std::cos (MathConstants<float>::twoPi * fCenter
                                                  / currentSampleRate * (j - (firLen - 1.0f) / 2));
         }
-
-        bandCoefficientsChanged[i] = true;
     }
 
     // Highest band: highpass
@@ -1955,14 +1947,12 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
             filterBufferPointer[i] =
                 lp2hpCoeffs[i] * std::cos (MathConstants<float>::pi * (i - (firLen - 1.0f) / 2));
         }
-        bandCoefficientsChanged[nProcessorBands - 1] = true;
     }
 }
 
 void PolarDesignerAudioProcessor::initAllConvolvers()
 {
     TRACE_DSP();
-    convolversReady.store (false, std::memory_order_release);
 
     // Validate sample rate and block size
     validateSampleRateAndBlockSize();
@@ -1989,14 +1979,6 @@ void PolarDesignerAudioProcessor::initAllConvolvers()
     }
 
     dsp::ProcessSpec convSpec { currentSampleRate, static_cast<uint32> (currentBlockSize), 1 };
-    if (convSpec == lastConvSpec
-        && ! std::any_of (bandCoefficientsChanged.begin(),
-                          bandCoefficientsChanged.end(),
-                          [] (bool changed) { return changed; }))
-    {
-        convolversReady.store (true, std::memory_order_release);
-        return; // No changes, skip initialization
-    }
 
     const auto nBands = nProcessorBands.load();
     for (unsigned int i = 0; i < nBands; ++i)
@@ -2019,89 +2001,78 @@ void PolarDesignerAudioProcessor::initAllConvolvers()
         }
 
         // Load impulse response only if coefficients changed
-        if (bandCoefficientsChanged[i] || convSpec != lastConvSpec)
-        {
-            AudioBuffer<float> convSingleBuff (1, firLen);
-            convSingleBuff.copyFrom (0, 0, firFilterBuffer, static_cast<int> (i), 0, firLen);
-
-            convolvers[2 * i].loadImpulseResponse (std::move (convSingleBuff),
-                                                   currentSampleRate,
-                                                   dsp::Convolution::Stereo::no,
-                                                   dsp::Convolution::Trim::no,
-                                                   dsp::Convolution::Normalise::no);
-
-            // Re-create convSingleBuff for second copy since previous was moved
-            convSingleBuff = AudioBuffer<float> (1, firLen);
-            convSingleBuff.copyFrom (0,
-                                     0,
-                                     firFilterBuffer,
-                                     static_cast<int> (i),
-                                     0,
-                                     firLen); // Re-copy for Eight convolver
-            convolvers[2 * i + 1].loadImpulseResponse (std::move (convSingleBuff),
-                                                       currentSampleRate,
-                                                       dsp::Convolution::Stereo::no,
-                                                       dsp::Convolution::Trim::no,
-                                                       dsp::Convolution::Normalise::no);
-            bandCoefficientsChanged[i] = false;
-        }
-    }
-
-    lastConvSpec = convSpec;
-    convolversReady.store (true, std::memory_order_release);
-}
-
-void PolarDesignerAudioProcessor::initConvolver (size_t convNr)
-{
-    TRACE_DSP();
-    convolversReady.store (false, std::memory_order_release);
-
-    if (currentBlockSize == 0 || currentSampleRate <= 0.0)
-    {
-        LOG_ERROR ("Cannot initialize convolver: invalid block size or sample rate");
-        convolversReady.store (true, std::memory_order_release);
-        return;
-    }
-
-    dsp::ProcessSpec convSpec { currentSampleRate, static_cast<uint32> (currentBlockSize), 1 };
-    if (convSpec != lastConvSpec || bandCoefficientsChanged[convNr])
-    {
         AudioBuffer<float> convSingleBuff (1, firLen);
-        convSingleBuff.copyFrom (0, 0, firFilterBuffer, convNr, 0, firLen);
+        convSingleBuff.copyFrom (0, 0, firFilterBuffer, static_cast<int> (i), 0, firLen);
 
-        // Omni convolver
-        convolvers[2 * convNr].prepare (convSpec);
-        convolvers[2 * convNr].loadImpulseResponse (std::move (convSingleBuff),
-                                                    currentSampleRate,
-                                                    dsp::Convolution::Stereo::no, // isStereo
-                                                    dsp::Convolution::Trim::no, // trim
-                                                    dsp::Convolution::Normalise::no); // normalise
+        convolvers[2 * i].loadImpulseResponse (std::move (convSingleBuff),
+                                               currentSampleRate,
+                                               dsp::Convolution::Stereo::no,
+                                               dsp::Convolution::Trim::no,
+                                               dsp::Convolution::Normalise::no);
 
-        // Eight convolver
         // Re-create convSingleBuff for second copy since previous was moved
         convSingleBuff = AudioBuffer<float> (1, firLen);
         convSingleBuff.copyFrom (0,
                                  0,
                                  firFilterBuffer,
-                                 convNr,
+                                 static_cast<int> (i),
                                  0,
-                                 firLen); // Re-copy since previous buffer was moved
-        convolvers[2 * convNr + 1].prepare (convSpec);
-        convolvers[2 * convNr + 1].loadImpulseResponse (
-            std::move (convSingleBuff),
-            currentSampleRate,
-            dsp::Convolution::Stereo::no, // isStereo
-            dsp::Convolution::Trim::no, // trim
-            dsp::Convolution::Normalise::no); // normalise
-
-        bandCoefficientsChanged[convNr] = false;
-        if (convSpec != lastConvSpec)
-        {
-            lastConvSpec = convSpec;
-        }
+                                 firLen); // Re-copy for Eight convolver
+        convolvers[2 * i + 1].loadImpulseResponse (std::move (convSingleBuff),
+                                                   currentSampleRate,
+                                                   dsp::Convolution::Stereo::no,
+                                                   dsp::Convolution::Trim::no,
+                                                   dsp::Convolution::Normalise::no);
     }
 
-    convolversReady.store (true, std::memory_order_release);
+    lastConvSpec = convSpec;
+}
+
+void PolarDesignerAudioProcessor::updateConvolver (size_t convNr)
+{
+    TRACE_DSP();
+
+    if (currentBlockSize == 0 || currentSampleRate <= 0.0)
+    {
+        LOG_ERROR ("Cannot initialize convolver: invalid block size or sample rate");
+        return;
+    }
+
+    // TODO: ideally we should not allocate the IR holders on the audio thread
+    // prepare impulse response holders
+    std::array<AudioBuffer<float>, 4> convBuffers;
+
+    for (auto i = convNr; i < convNr + 2; ++i)
+    {
+        const auto j = i - convNr;
+        const auto k = j + 2;
+
+        convBuffers[j].setSize (1, firLen);
+        convBuffers[k].setSize (1, firLen);
+
+        convBuffers[j].copyFrom (0, 0, firFilterBuffer, i, 0, firLen);
+        convBuffers[k].copyFrom (0, 0, firFilterBuffer, i, 0, firLen);
+    }
+
+    for (auto i = convNr; i < convNr + 2; ++i)
+    {
+        const auto j = i - convNr;
+        const auto k = j + 2;
+
+        // Omni convolver
+        convolvers[2 * i].loadImpulseResponse (std::move (convBuffers[j]),
+                                               currentSampleRate,
+                                               dsp::Convolution::Stereo::no, // isStereo
+                                               dsp::Convolution::Trim::no, // trim
+                                               dsp::Convolution::Normalise::no); // normalise
+
+        // Eight convolver
+        convolvers[2 * i + 1].loadImpulseResponse (std::move (convBuffers[k]),
+                                                   currentSampleRate,
+                                                   dsp::Convolution::Stereo::no, // isStereo
+                                                   dsp::Convolution::Trim::no, // trim
+                                                   dsp::Convolution::Normalise::no); // normalise
+    }
 }
 
 void PolarDesignerAudioProcessor::loadFilterBankImpulseResponses()

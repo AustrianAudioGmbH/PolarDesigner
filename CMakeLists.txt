@@ -144,6 +144,31 @@ FetchContent_Declare (
 )
 FetchContent_MakeAvailable (melatonin_perfetto)
 
+if (APPLE)
+    find_library (ACCELERATE Accelerate)
+
+    if (NOT ACCELERATE)
+        message (FATAL_ERROR "Could not find the Accelerate framework!")
+    endif ()
+
+else ()
+    # fftw settings
+    set (BUILD_SHARED_LIBS OFF)
+    set (BUILD_TESTS OFF)
+
+    set (ENABLE_FLOAT ON)
+    set (FFTW_SINGLE ON)
+
+    set (ENABLE_SSE ON)
+    set (ENABLE_SSE2 ON)
+    set (CMAKE_POLICY_DEFAULT_CMP077 NEW)
+
+    add_subdirectory (modules/fftw)
+
+    set_target_properties (fftw3f PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
+endif ()
+
 juce_add_plugin (
     "${PROJECT_NAME}"
     ICON_BIG
@@ -253,6 +278,12 @@ target_compile_definitions (
     #	$<$<CONFIG:Debug>:JUCE_CHECK_MEMORY_LEAKS=1>
 )
 
+if (APPLE)
+    target_compile_definitions (SharedCode INTERFACE JUCE_USE_VDSP_FRAMEWORK=1)
+else ()
+    target_compile_definitions (SharedCode INTERFACE JUCE_DSP_USE_STATIC_FFTW=1)
+endif ()
+
 target_link_libraries (
     SharedCode
     INTERFACE Assets
@@ -272,6 +303,12 @@ target_link_libraries (
               juce::juce_recommended_lto_flags
               juce::juce_recommended_warning_flags
 )
+
+if (APPLE)
+    target_link_libraries (SharedCode INTERFACE ${ACCELERATE})
+else ()
+    target_link_libraries (SharedCode INTERFACE fftw3f)
+endif ()
 
 # Link melatonin_inspector only for Debug builds
 if (CMAKE_BUILD_TYPE MATCHES Debug)
