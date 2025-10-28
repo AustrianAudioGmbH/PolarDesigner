@@ -25,11 +25,12 @@
 
 #include "../resources/Delay.h"
 #include "Constants.h"
-#include "FilterCoefficients.h"
 
 #include <JuceHeader.h>
+#include <atomic>
 #include <math.h>
-#include <memory> // for unique_ptr
+#include <memory>
+
 // For performance tuning
 #ifdef PERFETTO
     #include "melatonin_perfetto/melatonin_perfetto.h"
@@ -52,7 +53,7 @@ using namespace juce;
 struct ParamsToSync
 {
     int nrActiveBands, ffDfEq;
-    float xOverFreqs[4], dirFactors[MAX_NUM_EQS], gains[MAX_NUM_EQS], proximity;
+    float xOverFreqs[MAX_NUM_EQS - 1], dirFactors[MAX_NUM_EQS], gains[MAX_NUM_EQS], proximity;
     bool solo[MAX_NUM_EQS], mute[MAX_NUM_EQS], allowBackwardsPattern, proximityOnOff,
         zeroLatencyMode, abLayer;
     bool paramsValid = false;
@@ -184,8 +185,6 @@ public:
 
     unsigned int getNProcessorBands();
 
-    CriticalSection convolutionLock;
-
     float getXoverSliderRangeStart (int sliderNum);
     float getXoverSliderRangeEnd (int sliderNum);
 
@@ -289,8 +288,6 @@ private:
     // proximity compensation filter
     dsp::IIR::Filter<float> proxCompIIR;
 
-    std::atomic<bool> convolversReady;
-
     // delay (in case of 1 active band)
     Delay delay;
     AudioBuffer<float> delayBuffer;
@@ -337,9 +334,7 @@ private:
     // New members for optimization
     dsp::ProcessSpec lastEqSpec { 0.0, 0, 0 }; // Last spec for EQ convolvers
     dsp::ProcessSpec lastConvSpec { 0.0, 0, 0 }; // Track last convolver spec
-    std::array<bool, MAX_NUM_EQS> bandCoefficientsChanged {
-        false
-    }; // Track which bands need updating
+
     AudioBuffer<float> cachedDfEqOmniBuffer; // Cached resampled EQ buffers
     AudioBuffer<float> cachedDfEqEightBuffer;
     AudioBuffer<float> cachedFfEqOmniBuffer;
@@ -359,7 +354,7 @@ private:
     void computeFilterCoefficients (unsigned int crossoverNr);
     void setProxCompCoefficients (float distance);
     void initAllConvolvers();
-    void initConvolver (size_t convNr);
+    void updateConvolver (size_t convNr);
     void loadFilterBankImpulseResponses();
 
     void createOmniAndEightSignals (AudioBuffer<float>& buffer);
