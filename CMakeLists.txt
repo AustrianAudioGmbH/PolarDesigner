@@ -8,6 +8,8 @@ set (CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
 option (WITH_ADDRESS_SANITIZER "Enable Address Sanitizer" OFF)
 option (WITH_THREAD_SANITIZER "Enable Thread Sanitizer" OFF)
 
+option (INSTALL_AFTER_BUILD "Let JUCE automatically install the plugin after building" OFF)
+
 message (STATUS "Sanitizers: ASan=${WITH_ADDRESS_SANITIZER} TSan=${WITH_THREAD_SANITIZER}")
 if (WITH_ADDRESS_SANITIZER)
     if (MSVC)
@@ -178,7 +180,7 @@ juce_add_plugin (
     BUNDLE_ID
     "${BUNDLE_ID}"
     COPY_PLUGIN_AFTER_BUILD
-    ON
+    ${INSTALL_AFTER_BUILD}
     PLUGIN_MANUFACTURER_CODE
     OIDA
     PLUGIN_CODE
@@ -203,17 +205,6 @@ if (WIN32)
         "${PROJECT_NAME}" PROPERTIES WIN32_EXECUTABLE TRUE VS_DPI_AWARE "PerMonitorV2"
     )
 endif ()
-
-if (${CMAKE_BUILD_TYPE} MATCHES "Release")
-    message (STATUS "Release build detected: will not copy plugins")
-    set_target_properties ("${PROJECT_NAME}" PROPERTIES JUCE_COPY_PLUGIN_AFTER_BUILD OFF)
-else ()
-    message (STATUS "Debug build detected: will copy plugins for testing")
-    set_target_properties ("${PROJECT_NAME}" PROPERTIES JUCE_COPY_PLUGIN_AFTER_BUILD ON)
-endif ()
-
-message (STATUS "Will copy plugins!!")
-set_target_properties ("${PROJECT_NAME}" PROPERTIES JUCE_COPY_PLUGIN_AFTER_BUILD OFF)
 
 add_library (SharedCode INTERFACE)
 
