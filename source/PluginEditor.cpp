@@ -100,7 +100,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
     tbZeroLatency.setToggleable (true);
     tbZeroLatency.setClickingTogglesState (true);
     tbZeroLatency.setToggleState (polarDesignerProcessor.zeroLatencyModeActive(),
-                                  NotificationType::sendNotification);
+                                  NotificationType::dontSendNotification);
 
     addAndMakeVisible (&titlePreset);
     titlePreset.setTitle (String ("Preset"));
