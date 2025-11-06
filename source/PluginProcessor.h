@@ -258,6 +258,8 @@ public:
 
     void timerCallback() override;
 
+    AudioProcessorValueTreeState& getValueTreeState() { return vtsParams; }
+
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarDesignerAudioProcessor)

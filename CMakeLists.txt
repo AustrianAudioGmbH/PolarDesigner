@@ -3,8 +3,6 @@ cmake_minimum_required (VERSION 3.24.1)
 set (CMAKE_CXX_STANDARD 20)
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set (CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
-
 option (WITH_ADDRESS_SANITIZER "Enable Address Sanitizer" OFF)
 option (WITH_THREAD_SANITIZER "Enable Thread Sanitizer" OFF)
 
@@ -287,10 +285,10 @@ target_compile_definitions (
               AA_BUILD_TAG="${AA_GIT_TAG}"
               AA_BUILD_JUCE_VERSION="${AA_JUCE_GIT_TAG}"
               PRODUCT_NAME_WITHOUT_VERSION="PolarDesigner"
+              PERFETTO=OFF
               # For debugging Performance issues:
               # $<$<CONFIG:Debug>:PERFETTO=OFF>
               # $<$<CONFIG:Release>:PERFETTO=OFF>
-              PERFETTO=OFF
     # Define USE_MELATONIN_INSPECTOR for Debug builds
     #	$<$<CONFIG:Debug>:USE_MELATONIN_INSPECTOR>
     # For debugging UI issues:
@@ -351,3 +349,5 @@ if ("AAX" IN_LIST FORMATS)
 endif ()
 
 include (Tests)
+
+target_compile_definitions (Tests PRIVATE POLARDESIGNER_ROOT_PATH="${CMAKE_CURRENT_SOURCE_DIR}")
