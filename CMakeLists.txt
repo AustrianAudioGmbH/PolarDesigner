@@ -331,6 +331,9 @@ else ()
     target_link_libraries (SharedCode INTERFACE fftw3f)
 endif ()
 
+target_compile_definitions (
+    ${PROJECT_NAME} PRIVATE POLARDESIGNER_ROOT_PATH="${CMAKE_CURRENT_SOURCE_DIR}"
+)
 target_link_libraries ("${PROJECT_NAME}" PRIVATE SharedCode)
 
 if ("AAX" IN_LIST FORMATS)
