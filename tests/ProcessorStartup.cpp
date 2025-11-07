@@ -35,17 +35,13 @@ TEST_CASE ("Processor startup", "[startup]")
     juce::MidiBuffer midiBuffer;
 
     auto proc = PolarDesignerAudioProcessor();
-<<<<<<< HEAD
     auto& vts = proc.getValueTreeState();
-=======
->>>>>>> 9644fef (test(filterbank): added regression test)
 
     // FIX:uncommenting this causes a deadlock on atmoky macrunner1 when run through
     // ci but not when run manually, suggesting this is a very specific race condition.
     // Needs further investigation
     // [[maybe_unused]] auto editor = proc.createEditor();
 
-<<<<<<< HEAD
     vts.getParameter ("zeroLatencyMode")->setValueNotifyingHost (0.0f);
     proc.changeABLayerState (COMPARE_LAYER_B);
     vts.getParameter ("zeroLatencyMode")->setValueNotifyingHost (1.0f);
@@ -61,23 +57,6 @@ TEST_CASE ("Processor startup", "[startup]")
     proc.prepareToPlay (44100.0, 256);
 
     vts.getParameter ("zeroLatencyMode")->setValueNotifyingHost (0.0f);
-=======
-    proc.parameterChanged ("zeroLatencyMode", 0.0f);
-    proc.changeABLayerState (COMPARE_LAYER_B);
-    proc.parameterChanged ("zeroLatencyMode", 1.0f);
-    proc.changeABLayerState (COMPARE_LAYER_A);
-    proc.parameterChanged ("zeroLatencyMode", 0.0f);
-    proc.changeABLayerState (COMPARE_LAYER_B);
-    proc.parameterChanged ("zeroLatencyMode", 0.0f);
-
-    proc.prepareToPlay (96000.0, 64);
-
-    proc.parameterChanged ("zeroLatencyMode", 0.0f);
-
-    proc.prepareToPlay (44100.0, 256);
-
-    proc.parameterChanged ("zeroLatencyMode", 0.0f);
->>>>>>> 9644fef (test(filterbank): added regression test)
 
     proc.processBlock (buffer, midiBuffer);
 }
