@@ -25,6 +25,7 @@
 
 //#define AA_DO_DEBUG_PATH
 
+#include "Logging.hpp"
 #include "PluginProcessor.h"
 
 #include "resources/customComponents/AnimatedLabel.h"
@@ -43,16 +44,6 @@
 
 #ifdef USE_MELATONIN_INSPECTOR
     #include <melatonin_inspector/melatonin_inspector.h>
-#endif
-
-#ifdef DEBUG
-    #define LOG_ERROR(message) Logger::writeToLog ("ERROR: " + String (message))
-    #define LOG_DEBUG(message) Logger::writeToLog ("DEBUG: " + String (message))
-    #define LOG_WARN(message) Logger::writeToLog ("WARNING: " + String (message))
-#else
-    #define LOG_ERROR(message)
-    #define LOG_DEBUG(message)
-    #define LOG_WARN(message)
 #endif
 
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;

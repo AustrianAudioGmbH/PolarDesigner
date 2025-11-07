@@ -48,6 +48,8 @@
  */
 
 #pragma once
+
+#include "../../Conversions.hpp"
 #include "../lookAndFeel/MainLookAndFeel.h"
 #include "PolarPatternVisualizer.h"
 
@@ -487,7 +489,8 @@ public:
             float rightBound =
                 (handle.upperFrequencySlider == nullptr || nrActiveBands == i + 1)
                     ? hzToX (s.fMax)
-                    : static_cast<float> (hzToX (processor.hzFromZeroToOne (
+                    : static_cast<float> (hzToX (hzFromZeroToOne (
+                          nrActiveBands,
                           i,
                           static_cast<float> (handle.upperFrequencySlider->getValue()))));
 
@@ -637,13 +640,15 @@ public:
             float leftBound =
                 handle.lowerFrequencySlider == nullptr
                     ? hzToX (s.fMin)
-                    : static_cast<float> (hzToX (processor.hzFromZeroToOne (
+                    : static_cast<float> (hzToX (hzFromZeroToOne (
+                          nrActiveBands,
                           i - 1,
                           static_cast<float> (handle.lowerFrequencySlider->getValue()))));
             float rightBound =
                 (handle.upperFrequencySlider == nullptr || nrActiveBands == i + 1)
                     ? hzToX (s.fMax)
-                    : static_cast<float> (hzToX (processor.hzFromZeroToOne (
+                    : static_cast<float> (hzToX (hzFromZeroToOne (
+                          nrActiveBands,
                           i,
                           static_cast<float> (handle.upperFrequencySlider->getValue()))));
             float circX = (rightBound + leftBound) / 2;
@@ -776,9 +781,10 @@ public:
                 Slider* slider = handle.upperFrequencySlider;
                 if (slider != nullptr)
                 {
-                    slider->setValue (processor.hzToZeroToOne (
-                        static_cast<size_t> (activeBandLimitPath),
-                        getXoverValueInRange (activeBandLimitPath, frequency)));
+                    slider->setValue (
+                        hzToZeroToOne (nrActiveBands,
+                                       static_cast<size_t> (activeBandLimitPath),
+                                       getXoverValueInRange (activeBandLimitPath, frequency)));
                 }
             }
         }
@@ -1161,13 +1167,13 @@ public:
                 float attemptedVal = tooltipValueBox[i]->getText().getFloatValue();
 
                 if (juce::approximatelyEqual (attemptedVal, 0.0f))
-                    attemptedVal =
-                        processor.hzFromZeroToOne (static_cast<size_t> (i),
-                                                   static_cast<float> (slider->getValue()));
+                    attemptedVal = hzFromZeroToOne (nrActiveBands,
+                                                    static_cast<size_t> (i),
+                                                    static_cast<float> (slider->getValue()));
 
                 float newValue = getXoverValueInRange (i, attemptedVal);
 
-                slider->setValue (processor.hzToZeroToOne (static_cast<size_t> (i), newValue),
+                slider->setValue (hzToZeroToOne (nrActiveBands, static_cast<size_t> (i), newValue),
                                   NotificationType::sendNotification);
                 tooltipValueBox[i]->setText (slider->getTextFromValue (slider->getValue()),
                                              NotificationType::dontSendNotification);

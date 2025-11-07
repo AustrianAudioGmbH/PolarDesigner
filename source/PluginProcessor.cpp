@@ -22,7 +22,8 @@
  */
 
 #include "PluginProcessor.h"
-#include "Constants.h"
+#include "Constants.hpp"
+#include "Conversions.hpp"
 #include "FilterCoefficients.h"
 #include "PluginEditor.h"
 
@@ -41,6 +42,192 @@
 
 /* Debug State Information dumps */
 #define USE_EXTRA_DEBUG_DUMPS
+
+static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+{
+    using APF = AudioParameterFloat;
+    using APB = AudioParameterBool;
+    using API = AudioParameterInt;
+
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+    layout.add (std::make_unique<APF> (
+        ParameterID { "trimPosition", PD_PARAMETER_V2 },
+        "trimPosition",
+        NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
+        0.0f,
+        AudioParameterFloatAttributes()
+            .withLabel ("Trim")
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction (
+                [&] (float value, [[maybe_unused]] int maximumStringLength)
+                {
+                    return String (std::roundf (hzFromZeroToOne (MAX_NUM_EQS, 0, value)))
+                           + " Hz trimPot";
+                })
+            .withAutomatable (false)));
+
+    layout.add (std::make_unique<APF> (
+        ParameterID { "xOverF1", PD_PARAMETER_V1 },
+        "Xover1",
+        NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
+        hzToZeroToOne (MAX_NUM_EQS, 0, INIT_XOVER_FREQS_5B[0]),
+        AudioParameterFloatAttributes()
+            .withLabel ("Hz")
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction (
+                [&] (float value, [[maybe_unused]] int maximumStringLength)
+                { return String (std::roundf (hzFromZeroToOne (MAX_NUM_EQS, 0, value))); })));
+
+    layout.add (std::make_unique<APF> (
+        ParameterID { "xOverF2", PD_PARAMETER_V1 },
+        "Xover2",
+        NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
+        hzToZeroToOne (MAX_NUM_EQS, 1, INIT_XOVER_FREQS_5B[1]),
+        AudioParameterFloatAttributes()
+            .withLabel ("Hz")
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction (
+                [&] (float value, [[maybe_unused]] int maximumStringLength)
+                { return String (std::roundf (hzFromZeroToOne (MAX_NUM_EQS, 1, value))); })));
+
+    layout.add (std::make_unique<APF> (
+        ParameterID { "xOverF3", PD_PARAMETER_V1 },
+        "Xover3",
+        NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
+        hzToZeroToOne (MAX_NUM_EQS, 2, INIT_XOVER_FREQS_5B[2]),
+        AudioParameterFloatAttributes()
+            .withLabel ("Hz")
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction (
+                [&] (float value, [[maybe_unused]] int maximumStringLength)
+                { return String (std::roundf (hzFromZeroToOne (MAX_NUM_EQS, 2, value))); })));
+
+    layout.add (std::make_unique<APF> (
+        ParameterID { "xOverF4", PD_PARAMETER_V1 },
+        "Xover4",
+        NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
+        hzToZeroToOne (MAX_NUM_EQS, 3, INIT_XOVER_FREQS_5B[3]),
+        AudioParameterFloatAttributes()
+            .withLabel ("Hz")
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction (
+                [&] (float value, [[maybe_unused]] int maximumStringLength)
+                { return String (std::roundf (hzFromZeroToOne (MAX_NUM_EQS, 3, value))); })));
+
+    for (size_t i = 1; i < MAX_NUM_EQS + 1; ++i)
+        layout.add (std::make_unique<APF> (
+            ParameterID { "alpha" + String (i), PD_PARAMETER_V1 },
+            "Polar" + String (i),
+            NormalisableRange<float> (-0.5f, 1.0f, 0.01f),
+            0.0f,
+            AudioParameterFloatAttributes()
+                .withCategory (AudioProcessorParameter::genericParameter)
+                .withStringFromValueFunction (
+                    [] (float value, [[maybe_unused]] int maximumStringLength)
+                    { return String (value, 2); })));
+
+    for (size_t i = 1; i < MAX_NUM_EQS + 1; ++i)
+        layout.add (
+            std::make_unique<APB> (ParameterID { "solo" + String (i), PD_PARAMETER_V1 },
+                                   "Solo" + String (i),
+                                   false,
+                                   AudioParameterBoolAttributes()
+                                       .withCategory (AudioProcessorParameter::genericParameter)
+                                       .withStringFromValueFunction (
+                                           [] (bool value, [[maybe_unused]] int maximumStringLength)
+                                           { return value ? "on" : "off"; })));
+
+    for (size_t i = 1; i < MAX_NUM_EQS + 1; ++i)
+        layout.add (
+            std::make_unique<APB> (ParameterID { "mute" + String (i), PD_PARAMETER_V1 },
+                                   "Mute" + String (i),
+                                   false,
+                                   AudioParameterBoolAttributes()
+                                       .withCategory (AudioProcessorParameter::genericParameter)
+                                       .withStringFromValueFunction (
+                                           [] (bool value, [[maybe_unused]] int maximumStringLength)
+                                           { return value ? "on" : "off"; })));
+
+    for (size_t i = 1; i < MAX_NUM_EQS + 1; ++i)
+        layout.add (std::make_unique<APF> (
+            ParameterID { "gain" + String (i), PD_PARAMETER_V1 },
+            "Gain" + String (i),
+            NormalisableRange<float> (-24.0f, 18.0f, 0.1f),
+            0.0f,
+            AudioParameterFloatAttributes()
+                .withLabel ("dB")
+                .withCategory (AudioProcessorParameter::genericParameter)
+                .withStringFromValueFunction (
+                    [] (float value, [[maybe_unused]] int maximumStringLength)
+                    { return String (value, 1); })));
+
+    layout.add (std::make_unique<API> (
+        ParameterID { "nrBands", PD_PARAMETER_V1 },
+        "Nr. of Bands",
+        0,
+        4,
+        4,
+        AudioParameterIntAttributes()
+            .withLabel ("")
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction ([] (int value, [[maybe_unused]] int maximumStringLength)
+                                          { return String (value + 1); })
+            .withAutomatable (false)));
+
+    layout.add (std::make_unique<AudioParameterBool> (
+        ParameterID { "allowBackwardsPattern", PD_PARAMETER_V1 },
+        "Allow Reverse Patterns",
+        true,
+        AudioParameterBoolAttributes()
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction ([] (bool value, [[maybe_unused]] int maximumStringLength)
+                                          { return value ? "on" : "off"; })
+            .withAutomatable (false)));
+
+    layout.add (std::make_unique<AudioParameterFloat> (
+        ParameterID { "proximity", PD_PARAMETER_V1 },
+        "Proximity",
+        NormalisableRange<float> (-1.0f, 1.0f, 0.001f),
+        0.0f,
+        AudioParameterFloatAttributes()
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction (
+                [] (float value, [[maybe_unused]] int maximumStringLength)
+                { return std::abs (value) < 0.05f ? "0.00" : String (value, 2); })));
+
+    layout.add (std::make_unique<APB> (
+        ParameterID { "proximityOnOff", PD_PARAMETER_V1 },
+        "ProximityOnOff",
+        false,
+        AudioParameterBoolAttributes()
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction ([] (bool value, [[maybe_unused]] int maximumStringLength)
+                                          { return value ? "on" : "off"; })));
+
+    layout.add (std::make_unique<APB> (
+        ParameterID { "zeroLatencyMode", PD_PARAMETER_V1 },
+        "Zero Latency",
+        false,
+        AudioParameterBoolAttributes()
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction ([] (bool value, [[maybe_unused]] int maximumStringLength)
+                                          { return value ? "on" : "off"; })));
+
+    layout.add (std::make_unique<API> (
+        ParameterID { "syncChannel", PD_PARAMETER_V1 },
+        "Sync to Channel",
+        0,
+        4,
+        0,
+        AudioParameterIntAttributes()
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction ([] (int value, [[maybe_unused]] int maximumStringLength)
+                                          { return value == 0 ? "none" : String (value); })
+            .withAutomatable (false)));
+
+    return layout;
+}
 
 //==============================================================================
 PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
@@ -81,328 +268,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     undoManager(),
     properties(),
     nProcessorBands (MAX_NUM_EQS),
-    vtsParams (*this,
-               &undoManager,
-               "AAPolarDesigner",
-               {
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "trimPosition", PD_PARAMETER_V2 },
-                       "trimPosition",
-                       NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-                       0.0f,
-                       AudioParameterFloatAttributes()
-                           .withLabel ("Trim")
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [&] (float value, [[maybe_unused]] int maximumStringLength)
-                               {
-                                   return String (std::roundf (hzFromZeroToOne (0, value)))
-                                          + " Hz trimPot";
-                               })
-                           .withAutomatable (false)),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "xOverF1", PD_PARAMETER_V1 },
-                       "Xover1",
-                       NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-                       hzToZeroToOne (0, INIT_XOVER_FREQS_5B[0]),
-                       AudioParameterFloatAttributes()
-                           .withLabel ("Hz")
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [&] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (std::roundf (hzFromZeroToOne (0, value))); })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "xOverF2", PD_PARAMETER_V1 },
-                       "Xover2",
-                       NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-                       hzToZeroToOne (1, INIT_XOVER_FREQS_5B[1]),
-                       AudioParameterFloatAttributes()
-                           .withLabel ("Hz")
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [&] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (std::roundf (hzFromZeroToOne (1, value))); })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "xOverF3", PD_PARAMETER_V1 },
-                       "Xover3",
-                       NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-                       hzToZeroToOne (2, INIT_XOVER_FREQS_5B[2]),
-                       AudioParameterFloatAttributes()
-                           .withLabel ("Hz")
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [&] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (std::roundf (hzFromZeroToOne (2, value))); })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "xOverF4", PD_PARAMETER_V1 },
-                       "Xover4",
-                       NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-                       hzToZeroToOne (3, INIT_XOVER_FREQS_5B[3]),
-                       AudioParameterFloatAttributes()
-                           .withLabel ("Hz")
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [&] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (std::roundf (hzFromZeroToOne (3, value))); })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "alpha1", PD_PARAMETER_V1 },
-                       "Polar1",
-                       NormalisableRange<float> (-0.5f, 1.0f, 0.01f),
-                       0.0f,
-                       AudioParameterFloatAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (value, 2); })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "alpha2", PD_PARAMETER_V1 },
-                       "Polar2",
-                       NormalisableRange<float> (-0.5f, 1.0f, 0.01f),
-                       0.0f,
-                       AudioParameterFloatAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (value, 2); })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "alpha3", PD_PARAMETER_V1 },
-                       "Polar3",
-                       NormalisableRange<float> (-0.5f, 1.0f, 0.01f),
-                       0.0f,
-                       AudioParameterFloatAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (value, 2); })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "alpha4", PD_PARAMETER_V1 },
-                       "Polar4",
-                       NormalisableRange<float> (-0.5f, 1.0f, 0.01f),
-                       0.0f,
-                       AudioParameterFloatAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (value, 2); })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "alpha5", PD_PARAMETER_V1 },
-                       "Polar5",
-                       NormalisableRange<float> (-0.5f, 1.0f, 0.01f),
-                       0.0f,
-                       AudioParameterFloatAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (value, 2); })),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "solo1", PD_PARAMETER_V1 },
-                       "Solo1",
-                       false,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "solo2", PD_PARAMETER_V1 },
-                       "Solo2",
-                       false,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "solo3", PD_PARAMETER_V1 },
-                       "Solo3",
-                       false,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "solo4", PD_PARAMETER_V1 },
-                       "Solo4",
-                       false,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "solo5", PD_PARAMETER_V1 },
-                       "Solo5",
-                       false,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "mute1", PD_PARAMETER_V1 },
-                       "Mute1",
-                       false,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "mute2", PD_PARAMETER_V1 },
-                       "Mute2",
-                       false,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "mute3", PD_PARAMETER_V1 },
-                       "Mute3",
-                       false,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "mute4", PD_PARAMETER_V1 },
-                       "Mute4",
-                       false,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "mute5", PD_PARAMETER_V1 },
-                       "Mute5",
-                       false,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "gain1", PD_PARAMETER_V1 },
-                       "Gain1",
-                       NormalisableRange<float> (-24.0f, 18.0f, 0.1f),
-                       0.0f,
-                       AudioParameterFloatAttributes()
-                           .withLabel ("dB")
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (value, 1); })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "gain2", PD_PARAMETER_V1 },
-                       "Gain2",
-                       NormalisableRange<float> (-24.0f, 18.0f, 0.1f),
-                       0.0f,
-                       AudioParameterFloatAttributes()
-                           .withLabel ("dB")
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (value, 1); })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "gain3", PD_PARAMETER_V1 },
-                       "Gain3",
-                       NormalisableRange<float> (-24.0f, 18.0f, 0.1f),
-                       0.0f,
-                       AudioParameterFloatAttributes()
-                           .withLabel ("dB")
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (value, 1); })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "gain4", PD_PARAMETER_V1 },
-                       "Gain4",
-                       NormalisableRange<float> (-24.0f, 18.0f, 0.1f),
-                       0.0f,
-                       AudioParameterFloatAttributes()
-                           .withLabel ("dB")
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (value, 1); })),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "gain5", PD_PARAMETER_V1 },
-                       "Gain5",
-                       NormalisableRange<float> (-24.0f, 18.0f, 0.1f),
-                       0.0f,
-                       AudioParameterFloatAttributes()
-                           .withLabel ("dB")
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return String (value, 1); })),
-                   std::make_unique<AudioParameterInt> (
-                       ParameterID { "nrBands", PD_PARAMETER_V1 },
-                       "Nr. of Bands",
-                       0,
-                       4,
-                       4,
-                       AudioParameterIntAttributes()
-                           .withLabel ("")
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (int value, [[maybe_unused]] int maximumStringLength)
-                               { return String (value + 1); })
-                           .withAutomatable (false)),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "allowBackwardsPattern", PD_PARAMETER_V1 },
-                       "Allow Reverse Patterns",
-                       true,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })
-                           .withAutomatable (false)),
-                   std::make_unique<AudioParameterFloat> (
-                       ParameterID { "proximity", PD_PARAMETER_V1 },
-                       "Proximity",
-                       NormalisableRange<float> (-1.0f, 1.0f, 0.001f),
-                       0.0f,
-                       AudioParameterFloatAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (float value, [[maybe_unused]] int maximumStringLength)
-                               { return std::abs (value) < 0.05f ? "0.00" : String (value, 2); })),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "proximityOnOff", PD_PARAMETER_V1 },
-                       "ProximityOnOff",
-                       false,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })),
-                   std::make_unique<AudioParameterBool> (
-                       ParameterID { "zeroLatencyMode", PD_PARAMETER_V1 },
-                       "Zero Latency",
-                       false,
-                       AudioParameterBoolAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (bool value, [[maybe_unused]] int maximumStringLength)
-                               { return value ? "on" : "off"; })),
-                   std::make_unique<AudioParameterInt> (
-                       ParameterID { "syncChannel", PD_PARAMETER_V1 },
-                       "Sync to Channel",
-                       0,
-                       4,
-                       0,
-                       AudioParameterIntAttributes()
-                           .withCategory (AudioProcessorParameter::genericParameter)
-                           .withStringFromValueFunction (
-                               [] (int value, [[maybe_unused]] int maximumStringLength)
-                               { return value == 0 ? "none" : String (value); })
-                           .withAutomatable (false)),
-               }),
+    vtsParams (*this, &undoManager, "AAPolarDesigner", createParameterLayout()),
     firLen (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE),
     dfEqOmniBuffer (1, DF_EQ_LEN),
     dfEqEightBuffer (1, DF_EQ_LEN),
@@ -1162,21 +1028,25 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
         { "trimPosition", 0.0f }, // Default from constructor: 0.0f
         { "xOverF1",
           hzToZeroToOne (
+              nProcessorBands,
               0,
               INIT_XOVER_FREQS_5B
                   [0]) }, // Band 1: Matches constructor, assuming INIT_XOVER_FREQS_5B[0] = 100 Hz
         { "xOverF2",
           hzToZeroToOne (
+              nProcessorBands,
               1,
               INIT_XOVER_FREQS_5B
                   [1]) }, // Band 2: Matches constructor, assuming INIT_XOVER_FREQS_5B[1] = 315 Hz
         { "xOverF3",
           hzToZeroToOne (
+              nProcessorBands,
               2,
               INIT_XOVER_FREQS_5B
                   [2]) }, // Band 3: Matches constructor, assuming INIT_XOVER_FREQS_5B[2] = 1000 Hz
         { "xOverF4",
           hzToZeroToOne (
+              nProcessorBands,
               3,
               INIT_XOVER_FREQS_5B
                   [3]) }, // Band 4: Matches constructor, assuming INIT_XOVER_FREQS_5B[3] = 3150 Hz
@@ -1815,7 +1685,7 @@ void PolarDesignerAudioProcessor::resetXoverFreqs()
             for (unsigned int i = 0; i < nProcessorBands - 1; ++i)
             {
                 vtsParams.getParameter ("xOverF" + String (i + 1))
-                    ->setValueNotifyingHost (hzToZeroToOne (i, INIT_XOVER_FREQS_2B[i]));
+                    ->setValueNotifyingHost (hzToZeroToOne (2, i, INIT_XOVER_FREQS_2B[i]));
             }
             break;
 
@@ -1823,7 +1693,7 @@ void PolarDesignerAudioProcessor::resetXoverFreqs()
             for (unsigned int i = 0; i < nProcessorBands - 1; ++i)
             {
                 vtsParams.getParameter ("xOverF" + String (i + 1))
-                    ->setValueNotifyingHost (hzToZeroToOne (i, INIT_XOVER_FREQS_3B[i]));
+                    ->setValueNotifyingHost (hzToZeroToOne (3, i, INIT_XOVER_FREQS_3B[i]));
             }
             break;
 
@@ -1831,7 +1701,7 @@ void PolarDesignerAudioProcessor::resetXoverFreqs()
             for (unsigned int i = 0; i < nProcessorBands - 1; ++i)
             {
                 vtsParams.getParameter ("xOverF" + String (i + 1))
-                    ->setValueNotifyingHost (hzToZeroToOne (i, INIT_XOVER_FREQS_4B[i]));
+                    ->setValueNotifyingHost (hzToZeroToOne (4, i, INIT_XOVER_FREQS_4B[i]));
             }
             break;
 
@@ -1839,7 +1709,7 @@ void PolarDesignerAudioProcessor::resetXoverFreqs()
             for (unsigned int i = 0; i < (nProcessorBands - 1); ++i)
             {
                 vtsParams.getParameter ("xOverF" + String (i + 1))
-                    ->setValueNotifyingHost (hzToZeroToOne (i, INIT_XOVER_FREQS_5B[i]));
+                    ->setValueNotifyingHost (hzToZeroToOne (5, i, INIT_XOVER_FREQS_5B[i]));
             }
             break;
 
@@ -1892,7 +1762,7 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
     {
         dsp::FilterDesign<float>::FIRCoefficientsPtr lowpass =
             dsp::FilterDesign<float>::designFIRLowpassWindowMethod (
-                hzFromZeroToOne (0, xOverFreqsPtr[0]->load()),
+                hzFromZeroToOne (nProcessorBands, 0, xOverFreqsPtr[0]->load()),
                 currentSampleRate,
                 static_cast<size_t> (firLen - 1),
                 dsp::WindowingFunction<float>::WindowingMethod::hamming);
@@ -1904,9 +1774,10 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
          i < std::min (crossoverNr + 2, nProcessorBands - 1);
          ++i)
     {
-        const float halfBandwidth = (hzFromZeroToOne (i, xOverFreqsPtr[i]->load())
-                                     - hzFromZeroToOne (i - 1, xOverFreqsPtr[i - 1]->load()))
-                                    / 2;
+        const float halfBandwidth =
+            (hzFromZeroToOne (nProcessorBands, i, xOverFreqsPtr[i]->load())
+             - hzFromZeroToOne (nProcessorBands, i - 1, xOverFreqsPtr[i - 1]->load()))
+            / 2;
         dsp::FilterDesign<float>::FIRCoefficientsPtr lp2bp =
             dsp::FilterDesign<float>::designFIRLowpassWindowMethod (
                 halfBandwidth,
@@ -1916,7 +1787,8 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
 
         const auto* lp2bpCoeffs = lp2bp->getRawCoefficients();
         auto* filterBufferPointer = firFilterBuffer.getWritePointer (static_cast<int> (i));
-        const auto fCenter = halfBandwidth + hzFromZeroToOne (i - 1, xOverFreqsPtr[i - 1]->load());
+        const auto fCenter =
+            halfBandwidth + hzFromZeroToOne (nProcessorBands, i - 1, xOverFreqsPtr[i - 1]->load());
 
         for (int j = 0; j < firLen; j++)
         {
@@ -1929,9 +1801,11 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
     // Highest band: highpass
     if (crossoverNr == nProcessorBands - 2)
     {
-        float hpBandwidth = static_cast<float> (
-            currentSampleRate / 2
-            - hzFromZeroToOne (nProcessorBands - 2, xOverFreqsPtr[nProcessorBands - 2]->load()));
+        float hpBandwidth =
+            static_cast<float> (currentSampleRate / 2
+                                - hzFromZeroToOne (nProcessorBands,
+                                                   nProcessorBands - 2,
+                                                   xOverFreqsPtr[nProcessorBands - 2]->load()));
         auto* filterBufferPointer =
             firFilterBuffer.getWritePointer (static_cast<int> (nProcessorBands) - 1);
         dsp::FilterDesign<float>::FIRCoefficientsPtr lp2hp =
@@ -2211,7 +2085,7 @@ Result PolarDesignerAudioProcessor::loadPreset (const File& presetFile)
     {
         x = parsedJson.getProperty ("xOverF" + String (i + 1), parsedJson);
         vtsParams.getParameter ("xOverF" + String (i + 1))
-            ->setValueNotifyingHost (hzToZeroToOne (i, x));
+            ->setValueNotifyingHost (hzToZeroToOne (nProcessorBands, i, x));
     }
 
     NormalisableRange<float> dfRange = vtsParams.getParameter ("alpha1")->getNormalisableRange();
@@ -2283,14 +2157,18 @@ Result PolarDesignerAudioProcessor::savePreset (File destination)
     jsonObj->setProperty ("nrActiveBands", (int) nProcessorBands);
     jsonObj->setProperty ("zeroLatencyMode", zeroLatencyModePtr->load());
     jsonObj->setProperty ("trimPosition", trimPositionPtr->load());
-    jsonObj->setProperty ("xOverF1",
-                          static_cast<int> (hzFromZeroToOne (0, xOverFreqsPtr[0]->load())));
-    jsonObj->setProperty ("xOverF2",
-                          static_cast<int> (hzFromZeroToOne (1, xOverFreqsPtr[1]->load())));
-    jsonObj->setProperty ("xOverF3",
-                          static_cast<int> (hzFromZeroToOne (2, xOverFreqsPtr[2]->load())));
-    jsonObj->setProperty ("xOverF4",
-                          static_cast<int> (hzFromZeroToOne (3, xOverFreqsPtr[3]->load())));
+    jsonObj->setProperty (
+        "xOverF1",
+        static_cast<int> (hzFromZeroToOne (nProcessorBands, 0, xOverFreqsPtr[0]->load())));
+    jsonObj->setProperty (
+        "xOverF2",
+        static_cast<int> (hzFromZeroToOne (nProcessorBands, 1, xOverFreqsPtr[1]->load())));
+    jsonObj->setProperty (
+        "xOverF3",
+        static_cast<int> (hzFromZeroToOne (nProcessorBands, 2, xOverFreqsPtr[2]->load())));
+    jsonObj->setProperty (
+        "xOverF4",
+        static_cast<int> (hzFromZeroToOne (nProcessorBands, 3, xOverFreqsPtr[3]->load())));
     jsonObj->setProperty ("dirFactor1", dirFactorsPtr[0]->load());
     jsonObj->setProperty ("dirFactor2", dirFactorsPtr[1]->load());
     jsonObj->setProperty ("dirFactor3", dirFactorsPtr[2]->load());
@@ -2320,53 +2198,6 @@ Result PolarDesignerAudioProcessor::savePreset (File destination)
         return Result::ok();
     else
         return Result::fail ("Could not write preset file. Check file access permissions.");
-}
-
-float PolarDesignerAudioProcessor::hzToZeroToOne (size_t idx, float hz)
-{
-    switch (nProcessorBands)
-    {
-        case 1:
-            return 0.0f;
-        case 2:
-            return (hz - XOVER_RANGE_START_2B[idx])
-                   / (XOVER_RANGE_END_2B[idx] - XOVER_RANGE_START_2B[idx]);
-        case 3:
-            return (hz - XOVER_RANGE_START_3B[idx])
-                   / (XOVER_RANGE_END_3B[idx] - XOVER_RANGE_START_3B[idx]);
-        case 4:
-            return (hz - XOVER_RANGE_START_4B[idx])
-                   / (XOVER_RANGE_END_4B[idx] - XOVER_RANGE_START_4B[idx]);
-        case 5:
-            return (hz - XOVER_RANGE_START_5B[idx])
-                   / (XOVER_RANGE_END_5B[idx] - XOVER_RANGE_START_5B[idx]);
-        default:
-            LOG_ERROR ("Invalid number of bands: " + String (nProcessorBands));
-            return 0.0f;
-    }
-}
-float PolarDesignerAudioProcessor::hzFromZeroToOne (size_t idx, float val)
-{
-    switch (nProcessorBands)
-    {
-        case 1:
-            return 0.0f;
-        case 2:
-            return XOVER_RANGE_START_2B[idx]
-                   + val * (XOVER_RANGE_END_2B[idx] - XOVER_RANGE_START_2B[idx]);
-        case 3:
-            return XOVER_RANGE_START_3B[idx]
-                   + val * (XOVER_RANGE_END_3B[idx] - XOVER_RANGE_START_3B[idx]);
-        case 4:
-            return XOVER_RANGE_START_4B[idx]
-                   + val * (XOVER_RANGE_END_4B[idx] - XOVER_RANGE_START_4B[idx]);
-        case 5:
-            return XOVER_RANGE_START_5B[idx]
-                   + val * (XOVER_RANGE_END_5B[idx] - XOVER_RANGE_START_5B[idx]);
-        default:
-            LOG_ERROR ("Invalid number of bands: " + String (nProcessorBands));
-            return 0.0f;
-    }
 }
 
 float PolarDesignerAudioProcessor::getXoverSliderRangeStart (int sliderNum)
@@ -2662,7 +2493,6 @@ void PolarDesignerAudioProcessor::maximizeSigToDistRatio()
     if (! signalRecorded || ! disturberRecorded)
         return; // Skip if both signal and disturber haven't been recorded
 
-    bool validData = true;
     for (unsigned int i = 0; i < nProcessorBands; ++i)
     {
         if (juce::approximatelyEqual (omniSqSumSig[i], 0.0f)
@@ -2671,14 +2501,8 @@ void PolarDesignerAudioProcessor::maximizeSigToDistRatio()
             && juce::approximatelyEqual (omniSqSumDist[i], 0.0f)
             && juce::approximatelyEqual (eightSqSumDist[i], 0.0f)
             && juce::approximatelyEqual (omniEightSumDist[i], 0.0f))
-
-        {
-            validData = false;
-            break;
-        }
+            return;
     }
-    if (! validData)
-        return;
 
     float distToSigRatio = 0.0f;
     float maxDistToSigAlpha = 0.0f;

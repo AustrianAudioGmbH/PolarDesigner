@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "Constants.h"
+#include "Constants.hpp"
 #include "resources/Delay.h"
 
 #include <atomic>
@@ -242,8 +242,6 @@ public:
 
     int getEqState() { return doEq; }
     void setEqState (int idx);
-    float hzToZeroToOne (size_t idx, float hz);
-    float hzFromZeroToOne (size_t idx, float val);
 
 #if PERFETTO
     // perfetto
