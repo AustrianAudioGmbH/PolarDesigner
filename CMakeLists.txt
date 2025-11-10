@@ -8,7 +8,7 @@ set (CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
 option (WITH_ADDRESS_SANITIZER "Enable Address Sanitizer" OFF)
 option (WITH_THREAD_SANITIZER "Enable Thread Sanitizer" OFF)
 
-option (INSTALL_AFTER_BUILD "Let JUCE automatically install the plugin after building" OFF)
+option (INSTALL_AFTER_BUILD "Let JUCE automatically install the plugin after building" ON)
 
 message (STATUS "Sanitizers: ASan=${WITH_ADDRESS_SANITIZER} TSan=${WITH_THREAD_SANITIZER}")
 if (WITH_ADDRESS_SANITIZER)
