@@ -1,5 +1,5 @@
 {
-  "title": "PolarDesigner3",
+  "title": "PolarDesigner",
   "icon": "austrianaudio_logo.icns",
   "background": "background.jpg",
   "window": {
@@ -14,9 +14,11 @@
   },
   "format": "UDZO",
   "contents": [
-    { "x": 220, "y": 200, "type": "file", "path": "dmg/PolarDesigner3.component" },
-    { "x": 220, "y": 310, "type": "file", "path": "dmg/PolarDesigner3.vst3" },
-    { "x": 480, "y": 200, "type": "file", "path": "dmg/Your Mac's Component Folder" },
-    { "x": 480, "y": 310, "type": "file", "path": "dmg/Your Mac's VST3 Folder" }
+    { "x": 220, "y": 200, "type": "file", "path": "dmg/PolarDesigner.app" },
+    { "x": 480, "y": 200, "type": "link", "path": "/Applications" },
+    { "x": 250, "y": 300, "type": "file", "path": "dmg/PolarDesigner.component" },
+    { "x": 480, "y": 300, "type": "file", "path": "dmg/Your Mac's Component Folder" },
+    { "x": 250, "y": 400, "type": "file", "path": "dmg/PolarDesigner.vst3" },
+    { "x": 480, "y": 400, "type": "file", "path": "dmg/Your Mac's VST3 Folder" }
   ]
 }

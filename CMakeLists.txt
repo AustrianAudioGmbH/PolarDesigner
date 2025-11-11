@@ -131,6 +131,9 @@ set (COMPANY_NAME "Austrian Audio")
 
 set (BUNDLE_ID "audio.austrian.software.plugins.polardesigner")
 
+set (CMAKE_POLICY_DEFAULT_CMP0141 NEW CACHE STRING "" FORCE)
+set (CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded CACHE STRING "" FORCE)
+
 project (${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 
 include (JUCEDefaults)
@@ -339,3 +342,4 @@ endif ()
 include (Tests)
 
 target_compile_definitions (Tests PRIVATE POLARDESIGNER_ROOT_PATH="${CMAKE_CURRENT_SOURCE_DIR}")
+include (GitHubENV)
