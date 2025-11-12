@@ -8,6 +8,9 @@ option (WITH_THREAD_SANITIZER "Enable Thread Sanitizer" OFF)
 
 option (INSTALL_AFTER_BUILD "Let JUCE automatically install the plugin after building" ON)
 
+set (CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for macOS")
+set (CMAKE_OSX_DEPLOYMENT_TARGET "10.14" CACHE STRING "Minimum version of the target platform")
+
 message (STATUS "Sanitizers: ASan=${WITH_ADDRESS_SANITIZER} TSan=${WITH_THREAD_SANITIZER}")
 if (WITH_ADDRESS_SANITIZER)
     if (MSVC)
@@ -117,6 +120,7 @@ message (
 )
 
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 include (PamplejuceVersion)
 
 set (PROJECT_NAME "PolarDesigner")
@@ -170,12 +174,12 @@ FetchContent_Declare (
 FetchContent_MakeAvailable (melatonin_inspector)
 
 # Include Melatonin Perfetto only for Release builds
-include (FetchContent)
-FetchContent_Declare (
-    melatonin_perfetto GIT_REPOSITORY https://github.com/sudara/melatonin_perfetto.git
-    GIT_TAG origin/main
-)
-FetchContent_MakeAvailable (melatonin_perfetto)
+# include (FetchContent)
+# FetchContent_Declare (
+#     melatonin_perfetto GIT_REPOSITORY https://github.com/sudara/melatonin_perfetto.git
+#     GIT_TAG origin/main
+# )
+# FetchContent_MakeAvailable (melatonin_perfetto)
 
 if (APPLE)
     find_library (ACCELERATE Accelerate)
@@ -239,15 +243,8 @@ endif ()
 
 add_library (SharedCode INTERFACE)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    message ("Building on MacOS (Darwin)")
-    set (CMAKE_XCODE_GENERATE_SCHEME "TRUE")
-    include (PamplejuceMacOS)
-    set (CMAKE_OSX_ARCHITECTURES arm64 x86_64)
-    set (CMAKE_OSX_DEPLOYMENT_TARGET "10.14" CACHE STRING "Minimum version of the target platform"
-                                                   FORCE
-    )
-    target_link_options (SharedCode INTERFACE -Wl)
+if (APPLE)
+    message ("Building on MacOS")
     if (CMAKE_OSX_DEPLOYMENT_TARGET)
         message ("The minimum macOS version is set to " $CACHE{CMAKE_OSX_DEPLOYMENT_TARGET}.)
     endif ()
@@ -285,10 +282,6 @@ target_compile_definitions (
               AA_BUILD_TAG="${AA_GIT_TAG}"
               AA_BUILD_JUCE_VERSION="${AA_JUCE_GIT_TAG}"
               PRODUCT_NAME_WITHOUT_VERSION="PolarDesigner"
-              PERFETTO=OFF
-              # For debugging Performance issues:
-              # $<$<CONFIG:Debug>:PERFETTO=OFF>
-              # $<$<CONFIG:Release>:PERFETTO=OFF>
     # Define USE_MELATONIN_INSPECTOR for Debug builds
     #	$<$<CONFIG:Debug>:USE_MELATONIN_INSPECTOR>
     # For debugging UI issues:
@@ -307,7 +300,6 @@ target_link_libraries (
     SharedCode
     INTERFACE Assets
               melatonin_inspector
-              Melatonin::Perfetto
               juce_audio_basics
               juce_audio_devices
               juce_audio_formats
