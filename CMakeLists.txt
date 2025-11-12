@@ -125,7 +125,7 @@ include (PamplejuceVersion)
 
 set (PROJECT_NAME "PolarDesigner")
 
-set (PRODUCT_NAME "PolarDesigner")
+set (PRODUCT_NAME "PolarDesigner3")
 
 set (COMPANY_NAME "Austrian Audio")
 
@@ -174,13 +174,31 @@ FetchContent_Declare (
 FetchContent_MakeAvailable (melatonin_inspector)
 
 if (APPLE)
+    message (STATUS "Building on MacOS")
+
     find_library (ACCELERATE Accelerate)
 
     if (NOT ACCELERATE)
         message (FATAL_ERROR "Could not find the Accelerate framework!")
     endif ()
 
+    message (STATUS "Using Accelerate framework as FFT backend.")
+
+    if (CMAKE_OSX_DEPLOYMENT_TARGET)
+        message (STATUS "The minimum macOS version is set to " $CACHE{CMAKE_OSX_DEPLOYMENT_TARGET}.)
+    endif ()
+
 else ()
+    if (UNIX)
+        message ("Building on Linux")
+    elseif (WIN32)
+        message ("Building on Windows")
+    else ()
+        message (FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+    endif ()
+
+    message (STATUS "Using FFTW3 as FFT backend.")
+
     # fftw settings
     set (BUILD_SHARED_LIBS OFF)
     set (BUILD_TESTS OFF)
@@ -215,7 +233,7 @@ juce_add_plugin (
     FORMATS
     "${FORMATS}"
     PRODUCT_NAME
-    "${PRODUCT_NAME}${MAJOR_VERSION}"
+    "${PRODUCT_NAME}"
 )
 
 # HiDPI Awareness on Windows requires the .manifest file
@@ -234,20 +252,6 @@ if (WIN32)
 endif ()
 
 add_library (SharedCode INTERFACE)
-
-if (APPLE)
-    message ("Building on MacOS")
-    if (CMAKE_OSX_DEPLOYMENT_TARGET)
-        message ("The minimum macOS version is set to " $CACHE{CMAKE_OSX_DEPLOYMENT_TARGET}.)
-    endif ()
-elseif (UNIX AND NOT APPLE)
-    message ("Building on Linux")
-elseif (WIN32)
-    message ("Building on Windows")
-    set (FORMATS VST3)
-else ()
-    message (FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
-endif ()
 
 target_compile_features (SharedCode INTERFACE cxx_std_20)
 
