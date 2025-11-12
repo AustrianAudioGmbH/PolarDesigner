@@ -368,7 +368,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     options.folderName = "AustrianAudio";
     options.osxLibrarySubFolder = "Preferences";
 
-    properties = std::unique_ptr<PropertiesFile> (new PropertiesFile (options));
+    properties = std::make_unique<PropertiesFile> (options);
     lastDir = File (properties->getValue ("presetFolder"));
 
     registerParameterListeners();
