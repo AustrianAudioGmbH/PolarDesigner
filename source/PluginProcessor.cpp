@@ -306,7 +306,6 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     currentBlockSize (PD_DEFAULT_BLOCK_SIZE),
     lastDir()
 {
-    TRACE_DSP();
     if (firLen % 2 == 0)
         firLen++;
     jassert (firLen % 2 == 1); // Ensure firLen is odd
@@ -506,8 +505,6 @@ void PolarDesignerAudioProcessor::changeProgramName ([[maybe_unused]] int index,
 
 void PolarDesignerAudioProcessor::loadEqImpulseResponses()
 {
-    TRACE_EVENT ("dsp", "loadEqImpulseResponses");
-
     validateSampleRateAndBlockSize();
 
     // Ensure firLen is valid
@@ -647,13 +644,6 @@ void PolarDesignerAudioProcessor::loadEqImpulseResponses()
 
 void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    TRACE_EVENT ("dsp",
-                 "prepareToPlay",
-                 "sampleRate:",
-                 sampleRate,
-                 "samplesPerBlock:",
-                 samplesPerBlock);
-
     jassert (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE > 0);
 
     // Validate inputs
@@ -765,7 +755,6 @@ bool PolarDesignerAudioProcessor::isBusesLayoutSupported (const BusesLayout& lay
 void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer,
                                                 [[maybe_unused]] MidiBuffer& midiMessages)
 {
-    TRACE_DSP();
     ScopedNoDenormals noDenormals;
     if (isBypassed)
     {
@@ -875,8 +864,6 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer,
 void PolarDesignerAudioProcessor::processBlockBypassed (AudioBuffer<float>& buffer,
                                                         [[maybe_unused]] MidiBuffer& midiMessages)
 {
-    TRACE_DSP();
-
     if (! isBypassed)
     {
         isBypassed = true;
@@ -897,8 +884,6 @@ bool PolarDesignerAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* PolarDesignerAudioProcessor::createEditor()
 {
-    TRACE_DSP();
-
     return new PolarDesignerAudioProcessorEditor (*this, vtsParams);
 }
 
@@ -975,8 +960,6 @@ void PolarDesignerAudioProcessor::getStateInformation (MemoryBlock& destData)
 // !J! Make setStateInformation more robust for ProTools
 void PolarDesignerAudioProcessor::initializeDefaultState()
 {
-    TRACE_DSP();
-
     validateSampleRateAndBlockSize(); // Validate current values
 
     if (juce::approximatelyEqual (currentSampleRate,
@@ -1202,8 +1185,6 @@ void PolarDesignerAudioProcessor::releaseResources()
 
 void PolarDesignerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    TRACE_EVENT ("dsp", "setStateInformation");
-
     validateSampleRateAndBlockSize();
 
     // Calculate firLen based on currentSampleRate
@@ -1409,11 +1390,6 @@ void PolarDesignerAudioProcessor::parameterChanged (const String& parameterID,
                + " syncChannel: " + std::to_string (syncChannelPtr->load()));
 #endif
 
-    TRACE_EVENT ("dsp",
-                 "parameterChanged",
-                 "paramID:",
-                 perfetto::DynamicString { parameterID.toStdString() });
-
     if (currentSampleRate <= 0.0 || currentBlockSize <= 0)
     {
         LOG_WARN ("Plugin not prepared in parameterChanged, initializing defaults");
@@ -1471,7 +1447,6 @@ void PolarDesignerAudioProcessor::parameterChanged (const String& parameterID,
     }
     else if (parameterID == "zeroLatencyMode")
     {
-        TRACE_EVENT ("dsp", "zeroLatencyMode");
         updateLatency();
         if (zeroLatencyModePtr->load (std::memory_order_acquire) < 0.5f)
         {
@@ -1674,8 +1649,6 @@ void PolarDesignerAudioProcessor::setEqState (int idx)
 
 void PolarDesignerAudioProcessor::resetXoverFreqs()
 {
-    TRACE_DSP();
-
     switch (nProcessorBands)
     {
         case 1:
@@ -1721,8 +1694,6 @@ void PolarDesignerAudioProcessor::resetXoverFreqs()
 
 void PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded()
 {
-    TRACE_DSP();
-
     if (recomputeAllFilterCoefficients.exchange (false, std::memory_order_relaxed))
     {
         resetXoverFreqs();
@@ -1742,7 +1713,6 @@ void PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded()
 
 void PolarDesignerAudioProcessor::computeAllFilterCoefficients()
 {
-    TRACE_DSP();
     for (unsigned int i = 0; i < MAX_NUM_EQS - 1; ++i)
     {
         computeFilterCoefficients (i);
@@ -1752,8 +1722,6 @@ void PolarDesignerAudioProcessor::computeAllFilterCoefficients()
 
 void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crossoverNr)
 {
-    TRACE_DSP();
-
     if (nProcessorBands == 1)
         return;
 
@@ -1825,8 +1793,6 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
 
 void PolarDesignerAudioProcessor::initAllConvolvers()
 {
-    TRACE_DSP();
-
     // Validate sample rate and block size
     validateSampleRateAndBlockSize();
 
@@ -1903,8 +1869,6 @@ void PolarDesignerAudioProcessor::initAllConvolvers()
 
 void PolarDesignerAudioProcessor::updateConvolver (size_t convNr)
 {
-    TRACE_DSP();
-
     if (currentBlockSize == 0 || currentSampleRate <= 0.0)
     {
         LOG_ERROR ("Cannot initialize convolver: invalid block size or sample rate");
@@ -2592,8 +2556,6 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients (float distance)
 
 void PolarDesignerAudioProcessor::timerCallback()
 {
-    TRACE_DSP();
-
     validateSampleRateAndBlockSize(); // Validate before operations
 
     recomputeFilterCoefficientsIfNeeded();
@@ -2701,7 +2663,6 @@ void PolarDesignerAudioProcessor::timerCallback()
 
 void PolarDesignerAudioProcessor::updateLatency()
 {
-    TRACE_DSP();
     if (firLen % 2 == 0)
     {
         LOG_WARN ("firLen is even (" + String (firLen) + "), incrementing to make odd");

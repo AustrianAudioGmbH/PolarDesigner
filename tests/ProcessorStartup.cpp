@@ -58,5 +58,7 @@ TEST_CASE ("Processor startup", "[startup]")
 
     vts.getParameter ("zeroLatencyMode")->setValueNotifyingHost (0.0f);
 
+    proc.prepareToPlay (48000.0, 1024);
+
     proc.processBlock (buffer, midiBuffer);
 }
