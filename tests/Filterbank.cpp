@@ -51,7 +51,6 @@ TEST_CASE ("Crossover update", "[filterbank]")
     auto proc = PolarDesignerAudioProcessor();
     auto& vts = proc.getValueTreeState();
 
-    proc.reset();
     proc.prepareToPlay (sampleRate, bufferSize);
 
     SECTION ("2-band filterbank with 200Hz crossover")
