@@ -24,7 +24,6 @@
 
 //#define AA_DO_DEBUG_PATH
 
-#include "Logging.hpp"
 #include "PluginProcessor.h"
 
 #include "resources/customComponents/AnimatedLabel.h"

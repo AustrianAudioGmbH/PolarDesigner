@@ -28,7 +28,7 @@
  * prepareToPlay is called
  */
 
-TEST_CASE ("Processor startup", "[startup]")
+TEST_CASE ("Processor: startup", "[Processor]")
 {
     juce::AudioBuffer<float> buffer (2, 1024);
     juce::MidiBuffer midiBuffer;
@@ -60,4 +60,27 @@ TEST_CASE ("Processor startup", "[startup]")
     proc.prepareToPlay (48000.0, 1024);
 
     proc.processBlock (buffer, midiBuffer);
+}
+
+TEST_CASE ("Processor: base latency", "[Processor]")
+{
+    PolarDesignerAudioProcessor proc;
+
+    SECTION ("44.1kHz")
+    {
+        proc.prepareToPlay (44100, 32);
+        REQUIRE (proc.getLatencySamples() == 184);
+    }
+
+    SECTION ("48kHz")
+    {
+        proc.prepareToPlay (48000, 32);
+        REQUIRE (proc.getLatencySamples() == 200);
+    }
+
+    SECTION ("96kHz")
+    {
+        proc.prepareToPlay (96000, 32);
+        REQUIRE (proc.getLatencySamples() == 401);
+    }
 }

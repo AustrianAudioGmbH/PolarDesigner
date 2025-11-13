@@ -36,17 +36,6 @@
     #include "melatonin_perfetto/melatonin_perfetto.h"
 #endif
 
-//
-//static inline bool doublesEquivalent(double a, double b)
-//{
-//    return fabs(a - b) < DBL_EPSILON;
-//}
-//
-//static inline bool floatsEquivalent(double a, double b)
-//{
-//    return fabs(a - b) < FLT_EPSILON;
-//}
-
 using namespace juce;
 
 // these params can be synced between plugin instances
@@ -110,15 +99,6 @@ public:
     String getPageFileName() const override { return "PolarDesigner3.xml"; }
 
     //==============================================================================
-    void resampleBuffer (const AudioBuffer<float>& src,
-                         AudioBuffer<float>& dst,
-                         float srcSampleRate,
-                         double dstSampleRate);
-    void resampleBufferLagrange (const AudioBuffer<float>& src,
-                                 AudioBuffer<float>& dst,
-                                 float srcSampleRate,
-                                 float dstSampleRate);
-
     void loadEqImpulseResponses();
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -275,15 +255,8 @@ private:
     // free field / diffuse field eq
     dsp::Convolution dfEqOmniConv;
     dsp::Convolution dfEqEightConv;
-    AudioBuffer<float> dfEqOmniBuffer;
-    AudioBuffer<float> dfEqEightBuffer;
     dsp::Convolution ffEqOmniConv;
     dsp::Convolution ffEqEightConv;
-    AudioBuffer<float> ffEqOmniBuffer;
-    AudioBuffer<float> ffEqEightBuffer;
-
-    // Single reusable temporary buffer - used during resampling
-    AudioBuffer<float> tempBuffer;
 
     // proximity compensation filter
     dsp::IIR::Filter<float> proxCompIIR;
@@ -322,6 +295,8 @@ private:
     bool trackingDisturber;
     int nrBlocksRecorded;
 
+    int eqLatency;
+
     float omniSqSumDist[MAX_NUM_EQS], eightSqSumDist[MAX_NUM_EQS], omniEightSumDist[MAX_NUM_EQS],
         omniSqSumSig[MAX_NUM_EQS], eightSqSumSig[MAX_NUM_EQS], omniEightSumSig[MAX_NUM_EQS];
 
@@ -329,17 +304,6 @@ private:
     AudioBuffer<float> firFilterBuffer; // holds filter coefficients, size: 5
     AudioBuffer<float> omniEightBuffer; // holds omni and fig-of-eight signals, size: 2
     std::array<dsp::Convolution, 2 * MAX_NUM_EQS> convolvers;
-
-    // convolver cache
-    // New members for optimization
-    dsp::ProcessSpec lastEqSpec { 0.0, 0, 0 }; // Last spec for EQ convolvers
-    dsp::ProcessSpec lastConvSpec { 0.0, 0, 0 }; // Track last convolver spec
-
-    AudioBuffer<float> cachedDfEqOmniBuffer; // Cached resampled EQ buffers
-    AudioBuffer<float> cachedDfEqEightBuffer;
-    AudioBuffer<float> cachedFfEqOmniBuffer;
-    AudioBuffer<float> cachedFfEqEightBuffer;
-    double lastEqSampleRate { 0.0 }; // Track last sample rate for EQ buffers
 
     double currentSampleRate = 0.0f;
     double previousSampleRate = 0.0f;
