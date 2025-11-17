@@ -173,14 +173,6 @@ FetchContent_Declare (
 )
 FetchContent_MakeAvailable (melatonin_inspector)
 
-# Include Melatonin Perfetto only for Release builds
-# include (FetchContent)
-# FetchContent_Declare (
-#     melatonin_perfetto GIT_REPOSITORY https://github.com/sudara/melatonin_perfetto.git
-#     GIT_TAG origin/main
-# )
-# FetchContent_MakeAvailable (melatonin_perfetto)
-
 if (APPLE)
     find_library (ACCELERATE Accelerate)
 
