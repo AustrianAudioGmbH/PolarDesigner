@@ -1,6 +1,5 @@
 /*
  ==============================================================================
- PluginEditor.h
  Author: Thomas Deppisch & Simon Beck
 
  Copyright (c) 2019 - Austrian Audio GmbH
