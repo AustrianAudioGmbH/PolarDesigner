@@ -1,6 +1,6 @@
 /*
  ==============================================================================
- Filterbank.cpp
+ PluginBasics.cpp
  Author: Sebastian Grill
 
  Copyright (c) 2025 - Austrian Audio GmbH

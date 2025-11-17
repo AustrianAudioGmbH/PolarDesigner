@@ -1,6 +1,6 @@
 /*
  ==============================================================================
- ProcessorStartup.cpp
+ FilterCoefficients.hpp
  Author: Sebastian Grill
 
  Copyright (c) 2025 - Austrian Audio GmbH
