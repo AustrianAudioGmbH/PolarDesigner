@@ -24,7 +24,7 @@
 #include "PluginProcessor.h"
 #include "Constants.hpp"
 #include "Conversions.hpp"
-#include "FilterCoefficients.h"
+#include "FilterCoefficients.hpp"
 #include "PluginEditor.h"
 
 #include <atomic>
