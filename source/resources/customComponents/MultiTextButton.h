@@ -26,8 +26,6 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 #include <juce_opengl/juce_opengl.h>
 
-#include "BinaryData.h"
-
 #include "../lookAndFeel/MainLookAndFeel.h"
 
 //==============================================================================
@@ -110,7 +108,7 @@ public:
         fb.justifyContent = juce::FlexBox::JustifyContent::center;
         fb.alignContent = juce::FlexBox::AlignContent::center;
 
-        float buttonFlex = 1.f / textButtonArray.size();
+        float buttonFlex = 1.f / static_cast<float> (textButtonArray.size());
 
         for (TextButton* tb : textButtonArray)
         {

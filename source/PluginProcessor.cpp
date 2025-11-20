@@ -2130,9 +2130,10 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
             {
                 for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
                 {
-                    omniSqSumDist[i] = omniSqSumDist[i] / nrBlocksRecorded;
-                    eightSqSumDist[i] = eightSqSumDist[i] / nrBlocksRecorded;
-                    omniEightSumDist[i] = omniEightSumDist[i] / nrBlocksRecorded;
+                    omniSqSumDist[i] = omniSqSumDist[i] / static_cast<float> (nrBlocksRecorded);
+                    eightSqSumDist[i] = eightSqSumDist[i] / static_cast<float> (nrBlocksRecorded);
+                    omniEightSumDist[i] =
+                        omniEightSumDist[i] / static_cast<float> (nrBlocksRecorded);
                 }
             }
             setMinimumDisturbancePattern();
@@ -2143,9 +2144,9 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
             {
                 for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
                 {
-                    omniSqSumSig[i] = omniSqSumSig[i] / nrBlocksRecorded;
-                    eightSqSumSig[i] = eightSqSumSig[i] / nrBlocksRecorded;
-                    omniEightSumSig[i] = omniEightSumSig[i] / nrBlocksRecorded;
+                    omniSqSumSig[i] = omniSqSumSig[i] / static_cast<float> (nrBlocksRecorded);
+                    eightSqSumSig[i] = eightSqSumSig[i] / static_cast<float> (nrBlocksRecorded);
+                    omniEightSumSig[i] = omniEightSumSig[i] / static_cast<float> (nrBlocksRecorded);
                 }
             }
             setMaximumSignalPattern();
@@ -2162,9 +2163,10 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
             {
                 for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
                 {
-                    omniSqSumDist[i] = omniSqSumDist[i] / nrBlocksRecorded;
-                    eightSqSumDist[i] = eightSqSumDist[i] / nrBlocksRecorded;
-                    omniEightSumDist[i] = omniEightSumDist[i] / nrBlocksRecorded;
+                    omniSqSumDist[i] = omniSqSumDist[i] / static_cast<float> (nrBlocksRecorded);
+                    eightSqSumDist[i] = eightSqSumDist[i] / static_cast<float> (nrBlocksRecorded);
+                    omniEightSumDist[i] =
+                        omniEightSumDist[i] / static_cast<float> (nrBlocksRecorded);
                 }
             }
             disturberRecorded = true;
@@ -2175,9 +2177,9 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
             {
                 for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
                 {
-                    omniSqSumSig[i] = omniSqSumSig[i] / nrBlocksRecorded;
-                    eightSqSumSig[i] = eightSqSumSig[i] / nrBlocksRecorded;
-                    omniEightSumSig[i] = omniEightSumSig[i] / nrBlocksRecorded;
+                    omniSqSumSig[i] = omniSqSumSig[i] / static_cast<float> (nrBlocksRecorded);
+                    eightSqSumSig[i] = eightSqSumSig[i] / static_cast<float> (nrBlocksRecorded);
+                    omniEightSumSig[i] = omniEightSumSig[i] / static_cast<float> (nrBlocksRecorded);
                 }
             }
             signalRecorded = true;
@@ -2206,10 +2208,10 @@ void PolarDesignerAudioProcessor::trackSignalEnergy()
             for (int j = 0; j < numSamples; ++j)
             {
                 float omniSample = readPointerOmni[j];
-                omniSqSumDist[i] += omniSample * omniSample / numSamples;
+                omniSqSumDist[i] += omniSample * omniSample / static_cast<float> (numSamples);
                 float eightSample = readPointerEight[j];
-                eightSqSumDist[i] += eightSample * eightSample / numSamples;
-                omniEightSumDist[i] += omniSample * eightSample / numSamples;
+                eightSqSumDist[i] += eightSample * eightSample / static_cast<float> (numSamples);
+                omniEightSumDist[i] += omniSample * eightSample / static_cast<float> (numSamples);
             }
         }
         else
@@ -2217,10 +2219,10 @@ void PolarDesignerAudioProcessor::trackSignalEnergy()
             for (int j = 0; j < numSamples; ++j)
             {
                 float omniSample = readPointerOmni[j];
-                omniSqSumSig[i] += omniSample * omniSample / numSamples;
+                omniSqSumSig[i] += omniSample * omniSample / static_cast<float> (numSamples);
                 float eightSample = readPointerEight[j];
-                eightSqSumSig[i] += eightSample * eightSample / numSamples;
-                omniEightSumSig[i] += omniSample * eightSample / numSamples;
+                eightSqSumSig[i] += eightSample * eightSample / static_cast<float> (numSamples);
+                omniEightSumSig[i] += omniSample * eightSample / static_cast<float> (numSamples);
             }
         }
     }
@@ -2367,7 +2369,7 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients (float distance)
         return;
     }
 
-    int c = 343;
+    auto c = 343.0f;
     double fs = getSampleRate();
     if (fs <= 0.0)
     {
@@ -2416,8 +2418,8 @@ void PolarDesignerAudioProcessor::timerCallback()
                             static_cast<float> (paramsToSync.nrActiveBands)))
         {
             vtsParams.getParameter ("nrBands")->setValueNotifyingHost (
-                vtsParams.getParameterRange ("nrBands").convertTo0to1 (paramsToSync.nrActiveBands
-                                                                       * 1.0f));
+                vtsParams.getParameterRange ("nrBands").convertTo0to1 (
+                    static_cast<float> (paramsToSync.nrActiveBands)));
         }
 
         for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)

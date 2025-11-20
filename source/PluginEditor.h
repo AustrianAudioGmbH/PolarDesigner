@@ -25,7 +25,6 @@
 //#define AA_DO_DEBUG_PATH
 
 #include "PluginProcessor.h"
-
 #include "resources/customComponents/AnimatedLabel.h"
 #include "resources/customComponents/DirSlider.h"
 #include "resources/customComponents/DirectivityEQ.h"
