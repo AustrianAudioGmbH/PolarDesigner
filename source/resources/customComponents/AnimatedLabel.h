@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "../lookAndFeel/MainLookAndFeel.h"
+
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_devices/juce_audio_devices.h>
 #include <juce_audio_formats/juce_audio_formats.h>
@@ -26,9 +28,6 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 #include <juce_opengl/juce_opengl.h>
 
-#include "BinaryData.h"
-
-#include "../lookAndFeel/MainLookAndFeel.h"
 //==============================================================================
 /*
 */
@@ -75,17 +74,18 @@ public:
 
     void paint (juce::Graphics& g) override
     {
-        fontHeight = static_cast<int> (getTopLevelComponent()->getHeight() * 0.018f);
-        textArea = getLocalBounds().reduced (static_cast<int> (getLocalBounds().getWidth() * 0.06f),
-                                             (getLocalBounds().getHeight() - fontHeight) / 2);
+        fontHeight = static_cast<float> (getTopLevelComponent()->getHeight()) * 0.018f;
+        textArea = getLocalBounds().reduced (
+            static_cast<int> (static_cast<float> (getLocalBounds().getWidth()) * 0.06f),
+            (getLocalBounds().getHeight() - static_cast<int> (fontHeight)) / 2);
         g.fillAll (mainLaF.labelBackgroundColor);
 
         g.setColour (mainLaF.mainTextColor);
-        g.setFont (fontHeight * 1.0f);
+        g.setFont (fontHeight);
 
         g.drawMultiLineText (animatedString,
                              textArea.getX(),
-                             textArea.getY() + fontHeight / 2,
+                             textArea.getY() + static_cast<int> (fontHeight) / 2,
                              textArea.getWidth(),
                              juce::Justification::left,
                              true);
@@ -93,16 +93,18 @@ public:
 
     void resized() override
     {
-        fontHeight = static_cast<int> (getTopLevelComponent()->getHeight() * 0.018f);
+        fontHeight = static_cast<float> (getTopLevelComponent()->getHeight()) * 0.018f;
 
         Font font (fontHeight * 1.0f);
-        textArea = getLocalBounds().reduced (static_cast<int> (getLocalBounds().getWidth() * 0.06f),
-                                             (getLocalBounds().getHeight() - fontHeight) / 2);
+        textArea = getLocalBounds().reduced (
+            static_cast<int> (static_cast<float> (getLocalBounds().getWidth()) * 0.06f),
+            (getLocalBounds().getHeight() - static_cast<int> (fontHeight)) / 2);
         auto centredTextArea = Rectangle<int> (textArea.getX(),
-                                               textArea.getY() - fontHeight / 4,
+                                               textArea.getY() - static_cast<int> (fontHeight) / 4,
                                                textArea.getWidth(),
-                                               fontHeight);
-        int equalSignWidth = static_cast<int> (getLocalBounds().getWidth() * 0.042f);
+                                               static_cast<int> (fontHeight));
+        int equalSignWidth =
+            static_cast<int> (static_cast<float> (getLocalBounds().getWidth()) * 0.042f);
         float rowProportion = static_cast<float> (font.getStringWidth (animatedString))
                               / static_cast<float> (centredTextArea.getWidth());
 
@@ -112,10 +114,13 @@ public:
             equalSignWidth = font.getStringWidth (animatedString) / animatedString.length();
             if (font.getStringWidth (animatedString) > centredTextArea.getWidth())
             {
-                int nrOfSignsInNewRow = static_cast<int> (
-                    (rowProportion - 1.f) * (centredTextArea.getWidth() / equalSignWidth));
+                int nrOfSignsInNewRow =
+                    static_cast<int> ((rowProportion - 1.f)
+                                      * (static_cast<float> (centredTextArea.getWidth())
+                                         / static_cast<float> (equalSignWidth)));
                 rectArea = centredTextArea.withWidth (equalSignWidth)
-                               .translated (equalSignWidth * nrOfSignsInNewRow, fontHeight);
+                               .translated (equalSignWidth * nrOfSignsInNewRow,
+                                            static_cast<int> (fontHeight));
             }
             else
             {
@@ -133,7 +138,7 @@ public:
 private:
     String animatedString;
     int it;
-    int fontHeight;
+    float fontHeight;
     Font textFont;
     int timerBypassedPeriods;
     bool repaintBypassed;

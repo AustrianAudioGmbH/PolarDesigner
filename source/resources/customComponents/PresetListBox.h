@@ -60,8 +60,9 @@ public:
     {
         auto eyeDropImg = juce::Drawable::createFromImageData (BinaryData::eyeDrop_svg,
                                                                BinaryData::eyeDrop_svgSize);
-        auto eyeDropArea = Rectangle<float> (0, 0, (width * 1.0f), (height * 1.0f))
-                               .reduced ((width * 0.03f), (height * 0.15f));
+        auto eyeDropArea =
+            Rectangle<float> (0, 0, static_cast<float> (width), static_cast<float> (height))
+                .reduced (static_cast<float> (width) * 0.03f, static_cast<float> (height) * 0.15f);
         eyeDropImg->drawWithin (g, eyeDropArea, juce::RectanglePlacement::xRight, 1.f);
 
         if (rowIsSelected)
@@ -69,8 +70,8 @@ public:
 
         g.setColour (mainLaF.mainTextColor);
 
-        float h = (getTopLevelComponent()->getHeight() * 0.023f);
-        float y = (height - h) / 2;
+        float h = static_cast<float> (getTopLevelComponent()->getHeight()) * 0.023f;
+        float y = (static_cast<float> (height) - h) / 2;
 
         Font font (mainLaF.normalFont);
         font.setHeight (h);
@@ -143,20 +144,23 @@ private:
         {
             (void) isMouseOverButton;
             (void) isButtonDown;
-            Rectangle<float> buttonArea (0.0f, 0.0f, getWidth() * 1.0f, getHeight() * 1.0f);
+            Rectangle<float> buttonArea (0.0f,
+                                         0.0f,
+                                         static_cast<float> (getWidth()),
+                                         static_cast<float> (getHeight()));
             g.fillAll (mainLaF.groupComponentBackgroundColor);
 
-            int x = 0;
-            int w = static_cast<int> (buttonArea.getWidth() * 0.65f);
-            int h = static_cast<int> (getTopLevelComponent()->getHeight() * 0.023f);
-            int y = static_cast<int> ((buttonArea.getHeight() - h) / 2);
+            auto x = 0;
+            auto w = static_cast<int> (buttonArea.getWidth() * 0.65f);
+            auto h = static_cast<float> (getTopLevelComponent()->getHeight()) * 0.023f;
+            auto y = static_cast<int> ((buttonArea.getHeight() - h) / 2);
 
             g.setColour (mainLaF.textButtonHoverBackgroundColor);
 
             Font font (mainLaF.normalFont);
-            font.setHeight (h * 1.0f);
+            font.setHeight (h);
             g.setFont (font);
-            g.drawFittedText (getTitle(), x, y, w, h, Justification::left, 1);
+            g.drawFittedText (getTitle(), x, y, w, static_cast<int> (h), Justification::left, 1);
         }
 
     private:

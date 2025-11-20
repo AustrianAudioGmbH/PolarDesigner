@@ -38,7 +38,7 @@ public:
     {
         if (e.mouseWasDraggedSinceMouseDown())
         {
-            currentMoved = e.getDistanceFromDragStartY() * 1.0f;
+            currentMoved = static_cast<float> (e.getDistanceFromDragStartY());
             lastMoved = currentMoved + prevMoved;
             sliderValue = jmap (lastMoved,
                                 static_cast<float> (proportionOfHeight (0.48f)),
@@ -46,7 +46,7 @@ public:
                                 -0.5f,
                                 1.f);
             sliderValueSet();
-            lastMovedPoportion = (lastMoved / (getHeight() * 1.0f));
+            lastMovedPoportion = lastMoved / static_cast<float> (getHeight());
             repaint();
         }
     }
@@ -62,7 +62,7 @@ public:
                             -0.5f,
                             1.f);
         sliderValueSet();
-        lastMovedPoportion = static_cast<float> (lastMoved / getHeight());
+        lastMovedPoportion = lastMoved / static_cast<float> (getHeight());
         prevMoved = lastMoved;
         repaint();
     }
@@ -73,13 +73,13 @@ public:
 
         Rectangle<float> bounds = getLocalBounds().toFloat();
         float height = bounds.getHeight();
-        int numElem = 34;
-        float spaceBetween = height / static_cast<float> (numElem);
+        float numElem = 34;
+        float spaceBetween = height / numElem;
         float y = lastMoved;
-        int mappedY = 0;
-        int elemWidth = 0;
-        int counter = 0;
-        int r = static_cast<int> (sqrt (((height * height)) / 2)); // circle radius
+        float mappedY = 0;
+        float elemWidth = 0;
+        float counter = 0;
+        auto r = std::sqrt (((height * height)) / 2); // circle radius
 
         ColourGradient cg = ColourGradient (mainLaF.trimSliderMainColor,
                                             bounds.getWidth() / 2,
@@ -91,7 +91,7 @@ public:
         g.setGradientFill (cg);
         g.fillRect (bounds.reduced (5, 5));
 
-        for (int i = 0; i < numElem; i++)
+        for (int i = 0; i < static_cast<int> (std::round (numElem)); i++)
         {
             if (i == 0)
             {
@@ -104,18 +104,18 @@ public:
             // calculate y when mouse out of component
             if (y > height)
             {
-                counter = static_cast<int> (std::abs (y / height));
+                counter = std::round (std::abs (y / height));
                 y -= height * counter;
             }
             else if (y < 0)
             {
-                counter = static_cast<int> (std::abs (y / height) + 1);
+                counter = std::round (std::abs (y / height) + 1);
                 y += height * counter;
             }
             // calculate y when mousePos in component
             if (y < height / 2)
             {
-                mappedY = static_cast<int> ((-1) * (height / 2) + y);
+                mappedY = -1 * (height / 2) + y;
             }
             else if (juce::approximatelyEqual (y, height / 2))
             {
@@ -123,15 +123,15 @@ public:
             }
             else if (y > height / 2)
             {
-                mappedY = static_cast<int> (y - height / 2);
+                mappedY = y - height / 2;
             }
             // calculate width change with circle equation
-            elemWidth = static_cast<int> (sqrt (r * r - (mappedY * mappedY)));
+            elemWidth = sqrt (r * r - (mappedY * mappedY));
 
             auto rect = Rectangle<float> (bounds.getWidth() * 0.22f,
                                           y - (elemWidth / (numElem * 2)) / 2.0f,
                                           bounds.getWidth() * 0.55f,
-                                          elemWidth / (numElem * 2.0f));
+                                          elemWidth / (numElem * 2));
 
             if (i == lastFilledElem)
                 filledRect = rect;
@@ -170,7 +170,7 @@ public:
     {
         if (! juce::approximatelyEqual (lastMoved, 0.0f))
         {
-            lastMoved = proportionOfHeight (lastMovedPoportion) * 1.0f;
+            lastMoved = static_cast<float> (proportionOfHeight (lastMovedPoportion));
             prevMoved = lastMoved;
         }
         repaint();

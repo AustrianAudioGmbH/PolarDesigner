@@ -36,8 +36,6 @@
     #include "melatonin_perfetto/melatonin_perfetto.h"
 #endif
 
-using namespace juce;
-
 // these params can be synced between plugin instances
 struct ParamsToSync
 {

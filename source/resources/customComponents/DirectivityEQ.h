@@ -50,8 +50,11 @@
 #pragma once
 
 #include "../../Conversions.hpp"
-#include "../lookAndFeel/MainLookAndFeel.h"
+#include "../../PluginProcessor.h"
 #include "PolarPatternVisualizer.h"
+
+#include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 
 #ifdef AA_INCLUDE_MELATONIN
     #include "melatonin_inspector/melatonin/helpers/timing.h"
@@ -199,9 +202,9 @@ class DirectivityEQ : public Component,
 
         void resized() override
         {
-            float circX = getLocalBounds().getCentreX() * 1.0f;
-            float circY = getLocalBounds().getCentreY() * 1.0f;
-            float circleSize = getLocalBounds().getWidth() * 1.0f;
+            auto circX = static_cast<float> (getLocalBounds().getCentreX());
+            auto circY = static_cast<float> (getLocalBounds().getCentreY());
+            auto circleSize = static_cast<float> (getLocalBounds().getWidth());
 
             bandHandleKnobImageArea = Rectangle<float> (circX - (circleSize / 2),
                                                         circY - (circleSize / 2),
@@ -209,8 +212,10 @@ class DirectivityEQ : public Component,
                                                         circleSize);
 
             if (SystemStats::getOperatingSystemName() == "iOS")
-                bandHandleKnobImageArea.reduce (proportionOfHeight (0.23f) * 1.0f,
-                                                proportionOfHeight (0.23f) * 1.0f);
+            {
+                const auto reduce = static_cast<float> (proportionOfHeight (0.23f));
+                bandHandleKnobImageArea.reduce (reduce, reduce);
+            }
         }
 
         void enablementChanged() override
@@ -233,7 +238,7 @@ class DirectivityEQ : public Component,
             else
                 knobArea.addEllipse (bandHandleKnobImageArea);
 
-            return knobArea.contains (x * 1.0f, y * 1.0f);
+            return knobArea.contains (static_cast<float> (x), static_cast<float> (y));
         }
 
     private:
@@ -388,12 +393,12 @@ public:
         // frequency labels
         Font axisLabelFont = getLookAndFeel().getTypefaceForFont (Font (12.0f, 1));
         g.setFont (axisLabelFont);
-        g.setFont (proportionOfHeight (0.05f) * 1.0f);
+        g.setFont (static_cast<float> (proportionOfHeight (0.05f)));
         g.setColour (mainLaF.mainTextColor);
-        mLabel = proportionOfHeight (0.02f) * 1.0f;
+        mLabel = static_cast<float> (proportionOfHeight (0.02f));
         for (float f = s.fMin; f <= s.fMax; f += powf (10, floorf (log10 (f))))
         {
-            int xpos = hzToX (f);
+            auto xpos = hzToX (f);
 
             String axislabel;
             bool drawText = false;
@@ -411,22 +416,24 @@ public:
                      || juce::approximatelyEqual (f, 10000.0f)
                      || juce::approximatelyEqual (f, 20000.0f))
             {
-                axislabel = String ((int) f / 1000.0f);
+                axislabel = String (f / 1000.0f);
                 axislabel << "k";
                 drawText = true;
             }
 
             if (drawText)
             {
+                const auto axisLabelWidth =
+                    static_cast<float> (axisLabelFont.getStringWidth (axislabel));
                 auto justification = Justification::centred;
-                auto x = xpos - axisLabelFont.getStringWidth (axislabel) / 2 - mLabel;
+                auto x = xpos - axisLabelWidth / 2.0f - mLabel;
                 auto y = dirToY (s.yMin) + OH + mLabel;
-                auto width = axisLabelFont.getStringWidth (axislabel) + 2 * mLabel;
+                auto width = axisLabelWidth + 2 * mLabel;
                 auto height = axisLabelFont.getHeight();
-                if (axislabel == "20k" && ((x + width) > getWidth()))
+                if (axislabel == "20k" && ((x + width) > static_cast<float> (getWidth())))
                 {
                     justification = Justification::right;
-                    x = getWidth() - width;
+                    x = static_cast<float> (getWidth()) - width;
                 }
                 g.drawText (axislabel,
                             static_cast<int> (x),
@@ -439,9 +446,9 @@ public:
         }
 
         g.setColour (Colours::white.withAlpha (0.05f));
-        g.fillRect (static_cast<float> (hzToX (s.fMin)),
+        g.fillRect (hzToX (s.fMin),
                     dirToY (0),
-                    static_cast<float> (hzToX (s.fMax) - hzToX (s.fMin)),
+                    hzToX (s.fMax) - hzToX (s.fMin),
                     dirToY (-0.5) - dirToY (0));
 
         // set path colours and stroke
@@ -473,13 +480,13 @@ public:
         float lastRightBound = 0;
         float lastCircY = 0;
         float bandMargin = 20.0f;
-        int interpPointMargin = 15;
+        float interpPointMargin = 15.0f;
         float patternRectHeight = 14.0f;
-        int bandLimitDividerWidth = proportionOfWidth (0.005f);
+        float bandLimitDividerWidth = static_cast<float> (proportionOfWidth (0.005f));
         float bandLimitDividerHolderY = (mT / 2);
-        float bandLimitDividerHolderWidth = proportionOfWidth (0.017f) * 1.0f;
+        float bandLimitDividerHolderWidth = static_cast<float> (proportionOfWidth (0.017f));
         float bandLimitDividerHolderHeight = (dirToY (s.yMax) - 2.f);
-        float bandLineThickness = proportionOfHeight (0.006f) * 1.0f;
+        float bandLineThickness = static_cast<float> (proportionOfHeight (0.006f));
 
         // paint dirPaths and bandLimitPaths
         for (unsigned int i = 0; i < nrActiveBands; ++i)
@@ -489,10 +496,10 @@ public:
             float rightBound =
                 (handle.upperFrequencySlider == nullptr || nrActiveBands == i + 1)
                     ? hzToX (s.fMax)
-                    : static_cast<float> (hzToX (hzFromZeroToOne (
+                    : hzToX (hzFromZeroToOne (
                           nrActiveBands,
                           i,
-                          static_cast<float> (handle.upperFrequencySlider->getValue()))));
+                          static_cast<float> (handle.upperFrequencySlider->getValue())));
 
             float circY = handle.dirSlider == nullptr
                               ? dirToY (0.0f)
@@ -502,12 +509,12 @@ public:
             if (i != nrActiveBands - 1)
             {
                 Path& blPath = bandLimitPaths[i].getPath();
-                bandsWidth[i] =
-                    static_cast<int> (bandLimitPaths[i].getX() - mL + bandLimitDividerWidth / 2);
+                bandsWidth[i] = static_cast<int> (static_cast<float> (bandLimitPaths[i].getX()) - mL
+                                                  + bandLimitDividerWidth / 2);
                 blPath.addRectangle (rightBound - bandLimitDividerWidth / 2.0f,
-                                     dirToY (s.yMax) * 1.0f,
-                                     bandLimitDividerWidth * 1.0f,
-                                     (dirToY (s.yMin) - mT) * 1.0f);
+                                     dirToY (s.yMax),
+                                     bandLimitDividerWidth,
+                                     (dirToY (s.yMin) - mT));
 
                 g.setColour (mainLaF.textButtonFrameColor.withMultipliedAlpha (
                     activeBandLimitPath == (int) i ? 1.0f : 0.8f));
@@ -545,9 +552,9 @@ public:
             if (nrActiveBands == 1)
             {
                 // set surrounding rectangle to trigger mouse drag and for aax automation shortcut
-                dirPathRects[i].setBounds (hzToX (s.fMin) * 1.0f,
+                dirPathRects[i].setBounds (hzToX (s.fMin),
                                            circY - patternRectHeight / 2.0f,
-                                           (hzToX (s.fMax) - hzToX (s.fMin)) * 1.0f,
+                                           hzToX (s.fMax) - hzToX (s.fMin),
                                            patternRectHeight);
 
                 dirPaths[i].startNewSubPath (hzToX (s.fMin) * 1.0f, circY);
@@ -561,12 +568,12 @@ public:
             if (i == 0)
             {
                 // set surrounding rectangle to trigger mouse drag and for aax automation shortcut
-                dirPathRects[i].setBounds (hzToX (s.fMin) * 1.0f,
+                dirPathRects[i].setBounds (hzToX (s.fMin),
                                            circY - patternRectHeight / 2,
-                                           (rightBound - bandMargin - hzToX (s.fMin)) * 1.0f,
+                                           rightBound - bandMargin - hzToX (s.fMin),
                                            patternRectHeight);
 
-                dirPaths[i].startNewSubPath (hzToX (s.fMin) * 1.0f, circY);
+                dirPaths[i].startNewSubPath (hzToX (s.fMin), circY);
                 dirPaths[i].lineTo ((rightBound - bandMargin), circY);
             }
             else if (i == nrActiveBands - 1)
@@ -593,7 +600,7 @@ public:
                                          circY,
                                          lastRightBound + bandMargin,
                                          circY);
-                dirPaths[i].lineTo (hzToX (s.fMax) * 1.0f, circY);
+                dirPaths[i].lineTo (hzToX (s.fMax), circY);
                 g.setColour (dirPathRects[i].isEnabled() ? handle.colour
                                                          : handle.colour.withBrightness (0.3f));
                 g.strokePath (dirPaths[i], PathStrokeType (bandLineThickness));
@@ -629,10 +636,10 @@ public:
         }
 
         // band handle knobs
-        float knobSize = proportionOfHeight (0.075f) * 1.0f;
+        float knobSize = static_cast<float> (proportionOfHeight (0.075f));
 
         if (SystemStats::getOperatingSystemName() == "iOS")
-            knobSize = proportionOfHeight (0.145f) * 1.0f;
+            knobSize = static_cast<float> (proportionOfHeight (0.145f));
 
         for (unsigned int i = 0; i < nrActiveBands; ++i)
         {
@@ -640,17 +647,17 @@ public:
             float leftBound =
                 handle.lowerFrequencySlider == nullptr
                     ? hzToX (s.fMin)
-                    : static_cast<float> (hzToX (hzFromZeroToOne (
+                    : hzToX (hzFromZeroToOne (
                           nrActiveBands,
                           i - 1,
-                          static_cast<float> (handle.lowerFrequencySlider->getValue()))));
+                          static_cast<float> (handle.lowerFrequencySlider->getValue())));
             float rightBound =
                 (handle.upperFrequencySlider == nullptr || nrActiveBands == i + 1)
                     ? hzToX (s.fMax)
-                    : static_cast<float> (hzToX (hzFromZeroToOne (
+                    : hzToX (hzFromZeroToOne (
                           nrActiveBands,
                           i,
-                          static_cast<float> (handle.upperFrequencySlider->getValue()))));
+                          static_cast<float> (handle.upperFrequencySlider->getValue())));
             float circX = (rightBound + leftBound) / 2;
             float circY = handle.dirSlider == nullptr
                               ? dirToY (0.0f)
@@ -674,7 +681,7 @@ public:
             if (bandKnobs[i].isEnabled()
                 && (bandKnobs[i].isMouseOver() || tooltipValueKnobBox[i]->isMouseOver()))
             {
-                int y = bandKnobs[i].getY() > dirToY (s.yMin - s.yMax) / 2
+                int y = bandKnobs[i].getY() > static_cast<int> (dirToY (s.yMin - s.yMax)) / 2
                             ? bandKnobs[i].getY() - bandKnobs[i].getHeight() - 5
                             : bandKnobs[i].getBottom() + 5;
                 drawTooltip ((int) i, bandKnobs[i].getX() - 5, y, true);
@@ -719,17 +726,17 @@ public:
         return temp;
     }
 
-    int hzToX (float hz)
+    float hzToX (float hz)
     {
-        float width = (float) getWidth() - mL - mR;
-        int xpos = static_cast<int> (mL + width * (log (hz / s.fMin) / log (s.fMax / s.fMin)));
+        float width = static_cast<float> (getWidth()) - mL - mR;
+        float xpos = mL + width * (log (hz / s.fMin) / log (s.fMax / s.fMin));
         return xpos;
     }
 
     float xToHz (int x)
     {
         float width = (float) getWidth() - mL - mR;
-        return s.fMin * powf ((s.fMax / s.fMin), ((x - mL) / width));
+        return s.fMin * powf ((s.fMax / s.fMin), ((static_cast<float> (x) - mL) / width));
     }
 
     void mouseDrag (const MouseEvent& event) override
@@ -749,7 +756,7 @@ public:
 
                 MouseEvent ev = event.getEventRelativeTo (this);
                 Point<int> pos = ev.getPosition();
-                float dirFactor = yToDir (pos.y * 1.0f);
+                float dirFactor = yToDir (static_cast<float> (pos.y));
 
                 BandElements& handle (elements.getReference (activeElem));
                 if (handle.dirSlider != nullptr)
@@ -909,13 +916,13 @@ public:
     {
         Rectangle<int> area (getLocalBounds());
 
-        int xMin = hzToX (s.fMin);
-        int xMax = hzToX (s.fMax);
+        int xMin = static_cast<int> (hzToX (s.fMin));
+        int xMax = static_cast<int> (hzToX (s.fMax));
         numPixels = xMax - xMin + 1;
 
-        mT = area.proportionOfHeight (0.1f) * 1.0f;
-        mB = area.proportionOfHeight (0.08f) * 1.0f;
-        mL = area.proportionOfHeight (0.13f) * 1.0f;
+        mT = static_cast<float> (area.proportionOfHeight (0.1f));
+        mB = static_cast<float> (area.proportionOfHeight (0.08f));
+        mL = static_cast<float> (area.proportionOfHeight (0.13f));
 
         if (SystemStats::getOperatingSystemName() == "iOS")
             dirPatternButtonWidth = static_cast<int> (mL);
@@ -929,55 +936,60 @@ public:
             frequencies.set (i, xToHz (xMin + i));
 
         // directivity grid lines
-        const float width = getWidth() - mL - mR;
+        const float width = static_cast<float> (getWidth()) - mL - mR;
         dirGridPath.clear();
         dyn = s.yMax - s.yMin;
         int numgridlines = static_cast<int> (dyn / s.gridDiv + 1);
 
         for (int i = 0; i < numgridlines; i++)
         {
-            float db_val = s.yMax - i * s.gridDiv;
-            int ypos = static_cast<int> (dirToY (db_val));
-            dirGridPath.startNewSubPath (mL, ypos * 1.0f);
-            dirGridPath.lineTo (mL + width, ypos * 1.0f);
+            float db_val = s.yMax - static_cast<float> (i) * s.gridDiv;
+            auto ypos = dirToY (db_val);
+            auto yPosInt = static_cast<int> (ypos);
+            dirGridPath.startNewSubPath (mL, ypos);
+            dirGridPath.lineTo (mL + width, ypos);
             //Directivity primary buttons
-            tbPrimDirButtons[i].setBounds (5, ypos, dirPatternButtonWidth, dirPatternButtonHeight);
-            tbPrimDirButtons[i].setCentrePosition (static_cast<int> (mL / 2.0f), ypos);
+            tbPrimDirButtons[i].setBounds (5,
+                                           yPosInt,
+                                           dirPatternButtonWidth,
+                                           dirPatternButtonHeight);
+            tbPrimDirButtons[i].setCentrePosition (static_cast<int> (mL / 2.0f), yPosInt);
         }
 
         // add grid for super card, hyper card and broad card
         // and directivity secondary buttons
         smallDirGridPath.clear();
-        int ypos = static_cast<int> (dirToY (hCardFact));
-        smallDirGridPath.startNewSubPath (mL, ypos * 1.0f);
-        smallDirGridPath.lineTo (mL + width, ypos * 1.0f);
-        tbSecDirButtons[0].setBounds (5, ypos, dirPatternButtonWidth, dirPatternButtonHeight);
-        tbSecDirButtons[0].setCentrePosition (static_cast<int> (mL / 2.0f), ypos);
+        auto ypos = dirToY (hCardFact);
+        auto yPosInt = static_cast<int> (ypos);
+        smallDirGridPath.startNewSubPath (mL, ypos);
+        smallDirGridPath.lineTo (mL + width, ypos);
+        tbSecDirButtons[0].setBounds (5, yPosInt, dirPatternButtonWidth, dirPatternButtonHeight);
+        tbSecDirButtons[0].setCentrePosition (static_cast<int> (mL / 2.0f), yPosInt);
 
-        ypos = static_cast<int> (dirToY (sCardFact));
-        smallDirGridPath.startNewSubPath (mL, ypos * 1.0f);
-        smallDirGridPath.lineTo (mL + width, ypos * 1.0f);
-        tbSecDirButtons[1].setBounds (5, ypos, dirPatternButtonWidth, dirPatternButtonHeight);
-        tbSecDirButtons[1].setCentrePosition (static_cast<int> (mL / 2.0f), ypos);
+        ypos = dirToY (sCardFact);
+        smallDirGridPath.startNewSubPath (mL, ypos);
+        smallDirGridPath.lineTo (mL + width, ypos);
+        tbSecDirButtons[1].setBounds (5, yPosInt, dirPatternButtonWidth, dirPatternButtonHeight);
+        tbSecDirButtons[1].setCentrePosition (static_cast<int> (mL / 2.0f), yPosInt);
 
-        ypos = static_cast<int> (dirToY (bCardFact));
-        smallDirGridPath.startNewSubPath (mL, ypos * 1.0f);
-        smallDirGridPath.lineTo (mL + width, ypos * 1.0f);
-        tbSecDirButtons[2].setBounds (5, ypos, dirPatternButtonWidth, dirPatternButtonHeight);
-        tbSecDirButtons[2].setCentrePosition (static_cast<int> (mL / 2.0f), ypos);
+        ypos = dirToY (bCardFact);
+        smallDirGridPath.startNewSubPath (mL, ypos);
+        smallDirGridPath.lineTo (mL + width, ypos);
+        tbSecDirButtons[2].setBounds (5, yPosInt, dirPatternButtonWidth, dirPatternButtonHeight);
+        tbSecDirButtons[2].setCentrePosition (static_cast<int> (mL / 2.0f), yPosInt);
 
-        ypos = static_cast<int> (dirToY (rbCardFact));
-        smallDirGridPath.startNewSubPath (mL, ypos * 1.0f);
-        smallDirGridPath.lineTo (mL + width, ypos * 1.0f);
-        tbSecDirButtons[3].setBounds (5, ypos, dirPatternButtonWidth, dirPatternButtonHeight);
-        tbSecDirButtons[3].setCentrePosition (static_cast<int> (mL / 2.0f), ypos);
+        ypos = dirToY (rbCardFact);
+        smallDirGridPath.startNewSubPath (mL, ypos);
+        smallDirGridPath.lineTo (mL + width, ypos);
+        tbSecDirButtons[3].setBounds (5, yPosInt, dirPatternButtonWidth, dirPatternButtonHeight);
+        tbSecDirButtons[3].setCentrePosition (static_cast<int> (mL / 2.0f), yPosInt);
 
         // frequency grid
         hzGridPath.clear();
         hzGridPathBold.clear();
         for (float f = s.fMin; f <= s.fMax; f += powf (10, floorf (log10 (f))))
         {
-            int xpos = hzToX (f);
+            int xpos = static_cast<int> (hzToX (f));
 
             //            if ((f == 20) || (f == 50) || (f == 100) || (f == 200) || (f == 500) || (f == 1000) || (f == 2000) || (f == 5000) || (f == 10000) || (f == 20000))
             if (juce::approximatelyEqual (f, 20.0f) || juce::approximatelyEqual (f, 50.0f)
@@ -986,13 +998,13 @@ public:
                 || juce::approximatelyEqual (f, 2000.0f) || juce::approximatelyEqual (f, 5000.0f)
                 || juce::approximatelyEqual (f, 10000.0f) || juce::approximatelyEqual (f, 20000.0f))
             {
-                hzGridPathBold.startNewSubPath (xpos * 1.0f, dirToY (s.yMax));
-                hzGridPathBold.lineTo (xpos * 1.0f, dirToY (s.yMin));
+                hzGridPathBold.startNewSubPath (static_cast<float> (xpos), dirToY (s.yMax));
+                hzGridPathBold.lineTo (static_cast<float> (xpos), dirToY (s.yMin));
             }
             else
             {
-                hzGridPath.startNewSubPath (xpos * 1.0f, dirToY (s.yMax));
-                hzGridPath.lineTo (xpos * 1.0f, dirToY (s.yMin));
+                hzGridPath.startNewSubPath (static_cast<float> (xpos), dirToY (s.yMax));
+                hzGridPath.lineTo (static_cast<float> (xpos), dirToY (s.yMin));
             }
         }
         initValueBox();
@@ -1121,8 +1133,9 @@ public:
             tooltipValueBox[tooltipIndex]->setBounds (
                 xCoord,
                 yCoord,
-                static_cast<int> (getTopLevelComponent()->getWidth() * 0.06f),
-                static_cast<int> (getTopLevelComponent()->getHeight() * 0.03f));
+                static_cast<int> (static_cast<float> (getTopLevelComponent()->getWidth()) * 0.06f),
+                static_cast<int> (static_cast<float> (getTopLevelComponent()->getHeight())
+                                  * 0.03f));
             tooltipValueBox[tooltipIndex]->setVisible (true);
         }
         else
@@ -1130,8 +1143,9 @@ public:
             tooltipValueKnobBox[tooltipIndex]->setBounds (
                 xCoord,
                 yCoord,
-                static_cast<int> (getTopLevelComponent()->getWidth() * 0.04f),
-                static_cast<int> (getTopLevelComponent()->getHeight() * 0.03f));
+                static_cast<int> (static_cast<float> (getTopLevelComponent()->getWidth()) * 0.04f),
+                static_cast<int> (static_cast<float> (getTopLevelComponent()->getHeight())
+                                  * 0.03f));
             tooltipValueKnobBox[tooltipIndex]->setVisible (true);
         }
     }
@@ -1286,7 +1300,7 @@ public:
         }
     }
 
-    int getEqWidth() { return (hzToX (20000) - hzToX (20)); }
+    int getEqWidth() { return static_cast<int> (hzToX (20000) - hzToX (20)); }
 
     int getBandWidth (int band) { return bandsWidth[band]; }
 

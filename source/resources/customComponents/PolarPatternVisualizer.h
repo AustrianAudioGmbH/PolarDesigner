@@ -79,8 +79,8 @@
 using namespace dsp;
 class PolarPatternVisualizer : public TextButton
 {
-    const float deg2rad = static_cast<float> (std::numbers::pi / 180.0f);
-    const int degStep = 4;
+    const float deg2rad = std::numbers::pi_v<float> / 180.0f;
+    const float degStep = 4;
     //    const int nLookUpSamples = 360;
 
 public:
@@ -94,9 +94,9 @@ public:
 
         colour = mainLaF.mainBackground;
 
-        for (int phi = -180; phi <= 180; phi += degStep)
+        for (float phi = -180; phi <= 180; phi += degStep)
         {
-            pointsOnCircle.add (Point<float> (cos (deg2rad * phi), sin (deg2rad * phi)));
+            pointsOnCircle.add (Point<float> (std::cos (deg2rad * phi), std::sin (deg2rad * phi)));
         }
 
         Path circle;
@@ -104,7 +104,7 @@ public:
 
         subGrid.clear();
         for (int i = 1; i < 5; i++)
-            subGrid.addPath (circle, AffineTransform().scaled (i / 4.0f));
+            subGrid.addPath (circle, AffineTransform().scaled (static_cast<float> (i) / 4.0f));
 
         hitArea.addEllipse (-1.0f, -1.0f, 2.0f, 2.0f);
     }
@@ -196,13 +196,13 @@ public:
             bounds.setHeight (bounds.getWidth());
         bounds.setCentre (centre);
 
-        transform = AffineTransform::fromTargetPoints (centre.x * 1.0f,
-                                                       centre.y * 1.0f,
-                                                       centre.x * 1.0f,
-                                                       bounds.getY() * 1.0f,
-                                                       bounds.getX() * 1.0f,
-                                                       centre.y * 1.0f)
-                        .translated (((getWidth() - getHeight()) / 2.0f), 0.0f);
+        transform = AffineTransform::fromTargetPoints (static_cast<float> (centre.x),
+                                                       static_cast<float> (centre.y),
+                                                       static_cast<float> (centre.x),
+                                                       static_cast<float> (bounds.getY()),
+                                                       static_cast<float> (bounds.getX()),
+                                                       static_cast<float> (centre.y))
+                        .translated ((static_cast<float> (getWidth() - getHeight()) / 2.0f), 0.0f);
 
         if (strokeBounds.getWidth() > strokeBounds.getHeight())
             strokeBounds.setWidth (strokeBounds.getHeight());
@@ -210,13 +210,14 @@ public:
             strokeBounds.setHeight (strokeBounds.getWidth());
         strokeBounds.setCentre (centre);
 
-        strokeTransform = AffineTransform::fromTargetPoints (centre.x * 1.0f,
-                                                             centre.y * 1.0f,
-                                                             centre.x * 1.0f,
-                                                             strokeBounds.getY() * 1.0f,
-                                                             strokeBounds.getX() * 1.0f,
-                                                             centre.y * 1.0f)
-                              .translated (((getWidth() - getHeight()) / 2) * 1.0f, 0.0f);
+        strokeTransform =
+            AffineTransform::fromTargetPoints (static_cast<float> (centre.x),
+                                               static_cast<float> (centre.y),
+                                               static_cast<float> (centre.x),
+                                               static_cast<float> (strokeBounds.getY()),
+                                               static_cast<float> (strokeBounds.getX()),
+                                               static_cast<float> (centre.y))
+                .translated ((static_cast<float> (getWidth() - getHeight()) / 2) * 1.0f, 0.0f);
 
         plotArea = bounds;
         recalculateDirectivity();
@@ -226,15 +227,12 @@ public:
     {
         dirPath.clear();
         int idx = 0;
-        for (int phi = -180; phi <= 180; phi += degStep)
+        for (int phi = -180; phi <= 180; phi += static_cast<int> (degStep))
         {
-            float phiInRad = (float) phi * deg2rad;
+            float phiInRad = static_cast<float> (phi) * deg2rad;
             float gainLin = std::abs ((1 - std::abs (dirWeight)) + dirWeight * std::cos (phiInRad));
-            int dbMin = 25;
-            float gainDb =
-                20
-                * std::log10 (
-                    std::max (gainLin, static_cast<float> (std::pow (10, -dbMin / 20.0f))));
+            float dbMin = 25;
+            float gainDb = 20 * std::log10 (std::max (gainLin, std::pow (10.0f, -dbMin / 20.0f)));
             float effGain = std::max (std::abs ((gainDb + dbMin) / dbMin), 0.01f);
             Point<float> point = effGain * pointsOnCircle[idx];
 
@@ -249,7 +247,10 @@ public:
         dirPath.applyTransform (transform);
     }
 
-    bool hitTest (int x, int y) override { return hitArea.contains (x * 1.0f, y * 1.0f); }
+    bool hitTest (int x, int y) override
+    {
+        return hitArea.contains (static_cast<float> (x), static_cast<float> (y));
+    }
 
     void setDirWeight (float weight)
     {

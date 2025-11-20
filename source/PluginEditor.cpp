@@ -648,8 +648,9 @@ void PolarDesignerAudioProcessorEditor::resized()
 
     // Margins are fixed value because DirectivityEQ component has fixed margins
     const float polarVisualizersComponentLeftMargin =
-        directivityEqualiser.proportionOfHeight (0.13f) * 1.0f;
-    const float polarVisualizersComponentRightMargin = proportionOfHeight (0.057f) * 1.0f;
+        static_cast<float> (directivityEqualiser.proportionOfHeight (0.13f));
+    const float polarVisualizersComponentRightMargin =
+        static_cast<float> (proportionOfHeight (0.057f)) * 1.0f;
 
     juce::FlexBox polarVisualizersComponent;
     polarVisualizersComponent.flexDirection = FlexBox::Direction::row;
@@ -665,8 +666,9 @@ void PolarDesignerAudioProcessorEditor::resized()
     muteSoloModule.items.add (juce::FlexItem().withWidth (polarVisualizersComponentLeftMargin));
 
     juce::FlexBox muteSoloComponent[5];
-    auto muteSoloButtonSize = area.getHeight() * 0.04f;
-    auto muteSoloButtonSpace = area.getHeight() * 0.025f;
+    auto muteSoloButtonSize = static_cast<float> (area.getHeight()) * 0.04f;
+    auto muteSoloButtonSpace = static_cast<float> (area.getHeight()) * 0.025f;
+
     for (int i = 0; i < 5; i++)
     {
         muteSoloComponent[i].flexDirection = FlexBox::Direction::row;
@@ -706,7 +708,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     //offsetPolVis are fixed values because DirectivityEQ component has fixed margins
     const float offsetPolVis = 40;
 
-    const float dirEqSize = directivityEqualiser.getEqWidth() * 1.0f;
+    const float dirEqSize = static_cast<float> (directivityEqualiser.getEqWidth());
     auto bandLimitWidth = getBandLimitWidthVector (dirEqSize, offsetPolVis);
 
     //bandFlex - value used for components spacing across given area i.e 0.65 (maximum 1.0 means full space)
@@ -715,7 +717,7 @@ void PolarDesignerAudioProcessorEditor::resized()
     float polarVisFlexSum = 0;
     float prevGainSliderFlex = 0;
     float gainSliderFlexSum = 0;
-    int polarRightMarginDiff = 31;
+    float polarRightMarginDiff = 31;
     int gainRightMarginDiff = 15;
 
     if (nActiveBands < 2)
@@ -737,10 +739,12 @@ void PolarDesignerAudioProcessorEditor::resized()
             polarVisualizersComponent.items.add (juce::FlexItem().withFlex (1.f - polarVisFlex));
 
             //Calculate gain slider position and size
-            int pixe1lLine = 1;
+            float pixe1lLine = 1;
             auto gainSliderHalfWidth =
                 pixe1lLine
-                + getLookAndFeel().getSliderLayout (slBandGain[0]).sliderBounds.getWidth() / 2;
+                + static_cast<float> (
+                      getLookAndFeel().getSliderLayout (slBandGain[0]).sliderBounds.getWidth())
+                      / 2;
             float gainSliderHalfWidthFlex = gainSliderHalfWidth / dirEqSize;
             float gainSliderFlex = bandFlex / 2 + gainSliderHalfWidthFlex;
             gainBandSlidersComponent.items.add (
@@ -783,9 +787,11 @@ void PolarDesignerAudioProcessorEditor::resized()
                         juce::FlexItem().withFlex (1 - polarVisFlexSum));
 
                 //Gain sliders position calculate to fit textbox when bandwidth is narrow
-                int pixe1lLine = 1;
+                float pixe1lLine = 1;
                 auto gainSliderHalfWidth =
-                    getLookAndFeel().getSliderLayout (slBandGain[i]).sliderBounds.getWidth() / 2;
+                    static_cast<float> (
+                        getLookAndFeel().getSliderLayout (slBandGain[i]).sliderBounds.getWidth())
+                    / 2;
                 float gainSliderHalfWidthFlex = gainSliderHalfWidth / dirEqSize;
                 float gainSliderFlex = bandFlex / 2 + prevGainSliderFlex / 2;
                 //Add gainSliderHalfWidthFlex only on first iteration
@@ -804,10 +810,10 @@ void PolarDesignerAudioProcessorEditor::resized()
             }
         }
     }
-    int gainRightMargin =
-        tbTrimSliderCenterPointer.getWidth() + trimSlider.getWidth() + gainRightMarginDiff;
+    float gainRightMargin = static_cast<float> (tbTrimSliderCenterPointer.getWidth()
+                                                + trimSlider.getWidth() + gainRightMarginDiff);
     polarVisualizersComponent.items.add (
-        juce::FlexItem().withWidth ((gainRightMargin - polarRightMarginDiff) * 1.0f));
+        juce::FlexItem().withWidth (gainRightMargin - polarRightMarginDiff));
     dirSlidersComponent.items.add (
         juce::FlexItem().withWidth (polarVisualizersComponentRightMargin));
     muteSoloModule.items.add (juce::FlexItem().withWidth (gainRightMargin * 1.0f));
@@ -1558,7 +1564,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
 
 float PolarDesignerAudioProcessorEditor::getABButtonAlphaFromLayerState (int layerState)
 {
-    return layerState * 0.7f + 0.3f;
+    return static_cast<float> (layerState) * 0.7f + 0.3f;
 }
 
 std::vector<float> PolarDesignerAudioProcessorEditor::getBandLimitWidthVector (float dirEqSize,
@@ -2566,7 +2572,8 @@ void PolarDesignerAudioProcessorEditor::restoreLayerState (int layer)
     // Set number of bands
     polarDesignerProcessor.setNProcessorBands (state.nrBandsValue);
     valueTreeState.getParameter ("nrBands")->setValueNotifyingHost (
-        valueTreeState.getParameter ("nrBands")->convertTo0to1 (state.nrBandsValue - 1));
+        valueTreeState.getParameter ("nrBands")->convertTo0to1 (
+            static_cast<float> (state.nrBandsValue - 1)));
     nActiveBands = state.nrBandsValue;
 
     // Restore band parameters
