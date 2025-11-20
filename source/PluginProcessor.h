@@ -91,8 +91,6 @@ public:
     PolarDesignerAudioProcessor();
     ~PolarDesignerAudioProcessor() override;
 
-    void validateSampleRateAndBlockSize();
-
     void registerParameterListeners();
 
     // This is the ProTools PageFile for PolarDesigner3

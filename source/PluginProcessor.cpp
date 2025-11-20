@@ -344,20 +344,6 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     startTimer (50);
 }
 
-void PolarDesignerAudioProcessor::validateSampleRateAndBlockSize()
-{
-    if (currentSampleRate <= 0.0)
-    {
-        LOG_WARN ("Invalid sample rate, setting to default");
-        currentSampleRate = FILTER_BANK_NATIVE_SAMPLE_RATE;
-    }
-    if (currentBlockSize <= 0)
-    {
-        LOG_WARN ("Invalid block size, setting to default");
-        currentBlockSize = PD_DEFAULT_BLOCK_SIZE;
-    }
-}
-
 void PolarDesignerAudioProcessor::registerParameterListeners()
 {
     static const StringArray params = {
@@ -572,7 +558,6 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     // Validate inputs
     currentSampleRate = sampleRate > 0 ? sampleRate : FILTER_BANK_NATIVE_SAMPLE_RATE;
     currentBlockSize = samplesPerBlock > 0 ? samplesPerBlock : PD_DEFAULT_BLOCK_SIZE;
-    validateSampleRateAndBlockSize();
 
     // Calculate firLen
     int newFirLen = static_cast<int> (
@@ -636,7 +621,7 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer,
         isBypassed = false;
         updateLatency();
     }
-    validateSampleRateAndBlockSize();
+
     auto numSamples = static_cast<size_t> (buffer.getNumSamples());
     createOmniAndEightSignals (buffer);
     if (currentBlockSize == 0)
@@ -835,8 +820,6 @@ void PolarDesignerAudioProcessor::getStateInformation (MemoryBlock& destData)
 // !J! Make setStateInformation more robust for ProTools
 void PolarDesignerAudioProcessor::initializeDefaultState()
 {
-    validateSampleRateAndBlockSize(); // Validate current values
-
     if (juce::approximatelyEqual (currentSampleRate,
                                   static_cast<double> (FILTER_BANK_NATIVE_SAMPLE_RATE))
         && currentBlockSize == PD_DEFAULT_BLOCK_SIZE)
@@ -976,8 +959,6 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
 }
 void PolarDesignerAudioProcessor::resizeBuffersIfNeeded (int newFirLen, int newBlockSize)
 {
-    validateSampleRateAndBlockSize();
-
     // Ensure newFirLen is valid (positive and odd)
     if (newFirLen <= 0)
     {
@@ -1055,8 +1036,6 @@ void PolarDesignerAudioProcessor::releaseResources()
 
 void PolarDesignerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    validateSampleRateAndBlockSize();
-
     // Calculate firLen based on currentSampleRate
     int newFirLen = static_cast<int> (
         std::ceil (static_cast<float> (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE)
@@ -1263,7 +1242,6 @@ void PolarDesignerAudioProcessor::parameterChanged (const String& parameterID,
     if (currentSampleRate <= 0.0 || currentBlockSize <= 0)
     {
         LOG_WARN ("Plugin not prepared in parameterChanged, initializing defaults");
-        validateSampleRateAndBlockSize();
         prepareToPlay (currentSampleRate, currentBlockSize);
     }
 
@@ -1670,7 +1648,6 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
 void PolarDesignerAudioProcessor::initAllConvolvers()
 {
     // Validate sample rate and block size
-    validateSampleRateAndBlockSize();
 
     // Ensure firLen is valid
     if (firLen <= 0)
@@ -2426,10 +2403,6 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients (float distance)
 
 void PolarDesignerAudioProcessor::timerCallback()
 {
-    validateSampleRateAndBlockSize(); // Validate before operations
-
-    recomputeFilterCoefficientsIfNeeded();
-
     if (zeroLatencyModeChanged.exchange (false, std::memory_order_acquire))
         updateLatency();
 
