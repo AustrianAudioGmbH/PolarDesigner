@@ -22,6 +22,8 @@
 
 #include "PluginEditor.h"
 
+#include <juce_gui_basics/juce_gui_basics.h>
+
 #ifdef AA_INCLUDE_MELATONIN
     #include "melatonin_inspector/melatonin/helpers/timing.h"
 #endif
@@ -31,8 +33,8 @@
 //==============================================================================
 PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
     PolarDesignerAudioProcessor& p,
-    AudioProcessorValueTreeState& vts) :
-    AudioProcessorEditor (&p),
+    juce::AudioProcessorValueTreeState& vts) :
+    juce::AudioProcessorEditor (&p),
     loadingFile (false),
     presetListVisible (false),
     polarDesignerProcessor (p),
@@ -45,6 +47,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
     uiMaxTargetToSpillFlowStarted (false),
     termStage (PolarDesignerAudioProcessorEditor::terminatorStage::DISABLED)
 {
+    using namespace juce;
+
     nActiveBands = polarDesignerProcessor.getNProcessorBands();
     syncChannelIdx = polarDesignerProcessor.getSyncChannelIdx();
 
@@ -450,7 +454,7 @@ void PolarDesignerAudioProcessorEditor::setTrimValue (int nBands)
             lockBandsOnTop = true;
             break;
         }
-        else if (exactlyEqual (slDir[i].getValue(), -0.5))
+        else if (juce::exactlyEqual (slDir[i].getValue(), -0.5))
         {
             lockBandsOnTop = false;
             break;
@@ -486,6 +490,8 @@ void PolarDesignerAudioProcessorEditor::resetTrim (int nBands)
 // Update A/B button states
 void PolarDesignerAudioProcessorEditor::updateABButtonState()
 {
+    using namespace juce;
+
     //    ScopedLock lock(polarDesignerProcessor.abLayerLock); // Ensure thread-safety
     bool isLayerB = (polarDesignerProcessor.abLayerState == COMPARE_LAYER_B);
     tmbABButton[COMPARE_LAYER_A].setToggleState (! isLayerB,
@@ -559,7 +565,7 @@ PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
 }
 
 //==============================================================================
-void PolarDesignerAudioProcessorEditor::paint (Graphics& g)
+void PolarDesignerAudioProcessorEditor::paint (juce::Graphics& g)
 {
 #ifdef AA_INCLUDE_MELATONIN
     melatonin::ComponentTimer timer { this };
@@ -573,6 +579,8 @@ void PolarDesignerAudioProcessorEditor::paint (Graphics& g)
 
 void PolarDesignerAudioProcessorEditor::resized()
 {
+    using namespace juce;
+
     Rectangle<int> area (getLocalBounds());
 
     juce::FlexBox mainfb;
@@ -1266,8 +1274,10 @@ void PolarDesignerAudioProcessorEditor::buttonStateChanged ([[maybe_unused]] juc
 {
 }
 
-void PolarDesignerAudioProcessorEditor::buttonClicked (Button* button)
+void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
 {
+    using namespace juce;
+
     if (presetListVisible)
     {
         if (lbUserPresets.isRowDoubleClicked() || lbFactoryPresets.isRowDoubleClicked())
@@ -1608,7 +1618,7 @@ bool PolarDesignerAudioProcessorEditor::getSoloActive()
     return active;
 }
 
-void PolarDesignerAudioProcessorEditor::sliderValueChanged (Slider* slider)
+void PolarDesignerAudioProcessorEditor::sliderValueChanged (juce::Slider* slider)
 {
     if (slider == &trimSlider)
     {
@@ -1651,6 +1661,8 @@ void PolarDesignerAudioProcessorEditor::sliderValueChanged (Slider* slider)
 
 void PolarDesignerAudioProcessorEditor::loadFile()
 {
+    using namespace juce;
+
     FileChooser myChooser ("Select Preset File",
                            polarDesignerProcessor.getLastDir().exists()
                                ? polarDesignerProcessor.getLastDir()
@@ -1692,6 +1704,8 @@ void PolarDesignerAudioProcessorEditor::loadFile()
 
 void PolarDesignerAudioProcessorEditor::saveFile()
 {
+    using namespace juce;
+
     FileChooser myChooser ("Save Preset File",
                            polarDesignerProcessor.getLastDir().exists()
                                ? polarDesignerProcessor.getLastDir()
@@ -1717,6 +1731,8 @@ void PolarDesignerAudioProcessorEditor::saveFile()
 
 void PolarDesignerAudioProcessorEditor::loadSavedPresetsToList()
 {
+    using namespace juce;
+
     File presetDir (polarDesignerProcessor.getLastDir().exists()
                         ? polarDesignerProcessor.getLastDir()
                         : File::getSpecialLocation (File::userHomeDirectory));
@@ -1743,6 +1759,8 @@ void PolarDesignerAudioProcessorEditor::loadSavedPresetsToList()
 
 void PolarDesignerAudioProcessorEditor::nEditorBandsChanged()
 {
+    using namespace juce;
+
     nActiveBands = polarDesignerProcessor.getNProcessorBands();
 
     // Set nrbands button state when preset load
@@ -1789,6 +1807,8 @@ void PolarDesignerAudioProcessorEditor::nEditorBandsChanged()
 
 void PolarDesignerAudioProcessorEditor::timerCallback()
 {
+    using namespace juce;
+
     //TRACE_COMPONENT();
 
     if (isRestoringState)
@@ -1911,6 +1931,8 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
 
 void PolarDesignerAudioProcessorEditor::activateMainUI (bool shouldBeActive)
 {
+    using namespace juce;
+
     tmbNrBandsButton[0].setEnabled (shouldBeActive);
     tmbNrBandsButton[1].setEnabled (shouldBeActive);
     tmbNrBandsButton[2].setEnabled (shouldBeActive);
@@ -1972,6 +1994,8 @@ void PolarDesignerAudioProcessorEditor::activateMainUI (bool shouldBeActive)
 
 void PolarDesignerAudioProcessorEditor::activateEditingForZeroLatency()
 {
+    using namespace juce;
+
     //    ScopedLock lock(polarDesignerProcessor.abLayerLock); // Add lock
     bool zlIsActive = polarDesignerProcessor.zeroLatencyModeActive();
     int currentLayer = polarDesignerProcessor.abLayerState;
@@ -2061,6 +2085,8 @@ void PolarDesignerAudioProcessorEditor::setBandEnabled (int bandNr, bool enable)
 
 void PolarDesignerAudioProcessorEditor::showActiveTerminatorStage (terminatorStage stage)
 {
+    using namespace juce;
+
     if (stage == terminatorStage::DISABLED)
     {
         terminatorLabelNr1.setVisible (false);
@@ -2211,7 +2237,7 @@ void PolarDesignerAudioProcessorEditor::notifyPresetLabelChange()
     }
 }
 
-void PolarDesignerAudioProcessorEditor::mouseDown (const MouseEvent& event)
+void PolarDesignerAudioProcessorEditor::mouseDown (const juce::MouseEvent& event)
 {
     //Event for hiding preset panel when clicking outside
     if (presetListVisible && ! presetArea.contains (event.mouseDownPosition))
@@ -2222,13 +2248,16 @@ void PolarDesignerAudioProcessorEditor::mouseDown (const MouseEvent& event)
 
     for (int i = 0; i < 5; i++)
     {
-        polarPatternVisualizers[i].setToggleState (false, NotificationType::dontSendNotification);
+        polarPatternVisualizers[i].setToggleState (false,
+                                                   juce::NotificationType::dontSendNotification);
         setBandEnabled (i, true);
     }
 }
 
-void PolarDesignerAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source)
+void PolarDesignerAudioProcessorEditor::changeListenerCallback (juce::ChangeBroadcaster* source)
 {
+    using namespace juce;
+
     if (source == &lbUserPresets)
     {
         File presetDir (polarDesignerProcessor.getLastDir().exists()
@@ -2293,6 +2322,8 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback (ChangeBroadcaste
 
 void PolarDesignerAudioProcessorEditor::setMainAreaEnabled (bool enable)
 {
+    using namespace juce;
+
     directivityEqualiser.setActive (enable);
     directivityEqualiser.setEnabled (enable);
 
@@ -2316,6 +2347,8 @@ void PolarDesignerAudioProcessorEditor::setMainAreaEnabled (bool enable)
 
 void PolarDesignerAudioProcessorEditor::setEqMode()
 {
+    using namespace juce;
+
     int activeIdx = polarDesignerProcessor.getEqState();
     if (activeIdx == 0)
     {
@@ -2337,6 +2370,8 @@ void PolarDesignerAudioProcessorEditor::setEqMode()
 
 void PolarDesignerAudioProcessorEditor::calculateLockedBands (int nBands, bool trimSliderIncr)
 {
+    using namespace juce;
+
     // First check if any of the band reach min/max value
     int minIt = -1;
     for (int i = 0; i < nBands; i++)
@@ -2529,6 +2564,8 @@ void PolarDesignerAudioProcessorEditor::saveLayerState (int layer)
 
 void PolarDesignerAudioProcessorEditor::restoreLayerState (int layer)
 {
+    using namespace juce;
+
     if (! isStateSaved[static_cast<size_t> (layer)])
     {
         DBG ("No state saved for layer " << layer);

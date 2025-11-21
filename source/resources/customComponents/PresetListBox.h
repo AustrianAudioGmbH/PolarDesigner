@@ -10,27 +10,15 @@
 
 #pragma once
 
-#include <juce_audio_basics/juce_audio_basics.h>
-#include <juce_audio_devices/juce_audio_devices.h>
-#include <juce_audio_formats/juce_audio_formats.h>
-#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
-#include <juce_audio_processors/juce_audio_processors.h>
-#include <juce_audio_utils/juce_audio_utils.h>
-#include <juce_core/juce_core.h>
-#include <juce_cryptography/juce_cryptography.h>
-#include <juce_data_structures/juce_data_structures.h>
-#include <juce_dsp/juce_dsp.h>
-#include <juce_events/juce_events.h>
-#include <juce_graphics/juce_graphics.h>
-#include <juce_gui_basics/juce_gui_basics.h>
-#include <juce_gui_extra/juce_gui_extra.h>
-#include <juce_opengl/juce_opengl.h>
-
-#include "BinaryData.h"
-
 #include "../lookAndFeel/MainLookAndFeel.h"
+#include "BinaryData.h"
+#include "juce_core/juce_core.h"
 
-class PresetListBox : public Component, public ListBoxModel, public ChangeBroadcaster
+#include <juce_gui_basics/juce_gui_basics.h>
+
+class PresetListBox : public juce::Component,
+                      public juce::ListBoxModel,
+                      public juce::ChangeBroadcaster
 {
 public:
     PresetListBox()
@@ -43,6 +31,8 @@ public:
 
     void resized() override
     {
+        using namespace juce;
+
         FlexBox fb;
         fb.flexDirection = FlexBox::Direction::column;
         fb.justifyContent = juce::FlexBox::JustifyContent::center;
@@ -53,11 +43,13 @@ public:
     }
 
     void paintListBoxItem (int rowNumber,
-                           Graphics& g,
+                           juce::Graphics& g,
                            int width,
                            int height,
                            bool rowIsSelected) override
     {
+        using namespace juce;
+
         auto eyeDropImg = juce::Drawable::createFromImageData (BinaryData::eyeDrop_svg,
                                                                BinaryData::eyeDrop_svgSize);
         auto eyeDropArea =
@@ -87,9 +79,9 @@ public:
 
     int getNumRows() override { return data.size(); }
 
-    void backgroundClicked (const MouseEvent&) override { presets.deselectAllRows(); }
+    void backgroundClicked (const juce::MouseEvent&) override { presets.deselectAllRows(); }
 
-    void listBoxItemDoubleClicked (int row, const MouseEvent&) override
+    void listBoxItemDoubleClicked (int row, const juce::MouseEvent&) override
     {
         rowDoubleClicked = true;
         selectedRow = row;
@@ -113,13 +105,13 @@ public:
         sendChangeMessage();
     }
 
-    String getSelectedPresetName() { return *data.getUnchecked (selectedRow); }
+    juce::String getSelectedPresetName() { return *data.getUnchecked (selectedRow); }
 
-    void setHeaderText (const String& text) { presets.getHeaderComponent()->setTitle (text); }
+    void setHeaderText (const juce::String& text) { presets.getHeaderComponent()->setTitle (text); }
 
-    void AddNewPresetToList (const String& presetName)
+    void AddNewPresetToList (const juce::String& presetName)
     {
-        data.add (std::make_unique<String> (presetName));
+        data.add (std::make_unique<juce::String> (presetName));
         presets.updateContent();
     }
 
@@ -128,7 +120,7 @@ public:
     void deselectAll() { presets.deselectAllRows(); }
 
 private:
-    class PresetListHeaderComponent : public Button
+    class PresetListHeaderComponent : public juce::Button
     {
     public:
         explicit PresetListHeaderComponent (PresetListBox& o) : Button ({})
@@ -140,10 +132,12 @@ private:
             setSize (0, 30);
         }
 
-        void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
+        void paintButton (juce::Graphics& g, bool isMouseOverButton, bool isButtonDown) override
         {
-            (void) isMouseOverButton;
-            (void) isButtonDown;
+            using namespace juce;
+
+            ignoreUnused (isMouseOverButton, isButtonDown);
+
             Rectangle<float> buttonArea (0.0f,
                                          0.0f,
                                          static_cast<float> (getWidth()),
@@ -183,7 +177,7 @@ private:
         {
             for (auto* child : handler->getChildren())
             {
-                if (child->getRole() == AccessibilityRole::listItem)
+                if (child->getRole() == juce::AccessibilityRole::listItem)
                 {
                     child->grabFocus();
                     break;
@@ -192,9 +186,9 @@ private:
         }
     }
 
-    ListBox presets;
+    juce::ListBox presets;
     MainLookAndFeel mainLaF;
-    OwnedArray<String> data;
+    juce::OwnedArray<juce::String> data;
     int selectedRow = -1;
     bool rowDoubleClicked = false;
 };
