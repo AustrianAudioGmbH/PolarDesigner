@@ -118,27 +118,30 @@ jobs:
 
       - name: Pluginval
         run: |
-          curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.3/pluginval_${{ matrix.name }}.zip"
+          curl -LO "https://github.com/Tracktion/pluginval/releases/download/v1.0.4/pluginval_${{ matrix.name }}.zip"
           7z x pluginval_${{ matrix.name }}.zip
           ${{ matrix.pluginval-binary }} --strictness-level 10 --verbose --validate "${{ env.VST3_PATH }}"
 
-      # - name: Import Certificates (macOS)
-      #   uses: sudara/basic-macos-keychain-action@v1
-      #   id: keychain
-      #   if: ${{ matrix.name == 'macOS'}}
-      #   with:
-      #     dev-id-app-cert: ${{ secrets.DEV_ID_APP_CERT }}
-      #     dev-id-app-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
-      #     dev-id-installer-cert: ${{ secrets.DEV_ID_INSTALLER_CERT }}
-      #     dev-id-installer-password: ${{ secrets.DEV_ID_INSTALLER_PASSWORD }}
+      - name: Import Certificates (macOS)
+        uses: apple-actions/import-codesign-certs@v3
+        id: keychain
+        if: ${{ matrix.name == 'macOS'}}
+        with:
+          p12-file-base64: ${{ secrets.DEV_ID_APP_CERT }}
+          p12-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
 
-      # - name: Codesign (macOS)
-      #   if: ${{ matrix.name == 'macOS' }}
-      #   timeout-minutes: 5
-      #   run: |
-      #     # Each plugin must be code signed
-      #     codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.VST3_PATH }}" --deep --strict --options=runtime --timestamp
-      #     codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.AU_PATH }}" --deep --strict --options=runtime --timestamp
+          # dev-id-app-cert: ${{ secrets.DEV_ID_APP_CERT }}
+          # dev-id-app-password: ${{ secrets.DEV_ID_APP_PASSWORD }}
+          # dev-id-installer-cert: ${{ secrets.DEV_ID_INSTALLER_CERT }}
+          # dev-id-installer-password: ${{ secrets.DEV_ID_INSTALLER_PASSWORD }}
+
+      - name: Codesign (macOS)
+        if: ${{ matrix.name == 'macOS' }}
+        timeout-minutes: 5
+        run: |
+          # Each plugin must be code signed
+          codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.VST3_PATH }}" --deep --strict --options=runtime --timestamp
+          codesign --force -s "${{ secrets.DEVELOPER_ID_APPLICATION}}" -v "${{ env.AU_PATH }}" --deep --strict --options=runtime --timestamp
 
       # - name: Add Custom Icons (macOS)
       #   if: ${{ matrix.name == 'macOS' }}
@@ -161,16 +164,15 @@ jobs:
         if: ${{ matrix.name == 'macOS' }}
         timeout-minutes: 5
         run: |
-          pkgbuild --identifier "${{ env.BUNDLE_ID }}.au.pkg" --version $VERSION --component "${{ env.AU_PATH }}" --install-location "/Library/Audio/Plug-Ins/Components"  "packaging/${{ env.PRODUCT_NAME }}.au.pkg"
+          pkgbuild --identifier "${{ env.BUNDLE_ID }}.au.pkg" --version $VERSION --component "${{ env.AU_PATH }}" --install-location "/Library/Audio/Plug-Ins/Components" "packaging/${{ env.PRODUCT_NAME }}.au.pkg"
           pkgbuild --identifier "${{ env.BUNDLE_ID }}.vst3.pkg" --version $VERSION --component "${{ env.VST3_PATH }}" --install-location "/Library/Audio/Plug-Ins/VST3" "packaging/${{ env.PRODUCT_NAME }}.vst3.pkg"
 
           cd packaging
           envsubst < distribution.xml.template > distribution.xml
-          productbuild --resources ./resources --distribution distribution.xml --timestamp "${{ env.ARTIFACT_NAME }}.pkg"
-          # productbuild --resources ./resources --distribution distribution.xml --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "${{ env.ARTIFACT_NAME }}.pkg"
+          productbuild --resources ./resources --distribution distribution.xml --sign "${{ secrets.DEVELOPER_ID_INSTALLER }}" --timestamp "${{ env.ARTIFACT_NAME }}.pkg"
 
-          # xcrun notarytool submit "${{ env.ARTIFACT_NAME }}.pkg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
-          # xcrun stapler staple "${{ env.ARTIFACT_NAME }}.pkg"
+          xcrun notarytool submit "${{ env.ARTIFACT_NAME }}.pkg" --apple-id ${{ secrets.NOTARIZATION_USERNAME }} --password ${{ secrets.NOTARIZATION_PASSWORD }} --team-id ${{ secrets.TEAM_ID }} --wait
+          xcrun stapler staple "${{ env.ARTIFACT_NAME }}.pkg"
 
       - name: Zip
         if: ${{ matrix.name == 'Linux' }}
