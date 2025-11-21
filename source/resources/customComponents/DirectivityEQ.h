@@ -60,10 +60,10 @@
     #include "melatonin_inspector/melatonin/helpers/timing.h"
 #endif
 
-class DirectivityEQ : public Component,
-                      private Slider::Listener,
-                      private Label::Listener,
-                      private Button::Listener
+class DirectivityEQ : public juce::Component,
+                      private juce::Slider::Listener,
+                      private juce::Label::Listener,
+                      private juce::Button::Listener
 {
     struct Settings
     {
@@ -76,16 +76,16 @@ class DirectivityEQ : public Component,
 
     struct BandElements
     {
-        Slider* dirSlider = nullptr;
-        Slider* lowerFrequencySlider = nullptr;
-        Slider* upperFrequencySlider = nullptr;
-        ToggleButton* soloButton = nullptr;
-        ToggleButton* muteButton = nullptr;
-        Colour colour;
-        Slider* gainSlider = nullptr;
+        juce::Slider* dirSlider = nullptr;
+        juce::Slider* lowerFrequencySlider = nullptr;
+        juce::Slider* upperFrequencySlider = nullptr;
+        juce::ToggleButton* soloButton = nullptr;
+        juce::ToggleButton* muteButton = nullptr;
+        juce::Colour colour;
+        juce::Slider* gainSlider = nullptr;
         PolarPatternVisualizer* polarPatternVisualizer = nullptr;
 
-        Point<int> handlePos = { 0, 0 };
+        juce::Point<int> handlePos = { 0, 0 };
     };
 
     // margins
@@ -108,6 +108,8 @@ class DirectivityEQ : public Component,
         ~PathComponent() {}
         void setBounds()
         {
+            using namespace juce;
+
             int deltaX = 0;
 
             if (SystemStats::getOperatingSystemName() == "iOS")
@@ -115,10 +117,10 @@ class DirectivityEQ : public Component,
 
             Component::setBounds (path.getBounds().toNearestInt().expanded (deltaX, 0));
         }
-        Path& getPath() { return path; }
+        juce::Path& getPath() { return path; }
 
     private:
-        Path path;
+        juce::Path path;
     };
 
     class BandLimitDividerHolder : public Component
@@ -135,7 +137,7 @@ class DirectivityEQ : public Component,
         {
             int deltaX = 0;
             int deltaY = 0;
-            if (SystemStats::getOperatingSystemName() == "iOS")
+            if (juce::SystemStats::getOperatingSystemName() == "iOS")
             {
                 deltaX = static_cast<int> (path.getBounds().getWidth());
                 deltaY = static_cast<int> (path.getBounds().getHeight());
@@ -143,10 +145,10 @@ class DirectivityEQ : public Component,
 
             Component::setBounds (path.getBounds().toNearestInt().expanded (deltaX, deltaY));
         }
-        Path& getPath() { return path; }
+        juce::Path& getPath() { return path; }
 
     private:
-        Path path;
+        juce::Path path;
     };
 
     class RectangleComponent : public Component
@@ -166,7 +168,7 @@ class DirectivityEQ : public Component,
         }
 
     private:
-        Rectangle<float> rectangle;
+        juce::Rectangle<float> rectangle;
     };
 
     class BandKnobComponent : public Component
@@ -182,7 +184,7 @@ class DirectivityEQ : public Component,
         }
 
         ~BandKnobComponent() override {}
-        void paint (Graphics& g) override
+        void paint (juce::Graphics& g) override
         {
 #ifdef AA_INCLUDE_MELATONIN
             melatonin::ComponentTimer timer { this };
@@ -202,6 +204,8 @@ class DirectivityEQ : public Component,
 
         void resized() override
         {
+            using namespace juce;
+
             auto circX = static_cast<float> (getLocalBounds().getCentreX());
             auto circY = static_cast<float> (getLocalBounds().getCentreY());
             auto circleSize = static_cast<float> (getLocalBounds().getWidth());
@@ -220,6 +224,8 @@ class DirectivityEQ : public Component,
 
         void enablementChanged() override
         {
+            using namespace juce;
+
             if (! isEnabled())
             {
                 bandHandleKnobImg->replaceColour (Colours::white, Colours::black);
@@ -232,6 +238,8 @@ class DirectivityEQ : public Component,
 
         bool hitTest (int x, int y) override
         {
+            using namespace juce;
+
             Path knobArea;
             if (SystemStats::getOperatingSystemName() == "iOS")
                 knobArea.addRectangle (getLocalBounds());
@@ -242,8 +250,8 @@ class DirectivityEQ : public Component,
         }
 
     private:
-        Rectangle<float> rectangle;
-        Rectangle<float> bandHandleKnobImageArea;
+        juce::Rectangle<float> rectangle;
+        juce::Rectangle<float> bandHandleKnobImageArea;
         std::unique_ptr<juce::Drawable> bandHandleKnobImg;
     };
 
@@ -348,11 +356,13 @@ public:
         elements.clear();
     }
 
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
 #ifdef AA_INCLUDE_MELATONIN
         melatonin::ComponentTimer timer { this };
 #endif
+
+        using namespace juce;
 
         nrActiveBands = processor.getNProcessorBands();
 
@@ -472,7 +482,7 @@ public:
         {
             p.getPath().clear();
         }
-        for (Path& p : dirPaths)
+        for (juce::Path& p : dirPaths)
         {
             p.clear();
         }
@@ -739,8 +749,10 @@ public:
         return s.fMin * powf ((s.fMax / s.fMin), ((static_cast<float> (x) - mL) / width));
     }
 
-    void mouseDrag (const MouseEvent& event) override
+    void mouseDrag (const juce::MouseEvent& event) override
     {
+        using namespace juce;
+
         if (! active || ! event.eventComponent->isEnabled())
             return;
 
@@ -797,7 +809,7 @@ public:
         }
     }
 
-    void mouseMove (const MouseEvent& event) override
+    void mouseMove (const juce::MouseEvent& event) override
     {
         if (! active)
             return;
@@ -841,7 +853,7 @@ public:
             repaint();
     }
 
-    void mouseUp (const MouseEvent& event) override
+    void mouseUp (const juce::MouseEvent& event) override
     {
         // this improves rendering performance!
         if (isDraggingDirPath)
@@ -858,7 +870,7 @@ public:
             return;
     }
 
-    void mouseDoubleClick (const MouseEvent& event) override
+    void mouseDoubleClick (const juce::MouseEvent& event) override
     {
         if (! active
             || (event.eventComponent->getName() != "RectangleComponent"
@@ -877,7 +889,7 @@ public:
         }
     }
 
-    void mouseExit (const MouseEvent& event) override
+    void mouseExit (const juce::MouseEvent& event) override
     {
         if (event.eventComponent == this)
         {
@@ -914,6 +926,8 @@ public:
 
     void resized() override
     {
+        using namespace juce;
+
         Rectangle<int> area (getLocalBounds());
 
         int xMin = static_cast<int> (hzToX (s.fMin));
@@ -1010,13 +1024,13 @@ public:
         initValueBox();
     }
 
-    void addSliders (Colour newColour,
-                     Slider* dirSlider = nullptr,
-                     Slider* lowerFrequencySlider = nullptr,
-                     Slider* upperFrequencySlider = nullptr,
-                     ToggleButton* soloButton = nullptr,
-                     ToggleButton* muteButton = nullptr,
-                     Slider* gainSlider = nullptr,
+    void addSliders (juce::Colour newColour,
+                     juce::Slider* dirSlider = nullptr,
+                     juce::Slider* lowerFrequencySlider = nullptr,
+                     juce::Slider* upperFrequencySlider = nullptr,
+                     juce::ToggleButton* soloButton = nullptr,
+                     juce::ToggleButton* muteButton = nullptr,
+                     juce::Slider* gainSlider = nullptr,
                      PolarPatternVisualizer* directivityVis = nullptr)
     {
         elements.add ({ dirSlider,
@@ -1083,6 +1097,8 @@ public:
 
     void initValueBox()
     {
+        using namespace juce;
+
         auto& lf = getLookAndFeel();
 
         for (int i = 0; i < 4; ++i)
@@ -1150,8 +1166,10 @@ public:
         }
     }
 
-    void sliderValueChanged (Slider* slider) override
+    void sliderValueChanged (juce::Slider* slider) override
     {
+        using namespace juce;
+
         for (int i = 0; i < 4; ++i)
         {
             Slider* freqSlider = elements[i].upperFrequencySlider;
@@ -1168,8 +1186,10 @@ public:
         }
     }
 
-    void labelTextChanged (Label* label) override
+    void labelTextChanged (juce::Label* label) override
     {
+        using namespace juce;
+
         for (int i = 0; i < 4; ++i)
         {
             if (label == tooltipValueBox[i].get())
@@ -1180,7 +1200,7 @@ public:
 
                 float attemptedVal = tooltipValueBox[i]->getText().getFloatValue();
 
-                if (juce::approximatelyEqual (attemptedVal, 0.0f))
+                if (approximatelyEqual (attemptedVal, 0.0f))
                     attemptedVal = hzFromZeroToOne (nrActiveBands,
                                                     static_cast<size_t> (i),
                                                     static_cast<float> (slider->getValue()));
@@ -1204,6 +1224,8 @@ public:
 
     void resetTooltipTexts()
     {
+        using namespace juce;
+
         for (int i = 0; i < 4; ++i)
         {
             Slider* slider = elements[i].upperFrequencySlider;
@@ -1224,7 +1246,7 @@ public:
 
     RectangleComponent& getDirPathComponent (int idx) { return dirPathRects[idx]; }
 
-    void buttonClicked (Button* button) override
+    void buttonClicked (juce::Button* button) override
     {
         if (button == &tbPrimDirButtons[0])
         {
@@ -1326,21 +1348,21 @@ private:
     bool dirSliderLastChangedByDrag = false;
 
     Settings s;
-    Path dirGridPath;
-    Path hzGridPath;
-    Path hzGridPathBold;
-    Path dirPaths[5];
-    Path smallDirGridPath;
+    juce::Path dirGridPath;
+    juce::Path hzGridPath;
+    juce::Path hzGridPathBold;
+    juce::Path dirPaths[5];
+    juce::Path smallDirGridPath;
 
     int dirPatternButtonWidth;
     int dirPatternButtonHeight;
 
-    std::unique_ptr<Label> tooltipValueBox[4];
-    std::unique_ptr<Label> tooltipValueKnobBox[5];
+    std::unique_ptr<juce::Label> tooltipValueBox[4];
+    std::unique_ptr<juce::Label> tooltipValueKnobBox[5];
 
-    Array<double> frequencies;
+    juce::Array<double> frequencies;
     int numPixels;
-    Array<BandElements> elements;
+    juce::Array<BandElements> elements;
 
     static constexpr float omniFact = 0.0f;
     static constexpr float cardFact = 0.5f;
@@ -1360,8 +1382,8 @@ private:
     int bandsWidth[4];
 
     // ImageButtons
-    TextButton tbPrimDirButtons[4];
-    TextButton tbSecDirButtons[4];
+    juce::TextButton tbPrimDirButtons[4];
+    juce::TextButton tbSecDirButtons[4];
 
     MainLookAndFeel mainLaF;
 };

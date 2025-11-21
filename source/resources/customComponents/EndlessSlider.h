@@ -16,7 +16,7 @@
 
 #include "../lookAndFeel/MainLookAndFeel.h"
 
-class EndlessSlider : public Slider
+class EndlessSlider : public juce::Slider
 {
 public:
     EndlessSlider() : Slider()
@@ -34,41 +34,44 @@ public:
     std::function<void()> sliderReset;
 
     // calculate whether to callback to an increment or decrement, and update UI
-    void mouseDrag (const MouseEvent& e) override
+    void mouseDrag (const juce::MouseEvent& e) override
     {
         if (e.mouseWasDraggedSinceMouseDown())
         {
             currentMoved = static_cast<float> (e.getDistanceFromDragStartY());
             lastMoved = currentMoved + prevMoved;
-            sliderValue = jmap (lastMoved,
-                                static_cast<float> (proportionOfHeight (0.48f)),
-                                (-1) * static_cast<float> (proportionOfHeight (0.52f)),
-                                -0.5f,
-                                1.f);
+            sliderValue = juce::jmap (lastMoved,
+                                      static_cast<float> (proportionOfHeight (0.48f)),
+                                      (-1) * static_cast<float> (proportionOfHeight (0.52f)),
+                                      -0.5f,
+                                      1.f);
             sliderValueSet();
             lastMovedPoportion = lastMoved / static_cast<float> (getHeight());
             repaint();
         }
     }
 
-    void mouseWheelMove (const MouseEvent& event, const MouseWheelDetails& wheel) override
+    void mouseWheelMove (const juce::MouseEvent& event,
+                         const juce::MouseWheelDetails& wheel) override
     {
         (void) event;
         currentMoved = -10 * wheel.deltaY;
         lastMoved = currentMoved + prevMoved;
-        sliderValue = jmap (lastMoved,
-                            static_cast<float> (proportionOfHeight (0.48f)),
-                            (-1) * static_cast<float> (proportionOfHeight (0.52f)),
-                            -0.5f,
-                            1.f);
+        sliderValue = juce::jmap (lastMoved,
+                                  static_cast<float> (proportionOfHeight (0.48f)),
+                                  (-1) * static_cast<float> (proportionOfHeight (0.52f)),
+                                  -0.5f,
+                                  1.f);
         sliderValueSet();
         lastMovedPoportion = lastMoved / static_cast<float> (getHeight());
         prevMoved = lastMoved;
         repaint();
     }
 
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
+        using namespace juce;
+
         g.fillAll (Colours::black);
 
         Rectangle<float> bounds = getLocalBounds().toFloat();
@@ -126,7 +129,7 @@ public:
                 mappedY = y - height / 2;
             }
             // calculate width change with circle equation
-            elemWidth = sqrt (r * r - (mappedY * mappedY));
+            elemWidth = std::sqrt (r * r - (mappedY * mappedY));
 
             auto rect = Rectangle<float> (bounds.getWidth() * 0.22f,
                                           y - (elemWidth / (numElem * 2)) / 2.0f,
@@ -145,13 +148,13 @@ public:
         g.fillRoundedRectangle (filledRect, 2.f);
     }
 
-    void mouseExit (const MouseEvent& e) override
+    void mouseExit (const juce::MouseEvent& e) override
     {
         (void) e;
         repaint();
     }
 
-    void mouseDoubleClick (const MouseEvent& e) override
+    void mouseDoubleClick (const juce::MouseEvent& e) override
     {
         (void) e;
         lastMoved = 0;
@@ -160,7 +163,7 @@ public:
         repaint();
     }
 
-    void mouseUp (const MouseEvent& e) override
+    void mouseUp (const juce::MouseEvent& e) override
     {
         (void) e;
         prevMoved = lastMoved;
@@ -194,7 +197,7 @@ private:
     float lastMovedPoportion = 0;
 
     float sliderValue;
-    Rectangle<float> filledRect;
+    juce::Rectangle<float> filledRect;
     MainLookAndFeel mainLaF;
 };
 

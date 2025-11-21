@@ -52,23 +52,26 @@
 #include "../lookAndFeel/MainLookAndFeel.h"
 #include "ImgPaths.h"
 #include "TitleBarPaths.h"
-#include <memory>
+
+#include <juce_gui_basics/juce_gui_basics.h>
 
 #ifdef JUCE_OSC_H_INCLUDED
     #include "OSCStatus.h"
 #endif
 
-class AlertSymbol : public Component
+class AlertSymbol : public juce::Component
 {
 public:
-    AlertSymbol() : Component()
+    AlertSymbol() : juce::Component()
     {
         warningSign.loadPathFromData (WarningSignData, sizeof (WarningSignData));
         setBufferedToImage (true);
     }
     ~AlertSymbol() override {}
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
+        using namespace juce;
+
         warningSign.applyTransform (
             warningSign.getTransformToScaleToFit (getLocalBounds().toFloat(),
                                                   true,
@@ -78,19 +81,18 @@ public:
     }
 
 private:
-    Path warningSign;
+    juce::Path warningSign;
 };
 
-class IOWidget : public Component
+class IOWidget : public juce::Component
 {
 public:
-    IOWidget() : Component()
+    IOWidget() : juce::Component()
     {
         addChildComponent (alert);
         alert.setBounds (15, 15, 15, 15);
     }
 
-    ~IOWidget() {}
     virtual const int getComponentSize() = 0;
     virtual void setMaxSize (int maxSize) { (void) maxSize; }
 
@@ -128,8 +130,10 @@ public:
     ~BinauralIOWidget() override {}
     const int getComponentSize() override { return 30; }
     void setMaxSize (int maxSize) override { (void) maxSize; }
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
+        using namespace juce;
+
         BinauralPath.applyTransform (
             BinauralPath.getTransformToScaleToFit (0, 0, 30, 30, true, Justification::centred));
         g.setColour ((Colours::white).withMultipliedAlpha (0.5));
@@ -137,7 +141,7 @@ public:
     }
 
 private:
-    Path BinauralPath;
+    juce::Path BinauralPath;
 };
 
 class AALogo : public IOWidget
@@ -149,14 +153,16 @@ public:
     const int getComponentSize() override { return 40; }
     void setMaxSize (int maxSize) override { (void) maxSize; }
 
-    void setLogoColour (Colour logoColour)
+    void setLogoColour (juce::Colour logoColour)
     {
         logoColour_ = logoColour;
         repaint();
     }
 
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
+        using namespace juce;
+
         aaLogoPath.applyTransform (aaLogoPath.getTransformToScaleToFit (getLocalBounds().toFloat(),
                                                                         true,
                                                                         Justification::centred));
@@ -166,8 +172,8 @@ public:
     }
 
 private:
-    Path aaLogoPath;
-    Colour logoColour_ = Colour (Colours::white);
+    juce::Path aaLogoPath;
+    juce::Colour logoColour_ = juce::Colour (juce::Colours::white);
 };
 
 template <int maxChannels, bool selectable = true>
@@ -176,6 +182,8 @@ class AudioChannelsIOWidget : public IOWidget
 public:
     AudioChannelsIOWidget() : IOWidget()
     {
+        using namespace juce;
+
         WaveformPath.loadPathFromData (WaveformPathData, sizeof (WaveformPathData));
         setBufferedToImage (true);
 
@@ -197,6 +205,8 @@ public:
 
     void setMaxSize (int maxPossibleNumberOfChannels) override
     {
+        using namespace juce;
+
         if (selectable)
         {
             if (maxPossibleNumberOfChannels > 0)
@@ -251,15 +261,17 @@ public:
         }
     }
 
-    ComboBox* getChannelsCbPointer()
+    juce::ComboBox* getChannelsCbPointer()
     {
         if (selectable)
             return cbChannels.get();
         return nullptr;
     }
 
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
+        using namespace juce;
+
         WaveformPath.applyTransform (
             WaveformPath.getTransformToScaleToFit (0, 0, 30, 30, true, Justification::centred));
         g.setColour ((Colours::white).withMultipliedAlpha (0.5));
@@ -281,11 +293,11 @@ public:
     }
 
 private:
-    std::unique_ptr<ComboBox> cbChannels;
-    Path WaveformPath;
+    std::unique_ptr<juce::ComboBox> cbChannels;
+    juce::Path WaveformPath;
     int availableChannels { 64 };
     int channelSizeIfNotSelectable = maxChannels;
-    String displayTextIfNotSelectable = String (maxChannels);
+    juce::String displayTextIfNotSelectable = juce::String (maxChannels);
 };
 
 class DirectivityIOWidget : public IOWidget
@@ -293,6 +305,8 @@ class DirectivityIOWidget : public IOWidget
 public:
     DirectivityIOWidget() : IOWidget()
     {
+        using namespace juce;
+
         DirectivityPath.loadPathFromData (DirectivityPathData, sizeof (DirectivityPathData));
         setBufferedToImage (true);
         orderStrings[0] = String ("0th");
@@ -355,11 +369,13 @@ public:
             setBusTooSmall (false);
     }
 
-    ComboBox* getNormCbPointer() { return &cbNormalization; }
-    ComboBox* getOrderCbPointer() { return &cbOrder; }
+    juce::ComboBox* getNormCbPointer() { return &cbNormalization; }
+    juce::ComboBox* getOrderCbPointer() { return &cbOrder; }
 
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
+        using namespace juce;
+
         DirectivityPath.applyTransform (
             DirectivityPath.getTransformToScaleToFit (0, 0, 30, 30, true, Justification::centred));
         g.setColour ((Colours::white).withMultipliedAlpha (0.5));
@@ -367,25 +383,27 @@ public:
     }
 
 private:
-    String orderStrings[8];
-    ComboBox cbNormalization, cbOrder;
-    Path DirectivityPath;
+    juce::String orderStrings[8];
+    juce::ComboBox cbNormalization, cbOrder;
+    juce::Path DirectivityPath;
 };
 
-class TitleBarPDText : public Component
+class TitleBarPDText : public juce::Component
 {
 public:
     TitleBarPDText() {}
     ~TitleBarPDText() override {}
 
-    void setTitle (String newRegularText) { regularText = newRegularText; }
+    void setTitle (juce::String newRegularText) { regularText = newRegularText; }
 
-    void setFont (Typeface::Ptr newRegularFont) { regularFont = newRegularFont; }
+    void setFont (juce::Typeface::Ptr newRegularFont) { regularFont = newRegularFont; }
 
     void resized() override { repaint(); }
 
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
+        using namespace juce;
+
         Rectangle<int> bounds = getLocalBounds();
         regularFont.setHeight (static_cast<float> (bounds.getHeight()) * 0.75f);
 
@@ -395,27 +413,29 @@ public:
     }
 
 private:
-    Font regularFont = Font (22.f);
+    juce::Font regularFont = juce::Font (22.f);
     juce::String regularText = "Regular";
     MainLookAndFeel mainLaF;
 };
 
-class TitleBarTextLabel : public Component
+class TitleBarTextLabel : public juce::Component
 {
 public:
     TitleBarTextLabel() {}
     ~TitleBarTextLabel() override {}
 
-    void setTitle (String newRegularText) { regularText = newRegularText; }
+    void setTitle (juce::String newRegularText) { regularText = newRegularText; }
 
-    String& getTitle() { return regularText; }
+    juce::String& getTitle() { return regularText; }
 
-    void setFont (Typeface::Ptr newRegularFont) { regularFont = newRegularFont; }
+    void setFont (juce::Typeface::Ptr newRegularFont) { regularFont = newRegularFont; }
 
     void resized() override { repaint(); }
 
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
+        using namespace juce;
+
         Rectangle<int> bounds = getLocalBounds();
         auto scale = getApproximateScaleFactorForComponent (this);
         float fontSize = static_cast<float> (getTopLevelComponent()->getHeight()) * 0.025f / scale;
@@ -427,12 +447,12 @@ public:
     }
 
 private:
-    Font regularFont = Font (16.f);
+    juce::Font regularFont = juce::Font (16.f);
     juce::String regularText = "Regular";
     MainLookAndFeel mainLaF;
 };
 
-class IEMLogo : public Component
+class IEMLogo : public juce::Component
 {
 public:
     IEMLogo() : Component()
@@ -442,8 +462,10 @@ public:
     }
     ~IEMLogo() override {}
 
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
+        using namespace juce;
+
         Rectangle<int> bounds = getLocalBounds();
         bounds.removeFromBottom (3);
         bounds.removeFromLeft (1);
@@ -480,11 +502,11 @@ public:
     //    }
 
 private:
-    Path IEMPath;
+    juce::Path IEMPath;
     //    URL url;
 };
 
-class Footer : public Component
+class Footer : public juce::Component
 {
 public:
     Footer() : Component()
@@ -495,8 +517,10 @@ public:
     }
     ~Footer() override {}
 
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
+        using namespace juce;
+
         Rectangle<int> bounds = getLocalBounds();
         g.setColour (Colours::white.withAlpha (0.5f));
         g.setFont (getLookAndFeel().getTypefaceForFont (Font (12.0f, 0)));

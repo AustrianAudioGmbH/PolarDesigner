@@ -55,7 +55,7 @@ struct SharedParams
             syncParams.add (ParamsToSync());
         instanceCount++;
     }
-    Array<ParamsToSync> syncParams;
+    juce::Array<ParamsToSync> syncParams;
     unsigned int instanceCount;
 };
 
@@ -79,9 +79,9 @@ enum eqBandStates : unsigned int
 //==============================================================================
 /**
 */
-class PolarDesignerAudioProcessor final : public AudioProcessor,
-                                          public AudioProcessorValueTreeState::Listener,
-                                          private Timer
+class PolarDesignerAudioProcessor final : public juce::AudioProcessor,
+                                          public juce::AudioProcessorValueTreeState::Listener,
+                                          private juce::Timer
 
 {
 public:
@@ -92,7 +92,7 @@ public:
     void registerParameterListeners();
 
     // This is the ProTools PageFile for PolarDesigner3
-    String getPageFileName() const override { return "PolarDesigner3.xml"; }
+    juce::String getPageFileName() const override { return "PolarDesigner3.xml"; }
 
     //==============================================================================
     void loadEqImpulseResponses();
@@ -104,16 +104,16 @@ public:
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
 #endif
 
-    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
-    void processBlockBypassed (AudioBuffer<float>&, MidiBuffer&) override;
+    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    void processBlockBypassed (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     using AudioProcessor::processBlock;
     using AudioProcessor::processBlockBypassed;
     //==============================================================================
-    AudioProcessorEditor* createEditor() override;
+    juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override;
 
     //==============================================================================
-    const String getName() const override;
+    const juce::String getName() const override;
 
     bool acceptsMidi() const override;
     bool producesMidi() const override;
@@ -124,26 +124,26 @@ public:
     int getNumPrograms() override;
     int getCurrentProgram() override;
     void setCurrentProgram (int index) override;
-    const String getProgramName (int index) override;
-    void changeProgramName (int index, const String& newName) override;
+    const juce::String getProgramName (int index) override;
+    void changeProgramName (int index, const juce::String& newName) override;
 
     //==============================================================================
     void resizeBuffersIfNeeded (int newFirLen, int newBlockSize);
 
     void initializeBuffers();
     void initializeDefaultState();
-    void getStateInformation (MemoryBlock& destData) override;
+    void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     int getSyncChannelIdx();
 
     //==============================================================================
-    void parameterChanged (const String& parameterID, float newValue) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
     //==============================================================================
-    Result loadPreset (const File& presetFile);
-    Result savePreset (File destination);
-    File getLastDir() { return lastDir; }
-    void setLastDir (File newLastDir);
+    juce::Result loadPreset (const juce::File& presetFile);
+    juce::Result savePreset (juce::File destination);
+    juce::File getLastDir() { return lastDir; }
+    void setLastDir (juce::File newLastDir);
 
     void startTracking (bool trackDisturber);
     void stopTracking (int applyOptimalPattern);
@@ -180,13 +180,13 @@ public:
 
     bool abLayerState = COMPARE_LAYER_A;
 
-    Identifier saveTree = "save";
-    Identifier nodeA = "layerA";
-    Identifier nodeB = "layerB";
-    Identifier nodeParams = "vtsParams";
-    ValueTree layerA;
-    ValueTree layerB;
-    ValueTree saveStates;
+    juce::Identifier saveTree = "save";
+    juce::Identifier nodeA = "layerA";
+    juce::Identifier nodeB = "layerB";
+    juce::Identifier nodeParams = "vtsParams";
+    juce::ValueTree layerA;
+    juce::ValueTree layerB;
+    juce::ValueTree saveStates;
     int doEq;
     int doEqA;
     int doEqB;
@@ -205,15 +205,15 @@ public:
     float zeroLatencyModeA; // Zero Latency setting for Layer A
     float zeroLatencyModeB; // Zero Latency setting for Layer B
 
-    AudioVisualiserComponent termControlWaveform;
+    juce::AudioVisualiserComponent termControlWaveform;
 
-    AudioPlayHead* audioPlayHead;
-    AudioPlayHead::PositionInfo playHeadPosition;
+    juce::AudioPlayHead* audioPlayHead;
+    juce::AudioPlayHead::PositionInfo playHeadPosition;
 
     // deprecated
-    AudioPlayHead::CurrentPositionInfo playHeadState;
+    juce::AudioPlayHead::CurrentPositionInfo playHeadState;
 
-    UndoManager undoManager;
+    juce::UndoManager undoManager;
 
     int getEqState() { return doEq; }
     void setEqState (int idx);
@@ -231,35 +231,35 @@ public:
 
     void timerCallback() override;
 
-    AudioProcessorValueTreeState& getValueTreeState() { return vtsParams; }
+    juce::AudioProcessorValueTreeState& getValueTreeState() { return vtsParams; }
 
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarDesignerAudioProcessor)
 
-    std::unique_ptr<PropertiesFile> properties;
+    std::unique_ptr<juce::PropertiesFile> properties;
 
     std::atomic<unsigned int> nProcessorBands;
 
-    AudioProcessorValueTreeState vtsParams;
-    SharedResourcePointer<SharedParams> sharedParams;
+    juce::AudioProcessorValueTreeState vtsParams;
+    juce::SharedResourcePointer<SharedParams> sharedParams;
 
     // use odd FIR_LEN for even filter order (FIR_LEN = N+1)
     // (lowpass and highpass need even filter order to put a zero at f=0 and f=pi)
     std::atomic<int> firLen { FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE };
 
     // free field / diffuse field eq
-    dsp::Convolution dfEqOmniConv;
-    dsp::Convolution dfEqEightConv;
-    dsp::Convolution ffEqOmniConv;
-    dsp::Convolution ffEqEightConv;
+    juce::dsp::Convolution dfEqOmniConv;
+    juce::dsp::Convolution dfEqEightConv;
+    juce::dsp::Convolution ffEqOmniConv;
+    juce::dsp::Convolution ffEqEightConv;
 
     // proximity compensation filter
-    dsp::IIR::Filter<float> proxCompIIR;
+    juce::dsp::IIR::Filter<float> proxCompIIR;
 
     // delay (in case of 1 active band)
     Delay delay;
-    AudioBuffer<float> delayBuffer;
+    juce::AudioBuffer<float> delayBuffer;
 
     std::atomic<float>* nProcessorBandsPtr;
     std::atomic<float>* syncChannelPtr;
@@ -296,17 +296,17 @@ private:
     float omniSqSumDist[MAX_NUM_EQS], eightSqSumDist[MAX_NUM_EQS], omniEightSumDist[MAX_NUM_EQS],
         omniSqSumSig[MAX_NUM_EQS], eightSqSumSig[MAX_NUM_EQS], omniEightSumSig[MAX_NUM_EQS];
 
-    AudioBuffer<float> filterBankBuffer; // holds filtered data, size: N_CH_IN*5
-    AudioBuffer<float> firFilterBuffer; // holds filter coefficients, size: 5
-    AudioBuffer<float> omniEightBuffer; // holds omni and fig-of-eight signals, size: 2
-    std::array<dsp::Convolution, 2 * MAX_NUM_EQS> convolvers;
+    juce::AudioBuffer<float> filterBankBuffer; // holds filtered data, size: N_CH_IN*5
+    juce::AudioBuffer<float> firFilterBuffer; // holds filter coefficients, size: 5
+    juce::AudioBuffer<float> omniEightBuffer; // holds omni and fig-of-eight signals, size: 2
+    std::array<juce::dsp::Convolution, 2 * MAX_NUM_EQS> convolvers;
 
     double currentSampleRate = 0.0f;
     double previousSampleRate = 0.0f;
 
     // This is intentionally set to match Pro Tools expectations ...
     int currentBlockSize = PD_DEFAULT_BLOCK_SIZE;
-    File lastDir;
+    juce::File lastDir;
 
     //==============================================================================
     void resetXoverFreqs();
@@ -317,8 +317,8 @@ private:
     void updateConvolver (size_t convNr);
     void loadFilterBankImpulseResponses();
 
-    void createOmniAndEightSignals (AudioBuffer<float>& buffer);
-    void createPolarPatterns (AudioBuffer<float>& buffer);
+    void createOmniAndEightSignals (juce::AudioBuffer<float>& buffer);
+    void createPolarPatterns (juce::AudioBuffer<float>& buffer);
     void trackSignalEnergy();
     void setMinimumDisturbancePattern();
     void setMaximumSignalPattern();
@@ -334,11 +334,11 @@ private:
     //    void valueTreePropertyChanged(ValueTree& treeWhosePropertyHasChanged, const Identifier& property);
 
     // file handling
-    const String presetProperties[27] = { "nrActiveBands", "xOverF1",    "xOverF2",    "xOverF3",
-                                          "xOverF4",       "dirFactor1", "dirFactor2", "dirFactor3",
-                                          "dirFactor4",    "dirFactor5", "gain1",      "gain2",
-                                          "gain3",         "gain4",      "gain5",      "solo1",
-                                          "solo2",         "solo3",      "solo4",      "solo5",
-                                          "mute1",         "mute2",      "mute3",      "mute4",
-                                          "mute5",         "ffDfEq",     "proximity" };
+    const juce::String presetProperties[27] = {
+        "nrActiveBands", "xOverF1",    "xOverF2",    "xOverF3",    "xOverF4", "dirFactor1",
+        "dirFactor2",    "dirFactor3", "dirFactor4", "dirFactor5", "gain1",   "gain2",
+        "gain3",         "gain4",      "gain5",      "solo1",      "solo2",   "solo3",
+        "solo4",         "solo5",      "mute1",      "mute2",      "mute3",   "mute4",
+        "mute5",         "ffDfEq",     "proximity"
+    };
 };

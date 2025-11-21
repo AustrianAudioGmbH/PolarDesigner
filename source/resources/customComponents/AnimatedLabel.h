@@ -47,7 +47,7 @@ public:
 
     ~AnimatedLabel() override {}
 
-    void startAnimation (const String primText, const String secText = {})
+    void startAnimation (const juce::String primText, const juce::String secText = {})
     {
         it = 0;
         counter = 1;
@@ -95,14 +95,15 @@ public:
     {
         fontHeight = static_cast<float> (getTopLevelComponent()->getHeight()) * 0.018f;
 
-        Font font (fontHeight * 1.0f);
+        juce::Font font (fontHeight * 1.0f);
         textArea = getLocalBounds().reduced (
             static_cast<int> (static_cast<float> (getLocalBounds().getWidth()) * 0.06f),
             (getLocalBounds().getHeight() - static_cast<int> (fontHeight)) / 2);
-        auto centredTextArea = Rectangle<int> (textArea.getX(),
-                                               textArea.getY() - static_cast<int> (fontHeight) / 4,
-                                               textArea.getWidth(),
-                                               static_cast<int> (fontHeight));
+        auto centredTextArea =
+            juce::Rectangle<int> (textArea.getX(),
+                                  textArea.getY() - static_cast<int> (fontHeight) / 4,
+                                  textArea.getWidth(),
+                                  static_cast<int> (fontHeight));
         int equalSignWidth =
             static_cast<int> (static_cast<float> (getLocalBounds().getWidth()) * 0.042f);
         float rowProportion = static_cast<float> (font.getStringWidth (animatedString))
@@ -136,18 +137,18 @@ public:
     }
 
 private:
-    String animatedString;
+    juce::String animatedString;
     int it;
     float fontHeight;
-    Font textFont;
+    juce::Font textFont;
     int timerBypassedPeriods;
     bool repaintBypassed;
-    String text;
-    String primaryText;
-    String secondaryText;
+    juce::String text;
+    juce::String primaryText;
+    juce::String secondaryText;
     int counter;
 
-    void setLabelText (const String primText, const String secText = {})
+    void setLabelText (const juce::String primText, const juce::String secText = {})
     {
         primaryText = primText;
         secondaryText = secText;
@@ -207,8 +208,8 @@ private:
         MainLookAndFeel mainLaF;
     } animatedRectangle;
 
-    Rectangle<int> textArea;
-    Rectangle<int> rectArea;
+    juce::Rectangle<int> textArea;
+    juce::Rectangle<int> rectArea;
     MainLookAndFeel mainLaF;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AnimatedLabel)
