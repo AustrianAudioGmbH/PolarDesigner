@@ -49,25 +49,9 @@
 
 #pragma once
 
-#include <juce_audio_basics/juce_audio_basics.h>
-#include <juce_audio_devices/juce_audio_devices.h>
-#include <juce_audio_formats/juce_audio_formats.h>
-#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
-#include <juce_audio_processors/juce_audio_processors.h>
-#include <juce_audio_utils/juce_audio_utils.h>
-#include <juce_core/juce_core.h>
-#include <juce_cryptography/juce_cryptography.h>
-#include <juce_data_structures/juce_data_structures.h>
-#include <juce_dsp/juce_dsp.h>
-#include <juce_events/juce_events.h>
-#include <juce_graphics/juce_graphics.h>
 #include <juce_gui_basics/juce_gui_basics.h>
-#include <juce_gui_extra/juce_gui_extra.h>
-#include <juce_opengl/juce_opengl.h>
 
 #include "../lookAndFeel/MainLookAndFeel.h"
-
-#include <numbers>
 
 #ifdef AA_INCLUDE_MELATONIN
     #include "melatonin_inspector/melatonin/helpers/timing.h"
@@ -76,8 +60,7 @@
 //==============================================================================
 /*
 */
-using namespace dsp;
-class PolarPatternVisualizer : public TextButton
+class PolarPatternVisualizer : public juce::TextButton
 {
     const float deg2rad = std::numbers::pi_v<float> / 180.0f;
     const float degStep = 4;
@@ -86,6 +69,8 @@ class PolarPatternVisualizer : public TextButton
 public:
     PolarPatternVisualizer()
     {
+        using namespace juce;
+
         isActive = false;
         soloButton = nullptr;
         muteButton = nullptr;
@@ -119,8 +104,10 @@ public:
         muteButton = nullptr;
     }
 
-    void paint (Graphics& g) override
+    void paint (juce::Graphics& g) override
     {
+        using namespace juce;
+
 #ifdef AA_INCLUDE_MELATONIN
         melatonin::ComponentTimer timer { this };
 #endif
@@ -184,6 +171,8 @@ public:
 
     void resized() override
     {
+        using namespace juce;
+
         Rectangle<int> bounds = getLocalBounds();
         Rectangle<int> strokeBounds = getLocalBounds();
         Point<int> centre = bounds.getCentre();
@@ -234,7 +223,7 @@ public:
             float dbMin = 25;
             float gainDb = 20 * std::log10 (std::max (gainLin, std::pow (10.0f, -dbMin / 20.0f)));
             float effGain = std::max (std::abs ((gainDb + dbMin) / dbMin), 0.01f);
-            Point<float> point = effGain * pointsOnCircle[idx];
+            juce::Point<float> point = effGain * pointsOnCircle[idx];
 
             if (phi == -180)
                 dirPath.startNewSubPath (point);
@@ -270,7 +259,7 @@ public:
 
     bool isPvisActive() { return isActive; }
 
-    void setMuteSoloButtons (ToggleButton* solo, ToggleButton* mute)
+    void setMuteSoloButtons (juce::ToggleButton* solo, juce::ToggleButton* mute)
     {
         soloButton = solo;
         muteButton = mute;
@@ -296,20 +285,20 @@ public:
 
     void setSoloActive (bool set) { soloActive = set; }
 
-    void setColour (Colour newColour)
+    void setColour (juce::Colour newColour)
     {
         colour = newColour;
         repaint();
     }
 
-    void mouseEnter (const MouseEvent& e) override
+    void mouseEnter (const juce::MouseEvent& e) override
     {
         (void) e;
         mouseOver = true;
         repaint();
     }
 
-    void mouseExit (const MouseEvent& e) override
+    void mouseExit (const juce::MouseEvent& e) override
     {
         (void) e;
         mouseOver = false;
@@ -317,24 +306,24 @@ public:
     }
 
 private:
-    Path grid;
-    Path subGrid;
-    Path innerCircle;
-    Path outerCircle;
-    Path dirPath;
-    AffineTransform transform, strokeTransform;
-    Rectangle<int> plotArea;
+    juce::Path grid;
+    juce::Path subGrid;
+    juce::Path innerCircle;
+    juce::Path outerCircle;
+    juce::Path dirPath;
+    juce::AffineTransform transform, strokeTransform;
+    juce::Rectangle<int> plotArea;
     float dirWeight;
     bool isActive;
-    ToggleButton* soloButton;
-    ToggleButton* muteButton;
+    juce::ToggleButton* soloButton;
+    juce::ToggleButton* muteButton;
     bool soloActive;
-    Colour colour;
-    Colour hoverColour;
+    juce::Colour colour;
+    juce::Colour hoverColour;
     bool mouseOver;
-    Path hitArea;
+    juce::Path hitArea;
 
-    Array<Point<float>> pointsOnCircle;
+    juce::Array<juce::Point<float>> pointsOnCircle;
     MainLookAndFeel mainLaF;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarPatternVisualizer)
 };

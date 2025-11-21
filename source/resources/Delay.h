@@ -25,10 +25,7 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_dsp/juce_dsp.h>
 
-using namespace juce;
-using namespace dsp;
-
-class Delay : private ProcessorBase
+class Delay : private juce::dsp::ProcessorBase
 {
 public:
     Delay() {}
@@ -52,11 +49,11 @@ public:
 
     const int getDelayInSamples() { return bypassed ? 0 : delayInSamples; }
 
-    void prepare (const ProcessSpec& specs) override
+    void prepare (const juce::dsp::ProcessSpec& specs) override
     {
         spec = specs;
 
-        delayInSamples = roundToInt (delay * specs.sampleRate);
+        delayInSamples = juce::roundToInt (delay * specs.sampleRate);
 
         buffer.setSize (static_cast<int> (specs.numChannels),
                         static_cast<int> (specs.maximumBlockSize) + delayInSamples);
@@ -64,8 +61,10 @@ public:
         writePosition = 0;
     }
 
-    void process (const ProcessContextReplacing<float>& context) override
+    void process (const juce::dsp::ProcessContextReplacing<float>& context) override
     {
+        using namespace juce;
+
         ScopedNoDenormals noDenormals;
 
         if (! bypassed)
@@ -142,7 +141,7 @@ public:
         else
         {
             startIndex = pos;
-            blockSize1 = jmin (L - pos, numSamples);
+            blockSize1 = juce::jmin (L - pos, numSamples);
             numSamples -= blockSize1;
             blockSize2 = numSamples <= 0 ? 0 : numSamples;
         }
@@ -150,10 +149,10 @@ public:
 
 private:
     //==============================================================================
-    ProcessSpec spec = { -1, 0, 0 };
+    juce::dsp::ProcessSpec spec = { -1, 0, 0 };
     float delay;
     int delayInSamples = 0;
     bool bypassed = false;
     int writePosition = 0;
-    AudioBuffer<float> buffer;
+    juce::AudioBuffer<float> buffer;
 };

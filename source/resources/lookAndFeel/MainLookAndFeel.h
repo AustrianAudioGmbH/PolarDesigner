@@ -318,10 +318,10 @@ public:
             if (button.getToggleState() == true)
             {
                 auto eqFieldCheckSignArea =
-                    juce::Rectangle<float> (static_cast<float> (button.getWidth()) * 0.77f,
-                                            static_cast<float> (button.getHeight()) * 0.05f,
-                                            static_cast<float> (button.getWidth()) * 0.18f,
-                                            static_cast<float> (button.getWidth()) * 0.18f);
+                    Rectangle (static_cast<float> (button.getWidth()) * 0.77f,
+                               static_cast<float> (button.getHeight()) * 0.05f,
+                               static_cast<float> (button.getWidth()) * 0.18f,
+                               static_cast<float> (button.getWidth()) * 0.18f);
                 eqFieldCheckSign->drawWithin (g,
                                               eqFieldCheckSignArea,
                                               juce::RectanglePlacement::centred,
@@ -374,10 +374,10 @@ public:
             if (button.getToggleState() == true)
             {
                 auto eqFieldCheckSignArea =
-                    juce::Rectangle<float> (static_cast<float> (button.getWidth()) * 0.77f,
-                                            static_cast<float> (button.getHeight()) * 0.05f,
-                                            static_cast<float> (button.getWidth()) * 0.18f,
-                                            static_cast<float> (button.getWidth()) * 0.18f);
+                    Rectangle (static_cast<float> (button.getWidth()) * 0.77f,
+                               static_cast<float> (button.getHeight()) * 0.05f,
+                               static_cast<float> (button.getWidth()) * 0.18f,
+                               static_cast<float> (button.getWidth()) * 0.18f);
                 eqFieldCheckSign->drawWithin (g,
                                               eqFieldCheckSignArea,
                                               juce::RectanglePlacement::centred,
@@ -1493,7 +1493,7 @@ public:
 private:
     void drawPatternImage (Graphics& g,
                            std::unique_ptr<Drawable> image,
-                           Rectangle buttonArea,
+                           Rectangle& buttonArea,
                            int reduceX,
                            int reduceY,
                            int corner,

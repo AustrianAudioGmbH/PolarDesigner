@@ -45,6 +45,8 @@
 
 static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
+    using namespace juce;
+
     using APF = AudioParameterFloat;
     using APB = AudioParameterBool;
     using API = AudioParameterInt;
@@ -232,8 +234,8 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
 //==============================================================================
 PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     AudioProcessor (BusesProperties()
-                        .withInput ("Input", AudioChannelSet::stereo(), true)
-                        .withOutput ("Output", AudioChannelSet::stereo(), true)),
+                        .withInput ("Input", juce::AudioChannelSet::stereo(), true)
+                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
     repaintDEQ (true),
     activeBandsChanged (true),
     zeroLatencyModeChanged (true),
@@ -293,6 +295,8 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     convolvers {},
     lastDir()
 {
+    using namespace juce;
+
     if (firLen % 2 == 0)
         firLen++;
     jassert (firLen % 2 == 1); // Ensure firLen is odd
@@ -346,7 +350,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
 
 void PolarDesignerAudioProcessor::registerParameterListeners()
 {
-    static const StringArray params = {
+    static const juce::StringArray params = {
         "trimPosition", "xOverF1",        "xOverF2",
         "xOverF3",      "xOverF4",        "alpha1",
         "alpha2",       "alpha3",         "alpha4",
@@ -370,7 +374,7 @@ PolarDesignerAudioProcessor::~PolarDesignerAudioProcessor()
     // Remove listeners for parameters
     for (auto* param : getParameters())
     {
-        if (auto* rangedParam = dynamic_cast<RangedAudioParameter*> (param))
+        if (auto* rangedParam = dynamic_cast<juce::RangedAudioParameter*> (param))
         {
             vtsParams.removeParameterListener (rangedParam->paramID, this);
         }
@@ -378,7 +382,7 @@ PolarDesignerAudioProcessor::~PolarDesignerAudioProcessor()
 }
 
 //==============================================================================
-const String PolarDesignerAudioProcessor::getName() const
+const juce::String PolarDesignerAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }
@@ -430,18 +434,20 @@ void PolarDesignerAudioProcessor::setCurrentProgram ([[maybe_unused]] int index)
 {
 }
 
-const String PolarDesignerAudioProcessor::getProgramName ([[maybe_unused]] int index)
+const juce::String PolarDesignerAudioProcessor::getProgramName ([[maybe_unused]] int index)
 {
     return {};
 }
 
 void PolarDesignerAudioProcessor::changeProgramName ([[maybe_unused]] int index,
-                                                     [[maybe_unused]] const String& newName)
+                                                     [[maybe_unused]] const juce::String& newName)
 {
 }
 
 void PolarDesignerAudioProcessor::loadEqImpulseResponses()
 {
+    using namespace juce;
+
     jassert (DF_EQ_LEN == FF_EQ_LEN);
 
     // nothing changed, return early without allocating memory
@@ -553,6 +559,9 @@ void PolarDesignerAudioProcessor::loadEqImpulseResponses()
 
 void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    using namespace juce;
+    using namespace dsp;
+
     jassert (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE > 0);
 
     // Validate inputs
@@ -577,7 +586,7 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     computeAllFilterCoefficients();
 
     // Configure ProcessSpec
-    dsp::ProcessSpec spec { currentSampleRate, static_cast<uint32> (currentBlockSize), 1 };
+    ProcessSpec spec { currentSampleRate, static_cast<uint32> (currentBlockSize), 1 };
     dfEqOmniConv.prepare (spec);
     dfEqEightConv.prepare (spec);
     ffEqOmniConv.prepare (spec);
@@ -586,7 +595,7 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
         conv.prepare (spec);
 
     // Configure delay line
-    dsp::ProcessSpec delaySpec { currentSampleRate, static_cast<uint32> (currentBlockSize), 1 };
+    ProcessSpec delaySpec { currentSampleRate, static_cast<uint32> (currentBlockSize), 1 };
     delay.prepare (delaySpec);
     delay.setDelayTime (static_cast<float> (((newFirLen - 1) / 2.0) / currentSampleRate));
 
@@ -598,6 +607,8 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
 
 bool PolarDesignerAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
+    using namespace juce;
+
     if ((layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
          && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
         || layouts.getMainInputChannelSet() != AudioChannelSet::stereo())
@@ -612,9 +623,12 @@ bool PolarDesignerAudioProcessor::isBusesLayoutSupported (const BusesLayout& lay
     return true;
 }
 
-void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer,
-                                                [[maybe_unused]] MidiBuffer& midiMessages)
+void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
+                                                [[maybe_unused]] juce::MidiBuffer& midiMessages)
 {
+    using namespace juce;
+    using namespace dsp;
+
     ScopedNoDenormals noDenormals;
     if (isBypassed)
     {
@@ -721,8 +735,9 @@ void PolarDesignerAudioProcessor::processBlock (AudioBuffer<float>& buffer,
     createPolarPatterns (buffer);
 }
 
-void PolarDesignerAudioProcessor::processBlockBypassed (AudioBuffer<float>& buffer,
-                                                        [[maybe_unused]] MidiBuffer& midiMessages)
+void PolarDesignerAudioProcessor::processBlockBypassed (
+    juce::AudioBuffer<float>& buffer,
+    [[maybe_unused]] juce::MidiBuffer& midiMessages)
 {
     if (! isBypassed)
     {
@@ -742,7 +757,7 @@ bool PolarDesignerAudioProcessor::hasEditor() const
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-AudioProcessorEditor* PolarDesignerAudioProcessor::createEditor()
+juce::AudioProcessorEditor* PolarDesignerAudioProcessor::createEditor()
 {
     return new PolarDesignerAudioProcessorEditor (*this, vtsParams);
 }
@@ -755,8 +770,10 @@ int PolarDesignerAudioProcessor::getSyncChannelIdx()
 }
 
 // getStateInformation: Ensure consistent updates for layerA and layerB
-void PolarDesignerAudioProcessor::getStateInformation (MemoryBlock& destData)
+void PolarDesignerAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
+    using namespace juce;
+
     // Update vtsParams.state properties
     vtsParams.state.setProperty ("ffDfEq", var (doEq), nullptr);
     vtsParams.state.setProperty ("oldProxDistance", var (oldProxDistance), nullptr);
@@ -820,8 +837,9 @@ void PolarDesignerAudioProcessor::getStateInformation (MemoryBlock& destData)
 // !J! Make setStateInformation more robust for ProTools
 void PolarDesignerAudioProcessor::initializeDefaultState()
 {
-    if (juce::approximatelyEqual (currentSampleRate,
-                                  static_cast<double> (FILTER_BANK_NATIVE_SAMPLE_RATE))
+    using namespace juce;
+
+    if (approximatelyEqual (currentSampleRate, static_cast<double> (FILTER_BANK_NATIVE_SAMPLE_RATE))
         && currentBlockSize == PD_DEFAULT_BLOCK_SIZE)
 
     {
@@ -959,6 +977,8 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
 }
 void PolarDesignerAudioProcessor::resizeBuffersIfNeeded (int newFirLen, int newBlockSize)
 {
+    using namespace juce;
+
     // Ensure newFirLen is valid (positive and odd)
     if (newFirLen <= 0)
     {
@@ -1008,7 +1028,7 @@ void PolarDesignerAudioProcessor::initializeBuffers()
     // Ensure firLen is valid
     if (firLen <= 0)
     {
-        LOG_WARN ("Invalid firLen (" + String (firLen) + "), using default");
+        LOG_WARN ("Invalid firLen (" + juce::String (firLen) + "), using default");
         firLen = FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE;
         if (firLen % 2 == 0)
             firLen++;
@@ -1036,6 +1056,8 @@ void PolarDesignerAudioProcessor::releaseResources()
 
 void PolarDesignerAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
+    using namespace juce;
+
     // Calculate firLen based on currentSampleRate
     int newFirLen = static_cast<int> (
         std::ceil (static_cast<float> (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE)
@@ -1231,9 +1253,11 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
 // parameterChanged: Add thread-safety and consistent oldNrBands updates
 
 // In parameterChanged (around line 1050)
-void PolarDesignerAudioProcessor::parameterChanged (const String& parameterID,
+void PolarDesignerAudioProcessor::parameterChanged (const juce::String& parameterID,
                                                     [[maybe_unused]] float newValue)
 {
+    using namespace juce;
+
 #ifdef USE_EXTRA_DEBUG_DUMPS
     LOG_DEBUG ("Parameter changed: " + parameterID + " new Value: " + std::to_string (newValue)
                + " syncChannel: " + std::to_string (syncChannelPtr->load()));
@@ -1500,6 +1524,8 @@ void PolarDesignerAudioProcessor::setEqState (int idx)
 
 void PolarDesignerAudioProcessor::resetXoverFreqs()
 {
+    using namespace juce;
+
     switch (nProcessorBands)
     {
         case 1:
@@ -1573,18 +1599,20 @@ void PolarDesignerAudioProcessor::computeAllFilterCoefficients()
 
 void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crossoverNr)
 {
+    using namespace juce;
+    using namespace dsp;
     if (nProcessorBands == 1)
         return;
 
     // Lowest band: lowpass
     if (crossoverNr == 0)
     {
-        dsp::FilterDesign<float>::FIRCoefficientsPtr lowpass =
-            dsp::FilterDesign<float>::designFIRLowpassWindowMethod (
+        FilterDesign<float>::FIRCoefficientsPtr lowpass =
+            FilterDesign<float>::designFIRLowpassWindowMethod (
                 hzFromZeroToOne (nProcessorBands, 0, xOverFreqsPtr[0]->load()),
                 currentSampleRate,
                 static_cast<size_t> (firLen - 1),
-                dsp::WindowingFunction<float>::WindowingMethod::hamming);
+                WindowingFunction<float>::WindowingMethod::hamming);
         firFilterBuffer.copyFrom (0, 0, lowpass->getRawCoefficients(), firLen - 1);
     }
 
@@ -1597,12 +1625,12 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
             (hzFromZeroToOne (nProcessorBands, i, xOverFreqsPtr[i]->load())
              - hzFromZeroToOne (nProcessorBands, i - 1, xOverFreqsPtr[i - 1]->load()))
             / 2;
-        dsp::FilterDesign<float>::FIRCoefficientsPtr lp2bp =
-            dsp::FilterDesign<float>::designFIRLowpassWindowMethod (
+        FilterDesign<float>::FIRCoefficientsPtr lp2bp =
+            FilterDesign<float>::designFIRLowpassWindowMethod (
                 halfBandwidth,
                 currentSampleRate,
                 static_cast<size_t> (firLen - 1),
-                dsp::WindowingFunction<float>::WindowingMethod::hamming);
+                WindowingFunction<float>::WindowingMethod::hamming);
 
         const auto* lp2bpCoeffs = lp2bp->getRawCoefficients();
         auto* filterBufferPointer = firFilterBuffer.getWritePointer (static_cast<int> (i));
@@ -1647,6 +1675,8 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
 
 void PolarDesignerAudioProcessor::initAllConvolvers()
 {
+    using namespace juce;
+
     // Validate sample rate and block size
 
     // Ensure firLen is valid
@@ -1716,6 +1746,9 @@ void PolarDesignerAudioProcessor::initAllConvolvers()
 
 void PolarDesignerAudioProcessor::updateConvolver (size_t convNr)
 {
+    using namespace juce;
+    using namespace dsp;
+
     if (currentBlockSize == 0 || currentSampleRate <= 0.0)
     {
         LOG_ERROR ("Cannot initialize convolver: invalid block size or sample rate");
@@ -1746,16 +1779,16 @@ void PolarDesignerAudioProcessor::updateConvolver (size_t convNr)
         // Omni convolver
         convolvers[2 * i].loadImpulseResponse (std::move (convBuffers[j]),
                                                currentSampleRate,
-                                               dsp::Convolution::Stereo::no, // isStereo
-                                               dsp::Convolution::Trim::no, // trim
-                                               dsp::Convolution::Normalise::no); // normalise
+                                               Convolution::Stereo::no, // isStereo
+                                               Convolution::Trim::no, // trim
+                                               Convolution::Normalise::no); // normalise
 
         // Eight convolver
         convolvers[2 * i + 1].loadImpulseResponse (std::move (convBuffers[k]),
                                                    currentSampleRate,
-                                                   dsp::Convolution::Stereo::no, // isStereo
-                                                   dsp::Convolution::Trim::no, // trim
-                                                   dsp::Convolution::Normalise::no); // normalise
+                                                   Convolution::Stereo::no, // isStereo
+                                                   Convolution::Trim::no, // trim
+                                                   Convolution::Normalise::no); // normalise
     }
 }
 
@@ -1769,8 +1802,10 @@ unsigned int PolarDesignerAudioProcessor::getNProcessorBands()
     return nProcessorBands;
 }
 
-void PolarDesignerAudioProcessor::createOmniAndEightSignals (AudioBuffer<float>& buffer)
+void PolarDesignerAudioProcessor::createOmniAndEightSignals (juce::AudioBuffer<float>& buffer)
 {
+    using namespace juce;
+
     int numSamples = buffer.getNumSamples();
     // calculate omni part
     const float* readPointerFront = buffer.getReadPointer (0);
@@ -1786,8 +1821,10 @@ void PolarDesignerAudioProcessor::createOmniAndEightSignals (AudioBuffer<float>&
 }
 
 // In createPolarPatterns (around line 1350)
-void PolarDesignerAudioProcessor::createPolarPatterns (AudioBuffer<float>& buffer)
+void PolarDesignerAudioProcessor::createPolarPatterns (juce::AudioBuffer<float>& buffer)
 {
+    using namespace juce;
+
     int numSamples = buffer.getNumSamples();
     buffer.clear();
 
@@ -1862,15 +1899,17 @@ void PolarDesignerAudioProcessor::createPolarPatterns (AudioBuffer<float>& buffe
     }
 }
 
-void PolarDesignerAudioProcessor::setLastDir (File newLastDir)
+void PolarDesignerAudioProcessor::setLastDir (juce::File newLastDir)
 {
     lastDir = newLastDir;
-    const var v (lastDir.getFullPathName());
+    const juce::var v (lastDir.getFullPathName());
     properties->setValue ("presetFolder", v);
 }
 
-Result PolarDesignerAudioProcessor::loadPreset (const File& presetFile)
+juce::Result PolarDesignerAudioProcessor::loadPreset (const juce::File& presetFile)
 {
+    using namespace juce;
+
     var parsedJson;
     if (! presetFile.exists())
         return Result::fail ("File does not exist!");
@@ -1956,8 +1995,10 @@ Result PolarDesignerAudioProcessor::loadPreset (const File& presetFile)
     return Result::ok();
 }
 
-Result PolarDesignerAudioProcessor::savePreset (File destination)
+juce::Result PolarDesignerAudioProcessor::savePreset (juce::File destination)
 {
+    using namespace juce;
+
     auto jsonObj = std::make_unique<DynamicObject>();
 
     jsonObj->setProperty (
@@ -2190,6 +2231,8 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
 
 void PolarDesignerAudioProcessor::trackSignalEnergy()
 {
+    using namespace juce;
+
 #ifdef USE_EXTRA_DEBUG_DUMPS
     LOG_DEBUG ("TRACKING SIGNAL ENERGY...");
 #endif
@@ -2231,6 +2274,8 @@ void PolarDesignerAudioProcessor::trackSignalEnergy()
 
 void PolarDesignerAudioProcessor::setMinimumDisturbancePattern()
 {
+    using namespace juce;
+
     float disturberPower = 0.0f;
     float minPowerAlpha = 0.0f;
     float alphaStart = 0.0f;
@@ -2269,6 +2314,8 @@ void PolarDesignerAudioProcessor::setMinimumDisturbancePattern()
 
 void PolarDesignerAudioProcessor::setMaximumSignalPattern()
 {
+    using namespace juce;
+
     float signalPower = 0.0f;
     float maxPowerAlpha = 0.0f;
     float alphaStart = 0.0f;
@@ -2303,6 +2350,8 @@ void PolarDesignerAudioProcessor::setMaximumSignalPattern()
 
 void PolarDesignerAudioProcessor::maximizeSigToDistRatio()
 {
+    using namespace juce;
+
     if (! signalRecorded || ! disturberRecorded)
         return; // Skip if both signal and disturber haven't been recorded
 
@@ -2361,11 +2410,13 @@ void PolarDesignerAudioProcessor::maximizeSigToDistRatio()
 
 void PolarDesignerAudioProcessor::setProxCompCoefficients (float distance)
 {
+    using namespace juce::dsp::IIR;
+
     if (std::abs (distance) < 0.0001f)
     {
         LOG_WARN ("Invalid proximity distance, using default coefficients");
         *proxCompIIR.coefficients =
-            dsp::IIR::Coefficients<float> (1.0f, 0.0f, 1.0f, 0.0f); // Unity gain filter
+            Coefficients<float> (1.0f, 0.0f, 1.0f, 0.0f); // Unity gain filter
         return;
     }
 
@@ -2374,7 +2425,7 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients (float distance)
     if (fs <= 0.0)
     {
         LOG_WARN ("Invalid sample rate, using default coefficients");
-        *proxCompIIR.coefficients = dsp::IIR::Coefficients<float> (1.0f, 0.0f, 1.0f, 0.0f);
+        *proxCompIIR.coefficients = Coefficients<float> (1.0f, 0.0f, 1.0f, 0.0f);
         return;
     }
 
@@ -2400,11 +2451,13 @@ void PolarDesignerAudioProcessor::setProxCompCoefficients (float distance)
         a1 = static_cast<float> (-exp (-c / fs));
     }
 
-    *proxCompIIR.coefficients = dsp::IIR::Coefficients<float> (b0, b1, a0, a1);
+    *proxCompIIR.coefficients = Coefficients<float> (b0, b1, a0, a1);
 }
 
 void PolarDesignerAudioProcessor::timerCallback()
 {
+    using namespace juce;
+
     if (zeroLatencyModeChanged.exchange (false, std::memory_order_acquire))
         updateLatency();
 
@@ -2618,7 +2671,7 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
 
 //==============================================================================
 // This creates new instances of the plugin..
-AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new PolarDesignerAudioProcessor();
 }

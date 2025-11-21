@@ -43,35 +43,36 @@
     #include <melatonin_inspector/melatonin_inspector.h>
 #endif
 
-typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
-typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
+typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /**
 */
-class PolarDesignerAudioProcessorEditor : public AudioProcessorEditor,
-                                          private Button::Listener,
-                                          private Slider::Listener,
-                                          private Timer,
-                                          public ChangeListener,
-                                          private ValueTree::Listener
+class PolarDesignerAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                          private juce::Button::Listener,
+                                          private juce::Slider::Listener,
+                                          private juce::Timer,
+                                          public juce::ChangeListener,
+                                          private juce::ValueTree::Listener
 {
 private:
     //    LaF globalLaF;
     MainLookAndFeel mainLaF;
-    TextButton tbLogoAA;
+    juce::TextButton tbLogoAA;
 
 public:
-    PolarDesignerAudioProcessorEditor (PolarDesignerAudioProcessor&, AudioProcessorValueTreeState&);
+    PolarDesignerAudioProcessorEditor (PolarDesignerAudioProcessor&,
+                                       juce::AudioProcessorValueTreeState&);
     ~PolarDesignerAudioProcessorEditor() override;
 
     //==============================================================================
-    void paint (Graphics&) override;
+    void paint (juce::Graphics&) override;
     void resized() override;
 
-    void buttonStateChanged (Button* button) override;
-    void buttonClicked (Button* button) override;
-    void sliderValueChanged (Slider* slider) override;
+    void buttonStateChanged (juce::Button* button) override;
+    void buttonClicked (juce::Button* button) override;
+    void sliderValueChanged (juce::Slider* slider) override;
 
     void setEqMode();
     void calculateLockedBands (int nBands, bool trimSliderIncr);
@@ -88,14 +89,14 @@ public:
 
     void loadSavedPresetsToList();
 
-    void changeListenerCallback (ChangeBroadcaster* source) override;
+    void changeListenerCallback (juce::ChangeBroadcaster* source) override;
 
     void initializeSavedStates();
 
     void saveLayerState (int layer);
     void restoreLayerState (int layer);
 
-    TooltipWindow sharedTooltipWindow;
+    juce::TooltipWindow sharedTooltipWindow;
 
 private:
     // UI repainting is 'debounced' to avoid overwhelm
@@ -108,8 +109,8 @@ private:
     static const int EDITOR_MAX_WIDTH = 2732;
     static const int EDITOR_MAX_HEIGHT = 2048;
 
-    String presetFilename;
-    String errorMessage;
+    juce::String presetFilename;
+    juce::String errorMessage;
 
     static const int MAX_EDITOR_BANDS = 5;
 
@@ -128,40 +129,41 @@ private:
     bool presetListVisible;
     bool presetLoaded = false;
 
-    Colour eqColours[5];
+    juce::Colour eqColours[5];
 
     TitleBarTextLabel titleCompare, titlePreset;
-    TextButton titlePresetUndoButton;
+    juce::TextButton titlePresetUndoButton;
 
     Footer footer;
 
     PolarDesignerAudioProcessor& polarDesignerProcessor;
-    AudioProcessorValueTreeState& valueTreeState;
+    juce::AudioProcessorValueTreeState& valueTreeState;
 
     DirectivityEQ directivityEqualiser;
     PolarPatternVisualizer polarPatternVisualizers[5];
 
     // Groups
-    GroupComponent grpEq, grpPreset, grpTerminatorControl, grpProxComp, grpBands, grpSync,
+    juce::GroupComponent grpEq, grpPreset, grpTerminatorControl, grpProxComp, grpBands, grpSync,
         grpPresetList;
     // Sliders
     ReverseSlider slCrossoverPosition[4];
     DirSlider slDir[5];
-    Slider slProximity;
+    juce::Slider slProximity;
     GainSlider slBandGain[5];
 
     // a slider to use to 'trim' the EQ's
     EndlessSlider trimSlider;
 
     // Solo Buttons
-    ToggleButton tgbSolo[5], tgbMute[5];
+    juce::ToggleButton tgbSolo[5], tgbMute[5];
     // Text Buttons
-    TextButton tbLoad, tbSave, tbTerminateSpill, tbMaximizeTarget, tbMaxTargetToSpill,
+    juce::TextButton tbLoad, tbSave, tbTerminateSpill, tbMaximizeTarget, tbMaxTargetToSpill,
         tbZeroLatency, tbOpenFromFile;
     // ToggleButtons
-    ToggleButton tbAllowBackwardsPattern, tgbProxCtr;
+    juce::ToggleButton tbAllowBackwardsPattern, tgbProxCtr;
     // ImageButtons
-    TextButton ibEqCtr[2], tbClosePresetList, tbCloseTerminatorControl, tbTrimSliderCenterPointer;
+    juce::TextButton ibEqCtr[2], tbClosePresetList, tbCloseTerminatorControl,
+        tbTrimSliderCenterPointer;
 
     TextMultiButton tmbABButton, tmbNrBandsButton, tmbSyncChannelButton;
 
@@ -175,19 +177,20 @@ private:
     std::unique_ptr<ButtonAttachment> tgbSoloAtt[5], tgbMuteAtt[5], tbAllowBackwardsPatternAtt,
         tbZeroLatencyAtt, tgbProxCtrAtt;
 
-    Rectangle<float> presetArea;
+    juce::Rectangle<float> presetArea;
     AnimatedLabel albPlaybackSpill, albAcquiringTarget;
 
-    TextButton terminatorLabelNr1, terminatorLabelSpillMain, terminatorLabelSpillSub;
-    TextButton tbBeginTerminate;
+    juce::TextButton terminatorLabelNr1, terminatorLabelSpillMain, terminatorLabelSpillSub;
+    juce::TextButton tbBeginTerminate;
 
-    TextButton terminatorLabelNr2, terminatorLabelMaxMain, terminatorLabelMaxSub;
-    TextButton tbBeginMaximize;
+    juce::TextButton terminatorLabelNr2, terminatorLabelMaxMain, terminatorLabelMaxSub;
+    juce::TextButton tbBeginMaximize;
 
-    TextButton terminatorLabelNr3, terminatorLabelMaxToSpillMain, terminatorLabelMaxToSpillSub;
-    TextButton tbApplyMaxTargetToSpill;
+    juce::TextButton terminatorLabelNr3, terminatorLabelMaxToSpillMain,
+        terminatorLabelMaxToSpillSub;
+    juce::TextButton tbApplyMaxTargetToSpill;
 
-    TextButton terminatorStageLine[8];
+    juce::TextButton terminatorStageLine[8];
 
     /* Flags governing the display of the Terminator/Spill/Maximize UI */
     bool uiTerminatorAnimationWindowIsVisible;
@@ -241,7 +244,7 @@ private:
     void showActiveTerminatorStage (terminatorStage stage);
     void notifyPresetLabelChange();
 
-    void mouseDown (const MouseEvent& event) override;
+    void mouseDown (const juce::MouseEvent& event) override;
 
     void updateABButtonState();
 
