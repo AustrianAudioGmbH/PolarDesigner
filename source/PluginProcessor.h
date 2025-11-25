@@ -128,9 +128,7 @@ public:
     void changeProgramName (int index, const juce::String& newName) override;
 
     //==============================================================================
-    void resizeBuffersIfNeeded (int newFirLen, int newBlockSize);
 
-    void initializeBuffers();
     void initializeDefaultState();
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
@@ -309,13 +307,14 @@ private:
     juce::File lastDir;
 
     //==============================================================================
+    void updateFirLen();
+    void resizeBuffersIfNeeded();
     void resetXoverFreqs();
     void computeAllFilterCoefficients();
     void computeFilterCoefficients (unsigned int crossoverNr);
     void setProxCompCoefficients (float distance);
-    void initAllConvolvers();
+    void updateAllConvolvers();
     void updateConvolver (size_t convNr);
-    void loadFilterBankImpulseResponses();
 
     void createOmniAndEightSignals (juce::AudioBuffer<float>& buffer);
     void createPolarPatterns (juce::AudioBuffer<float>& buffer);
