@@ -568,17 +568,11 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     currentSampleRate = sampleRate > 0 ? sampleRate : FILTER_BANK_NATIVE_SAMPLE_RATE;
     currentBlockSize = samplesPerBlock > 0 ? samplesPerBlock : PD_DEFAULT_BLOCK_SIZE;
 
-    // Calculate firLen
-    int newFirLen = static_cast<int> (
-        std::ceil (static_cast<double> (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE)
-                   / FILTER_BANK_NATIVE_SAMPLE_RATE * sampleRate));
-    if (newFirLen % 2 == 0)
-        newFirLen++;
-    jassert (newFirLen % 2 == 1);
-    firLen.store (newFirLen);
+    // calculate the FIR filter length
+    updateFirLen();
 
     // Resize buffers
-    resizeBuffersIfNeeded (newFirLen, currentBlockSize);
+    resizeBuffersIfNeeded();
     jassert (firFilterBuffer.getNumSamples() > 0);
 
     // Load EQ and compute filter coefficients
@@ -591,13 +585,14 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     dfEqEightConv.prepare (spec);
     ffEqOmniConv.prepare (spec);
     ffEqEightConv.prepare (spec);
+
     for (auto& conv : convolvers)
         conv.prepare (spec);
 
     // Configure delay line
-    ProcessSpec delaySpec { currentSampleRate, static_cast<uint32> (currentBlockSize), 1 };
-    delay.prepare (delaySpec);
-    delay.setDelayTime (static_cast<float> (((newFirLen - 1) / 2.0) / currentSampleRate));
+    delay.prepare (spec);
+    delay.setDelayTime (static_cast<float> (((firLen.load (std::memory_order_relaxed) - 1) / 2.0)
+                                            / currentSampleRate));
 
     // Update latency
     updateLatency();
@@ -638,10 +633,6 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 
     auto numSamples = static_cast<size_t> (buffer.getNumSamples());
     createOmniAndEightSignals (buffer);
-    if (currentBlockSize == 0)
-    {
-        initializeBuffers();
-    }
 
     // Proximity compensation
     auto proximity =
@@ -847,7 +838,7 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
         firLen.store (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE);
         if (firLen % 2 == 0)
             firLen++;
-        initializeBuffers();
+        resizeBuffersIfNeeded();
         //        prepareToPlay(currentSampleRate, currentBlockSize);
     }
 
@@ -975,65 +966,39 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
     // Always true:
     vtsParams.getParameter ("allowBackwardsPattern")->setValueNotifyingHost (1.0f);
 }
-void PolarDesignerAudioProcessor::resizeBuffersIfNeeded (int newFirLen, int newBlockSize)
+void PolarDesignerAudioProcessor::resizeBuffersIfNeeded()
 {
     using namespace juce;
 
-    // Ensure newFirLen is valid (positive and odd)
-    if (newFirLen <= 0)
-    {
-        LOG_WARN ("Invalid newFirLen (" + String (newFirLen) + "), using default");
-        newFirLen = FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE;
-        if (newFirLen % 2 == 0)
-            newFirLen++;
-    }
-    jassert (newFirLen % 2 == 1); // Ensure odd length for FIR filter
+    const auto currentFirLen = firLen.load (std::memory_order_relaxed);
 
     // Resize firFilterBuffer if length differs or is uninitialized
-    if (newFirLen != firLen || firFilterBuffer.getNumSamples() != newFirLen)
+    if (firFilterBuffer.getNumSamples() != currentFirLen)
     {
-        firLen.store (newFirLen);
-        firFilterBuffer.setSize (MAX_NUM_EQS, newFirLen, false, false, true);
+        firFilterBuffer.setSize (MAX_NUM_EQS, currentFirLen, false, false, true);
         firFilterBuffer.clear();
     }
 
     // Resize filterBankBuffer if channels/samples differ or is uninitialized
-    if (filterBankBuffer.getNumChannels() != N_CH_IN * MAX_NUM_EQS
-        || filterBankBuffer.getNumSamples() != newBlockSize
-        || filterBankBuffer.getNumSamples() == 0)
+    if (filterBankBuffer.getNumSamples() != currentBlockSize)
     {
-        filterBankBuffer.setSize (N_CH_IN * MAX_NUM_EQS, newBlockSize, false, false, true);
+        filterBankBuffer.setSize (N_CH_IN * MAX_NUM_EQS, currentBlockSize, false, false, true);
         filterBankBuffer.clear();
     }
 
     // Resize omniEightBuffer if channels/samples differ or is uninitialized
-    if (omniEightBuffer.getNumChannels() != MAX_NUM_INPUTS
-        || omniEightBuffer.getNumSamples() != newBlockSize || omniEightBuffer.getNumSamples() == 0)
+    if (omniEightBuffer.getNumSamples() != currentBlockSize)
     {
-        omniEightBuffer.setSize (MAX_NUM_INPUTS, newBlockSize, false, false, true);
+        omniEightBuffer.setSize (MAX_NUM_INPUTS, currentBlockSize, false, false, true);
         omniEightBuffer.clear();
     }
 
     // Resize delayBuffer if channels/samples differ or is uninitialized
-    if (delayBuffer.getNumChannels() != 1 || delayBuffer.getNumSamples() != newBlockSize
-        || delayBuffer.getNumSamples() == 0)
+    if (delayBuffer.getNumSamples() != currentBlockSize)
     {
-        delayBuffer.setSize (1, newBlockSize, false, false, true);
+        delayBuffer.setSize (1, currentBlockSize, false, false, true);
         delayBuffer.clear();
     }
-}
-
-void PolarDesignerAudioProcessor::initializeBuffers()
-{
-    // Ensure firLen is valid
-    if (firLen <= 0)
-    {
-        LOG_WARN ("Invalid firLen (" + juce::String (firLen) + "), using default");
-        firLen = FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE;
-        if (firLen % 2 == 0)
-            firLen++;
-    }
-    resizeBuffersIfNeeded (firLen, currentBlockSize);
 }
 
 void PolarDesignerAudioProcessor::releaseResources()
@@ -1058,13 +1023,7 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
 {
     using namespace juce;
 
-    // Calculate firLen based on currentSampleRate
-    int newFirLen = static_cast<int> (
-        std::ceil (static_cast<float> (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE)
-                   / FILTER_BANK_NATIVE_SAMPLE_RATE * currentSampleRate));
-    if (newFirLen % 2 == 0)
-        newFirLen++;
-    jassert (newFirLen % 2 == 1);
+    updateFirLen();
 
     // Initialize if unprepared
     if (juce::approximatelyEqual (currentSampleRate,
@@ -1072,14 +1031,12 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
         && currentBlockSize == PD_DEFAULT_BLOCK_SIZE)
     {
         LOG_WARN ("Plugin not prepared, initializing with defaults");
-        firLen.store (newFirLen);
-        initializeBuffers();
         prepareToPlay (currentSampleRate, currentBlockSize);
     }
     else
     {
         // Ensure buffers are resized for current sample rate
-        resizeBuffersIfNeeded (newFirLen, currentBlockSize);
+        resizeBuffersIfNeeded();
     }
 
     std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
@@ -1594,7 +1551,7 @@ void PolarDesignerAudioProcessor::computeAllFilterCoefficients()
     {
         computeFilterCoefficients (i);
     }
-    initAllConvolvers();
+    updateAllConvolvers();
 }
 
 void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crossoverNr)
@@ -1673,51 +1630,13 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
     }
 }
 
-void PolarDesignerAudioProcessor::initAllConvolvers()
+void PolarDesignerAudioProcessor::updateAllConvolvers()
 {
     using namespace juce;
-
-    // Validate sample rate and block size
-
-    // Ensure firLen is valid
-    if (firLen <= 0)
-    {
-        LOG_WARN ("Invalid firLen (" + String (firLen) + "), using default");
-        firLen = FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE;
-        if (firLen % 2 == 0)
-            firLen++;
-    }
-
-    // Resize firFilterBuffer if mismatched
-    if (firFilterBuffer.getNumSamples() != firLen
-        || firFilterBuffer.getNumChannels() != MAX_NUM_EQS)
-    {
-        LOG_WARN ("firFilterBuffer size mismatch (channels="
-                  + String (firFilterBuffer.getNumChannels())
-                  + ", samples=" + String (firFilterBuffer.getNumSamples()) + "), resizing to "
-                  + String (MAX_NUM_EQS) + "x" + String (firLen));
-        firFilterBuffer.setSize (MAX_NUM_EQS, firLen, false, false, true);
-        firFilterBuffer.clear();
-    }
-
-    dsp::ProcessSpec convSpec { currentSampleRate, static_cast<uint32> (currentBlockSize), 1 };
 
     const auto nBands = nProcessorBands.load();
     for (unsigned int i = 0; i < nBands; ++i)
     {
-        // Validate firFilterBuffer
-        if (firFilterBuffer.getNumChannels() <= static_cast<int> (i)
-            || firFilterBuffer.getNumSamples() < firLen)
-        {
-            LOG_ERROR ("firFilterBuffer invalid for index " + String (i)
-                       + ": channels=" + String (firFilterBuffer.getNumChannels())
-                       + ", samples=" + String (firFilterBuffer.getNumSamples()));
-            continue;
-        }
-
-        convolvers[2 * i].prepare (convSpec); // Omni
-        convolvers[2 * i + 1].prepare (convSpec); // Eight
-
         // Load impulse response only if coefficients changed
         AudioBuffer<float> convSingleBuff (1, firLen);
         convSingleBuff.copyFrom (0, 0, firFilterBuffer, static_cast<int> (i), 0, firLen);
@@ -1790,11 +1709,6 @@ void PolarDesignerAudioProcessor::updateConvolver (size_t convNr)
                                                    Convolution::Trim::no, // trim
                                                    Convolution::Normalise::no); // normalise
     }
-}
-
-void PolarDesignerAudioProcessor::loadFilterBankImpulseResponses()
-{
-    initAllConvolvers(); // Reuse existing method for consistency
 }
 
 unsigned int PolarDesignerAudioProcessor::getNProcessorBands()
@@ -2667,6 +2581,18 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
     juce::String treeAsXmlString2 = vtsParams.state.toXmlString();
     LOG_DEBUG (treeAsXmlString2.toStdString());
 #endif
+}
+
+void PolarDesignerAudioProcessor::updateFirLen()
+{
+    // Calculate firLen
+    int newFirLen = static_cast<int> (
+        std::ceil (static_cast<double> (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE)
+                   / FILTER_BANK_NATIVE_SAMPLE_RATE * currentSampleRate));
+    if (newFirLen % 2 == 0)
+        newFirLen++;
+    jassert (newFirLen % 2 == 1);
+    firLen.store (newFirLen);
 }
 
 //==============================================================================
