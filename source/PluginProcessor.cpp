@@ -590,8 +590,7 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
 
     // Configure delay line
     delay.prepare (spec);
-    delay.setDelayTime (static_cast<float> (((firLen.load (std::memory_order_relaxed) - 1) / 2.0)
-                                            / currentSampleRate));
+    delay.setDelayTime (static_cast<float> (((firLen - 1) / 2.0) / currentSampleRate));
 
     // Update latency
     updateLatency();
@@ -829,12 +828,13 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
 {
     using namespace juce;
 
+    // FIXME: this makes no sense
     if (approximatelyEqual (currentSampleRate, static_cast<double> (FILTER_BANK_NATIVE_SAMPLE_RATE))
         && currentBlockSize == PD_DEFAULT_BLOCK_SIZE)
 
     {
         LOG_WARN ("Plugin not prepared, initializing with defaults");
-        firLen.store (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE);
+        firLen = FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE;
         if (firLen % 2 == 0)
             firLen++;
         resizeBuffersIfNeeded();
@@ -969,12 +969,10 @@ void PolarDesignerAudioProcessor::resizeBuffersIfNeeded()
 {
     using namespace juce;
 
-    const auto currentFirLen = firLen.load (std::memory_order_relaxed);
-
     // Resize firFilterBuffer if length differs or is uninitialized
-    if (firFilterBuffer.getNumSamples() != currentFirLen)
+    if (firFilterBuffer.getNumSamples() != firLen)
     {
-        firFilterBuffer.setSize (MAX_NUM_EQS, currentFirLen, false, false, true);
+        firFilterBuffer.setSize (MAX_NUM_EQS, firLen, false, false, true);
         firFilterBuffer.clear();
     }
 
@@ -2562,7 +2560,7 @@ void PolarDesignerAudioProcessor::updateFirLen()
     if (newFirLen % 2 == 0)
         newFirLen++;
     jassert (newFirLen % 2 == 1);
-    firLen.store (newFirLen);
+    firLen = newFirLen;
 }
 
 //==============================================================================
