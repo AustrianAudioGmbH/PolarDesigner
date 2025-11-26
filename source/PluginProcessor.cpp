@@ -1464,16 +1464,33 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
 // TODO: refactor: we should put this on the apvts
 void PolarDesignerAudioProcessor::setEqState (int idx)
 {
-    doEq = idx;
-
-    if ((syncChannelPtr->load() > 0) && ! readingSharedParams)
+    if (idx != doEq)
     {
-        int ch = (int) syncChannelPtr->load() - 1;
-        ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (ch);
-        paramsToSync.ffDfEq = doEq;
-    }
+        doEq = idx;
 
-    updateLatency();
+        // reset convolvers if needed
+        if (idx != 1)
+        {
+            ffEqOmniConv.reset();
+            ffEqEightConv.reset();
+        }
+
+        if (idx != 2)
+        {
+            dfEqOmniConv.reset();
+            dfEqEightConv.reset();
+        }
+        //
+
+        if ((syncChannelPtr->load() > 0) && ! readingSharedParams)
+        {
+            int ch = (int) syncChannelPtr->load() - 1;
+            ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (ch);
+            paramsToSync.ffDfEq = doEq;
+        }
+
+        updateLatency();
+    }
 }
 
 void PolarDesignerAudioProcessor::resetXoverFreqs()
