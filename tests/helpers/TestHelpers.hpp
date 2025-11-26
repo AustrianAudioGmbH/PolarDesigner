@@ -39,15 +39,17 @@ static inline juce::File getTestDataPath()
 
 static inline void loadWavFile (const juce::File& file, juce::AudioBuffer<float>& buffer)
 {
+    using namespace juce;
+
     if (! (file.existsAsFile() && file.hasFileExtension (".wav")))
     {
         throw std::runtime_error ("File does not exist or is not a valid WAV file: "
                                   + file.getFullPathName().toStdString());
     }
 
-    juce::AudioFormatManager formatManager;
+    AudioFormatManager formatManager;
     formatManager.registerBasicFormats();
-    std::unique_ptr<juce::AudioFormatReader> reader (formatManager.createReaderFor (file));
+    std::unique_ptr<AudioFormatReader> reader (formatManager.createReaderFor (file));
 
     if (reader == nullptr)
     {
@@ -63,26 +65,31 @@ static inline void loadWavFile (const juce::File& file, juce::AudioBuffer<float>
 static inline void
     writeWavFile (const juce::File& file, const juce::AudioBuffer<float>& buffer, float sampleRate)
 {
-    juce::WavAudioFormat wavFormat;
+    using namespace juce;
 
-    std::unique_ptr<juce::AudioFormatWriter> writer;
-    auto stream = new juce::FileOutputStream (file);
+    WavAudioFormat wavFormat;
 
-    if (stream->failedToOpen())
+    std::unique_ptr<AudioFormatWriter> writer;
+    std::unique_ptr<OutputStream> stream (file.createOutputStream());
+
+    if (! stream)
     {
         throw std::runtime_error ("Could not open file for writing: "
                                   + file.getFullPathName().toStdString());
     }
 
     stream->setPosition (0);
-    stream->truncate();
 
-    writer.reset (wavFormat.createWriterFor (stream,
-                                             sampleRate,
-                                             static_cast<unsigned int> (buffer.getNumChannels()),
-                                             24,
-                                             {},
-                                             0));
+    auto options = AudioFormatWriterOptions()
+                       .withSampleRate (sampleRate)
+                       .withNumChannels (buffer.getNumChannels())
+                       .withBitsPerSample (24)
+                       .withMetadataValues ({})
+                       .withQualityOptionIndex (0);
+
+    auto newWriter = wavFormat.createWriterFor (stream, options);
+
+    writer = std::move (newWriter);
 
     if (writer == nullptr)
     {
