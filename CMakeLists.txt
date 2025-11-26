@@ -139,7 +139,6 @@ project (${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 include (JUCEDefaults)
 
 add_subdirectory (JUCE)
-add_subdirectory (modules/melatonin_inspector)
 
 add_subdirectory (modules/melatonin_inspector)
 

@@ -690,7 +690,7 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     // Process filter bank convolvers
     if (zeroLatencyModePtr->load() < 0.5f && nActiveBands > 1)
     {
-        recomputeFilterCoefficientsIfNeeded();
+        // FIXME: load new impulse responses here
 
         for (unsigned int i = 0;
              i < static_cast<size_t> (nActiveBands) && 2 * i + 1 < convolvers.size();
@@ -1453,6 +1453,9 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
             paramsToSync.gains[idx] = bandGainsPtr[idx]->load();
         }
     }
+
+    recomputeFilterCoefficientsIfNeeded();
+
 #ifdef USE_EXTRA_DEBUG_DUMPS
     else
     {
