@@ -303,11 +303,10 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
 
     trimPositionPtr = vtsParams.getRawParameterValue ("trimPosition");
 
-    xOverFreqsPtr[0] = vtsParams.getRawParameterValue ("xOverF1");
-    xOverFreqsPtr[1] = vtsParams.getRawParameterValue ("xOverF2");
-    xOverFreqsPtr[2] = vtsParams.getRawParameterValue ("xOverF3");
-    xOverFreqsPtr[3] = vtsParams.getRawParameterValue ("xOverF4");
-    for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
+    for (size_t i = 0; i < MAX_NUM_EQS - 1; ++i)
+        xOverFreqsPtr[i] = vtsParams.getRawParameterValue ("xOverF" + String (i + 1));
+
+    for (size_t i = 0; i < MAX_NUM_EQS; ++i)
     {
         dirFactorsPtr[i] = vtsParams.getRawParameterValue ("alpha" + String (i + 1));
         soloBandPtr[i] = vtsParams.getRawParameterValue ("solo" + String (i + 1));
@@ -2022,21 +2021,25 @@ float PolarDesignerAudioProcessor::getXoverSliderRangeEnd (int sliderNum)
 
 void PolarDesignerAudioProcessor::startTracking (bool trackDisturber)
 {
-#ifdef USE_EXTRA_DEBUG_DUMPS
-    LOG_DEBUG ("START TRACKING...");
-#endif
-
-    signalRecorded = false;
-    disturberRecorded = false;
-    trackingDisturber = trackDisturber;
-    for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
+    if (trackDisturber)
     {
-        omniSqSumSig[i] = 0.0f;
-        eightSqSumSig[i] = 0.0f;
-        omniEightSumSig[i] = 0.0f;
-        omniSqSumDist[i] = 0.0f;
-        eightSqSumDist[i] = 0.0f;
-        omniEightSumDist[i] = 0.0f;
+        trackingDisturber = true;
+        for (size_t i = 0; i < MAX_NUM_EQS; ++i)
+        {
+            omniSqSumDist[i] = 0.0f;
+            eightSqSumDist[i] = 0.0f;
+            omniEightSumDist[i] = 0.0f;
+        }
+    }
+    else
+    {
+        trackingDisturber = false;
+        for (size_t i = 0; i < MAX_NUM_EQS; ++i)
+        {
+            omniSqSumSig[i] = 0.0f;
+            eightSqSumSig[i] = 0.0f;
+            omniEightSumSig[i] = 0.0f;
+        }
     }
     nrBlocksRecorded = 0;
     trackingActive = true;
@@ -2044,10 +2047,6 @@ void PolarDesignerAudioProcessor::startTracking (bool trackDisturber)
 
 void PolarDesignerAudioProcessor::resetTrackingState()
 {
-#ifdef USE_EXTRA_DEBUG_DUMPS
-    LOG_DEBUG ("RESET TRACKING...");
-#endif
-
     trackingActive = false;
     trackingDisturber = false;
     signalRecorded = false;
@@ -2066,23 +2065,15 @@ void PolarDesignerAudioProcessor::resetTrackingState()
 
 void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
 {
-#ifdef USE_EXTRA_DEBUG_DUMPS
-    LOG_DEBUG ("STOP TRACKING...");
-#endif
-
     trackingActive = false;
     if (nrBlocksRecorded == 0)
         return; // Skip if no blocks recorded
 
     if (applyOptimalPattern == 1)
     {
-#ifdef USE_EXTRA_DEBUG_DUMPS
-        LOG_DEBUG ("TRACKING: State <1>");
-#endif
         if (trackingDisturber)
         {
             if (nrBlocksRecorded != 0)
-            {
                 for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
                 {
                     omniSqSumDist[i] = omniSqSumDist[i] / static_cast<float> (nrBlocksRecorded);
@@ -2090,7 +2081,7 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
                     omniEightSumDist[i] =
                         omniEightSumDist[i] / static_cast<float> (nrBlocksRecorded);
                 }
-            }
+
             setMinimumDisturbancePattern();
         }
         else
@@ -2109,9 +2100,6 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
     }
     else if (applyOptimalPattern == 2) // max sig-to-dist
     {
-#ifdef USE_EXTRA_DEBUG_DUMPS
-        LOG_DEBUG ("TRACKING: State <2>");
-#endif
         if (trackingDisturber)
         {
             if (nrBlocksRecorded != 0)
@@ -2146,10 +2134,6 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
 void PolarDesignerAudioProcessor::trackSignalEnergy()
 {
     using namespace juce;
-
-#ifdef USE_EXTRA_DEBUG_DUMPS
-    LOG_DEBUG ("TRACKING SIGNAL ENERGY...");
-#endif
 
     int numSamples = filterBankBuffer.getNumSamples();
     if (numSamples == 0)
@@ -2194,9 +2178,6 @@ void PolarDesignerAudioProcessor::setMinimumDisturbancePattern()
     float minPowerAlpha = 0.0f;
     float alphaStart = 0.0f;
 
-#ifdef USE_EXTRA_DEBUG_DUMPS
-    LOG_DEBUG ("MINUMUM DISTURBANCE PATTERN...");
-#endif
     // !J! NOTE: allowBackwardsPattern is ALWAYS true
     alphaStart = -0.5f;
 
@@ -2282,11 +2263,7 @@ void PolarDesignerAudioProcessor::maximizeSigToDistRatio()
 
     float distToSigRatio = 0.0f;
     float maxDistToSigAlpha = 0.0f;
-    float alphaStart = 0.0f;
-
-    // CHANGED: Replaced std::round(allowBackwardsPatternPtr->load()) > 0.5f with juce::approximatelyEqual(allowBackwardsPatternPtr->load(), 1.0f)
-    if (juce::approximatelyEqual (allowBackwardsPatternPtr->load(), 1.0f))
-        alphaStart = -0.5f;
+    float alphaStart = -0.5f;
 
     for (unsigned int i = 0; i < nProcessorBands; ++i)
     {
