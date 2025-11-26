@@ -244,7 +244,7 @@ private:
 
     // use odd FIR_LEN for even filter order (FIR_LEN = N+1)
     // (lowpass and highpass need even filter order to put a zero at f=0 and f=pi)
-    std::atomic<int> firLen { FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE };
+    int firLen = FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE;
 
     // free field / diffuse field eq
     juce::dsp::Convolution dfEqOmniConv;
