@@ -143,24 +143,6 @@ add_subdirectory (JUCE)
 # If FORMATS has not already been defined (e.g. for Development machine), set it up:
 if (NOT DEFINED FORMATS)
     set (FORMATS Standalone VST3)
-
-    if (DEFINED AAX_SDK_PATH)
-        message (STATUS "AAX_SDK_PATH set to: ${AAX_SDK_PATH}")
-        juce_set_aax_sdk_path (${AAX_SDK_PATH})
-        set_directory_properties (
-            PROPERTIES JUCE_AAX_COPY_DIR
-                       "$ENV{HOME}/Library/Application Support/Avid/Audio/Plug-Ins"
-        )
-
-        set (FORMATS ${FORMATS} AAX)
-    else ()
-        message (WARNING "AAX_SDK_PATH not set. Will not build AAX!")
-    endif ()
-
-    if (APPLE)
-        set (FORMATS ${FORMATS} AU AUv3)
-    endif ()
-
 endif ()
 
 set (JUCE_BUILD_LV2 OFF CACHE BOOL "Disable LV2")
@@ -178,6 +160,12 @@ FetchContent_MakeAvailable (melatonin_inspector)
 
 if (APPLE)
     message (STATUS "Building on MacOS")
+
+    set (FORMATS ${FORMATS} AU AUv3 AAX)
+
+    set_directory_properties (
+        PROPERTIES JUCE_AAX_COPY_DIR "$ENV{HOME}/Library/Application Support/Avid/Audio/Plug-Ins"
+    )
 
     find_library (ACCELERATE Accelerate)
 

@@ -52,6 +52,7 @@
 #include "../lookAndFeel/MainLookAndFeel.h"
 #include "ImgPaths.h"
 #include "TitleBarPaths.h"
+#include "juce_graphics/juce_graphics.h"
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
@@ -280,7 +281,7 @@ public:
         if (! selectable)
         {
             g.setColour ((Colours::white).withMultipliedAlpha (0.5));
-            g.setFont (getLookAndFeel().getTypefaceForFont (Font (12.0f, 1)));
+            g.setFont (getLookAndFeel().getTypefaceForFont (Font (FontOptions (12.0f, 1))));
             g.setFont (15.0f);
             g.drawFittedText (displayTextIfNotSelectable,
                               35,
@@ -396,7 +397,10 @@ public:
 
     void setTitle (juce::String newRegularText) { regularText = newRegularText; }
 
-    void setFont (juce::Typeface::Ptr newRegularFont) { regularFont = newRegularFont; }
+    void setFont (juce::Typeface::Ptr newRegularFont)
+    {
+        regularFont = juce::FontOptions (newRegularFont);
+    }
 
     void resized() override { repaint(); }
 
@@ -413,7 +417,7 @@ public:
     }
 
 private:
-    juce::Font regularFont = juce::Font (22.f);
+    juce::Font regularFont = juce::Font (juce::FontOptions (22.f));
     juce::String regularText = "Regular";
     MainLookAndFeel mainLaF;
 };
@@ -428,7 +432,10 @@ public:
 
     juce::String& getTitle() { return regularText; }
 
-    void setFont (juce::Typeface::Ptr newRegularFont) { regularFont = newRegularFont; }
+    void setFont (juce::Typeface::Ptr newRegularFont)
+    {
+        regularFont = juce::FontOptions (newRegularFont);
+    }
 
     void resized() override { repaint(); }
 
@@ -447,7 +454,7 @@ public:
     }
 
 private:
-    juce::Font regularFont = juce::Font (16.f);
+    juce::Font regularFont = juce::Font (juce::FontOptions (16.f));
     juce::String regularText = "Regular";
     MainLookAndFeel mainLaF;
 };
@@ -523,7 +530,8 @@ public:
 
         Rectangle<int> bounds = getLocalBounds();
         g.setColour (Colours::white.withAlpha (0.5f));
-        g.setFont (getLookAndFeel().getTypefaceForFont (Font (12.0f, 0)));
+        g.setFont (
+            FontOptions (getLookAndFeel().getTypefaceForFont (Font (FontOptions (12.0f, 0)))));
         g.setFont (14.0f);
         String versionString = "v";
 

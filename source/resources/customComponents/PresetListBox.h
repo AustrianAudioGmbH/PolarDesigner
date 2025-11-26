@@ -12,7 +12,6 @@
 
 #include "../lookAndFeel/MainLookAndFeel.h"
 #include "BinaryData.h"
-#include "juce_core/juce_core.h"
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
@@ -65,7 +64,7 @@ public:
         float h = static_cast<float> (getTopLevelComponent()->getHeight()) * 0.023f;
         float y = (static_cast<float> (height) - h) / 2;
 
-        Font font (mainLaF.normalFont);
+        Font font (FontOptions (mainLaF.normalFont));
         font.setHeight (h);
         g.setFont (font);
         g.drawFittedText (*data.getUnchecked (rowNumber),
@@ -151,7 +150,7 @@ private:
 
             g.setColour (mainLaF.textButtonHoverBackgroundColor);
 
-            Font font (mainLaF.normalFont);
+            Font font (FontOptions (mainLaF.normalFont));
             font.setHeight (h);
             g.setFont (font);
             g.drawFittedText (getTitle(), x, y, w, static_cast<int> (h), Justification::left, 1);
