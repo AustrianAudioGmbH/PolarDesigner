@@ -14,6 +14,7 @@
     <choices-outline>
         <line choice="vst3" />
         <line choice="au" />
+        <line choice="aax" />
     </choices-outline>
 
     <choice id="vst3" visible="true" start_selected="true" title="${PRODUCT_NAME} VST3">
@@ -22,5 +23,9 @@
 
     <choice id="au" visible="true" start_selected="true" title="${PRODUCT_NAME} AU">
         <pkg-ref id="${BUNDLE_ID}.au.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.au.pkg</pkg-ref>
+    </choice>
+
+    <choice id="aax" visible="true" start_selected="true" title="${PRODUCT_NAME} AAX">
+        <pkg-ref id="${BUNDLE_ID}.aax.pkg" version="${VERSION}" onConclusion="none">${PRODUCT_NAME}.aax.pkg</pkg-ref>
     </choice>
 </installer-gui-script>
