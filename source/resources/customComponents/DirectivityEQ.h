@@ -401,7 +401,8 @@ public:
         }
 
         // frequency labels
-        Font axisLabelFont = getLookAndFeel().getTypefaceForFont (Font (12.0f, 1));
+        Font axisLabelFont =
+            FontOptions (getLookAndFeel().getTypefaceForFont (Font (FontOptions (12.0f, 1))));
         g.setFont (axisLabelFont);
         g.setFont (static_cast<float> (proportionOfHeight (0.05f)));
         g.setColour (mainLaF.mainTextColor);
@@ -433,8 +434,8 @@ public:
 
             if (drawText)
             {
-                const auto axisLabelWidth =
-                    static_cast<float> (axisLabelFont.getStringWidth (axislabel));
+                const auto axisLabelWidth = static_cast<float> (
+                    GlyphArrangement::getStringWidth (axisLabelFont, axislabel));
                 auto justification = Justification::centred;
                 auto x = xpos - axisLabelWidth / 2.0f - mLabel;
                 auto y = dirToY (s.yMin) + OH + mLabel;

@@ -12,21 +12,7 @@
 
 #include "../lookAndFeel/MainLookAndFeel.h"
 
-#include <juce_audio_basics/juce_audio_basics.h>
-#include <juce_audio_devices/juce_audio_devices.h>
-#include <juce_audio_formats/juce_audio_formats.h>
-#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
-#include <juce_audio_processors/juce_audio_processors.h>
-#include <juce_audio_utils/juce_audio_utils.h>
-#include <juce_core/juce_core.h>
-#include <juce_cryptography/juce_cryptography.h>
-#include <juce_data_structures/juce_data_structures.h>
-#include <juce_dsp/juce_dsp.h>
-#include <juce_events/juce_events.h>
-#include <juce_graphics/juce_graphics.h>
 #include <juce_gui_basics/juce_gui_basics.h>
-#include <juce_gui_extra/juce_gui_extra.h>
-#include <juce_opengl/juce_opengl.h>
 
 //==============================================================================
 /*
@@ -34,7 +20,7 @@
 class AnimatedLabel : public juce::Component, private juce::Timer
 {
 public:
-    AnimatedLabel()
+    AnimatedLabel() : textFont (juce::FontOptions())
     {
         it = 0;
         counter = 1;
@@ -93,9 +79,11 @@ public:
 
     void resized() override
     {
+        using namespace juce;
+
         fontHeight = static_cast<float> (getTopLevelComponent()->getHeight()) * 0.018f;
 
-        juce::Font font (fontHeight * 1.0f);
+        Font font (FontOptions { fontHeight });
         textArea = getLocalBounds().reduced (
             static_cast<int> (static_cast<float> (getLocalBounds().getWidth()) * 0.06f),
             (getLocalBounds().getHeight() - static_cast<int> (fontHeight)) / 2);
@@ -106,14 +94,18 @@ public:
                                   static_cast<int> (fontHeight));
         int equalSignWidth =
             static_cast<int> (static_cast<float> (getLocalBounds().getWidth()) * 0.042f);
-        float rowProportion = static_cast<float> (font.getStringWidth (animatedString))
-                              / static_cast<float> (centredTextArea.getWidth());
+        float rowProportion =
+            static_cast<float> (GlyphArrangement::getStringWidth (font, animatedString))
+            / static_cast<float> (centredTextArea.getWidth());
 
         if (animatedString.length() > 0)
         {
             auto currStringLength = animatedString.length();
-            equalSignWidth = font.getStringWidth (animatedString) / animatedString.length();
-            if (font.getStringWidth (animatedString) > centredTextArea.getWidth())
+            equalSignWidth =
+                static_cast<int> (GlyphArrangement::getStringWidth (font, animatedString)
+                                  / static_cast<float> (animatedString.length()));
+            if (GlyphArrangement::getStringWidth (font, animatedString)
+                > static_cast<float> (centredTextArea.getWidth()))
             {
                 int nrOfSignsInNewRow =
                     static_cast<int> ((rowProportion - 1.f)

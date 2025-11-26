@@ -12,6 +12,7 @@
 #include "BinaryData.h"
 #include "BinaryFonts.h"
 
+#include <juce_graphics/juce_graphics.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 class MainLookAndFeel : public juce::LookAndFeel_V4
@@ -19,6 +20,7 @@ class MainLookAndFeel : public juce::LookAndFeel_V4
     using Colour = juce::Colour;
     using Typeface = juce::Typeface;
     using Font = juce::Font;
+    using FontOptions = juce::FontOptions;
     using Component = juce::Component;
     using Graphics = juce::Graphics;
     using Button = juce::Button;
@@ -864,7 +866,7 @@ public:
 
         g.setColour (button.isEnabled() ? mainTextColor : mainTextDisabledColor);
 
-        Font font (normalFont);
+        Font font (FontOptions { normalFont });
 
         String text = button.getButtonText();
 
@@ -914,7 +916,7 @@ public:
                  || button.getButtonText() == "Max Target-to-Spill")
         {
             g.setColour (button.isEnabled() ? mainTextColor : mainTextInactiveColor);
-            font = button.isEnabled() ? terminatorBoldFont : terminatorRegularFont;
+            font = FontOptions (button.isEnabled() ? terminatorBoldFont : terminatorRegularFont);
             justification = Justification::centredLeft;
             h = static_cast<int> (static_cast<float> (button.getTopLevelComponent()->getHeight())
                                   * 0.015f / scale);
@@ -930,7 +932,7 @@ public:
             String tmpText ("");
             tmpText += button.getButtonText().getCharPointer()[1];
             text = tmpText;
-            font = button.isEnabled() ? terminatorBoldFont : terminatorRegularFont;
+            font = FontOptions (button.isEnabled() ? terminatorBoldFont : terminatorRegularFont);
             justification = Justification::centred;
             h = static_cast<int> (static_cast<float> (button.getTopLevelComponent()->getHeight())
                                   * 0.014f / scale);
@@ -949,7 +951,7 @@ public:
                    == "Find best compromise between reduction\nof spill and maximizing target signal")
         {
             g.setColour (button.isEnabled() ? mainTextColor : mainTextInactiveColor);
-            font = terminatorRegularFont;
+            font = FontOptions (terminatorRegularFont);
             justification = Justification::centredLeft;
             h = static_cast<int> (static_cast<float> (button.getTopLevelComponent()->getHeight())
                                   * 0.012f / scale);
@@ -1027,7 +1029,7 @@ public:
             y = group.proportionOfHeight (0.04f);
         }
 
-        Font font (normalFont);
+        Font font { FontOptions (normalFont) };
         font.setHeight (static_cast<float> (h));
         g.setFont (font);
         g.drawFittedText (text, x, y, w, h, Justification::left, 1);
@@ -1247,7 +1249,7 @@ public:
                                   * 0.018f / scale);
         int y = (static_cast<int> (labelArea.getHeight()) - h) / 2;
 
-        Font font (normalFont);
+        Font font (FontOptions { normalFont });
         font.setHeight (static_cast<float> (h));
         g.setFont (font);
 
@@ -1299,7 +1301,7 @@ public:
                                       static_cast<float> (button.getWidth()),
                                       static_cast<float> (button.getHeight()));
 
-        Font font (normalFont);
+        Font font (FontOptions { normalFont });
 
         int x = static_cast<int> (toggleButtonBounds.getX());
         int w = static_cast<int> (toggleButtonBounds.getWidth());
