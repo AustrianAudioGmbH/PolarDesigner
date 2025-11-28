@@ -139,6 +139,7 @@ project (${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 include (JUCEDefaults)
 
 add_subdirectory (JUCE)
+add_subdirectory (modules/melatonin_inspector)
 
 # If FORMATS has not already been defined (e.g. for Development machine), set it up:
 if (NOT DEFINED FORMATS)
@@ -147,16 +148,6 @@ endif ()
 
 set (JUCE_BUILD_LV2 OFF CACHE BOOL "Disable LV2")
 set (JUCE_BUILD_ARA OFF CACHE BOOL "Disable ARA")
-
-# Include Melatonin Inspector only for Debug builds
-include (FetchContent)
-FetchContent_Declare (
-    melatonin_inspector
-    GIT_REPOSITORY https://github.com/sudara/melatonin_inspector.git
-    GIT_TAG origin/main
-    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/melatonin_inspector
-)
-FetchContent_MakeAvailable (melatonin_inspector)
 
 if (APPLE)
     message (STATUS "Building on MacOS")
