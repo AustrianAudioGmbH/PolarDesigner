@@ -1,4 +1,4 @@
-#define Version Trim(GetEnv('AA_VERSION'))
+#define Version Trim(FileRead(FileOpen("..\VERSION")))
 #define ProjectName GetEnv('PROJECT_NAME')
 #define ProductName GetEnv('PRODUCT_NAME')
 #define Publisher GetEnv('COMPANY_NAME')
