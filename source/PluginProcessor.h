@@ -318,7 +318,7 @@ private:
 
     void createOmniAndEightSignals (juce::AudioBuffer<float>& buffer);
     void createPolarPatterns (juce::AudioBuffer<float>& buffer);
-    void trackSignalEnergy();
+    void trackSignalEnergy (int numSamples);
     void setMinimumDisturbancePattern();
     void setMaximumSignalPattern();
     void maximizeSigToDistRatio();

@@ -720,7 +720,7 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 
     termControlWaveform.pushBuffer (buffer);
     if (trackingActive)
-        trackSignalEnergy();
+        trackSignalEnergy (buffer.getNumSamples());
 
     createPolarPatterns (buffer);
 }
@@ -2065,6 +2065,30 @@ void PolarDesignerAudioProcessor::resetTrackingState()
 
 void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
 {
+    auto normalizeSqSumDist = [this]()
+    {
+        const auto n = static_cast<float> (nrBlocksRecorded);
+
+        for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
+        {
+            omniSqSumDist[i] = omniSqSumDist[i] / n;
+            eightSqSumDist[i] = eightSqSumDist[i] / n;
+            omniEightSumDist[i] = omniEightSumDist[i] / n;
+        }
+    };
+
+    auto normalizeSqSumSig = [this]()
+    {
+        const auto n = static_cast<float> (nrBlocksRecorded);
+
+        for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
+        {
+            omniSqSumSig[i] = omniSqSumSig[i] / n;
+            eightSqSumSig[i] = eightSqSumSig[i] / n;
+            omniEightSumSig[i] = omniEightSumSig[i] / n;
+        }
+    };
+
     trackingActive = false;
     if (nrBlocksRecorded == 0)
         return; // Skip if no blocks recorded
@@ -2074,27 +2098,15 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
         if (trackingDisturber)
         {
             if (nrBlocksRecorded != 0)
-                for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
-                {
-                    omniSqSumDist[i] = omniSqSumDist[i] / static_cast<float> (nrBlocksRecorded);
-                    eightSqSumDist[i] = eightSqSumDist[i] / static_cast<float> (nrBlocksRecorded);
-                    omniEightSumDist[i] =
-                        omniEightSumDist[i] / static_cast<float> (nrBlocksRecorded);
-                }
+                normalizeSqSumDist();
 
             setMinimumDisturbancePattern();
         }
         else
         {
             if (nrBlocksRecorded != 0)
-            {
-                for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
-                {
-                    omniSqSumSig[i] = omniSqSumSig[i] / static_cast<float> (nrBlocksRecorded);
-                    eightSqSumSig[i] = eightSqSumSig[i] / static_cast<float> (nrBlocksRecorded);
-                    omniEightSumSig[i] = omniEightSumSig[i] / static_cast<float> (nrBlocksRecorded);
-                }
-            }
+                normalizeSqSumSig();
+
             setMaximumSignalPattern();
         }
     }
@@ -2103,39 +2115,25 @@ void PolarDesignerAudioProcessor::stopTracking (int applyOptimalPattern)
         if (trackingDisturber)
         {
             if (nrBlocksRecorded != 0)
-            {
-                for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
-                {
-                    omniSqSumDist[i] = omniSqSumDist[i] / static_cast<float> (nrBlocksRecorded);
-                    eightSqSumDist[i] = eightSqSumDist[i] / static_cast<float> (nrBlocksRecorded);
-                    omniEightSumDist[i] =
-                        omniEightSumDist[i] / static_cast<float> (nrBlocksRecorded);
-                }
-            }
+                normalizeSqSumDist();
+
             disturberRecorded = true;
         }
         else
         {
             if (nrBlocksRecorded != 0)
-            {
-                for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
-                {
-                    omniSqSumSig[i] = omniSqSumSig[i] / static_cast<float> (nrBlocksRecorded);
-                    eightSqSumSig[i] = eightSqSumSig[i] / static_cast<float> (nrBlocksRecorded);
-                    omniEightSumSig[i] = omniEightSumSig[i] / static_cast<float> (nrBlocksRecorded);
-                }
-            }
+                normalizeSqSumSig();
+
             signalRecorded = true;
         }
         maximizeSigToDistRatio();
     }
 }
 
-void PolarDesignerAudioProcessor::trackSignalEnergy()
+void PolarDesignerAudioProcessor::trackSignalEnergy (int numSamples)
 {
     using namespace juce;
 
-    int numSamples = filterBankBuffer.getNumSamples();
     if (numSamples == 0)
         return; // avoid division by zero
 
@@ -2185,10 +2183,9 @@ void PolarDesignerAudioProcessor::setMinimumDisturbancePattern()
     {
         for (float alpha = alphaStart; alpha <= 1.0f; alpha += 0.01f)
         {
-            float currentPower =
-                static_cast<float> (std::pow ((1 - std::abs (alpha)), 2) * omniSqSumDist[i]
-                                    + std::pow (alpha, 2) * eightSqSumDist[i]
-                                    + 2 * (1 - std::abs (alpha)) * alpha * omniEightSumDist[i]);
+            float currentPower = std::powf ((1 - std::abs (alpha)), 2) * omniSqSumDist[i]
+                                 + std::powf (alpha, 2) * eightSqSumDist[i]
+                                 + 2 * (1 - std::abs (alpha)) * alpha * omniEightSumDist[i];
             if (juce::exactlyEqual (alpha, alphaStart) || (currentPower < disturberPower))
             {
                 disturberPower = currentPower;
@@ -2197,7 +2194,7 @@ void PolarDesignerAudioProcessor::setMinimumDisturbancePattern()
         }
 
         // do not apply changes, if playback is not active
-        if (disturberPower > 0.0f)
+        if (! juce::exactlyEqual (disturberPower, 0.0f))
         {
             vtsParams.getParameter ("alpha" + String (i + 1))
                 ->setValueNotifyingHost (
@@ -2213,19 +2210,15 @@ void PolarDesignerAudioProcessor::setMaximumSignalPattern()
 
     float signalPower = 0.0f;
     float maxPowerAlpha = 0.0f;
-    float alphaStart = 0.0f;
-
-    // !J! NOTE: allowBackwardsPattern is ALWAYS true
-    alphaStart = -0.5f;
+    float alphaStart = -0.5f;
 
     for (unsigned int i = 0; i < nProcessorBands; ++i)
     {
         for (float alpha = alphaStart; alpha <= 1.0f; alpha += 0.01f)
         {
-            float currentPower =
-                static_cast<float> (std::pow ((1 - std::abs (alpha)), 2) * omniSqSumSig[i]
-                                    + std::pow (alpha, 2) * eightSqSumSig[i]
-                                    + 2 * (1 - std::abs (alpha)) * alpha * omniEightSumSig[i]);
+            float currentPower = std::powf ((1 - std::abs (alpha)), 2) * omniSqSumSig[i]
+                                 + std::powf (alpha, 2) * eightSqSumSig[i]
+                                 + 2 * (1 - std::abs (alpha)) * alpha * omniEightSumSig[i];
             if (juce::exactlyEqual (alpha, alphaStart) || (currentPower > signalPower))
             {
                 signalPower = currentPower;
@@ -2233,7 +2226,7 @@ void PolarDesignerAudioProcessor::setMaximumSignalPattern()
             }
         }
 
-        if (signalPower > 0.0f)
+        if (! juce::exactlyEqual (signalPower, 0.0f))
         {
             vtsParams.getParameter ("alpha" + String (i + 1))
                 ->setValueNotifyingHost (
@@ -2292,7 +2285,7 @@ void PolarDesignerAudioProcessor::maximizeSigToDistRatio()
             }
         }
 
-        if (! juce::approximatelyEqual (distToSigRatio, 0.0f))
+        if (! juce::exactlyEqual (distToSigRatio, 0.0f))
             vtsParams.getParameter ("alpha" + String (i + 1))
                 ->setValueNotifyingHost (
                     vtsParams.getParameter ("alpha1")->convertTo0to1 (maxDistToSigAlpha));
