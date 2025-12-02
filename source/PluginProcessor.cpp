@@ -2183,8 +2183,8 @@ void PolarDesignerAudioProcessor::setMinimumDisturbancePattern()
     {
         for (float alpha = alphaStart; alpha <= 1.0f; alpha += 0.01f)
         {
-            float currentPower = std::powf ((1 - std::abs (alpha)), 2) * omniSqSumDist[i]
-                                 + std::powf (alpha, 2) * eightSqSumDist[i]
+            float currentPower = std::pow ((1 - std::abs (alpha)), 2.0f) * omniSqSumDist[i]
+                                 + std::pow (alpha, 2.0f) * eightSqSumDist[i]
                                  + 2 * (1 - std::abs (alpha)) * alpha * omniEightSumDist[i];
             if (juce::exactlyEqual (alpha, alphaStart) || (currentPower < disturberPower))
             {
@@ -2216,8 +2216,8 @@ void PolarDesignerAudioProcessor::setMaximumSignalPattern()
     {
         for (float alpha = alphaStart; alpha <= 1.0f; alpha += 0.01f)
         {
-            float currentPower = std::powf ((1 - std::abs (alpha)), 2) * omniSqSumSig[i]
-                                 + std::powf (alpha, 2) * eightSqSumSig[i]
+            float currentPower = std::pow ((1 - std::abs (alpha)), 2.0f) * omniSqSumSig[i]
+                                 + std::pow (alpha, 2.0f) * eightSqSumSig[i]
                                  + 2 * (1 - std::abs (alpha)) * alpha * omniEightSumSig[i];
             if (juce::exactlyEqual (alpha, alphaStart) || (currentPower > signalPower))
             {
