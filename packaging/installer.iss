@@ -1,4 +1,4 @@
-#define Version Trim(GetEnv('VERSION'))
+#define Version Trim(GetEnv('AA_VERSION'))
 #define ProjectName GetEnv('PROJECT_NAME')
 #define ProductName GetEnv('PRODUCT_NAME')
 #define Publisher GetEnv('COMPANY_NAME')

@@ -116,6 +116,7 @@ jobs:
           echo "AUV3_PATH=$ARTIFACTS_PATH/AUv3/${{ env.PRODUCT_NAME }}.appex" >> $GITHUB_ENV
           echo "AAX_PATH=$ARTIFACTS_PATH/AAX/${{ env.PRODUCT_NAME }}.aaxplugin" >> $GITHUB_ENV
           echo "ARTIFACT_NAME=${{ env.PRODUCT_NAME }}-${{ env.VERSION }}-${{ matrix.name }}" >> $GITHUB_ENV
+          echo "AA_VERSION=${{ env.VERSION }}" >> $GITHUB_ENV
 
       - name: Pluginval
         run: |
