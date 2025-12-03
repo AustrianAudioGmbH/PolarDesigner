@@ -690,7 +690,7 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     // Process filter bank convolvers
     if (zeroLatencyModePtr->load() < 0.5f && nActiveBands > 1)
     {
-        recomputeFilterCoefficientsIfNeeded();
+        // FIXME: load new impulse responses here
 
         for (unsigned int i = 0;
              i < static_cast<size_t> (nActiveBands) && 2 * i + 1 < convolvers.size();
@@ -1453,6 +1453,9 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
             paramsToSync.gains[idx] = bandGainsPtr[idx]->load();
         }
     }
+
+    recomputeFilterCoefficientsIfNeeded();
+
 #ifdef USE_EXTRA_DEBUG_DUMPS
     else
     {
@@ -1464,16 +1467,33 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
 // TODO: refactor: we should put this on the apvts
 void PolarDesignerAudioProcessor::setEqState (int idx)
 {
-    doEq = idx;
-
-    if ((syncChannelPtr->load() > 0) && ! readingSharedParams)
+    if (idx != doEq)
     {
-        int ch = (int) syncChannelPtr->load() - 1;
-        ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (ch);
-        paramsToSync.ffDfEq = doEq;
-    }
+        doEq = idx;
 
-    updateLatency();
+        // reset convolvers if needed
+        if (idx != 1)
+        {
+            ffEqOmniConv.reset();
+            ffEqEightConv.reset();
+        }
+
+        if (idx != 2)
+        {
+            dfEqOmniConv.reset();
+            dfEqEightConv.reset();
+        }
+        //
+
+        if ((syncChannelPtr->load() > 0) && ! readingSharedParams)
+        {
+            int ch = (int) syncChannelPtr->load() - 1;
+            ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (ch);
+            paramsToSync.ffDfEq = doEq;
+        }
+
+        updateLatency();
+    }
 }
 
 void PolarDesignerAudioProcessor::resetXoverFreqs()

@@ -139,6 +139,7 @@ project (${PROJECT_NAME} VERSION ${CURRENT_VERSION})
 include (JUCEDefaults)
 
 add_subdirectory (JUCE)
+
 add_subdirectory (modules/melatonin_inspector)
 
 # If FORMATS has not already been defined (e.g. for Development machine), set it up:
@@ -273,6 +274,10 @@ if (APPLE)
 else ()
     target_compile_definitions (SharedCode INTERFACE JUCE_DSP_USE_STATIC_FFTW=1)
 endif ()
+
+target_include_directories (
+    SharedCode INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/modules/farbot/include"
+)
 
 target_link_libraries (
     SharedCode
