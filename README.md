@@ -2,14 +2,18 @@
 
 This is PolarDesigner version 3, currently in development.
 
-
-WARNING: this is work in progress and is not intended for public release or usage!  
+WARNING: This is a work in progress and not intended for use in production!
 
 This branch is currently for Austrian Audio developers and contributors to collaborate on VERSION 3.
 
 If you are a producer or audio engineer, please use version 2 of our plugin until we complete our development work on version 3.
 
+### Acknowledgements
 
---
+PolarDesigner 3 makes use of the following projects:
 
-
+- [JUCE (audio application framework)](https://juce.com)
+- [FFTW3 (Windows/Linux FFT backend)](https://fftw.org/)
+- [Apple vDSP (MacOS FFT backend)](https://developer.apple.com/accelerate/)
+- [Pamplejuce (Audio plugin template)](https://github.com/sudara/Pamplejuce)
+- [pluginval (VST Plugin validation tests)](https://github.com/Tracktion/pluginval)
