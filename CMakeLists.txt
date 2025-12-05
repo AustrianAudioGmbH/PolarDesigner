@@ -175,6 +175,7 @@ else ()
         message (STATUS "Building on Linux")
     elseif (WIN32)
         message (STATUS "Building on Windows")
+        set (FORMATS ${FORMATS} AAX)
     else ()
         message (FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
     endif ()
@@ -303,7 +304,7 @@ endif ()
 
 target_link_libraries ("${PROJECT_NAME}" PRIVATE SharedCode)
 
-if ("AAX" IN_LIST FORMATS)
+if (APPLE AND "AAX" IN_LIST FORMATS)
     message (
         STATUS
             "AAX Build: Adding custom command to copy PageTable file to .aaxplugin Resources/ folder"
