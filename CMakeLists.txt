@@ -175,6 +175,7 @@ else ()
         message (STATUS "Building on Linux")
     elseif (WIN32)
         message (STATUS "Building on Windows")
+        set (FORMATS ${FORMATS} AAX)
     else ()
         message (FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
     endif ()
@@ -306,15 +307,16 @@ target_link_libraries ("${PROJECT_NAME}" PRIVATE SharedCode)
 if ("AAX" IN_LIST FORMATS)
     message (
         STATUS
-            "AAX Build: Adding custom command to copy PageTable file to .aaxplugin Resources/ folder"
+            "AAX Build: Adding custom command to copy PageTable file to .aaxplugin/Contents/Resources/ folder"
     )
+
     add_custom_command (
         TARGET ${PROJECT_NAME}_AAX
         POST_BUILD
         COMMAND
             ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/extra/ProTools/PolarDesigner3.xml
-            $<TARGET_FILE_DIR:${PROJECT_NAME}_AAX>/../Resources/
-        COMMENT "Copying PolarDesigner3.xml to the Resources folder for macOS AAX build"
+            $<TARGET_FILE_DIR:${PROJECT_NAME}_AAX>/../Resources/PolarDesigner3.xml
+        COMMENT "Copying PolarDesigner3.xml to the Resources folder for AAX build"
     )
 endif ()
 
