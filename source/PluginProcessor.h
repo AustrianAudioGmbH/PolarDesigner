@@ -31,11 +31,6 @@
 #include <math.h>
 #include <memory>
 
-// For performance tuning
-#ifdef PERFETTO
-    #include "melatonin_perfetto/melatonin_perfetto.h"
-#endif
-
 // these params can be synced between plugin instances
 struct ParamsToSync
 {
