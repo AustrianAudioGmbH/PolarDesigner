@@ -1212,11 +1212,6 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
 {
     using namespace juce;
 
-#ifdef USE_EXTRA_DEBUG_DUMPS
-    LOG_DEBUG ("Parameter changed: " + parameterID + " new Value: " + std::to_string (newValue)
-               + " syncChannel: " + std::to_string (syncChannelPtr->load()));
-#endif
-
     if (currentSampleRate <= 0.0 || currentBlockSize <= 0)
     {
         LOG_WARN ("Plugin not prepared in parameterChanged, initializing defaults");
@@ -1337,15 +1332,11 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
     }
     else if (parameterID == "syncChannel")
     {
-        int ch = static_cast<int> (syncChannelPtr->load (std::memory_order_acquire)) - 1;
+        const int ch = static_cast<int> (syncChannelPtr->load (std::memory_order_acquire)) - 1;
 
-        if (ch > 0)
+        if (ch >= 0)
         {
             ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (ch);
-#ifdef USE_EXTRA_DEBUG_DUMPS
-            LOG_DEBUG ("syncChannel params updated, ch: " + std::to_string (ch)
-                       + " paramsValid: " + std::to_string (paramsToSync.paramsValid));
-#endif
 
             if (! paramsToSync.paramsValid) // Initialize all params
             {
@@ -1357,7 +1348,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
                     paramsToSync.dirFactors[i] = dirFactorsPtr[i] ? dirFactorsPtr[i]->load() : 0.0f;
                     paramsToSync.gains[i] = bandGainsPtr[i] ? bandGainsPtr[i]->load() : 0.0f;
 
-                    if (i < 4)
+                    if (i < MAX_NUM_EQS - 1)
                     {
                         paramsToSync.xOverFreqs[i] =
                             xOverFreqsPtr[i] ? xOverFreqsPtr[i]->load() : 0.0f;
@@ -1382,28 +1373,12 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
 
             paramsToSync.paramsValid = true;
         }
-        else
-        {
-#ifdef USE_EXTRA_DEBUG_DUMPS
-            LOG_DEBUG ("syncChannel params not updated, ch: " + std::to_string (ch));
-#endif
-        }
     }
-#ifdef USE_EXTRA_DEBUG_DUMPS
-    else
-    {
-        LOG_DEBUG ("Some Other Parameter? :: " + parameterID);
-    }
-#endif
 
     // Update shared parameters if synced
     if ((syncChannelPtr->load() > 0) && ! readingSharedParams)
     {
-#ifdef USE_EXTRA_DEBUG_DUMPS
-        LOG_DEBUG ("SharedParams Reading:" + std::to_string (syncChannelPtr->load()));
-#endif
-
-        int ch = (int) syncChannelPtr->load() - 1;
+        const auto ch = static_cast<int> (syncChannelPtr->load()) - 1;
         ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (ch);
 
         if (parameterID.startsWith ("xOverF") && ! loadingFile)
@@ -1453,12 +1428,6 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
             paramsToSync.gains[idx] = bandGainsPtr[idx]->load();
         }
     }
-#ifdef USE_EXTRA_DEBUG_DUMPS
-    else
-    {
-        LOG_DEBUG ("SharedParams Reading?" + std::to_string (syncChannelPtr->load()));
-    }
-#endif
 }
 
 // TODO: refactor: we should put this on the apvts
