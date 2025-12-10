@@ -237,7 +237,6 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
                         .withInput ("Input", juce::AudioChannelSet::stereo(), true)
                         .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
     repaintDEQ (true),
-    activeBandsChanged (true),
     zeroLatencyModeChanged (true),
     ffDfEqChanged (true),
     recomputeAllFilterCoefficients (true),
@@ -861,7 +860,6 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
 
     for (auto& flag : recomputeFilterCoefficients)
         flag = false;
-    activeBandsChanged = true;
     zeroLatencyModeChanged = true;
     ffDfEqChanged = true;
     repaintDEQ = true;
@@ -1191,7 +1189,6 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
     // Defer filter coefficient computation until buffers are ready
     recomputeAllFilterCoefficients.store (true, std::memory_order_release);
     recomputeFilterCoefficientsIfNeeded();
-    activeBandsChanged.store (true, std::memory_order_release);
     zeroLatencyModeChanged.store (true, std::memory_order_release);
     ffDfEqChanged.store (true, std::memory_order_release);
     repaintDEQ.store (true, std::memory_order_release);
@@ -1239,7 +1236,6 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
             oldNrBands.store (nProcessorBandsPtr->load (std::memory_order_acquire),
                               std::memory_order_release);
             recomputeAllFilterCoefficients.store (true, std::memory_order_release);
-            activeBandsChanged.store (true, std::memory_order_release);
         }
     }
     else if (parameterID.startsWith ("xOverF") && ! loadingFile)
@@ -1868,7 +1864,6 @@ juce::Result PolarDesignerAudioProcessor::loadPreset (const juce::File& presetFi
     // set parameters
     nProcessorBands = static_cast<unsigned int> (nProcessorBandsPtr->load() + 1);
 
-    activeBandsChanged = true;
     computeAllFilterCoefficients();
     repaintDEQ = true;
 
@@ -2324,6 +2319,7 @@ void PolarDesignerAudioProcessor::timerCallback()
             vtsParams.getParameter ("nrBands")->setValueNotifyingHost (
                 vtsParams.getParameterRange ("nrBands").convertTo0to1 (
                     static_cast<float> (paramsToSync.nrActiveBands)));
+            repaintDEQ = true;
         }
 
         for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)

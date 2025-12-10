@@ -11,10 +11,10 @@
 // To adjust the rate of trim, use the EndlessSlider.step value in the slider inc/dec
 // callbacks.
 
-#ifndef EndlessSlider_h
-#define EndlessSlider_h
+#pragma once
 
 #include "../lookAndFeel/MainLookAndFeel.h"
+#include <juce_gui_basics/juce_gui_basics.h>
 
 class EndlessSlider : public juce::Slider
 {
@@ -200,5 +200,3 @@ private:
     juce::Rectangle<float> filledRect;
     MainLookAndFeel mainLaF;
 };
-
-#endif /* EndlessSlider_h */
