@@ -99,11 +99,6 @@ public:
     juce::TooltipWindow sharedTooltipWindow;
 
 private:
-    // UI repainting is 'debounced' to avoid overwhelm
-    bool repaintPending = false;
-    double lastRepaintTime = 0.0;
-    static constexpr double repaintDebounceInterval = 0.03;
-
     static const int EDITOR_MIN_WIDTH = 992; // 1194;
     static const int EDITOR_MIN_HEIGHT = 640; // 834;
     static const int EDITOR_MAX_WIDTH = 2732;

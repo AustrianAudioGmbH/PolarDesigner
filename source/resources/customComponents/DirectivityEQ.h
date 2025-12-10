@@ -490,21 +490,21 @@ public:
 
         float lastRightBound = 0;
         float lastCircY = 0;
-        float bandMargin = 20.0f;
-        float interpPointMargin = 15.0f;
-        float patternRectHeight = 14.0f;
-        float bandLimitDividerWidth = static_cast<float> (proportionOfWidth (0.005f));
-        float bandLimitDividerHolderY = (mT / 2);
-        float bandLimitDividerHolderWidth = static_cast<float> (proportionOfWidth (0.017f));
-        float bandLimitDividerHolderHeight = (dirToY (s.yMax) - 2.f);
-        float bandLineThickness = static_cast<float> (proportionOfHeight (0.006f));
+        constexpr float bandMargin = 20.0f;
+        constexpr float interpPointMargin = 15.0f;
+        constexpr float patternRectHeight = 14.0f;
+        const float bandLimitDividerWidth = static_cast<float> (proportionOfWidth (0.005f));
+        const float bandLimitDividerHolderY = (mT / 2);
+        const float bandLimitDividerHolderWidth = static_cast<float> (proportionOfWidth (0.017f));
+        const float bandLimitDividerHolderHeight = (dirToY (s.yMax) - 2.f);
+        const float bandLineThickness = static_cast<float> (proportionOfHeight (0.006f));
 
         // paint dirPaths and bandLimitPaths
         for (unsigned int i = 0; i < nrActiveBands; ++i)
         {
             BandElements& handle (elements.getReference ((int) i));
 
-            float rightBound =
+            const float rightBound =
                 (handle.upperFrequencySlider == nullptr || nrActiveBands == i + 1)
                     ? hzToX (s.fMax)
                     : hzToX (hzFromZeroToOne (
@@ -512,9 +512,9 @@ public:
                           i,
                           static_cast<float> (handle.upperFrequencySlider->getValue())));
 
-            float circY = handle.dirSlider == nullptr
-                              ? dirToY (0.0f)
-                              : dirToY (static_cast<float> (handle.dirSlider->getValue()));
+            const float circY = handle.dirSlider == nullptr
+                                    ? dirToY (0.0f)
+                                    : dirToY (static_cast<float> (handle.dirSlider->getValue()));
 
             // paint band limits
             if (i != nrActiveBands - 1)
@@ -1355,14 +1355,14 @@ private:
     juce::Path dirGridPath;
     juce::Path hzGridPath;
     juce::Path hzGridPathBold;
-    juce::Path dirPaths[5];
+    juce::Path dirPaths[MAX_NUM_EQS];
     juce::Path smallDirGridPath;
 
     int dirPatternButtonWidth;
     int dirPatternButtonHeight;
 
-    std::unique_ptr<juce::Label> tooltipValueBox[4];
-    std::unique_ptr<juce::Label> tooltipValueKnobBox[5];
+    std::unique_ptr<juce::Label> tooltipValueBox[MAX_NUM_EQS - 1];
+    std::unique_ptr<juce::Label> tooltipValueKnobBox[MAX_NUM_EQS];
 
     juce::Array<double> frequencies;
     int numPixels;
@@ -1379,15 +1379,15 @@ private:
     const float dirFactArray[8];
 
     // components for aax getControlParameterIndex()
-    PathComponent bandLimitPaths[4];
-    RectangleComponent dirPathRects[5];
-    BandLimitDividerHolder bandLimitDividerHolders[4];
-    BandKnobComponent bandKnobs[5];
-    int bandsWidth[4];
+    PathComponent bandLimitPaths[MAX_NUM_EQS - 1];
+    RectangleComponent dirPathRects[MAX_NUM_EQS];
+    BandLimitDividerHolder bandLimitDividerHolders[MAX_NUM_EQS - 1];
+    BandKnobComponent bandKnobs[MAX_NUM_EQS];
+    int bandsWidth[MAX_NUM_EQS - 1];
 
     // ImageButtons
-    juce::TextButton tbPrimDirButtons[4];
-    juce::TextButton tbSecDirButtons[4];
+    juce::TextButton tbPrimDirButtons[MAX_NUM_EQS - 1];
+    juce::TextButton tbSecDirButtons[MAX_NUM_EQS - 1];
 
     MainLookAndFeel mainLaF;
 };

@@ -1289,26 +1289,31 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     {
         valueTreeState.getParameter ("nrBands")->setValueNotifyingHost (
             valueTreeState.getParameter ("nrBands")->convertTo0to1 ((0)));
+        nEditorBandsChanged();
     }
     if ((button == &tmbNrBandsButton[1]) && (button->getToggleState()))
     {
         valueTreeState.getParameter ("nrBands")->setValueNotifyingHost (
             valueTreeState.getParameter ("nrBands")->convertTo0to1 ((1)));
+        nEditorBandsChanged();
     }
     if ((button == &tmbNrBandsButton[2]) && (button->getToggleState()))
     {
         valueTreeState.getParameter ("nrBands")->setValueNotifyingHost (
             valueTreeState.getParameter ("nrBands")->convertTo0to1 ((2)));
+        nEditorBandsChanged();
     }
     if ((button == &tmbNrBandsButton[3]) && (button->getToggleState()))
     {
         valueTreeState.getParameter ("nrBands")->setValueNotifyingHost (
             valueTreeState.getParameter ("nrBands")->convertTo0to1 ((3)));
+        nEditorBandsChanged();
     }
     if ((button == &tmbNrBandsButton[4]) && (button->getToggleState()))
     {
         valueTreeState.getParameter ("nrBands")->setValueNotifyingHost (
             valueTreeState.getParameter ("nrBands")->convertTo0to1 ((4)));
+        nEditorBandsChanged();
     }
 
     if ((button == &tmbSyncChannelButton[0]) && (button->getToggleState()))
@@ -1485,6 +1490,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
         valueTreeState.getParameter ("zeroLatencyMode")->setValueNotifyingHost (newState);
         // Trigger UI update
         activateEditingForZeroLatency();
+        directivityEqualiser.repaint();
     }
     else if (button == &tmbABButton[COMPARE_LAYER_A] && button->getToggleState())
     {
@@ -1622,13 +1628,14 @@ void PolarDesignerAudioProcessorEditor::sliderValueChanged (juce::Slider* slider
 {
     if (slider == &trimSlider)
     {
+        directivityEqualiser.repaint();
         return;
     }
     else if (slider == &slCrossoverPosition[0] || slider == &slCrossoverPosition[1]
              || slider == &slCrossoverPosition[2] || slider == &slCrossoverPosition[3])
     {
         // xOverSlider
-        repaintPending = true; // Mark repaint as pending
+        directivityEqualiser.repaint();
         notifyPresetLabelChange();
         return;
     }
@@ -1640,7 +1647,7 @@ void PolarDesignerAudioProcessorEditor::sliderValueChanged (juce::Slider* slider
             if (slider == &slDir[i])
             {
                 polarPatternVisualizers[i].setDirWeight (static_cast<float> (slider->getValue()));
-                repaintPending = true; // Mark repaint as pending
+                directivityEqualiser.repaint();
                 notifyPresetLabelChange();
                 return;
             }
@@ -1650,8 +1657,6 @@ void PolarDesignerAudioProcessorEditor::sliderValueChanged (juce::Slider* slider
         {
             if (slider == &slBandGain[i])
             {
-                // Update directivityEqualiser if needed (e.g., gain visualization)
-                repaintPending = true; // Mark repaint as pending
                 notifyPresetLabelChange();
                 return;
             }
@@ -1772,11 +1777,8 @@ void PolarDesignerAudioProcessorEditor::nEditorBandsChanged()
     {
         if (i < nActiveBands)
         {
-            setBandEnabled (static_cast<int> (i), true);
             polarPatternVisualizers[i].setActive (true);
             polarPatternVisualizers[i].setVisible (true);
-            polarPatternVisualizers[i].setToggleState (false,
-                                                       NotificationType::dontSendNotification);
 
             slDir[i].setVisible (true);
             slBandGain[i].setVisible (true);
@@ -1785,13 +1787,8 @@ void PolarDesignerAudioProcessorEditor::nEditorBandsChanged()
         }
         else
         {
-            setBandEnabled (static_cast<int> (i), false);
-            tgbSolo[i].setToggleState (false, NotificationType::sendNotification);
-            tgbMute[i].setToggleState (false, NotificationType::sendNotification);
             polarPatternVisualizers[i].setActive (false);
             polarPatternVisualizers[i].setVisible (false);
-            polarPatternVisualizers[i].setToggleState (false,
-                                                       NotificationType::dontSendNotification);
 
             slDir[i].setVisible (false);
             slBandGain[i].setVisible (false);
@@ -1809,66 +1806,11 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
 {
     using namespace juce;
 
-    //TRACE_COMPONENT();
-
     if (isRestoringState)
         return;
 
-    bool needsRepaint = false;
-    double currentTime = Time::getMillisecondCounterHiRes() / 1000.0; // Current time in seconds
-
-#if 0
-    // !J! TODO: refactor this, as it interferes with Logic Pro
-    // timer must wait until recomputeAllFilterCoefficients is false
-    if (polarDesignerProcessor.recomputeAllFilterCoefficients.get())
-    {
-        return;
-    }
-#endif
-
-    //    ScopedLock lock(polarDesignerProcessor.abLayerLock);
-
-    // Handle debounced repaint
-    if (repaintPending && (currentTime - lastRepaintTime >= repaintDebounceInterval))
-    {
-        directivityEqualiser.repaint();
-        repaintPending = false;
-        lastRepaintTime = currentTime;
-        needsRepaint = true;
-    }
-
-    if (polarDesignerProcessor.repaintDEQ.load())
-    {
-        polarDesignerProcessor.repaintDEQ = false;
-        needsRepaint = true;
-    }
-
-    if (polarDesignerProcessor.activeBandsChanged.load())
-    {
-        polarDesignerProcessor.activeBandsChanged = false;
+    if (polarDesignerProcessor.repaintDEQ.exchange (false))
         nEditorBandsChanged();
-        needsRepaint = true;
-    }
-
-    if (polarDesignerProcessor.zeroLatencyModeChanged.load())
-    {
-        activateEditingForZeroLatency();
-        polarDesignerProcessor.zeroLatencyModeChanged = false;
-        needsRepaint = true;
-    }
-
-    if (polarDesignerProcessor.ffDfEqChanged.load())
-    {
-        polarDesignerProcessor.ffDfEqChanged = false;
-        setEqMode();
-        needsRepaint = true;
-    }
-
-    if (needsRepaint && ! repaintPending)
-    {
-        directivityEqualiser.repaint();
-        lastRepaintTime = currentTime;
-    }
 
     if (uiTerminatorAnimationWindowIsVisible)
     {

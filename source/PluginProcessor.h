@@ -146,9 +146,9 @@ public:
         if (numBands >= 1 && numBands <= MAX_NUM_EQS)
         {
             nProcessorBands.store (numBands);
-            activeBandsChanged = true;
             // Update any internal state as needed
             recomputeAllFilterCoefficients = true;
+            repaintDEQ = true;
         }
     }
 
@@ -158,7 +158,6 @@ public:
     float getXoverSliderRangeEnd (int sliderNum);
 
     std::atomic<bool> repaintDEQ = true;
-    std::atomic<bool> activeBandsChanged = true;
     std::atomic<bool> zeroLatencyModeChanged = true;
     std::atomic<bool> ffDfEqChanged = true;
     std::array<std::atomic<bool>, MAX_NUM_EQS> recomputeFilterCoefficients;
