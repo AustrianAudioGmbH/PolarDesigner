@@ -1242,7 +1242,6 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
     {
         unsigned int idx = static_cast<unsigned int> (parameterID.getTrailingIntValue() - 1);
         recomputeFilterCoefficients[idx].store (true, std::memory_order_release);
-        repaintDEQ.store (true, std::memory_order_release);
     }
     else if (parameterID.startsWith ("solo"))
     {
