@@ -284,10 +284,10 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
             break; // there is one slCrossoverPosition less than bands
 
         addAndMakeVisible (&slCrossoverPosition[i]);
-        slCrossoverAtt[i] = std::unique_ptr<ReverseSlider::SliderAttachment> (
-            new ReverseSlider::SliderAttachment (valueTreeState,
-                                                 "xOverF" + String (i + 1),
-                                                 slCrossoverPosition[i]));
+        slCrossoverAtt[i] =
+            std::make_unique<ReverseSlider::SliderAttachment> (valueTreeState,
+                                                               "xOverF" + String (i + 1),
+                                                               slCrossoverPosition[i]);
         slCrossoverPosition[i].setSliderStyle (Slider::RotaryHorizontalVerticalDrag);
         slCrossoverPosition[i].addListener (this);
         slCrossoverPosition[i].setVisible (false);
