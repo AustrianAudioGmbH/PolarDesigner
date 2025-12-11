@@ -21,6 +21,7 @@
  */
 
 #include "PluginEditor.h"
+#include "Constants.hpp"
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
@@ -1773,7 +1774,7 @@ void PolarDesignerAudioProcessorEditor::nEditorBandsChanged()
         1,
         NotificationType::dontSendNotification);
 
-    for (unsigned int i = 0; i < 5; i++)
+    for (unsigned int i = 0; i < MAX_NUM_EQS; i++)
     {
         if (i < nActiveBands)
         {
@@ -1960,38 +1961,10 @@ void PolarDesignerAudioProcessorEditor::activateEditingForZeroLatency()
         saveLayerState (currentLayer);
     }
 
-    nActiveBands = 1;
     valueTreeState.getParameter ("nrBands")->setValueNotifyingHost (
         valueTreeState.getParameter ("nrBands")->convertTo0to1 (0));
 
-    for (unsigned int i = 0; i < MAX_EDITOR_BANDS; i++)
-    {
-        if (i < nActiveBands)
-        {
-            slDir[i].setEnabled (true);
-            slBandGain[i].setEnabled (true);
-            slBandGain[i].setVisible (true);
-            tgbSolo[i].setEnabled (true);
-            tgbSolo[i].setVisible (true);
-            tgbMute[i].setEnabled (true);
-            tgbMute[i].setVisible (true);
-            polarPatternVisualizers[i].setActive (true);
-            polarPatternVisualizers[i].setVisible (true);
-        }
-        else
-        {
-            slDir[i].setEnabled (false);
-            slBandGain[i].setEnabled (false);
-            slBandGain[i].setVisible (false);
-            tgbSolo[i].setEnabled (false);
-            tgbSolo[i].setToggleState (false, NotificationType::sendNotificationSync);
-            tgbMute[i].setEnabled (false);
-            tgbMute[i].setToggleState (false, NotificationType::sendNotificationSync);
-            tgbMute[i].setVisible (false);
-            polarPatternVisualizers[i].setActive (false);
-            polarPatternVisualizers[i].setVisible (false);
-        }
-    }
+    nEditorBandsChanged();
 
     directivityEqualiser.resetTooltipTexts();
     directivityEqualiser.repaint();
