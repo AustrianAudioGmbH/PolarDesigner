@@ -1873,7 +1873,7 @@ juce::Result PolarDesignerAudioProcessor::savePreset (juce::File destination)
 {
     using namespace juce;
 
-    auto jsonObj = std::make_unique<DynamicObject>();
+    DynamicObject::Ptr jsonObj = new DynamicObject();
 
     jsonObj->setProperty (
         "Description",
@@ -1919,7 +1919,7 @@ juce::Result PolarDesignerAudioProcessor::savePreset (juce::File destination)
     jsonObj->setProperty ("proximity", proxDistancePtr->load());
     jsonObj->setProperty ("proximityOnOff", proxOnOffPtr->load());
 
-    String jsonString = JSON::toString (var (jsonObj.get()), false, 2);
+    String jsonString = JSON::toString (var (jsonObj), false, 2);
     if (destination.replaceWithText (jsonString))
         return Result::ok();
     else
