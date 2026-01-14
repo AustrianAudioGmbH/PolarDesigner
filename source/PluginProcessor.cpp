@@ -21,14 +21,9 @@
  */
 
 #include "PluginProcessor.h"
-#include "Constants.hpp"
 #include "Conversions.hpp"
 #include "FilterCoefficients.hpp"
 #include "PluginEditor.h"
-
-#include <atomic>
-#include <juce_audio_basics/juce_audio_basics.h>
-#include <juce_core/juce_core.h>
 
 /* We use versionHint of ParameterID from now on - rigorously! */
 #define PD_PARAMETER_V1 1
@@ -43,7 +38,8 @@
 /* Debug State Information dumps */
 // #define USE_EXTRA_DEBUG_DUMPS
 
-static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+static juce::AudioProcessorValueTreeState::ParameterLayout
+    createParameterLayout (PolarDesignerAudioProcessor& processor)
 {
     using namespace juce;
 
@@ -69,53 +65,21 @@ static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
                 })
             .withAutomatable (false)));
 
-    layout.add (std::make_unique<APF> (
-        ParameterID { "xOverF1", PD_PARAMETER_V1 },
-        "Xover1",
-        NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-        hzToZeroToOne (MAX_NUM_EQS, 0, INIT_XOVER_FREQS_5B[0]),
-        AudioParameterFloatAttributes()
-            .withLabel ("Hz")
-            .withCategory (AudioProcessorParameter::genericParameter)
-            .withStringFromValueFunction (
-                [&] (float value, [[maybe_unused]] int maximumStringLength)
-                { return String (std::roundf (hzFromZeroToOne (MAX_NUM_EQS, 0, value))); })));
-
-    layout.add (std::make_unique<APF> (
-        ParameterID { "xOverF2", PD_PARAMETER_V1 },
-        "Xover2",
-        NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-        hzToZeroToOne (MAX_NUM_EQS, 1, INIT_XOVER_FREQS_5B[1]),
-        AudioParameterFloatAttributes()
-            .withLabel ("Hz")
-            .withCategory (AudioProcessorParameter::genericParameter)
-            .withStringFromValueFunction (
-                [&] (float value, [[maybe_unused]] int maximumStringLength)
-                { return String (std::roundf (hzFromZeroToOne (MAX_NUM_EQS, 1, value))); })));
-
-    layout.add (std::make_unique<APF> (
-        ParameterID { "xOverF3", PD_PARAMETER_V1 },
-        "Xover3",
-        NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-        hzToZeroToOne (MAX_NUM_EQS, 2, INIT_XOVER_FREQS_5B[2]),
-        AudioParameterFloatAttributes()
-            .withLabel ("Hz")
-            .withCategory (AudioProcessorParameter::genericParameter)
-            .withStringFromValueFunction (
-                [&] (float value, [[maybe_unused]] int maximumStringLength)
-                { return String (std::roundf (hzFromZeroToOne (MAX_NUM_EQS, 2, value))); })));
-
-    layout.add (std::make_unique<APF> (
-        ParameterID { "xOverF4", PD_PARAMETER_V1 },
-        "Xover4",
-        NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-        hzToZeroToOne (MAX_NUM_EQS, 3, INIT_XOVER_FREQS_5B[3]),
-        AudioParameterFloatAttributes()
-            .withLabel ("Hz")
-            .withCategory (AudioProcessorParameter::genericParameter)
-            .withStringFromValueFunction (
-                [&] (float value, [[maybe_unused]] int maximumStringLength)
-                { return String (std::roundf (hzFromZeroToOne (MAX_NUM_EQS, 3, value))); })));
+    for (size_t i = 0; i < MAX_NUM_EQS - 1; ++i)
+        layout.add (std::make_unique<APF> (
+            ParameterID { "xOverF" + String (i + 1), PD_PARAMETER_V1 },
+            "Xover" + String (i + 1),
+            NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
+            hzToZeroToOne (MAX_NUM_EQS, 0, INIT_XOVER_FREQS_5B[i]),
+            AudioParameterFloatAttributes()
+                .withLabel ("Hz")
+                .withCategory (AudioProcessorParameter::genericParameter)
+                .withStringFromValueFunction (
+                    [&, i] (float value, [[maybe_unused]] int maximumStringLength)
+                    {
+                        return String (std::roundf (
+                            hzFromZeroToOne (processor.getNProcessorBands(), i, value)));
+                    })));
 
     for (size_t i = 1; i < MAX_NUM_EQS + 1; ++i)
         layout.add (std::make_unique<APF> (
@@ -269,7 +233,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     undoManager(),
     properties(),
     nProcessorBands (MAX_NUM_EQS),
-    vtsParams (*this, &undoManager, "AAPolarDesigner", createParameterLayout()),
+    vtsParams (*this, &undoManager, "AAPolarDesigner", createParameterLayout (*this)),
     firLen (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE),
     delay(),
     delayBuffer(),
@@ -862,7 +826,7 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
         flag = false;
     zeroLatencyModeChanged = true;
     ffDfEqChanged = true;
-    repaintDEQ = true;
+    repaintDEQ.store (true, std::memory_order_relaxed);
 
     // Reset tracking state
     resetTrackingState();
@@ -1187,11 +1151,11 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
     }
 
     // Defer filter coefficient computation until buffers are ready
-    recomputeAllFilterCoefficients.store (true, std::memory_order_release);
+    recomputeAllFilterCoefficients.store (true, std::memory_order_relaxed);
     recomputeFilterCoefficientsIfNeeded();
     zeroLatencyModeChanged.store (true, std::memory_order_release);
     ffDfEqChanged.store (true, std::memory_order_release);
-    repaintDEQ.store (true, std::memory_order_release);
+    repaintDEQ.store (true, std::memory_order_relaxed);
 }
 
 /* IMPORTANT: parameterChanged *will* be called by both the message thread AND the audio thread.
@@ -1235,7 +1199,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
                                    std::memory_order_release);
             oldNrBands.store (nProcessorBandsPtr->load (std::memory_order_acquire),
                               std::memory_order_release);
-            recomputeAllFilterCoefficients.store (true, std::memory_order_release);
+            recomputeAllFilterCoefficients.store (true, std::memory_order_relaxed);
         }
     }
     else if (parameterID.startsWith ("xOverF") && ! loadingFile)
@@ -1255,7 +1219,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
     }
     else if (parameterID.startsWith ("alpha"))
     {
-        repaintDEQ = true;
+        repaintDEQ.store (true, std::memory_order_relaxed);
     }
     else if (parameterID == "proximity")
     {
@@ -1287,7 +1251,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
                     vtsParams.getParameter ("nrBands")->convertTo0to1 (
                         oldNrBandsA.load (std::memory_order_acquire)));
             }
-            recomputeAllFilterCoefficients.store (true, std::memory_order_release);
+            recomputeAllFilterCoefficients.store (true, std::memory_order_relaxed);
             zeroLatencyModeChanged.store (true, std::memory_order_release);
         }
         else
@@ -1453,7 +1417,8 @@ void PolarDesignerAudioProcessor::resetXoverFreqs()
             for (unsigned int i = 0; i < nProcessorBands - 1; ++i)
             {
                 vtsParams.getParameter ("xOverF" + String (i + 1))
-                    ->setValueNotifyingHost (hzToZeroToOne (2, i, INIT_XOVER_FREQS_2B[i]));
+                    ->setValueNotifyingHost (
+                        hzToZeroToOne (nProcessorBands, i, INIT_XOVER_FREQS_2B[i]));
             }
             break;
 
@@ -1461,7 +1426,8 @@ void PolarDesignerAudioProcessor::resetXoverFreqs()
             for (unsigned int i = 0; i < nProcessorBands - 1; ++i)
             {
                 vtsParams.getParameter ("xOverF" + String (i + 1))
-                    ->setValueNotifyingHost (hzToZeroToOne (3, i, INIT_XOVER_FREQS_3B[i]));
+                    ->setValueNotifyingHost (
+                        hzToZeroToOne (nProcessorBands, i, INIT_XOVER_FREQS_3B[i]));
             }
             break;
 
@@ -1469,7 +1435,8 @@ void PolarDesignerAudioProcessor::resetXoverFreqs()
             for (unsigned int i = 0; i < nProcessorBands - 1; ++i)
             {
                 vtsParams.getParameter ("xOverF" + String (i + 1))
-                    ->setValueNotifyingHost (hzToZeroToOne (4, i, INIT_XOVER_FREQS_4B[i]));
+                    ->setValueNotifyingHost (
+                        hzToZeroToOne (nProcessorBands, i, INIT_XOVER_FREQS_4B[i]));
             }
             break;
 
@@ -1477,7 +1444,8 @@ void PolarDesignerAudioProcessor::resetXoverFreqs()
             for (unsigned int i = 0; i < (nProcessorBands - 1); ++i)
             {
                 vtsParams.getParameter ("xOverF" + String (i + 1))
-                    ->setValueNotifyingHost (hzToZeroToOne (5, i, INIT_XOVER_FREQS_5B[i]));
+                    ->setValueNotifyingHost (
+                        hzToZeroToOne (nProcessorBands, i, INIT_XOVER_FREQS_5B[i]));
             }
             break;
 
@@ -1493,6 +1461,7 @@ void PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded()
     {
         resetXoverFreqs();
         computeAllFilterCoefficients();
+        repaintDEQ.store (true, std::memory_order_relaxed);
         return;
     }
 
@@ -1670,11 +1639,6 @@ void PolarDesignerAudioProcessor::updateConvolver (size_t convNr)
                                                    Convolution::Trim::no, // trim
                                                    Convolution::Normalise::no); // normalise
     }
-}
-
-unsigned int PolarDesignerAudioProcessor::getNProcessorBands()
-{
-    return nProcessorBands;
 }
 
 void PolarDesignerAudioProcessor::createOmniAndEightSignals (juce::AudioBuffer<float>& buffer)
@@ -1864,7 +1828,7 @@ juce::Result PolarDesignerAudioProcessor::loadPreset (const juce::File& presetFi
     nProcessorBands = static_cast<unsigned int> (nProcessorBandsPtr->load() + 1);
 
     computeAllFilterCoefficients();
-    repaintDEQ = true;
+    repaintDEQ.store (true, std::memory_order_relaxed);
 
     return Result::ok();
 }
@@ -2318,7 +2282,7 @@ void PolarDesignerAudioProcessor::timerCallback()
             vtsParams.getParameter ("nrBands")->setValueNotifyingHost (
                 vtsParams.getParameterRange ("nrBands").convertTo0to1 (
                     static_cast<float> (paramsToSync.nrActiveBands)));
-            repaintDEQ = true;
+            repaintDEQ.store (true, std::memory_order_relaxed);
         }
 
         for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)

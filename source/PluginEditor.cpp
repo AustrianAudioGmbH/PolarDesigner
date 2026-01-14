@@ -1799,7 +1799,6 @@ void PolarDesignerAudioProcessorEditor::nEditorBandsChanged()
     maxIt = 0;
     directivityEqualiser.resetTooltipTexts();
     directivityEqualiser.repaint();
-    polarDesignerProcessor.recomputeAllFilterCoefficients = true;
 }
 
 void PolarDesignerAudioProcessorEditor::timerCallback()
@@ -1809,7 +1808,7 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
     if (isRestoringState)
         return;
 
-    if (polarDesignerProcessor.repaintDEQ.exchange (false))
+    if (polarDesignerProcessor.repaintDEQ.exchange (false, std::memory_order_relaxed))
         nEditorBandsChanged();
 
     if (uiTerminatorAnimationWindowIsVisible)
