@@ -695,7 +695,7 @@ public:
                 int y = bandKnobs[i].getY() > static_cast<int> (dirToY (s.yMin - s.yMax)) / 2
                             ? bandKnobs[i].getY() - bandKnobs[i].getHeight() - 5
                             : bandKnobs[i].getBottom() + 5;
-                drawTooltip ((int) i, bandKnobs[i].getX() - 5, y, true);
+                drawTooltip (static_cast<int> (i), bandKnobs[i].getX() - 5, y, true);
             }
             else
                 tooltipValueKnobBox[i]->setVisible (false);
@@ -706,9 +706,9 @@ public:
             if (i < nrActiveBands - 1)
             {
                 // draw tooltip showing frequency
-                if (activeBandLimitPath == (int) i || tooltipValueBox[i]->isMouseOver()
+                if (activeBandLimitPath == static_cast<int> (i) || tooltipValueBox[i]->isMouseOver()
                     || tooltipValueBox[i]->isBeingEdited())
-                    drawTooltip ((int) i,
+                    drawTooltip (static_cast<int> (i),
                                  static_cast<int> (rightBound - 70),
                                  static_cast<int> (dirToY (s.yMax) - OH),
                                  false);
@@ -1213,7 +1213,7 @@ public:
 
                 slider->setValue (hzToZeroToOne (nrActiveBands, static_cast<size_t> (i), newValue),
                                   NotificationType::sendNotification);
-                tooltipValueBox[i]->setText (slider->getTextFromValue (slider->getValue()),
+                tooltipValueBox[i]->setText (slider->getTextFromValue (newValue),
                                              NotificationType::dontSendNotification);
             }
         }
@@ -1223,7 +1223,7 @@ public:
     {
         float min = processor.getXoverSliderRangeStart (sliderNum);
         float max = processor.getXoverSliderRangeEnd (sliderNum);
-        return attemptedValue < min ? min : (attemptedValue > max ? max : attemptedValue);
+        return std::clamp (attemptedValue, min, max);
     }
 
     void resetTooltipTexts()

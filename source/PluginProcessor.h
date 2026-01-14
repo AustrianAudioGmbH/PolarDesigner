@@ -145,14 +145,14 @@ public:
     {
         if (numBands >= 1 && numBands <= MAX_NUM_EQS)
         {
-            nProcessorBands.store (numBands);
+            nProcessorBands.store (numBands, std::memory_order_relaxed);
             // Update any internal state as needed
             recomputeAllFilterCoefficients = true;
-            repaintDEQ = true;
+            repaintDEQ.store (true, std::memory_order_relaxed);
         }
     }
 
-    unsigned int getNProcessorBands();
+    unsigned int getNProcessorBands() { return nProcessorBands.load (std::memory_order_relaxed); }
 
     float getXoverSliderRangeStart (int sliderNum);
     float getXoverSliderRangeEnd (int sliderNum);
