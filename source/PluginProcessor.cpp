@@ -139,7 +139,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout
             .withCategory (AudioProcessorParameter::genericParameter)
             .withStringFromValueFunction ([] (int value, [[maybe_unused]] int maximumStringLength)
                                           { return String (value + 1); })
-            .withAutomatable (false)));
+            .withAutomatable (true)));
 
     layout.add (std::make_unique<AudioParameterBool> (
         ParameterID { "allowBackwardsPattern", PD_PARAMETER_V1 },
@@ -190,7 +190,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout
             .withCategory (AudioProcessorParameter::genericParameter)
             .withStringFromValueFunction ([] (int value, [[maybe_unused]] int maximumStringLength)
                                           { return value == 0 ? "none" : String (value); })
-            .withAutomatable (false)));
+            .withAutomatable (true)));
 
     layout.add (std::make_unique<API> (
         ParameterID { "ffDfEq", PD_PARAMETER_V1 },
