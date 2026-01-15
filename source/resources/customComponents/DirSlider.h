@@ -271,13 +271,6 @@ public:
         lastDistanceFromDragStart = 0;
         Slider::mouseDown (e);
     }
-    void mouseDrag (const juce::MouseEvent& e) override
-    {
-        if (e.eventComponent != this)
-            return;
-
-        Slider::mouseDrag (e);
-    }
 
     void mouseExit (const juce::MouseEvent& e) override
     {
