@@ -13,7 +13,9 @@
 
 #pragma once
 
+#include "../../Constants.hpp"
 #include "../lookAndFeel/MainLookAndFeel.h"
+#include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 class EndlessSlider : public juce::Slider
@@ -21,7 +23,6 @@ class EndlessSlider : public juce::Slider
 public:
     EndlessSlider() : Slider()
     {
-        currentMoved = 0;
         lastMoved = 0;
         prevMoved = 0;
         lastFilledElem = 17;
@@ -30,42 +31,47 @@ public:
     ~EndlessSlider() override {}
 
     // set these callbacks where you use this class in order to get inc/dec messages
-    std::function<void()> sliderValueSet;
-    std::function<void()> sliderReset;
 
     // calculate whether to callback to an increment or decrement, and update UI
     void mouseDrag (const juce::MouseEvent& e) override
     {
-        if (e.mouseWasDraggedSinceMouseDown())
-        {
-            currentMoved = static_cast<float> (e.getDistanceFromDragStartY());
-            lastMoved = currentMoved + prevMoved;
-            sliderValue = juce::jmap (lastMoved,
-                                      static_cast<float> (proportionOfHeight (0.48f)),
-                                      (-1) * static_cast<float> (proportionOfHeight (0.52f)),
-                                      -0.5f,
-                                      1.f);
-            sliderValueSet();
-            lastMovedPoportion = lastMoved / static_cast<float> (getHeight());
-            repaint();
-        }
+        const auto currentMoved = static_cast<float> (e.getDistanceFromDragStartY());
+        lastMoved = currentMoved + prevMoved;
+
+        const auto height = static_cast<float> (getHeight());
+        lastMovedPoportion = lastMoved / height;
+        repaint();
+
+        constexpr auto sensitivity = 1.5f;
+        const auto sliderValue = -currentMoved / height * sensitivity;
+
+        for (size_t i = 0; i < elements.size(); ++i)
+            if (elements[i] != nullptr)
+                elements[i]->setValueNotifyingHost (
+                    elements[i]->convertTo0to1 (startPositions[i] + sliderValue));
     }
 
     void mouseWheelMove (const juce::MouseEvent& event,
                          const juce::MouseWheelDetails& wheel) override
     {
-        (void) event;
-        currentMoved = -10 * wheel.deltaY;
+        using namespace juce;
+        ignoreUnused (event);
+
+        const auto currentMoved = -10 * wheel.deltaY;
         lastMoved = currentMoved + prevMoved;
-        sliderValue = juce::jmap (lastMoved,
-                                  static_cast<float> (proportionOfHeight (0.48f)),
-                                  (-1) * static_cast<float> (proportionOfHeight (0.52f)),
-                                  -0.5f,
-                                  1.f);
-        sliderValueSet();
-        lastMovedPoportion = lastMoved / static_cast<float> (getHeight());
+        const auto height = static_cast<float> (getHeight());
+        lastMovedPoportion = lastMoved / height;
         prevMoved = lastMoved;
         repaint();
+
+        for (size_t i = 0; i < elements.size(); ++i)
+            if (elements[i] != nullptr)
+            {
+                auto& element = elements[i];
+                const auto oldValue = element->convertFrom0to1 (element->getValue());
+                const auto newValue = oldValue - currentMoved / height;
+                element->setValueNotifyingHost (element->convertTo0to1 (newValue));
+            }
     }
 
     void paint (juce::Graphics& g) override
@@ -159,14 +165,31 @@ public:
         (void) e;
         lastMoved = 0;
         prevMoved = 0;
-        sliderReset();
         repaint();
+
+        for (auto& el : elements)
+            el->setValueNotifyingHost (el->convertTo0to1 (0.0f));
     }
 
     void mouseUp (const juce::MouseEvent& e) override
     {
         (void) e;
         prevMoved = lastMoved;
+
+        for (size_t i = 0; i < elements.size(); ++i)
+            if (elements[i] != nullptr)
+                startPositions[i] = elements[i]->convertFrom0to1 (elements[i]->getValue());
+    }
+
+    void mouseDown (const juce::MouseEvent& e) override
+    {
+        using namespace juce;
+
+        ignoreUnused (e);
+
+        for (size_t i = 0; i < elements.size(); ++i)
+            if (elements[i] != nullptr)
+                startPositions[i] = elements[i]->convertFrom0to1 (elements[i]->getValue());
     }
 
     void resized() override
@@ -179,24 +202,21 @@ public:
         repaint();
     }
 
-    float getCurrentSliderValue()
+    void setElement (size_t index, juce::RangedAudioParameter* elementToSet)
     {
-        // Set precision 0.00 for sliderValue
-        sliderValue = std::round (sliderValue * 100.f) / 100.f;
-        return sliderValue;
+        elements[index] = elementToSet;
     }
 
 private:
+    std::array<juce::RangedAudioParameter*, MAX_NUM_EQS> elements;
+    std::array<float, MAX_NUM_EQS> startPositions;
+
     float lastMoved;
-    float currentMoved;
     int lastFilledElem;
     float prevMoved;
 
-    //    bool dragStarted;
-    //    bool isMouseUp;
     float lastMovedPoportion = 0;
 
-    float sliderValue;
     juce::Rectangle<float> filledRect;
     MainLookAndFeel mainLaF;
 };

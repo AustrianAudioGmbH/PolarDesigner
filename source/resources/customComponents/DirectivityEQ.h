@@ -873,10 +873,9 @@ public:
 
     void mouseDoubleClick (const juce::MouseEvent& event) override
     {
-        if (! active
-            || (event.eventComponent->getName() != "RectangleComponent"
-                && event.eventComponent != this))
-            return;
+        using namespace juce;
+
+        ignoreUnused (event);
 
         // set one band to omni
         for (unsigned int i = 0; i < nrActiveBands; ++i)

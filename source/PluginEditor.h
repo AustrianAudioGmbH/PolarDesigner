@@ -81,10 +81,6 @@ public:
     std::vector<float> getBandLimitWidthVector (float sizeDirectionalEQ,
                                                 float offsetPolarVisualizer);
 
-    //void incrementTrim(int nProcessorBands);
-    void setTrimValue (int nBands);
-    void resetTrim (int nBands);
-
     int getControlParameterIndex (Component& control) override;
 
     void loadSavedPresetsToList();
@@ -112,12 +108,6 @@ private:
     unsigned int nActiveBands;
 
     int syncChannelIdx;
-
-    float trimSliderPrevPos = 0.22f;
-    float minBandValueDistances[5];
-    bool bandLockedOnMinMax[5] = { false, false, false, false, false };
-    bool minBandValueDistancesSet = false;
-    int maxIt = 0;
 
     bool loadingFile;
     //    bool recordingDisturber;
