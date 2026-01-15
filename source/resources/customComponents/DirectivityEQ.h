@@ -1144,29 +1144,33 @@ public:
 
     void drawTooltip (int tooltipIndex, int xCoord, int yCoord, bool isKnobTooltip)
     {
+        using namespace juce;
+
         if (tooltipValueBox[tooltipIndex] == nullptr
             || tooltipValueKnobBox[tooltipIndex] == nullptr)
             return;
 
         if (! isKnobTooltip)
         {
-            tooltipValueBox[tooltipIndex]->setBounds (
+            auto* toolTip = tooltipValueBox[tooltipIndex].get();
+            auto* parentComponent = toolTip->getParentComponent();
+            toolTip->setBounds (
                 xCoord,
                 yCoord,
-                static_cast<int> (static_cast<float> (getTopLevelComponent()->getWidth()) * 0.06f),
-                static_cast<int> (static_cast<float> (getTopLevelComponent()->getHeight())
-                                  * 0.03f));
-            tooltipValueBox[tooltipIndex]->setVisible (true);
+                static_cast<int> (static_cast<float> (parentComponent->getWidth()) * 0.1f),
+                static_cast<int> (static_cast<float> (parentComponent->getHeight()) * 0.1f));
+            toolTip->setVisible (true);
         }
         else
         {
-            tooltipValueKnobBox[tooltipIndex]->setBounds (
+            auto* toolTip = tooltipValueKnobBox[tooltipIndex].get();
+            auto* parentComponent = toolTip->getParentComponent();
+            toolTip->setBounds (
                 xCoord,
                 yCoord,
-                static_cast<int> (static_cast<float> (getTopLevelComponent()->getWidth()) * 0.04f),
-                static_cast<int> (static_cast<float> (getTopLevelComponent()->getHeight())
-                                  * 0.03f));
-            tooltipValueKnobBox[tooltipIndex]->setVisible (true);
+                static_cast<int> (static_cast<float> (parentComponent->getWidth()) * 0.1f),
+                static_cast<int> (static_cast<float> (parentComponent->getHeight()) * 0.1f));
+            toolTip->setVisible (true);
         }
     }
 
