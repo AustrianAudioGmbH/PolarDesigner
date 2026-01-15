@@ -1,14 +1,37 @@
-# PolarDesigner
+# PolarDesigner3 - ReadMe
 
-This is PolarDesigner version 3, currently in development.
+Version: 3.0.0 Release Date: [21.1.2026]
 
-WARNING: This is a work in progress and not intended for use in production!
+## About
 
-This branch is currently for Austrian Audio developers and contributors to collaborate on VERSION 3.
+PolarDesigner gives engineers and producers more creative freedom and control than they’ve ever had before.
 
-If you are a producer or audio engineer, please use version 2 of our plugin until we complete our development work on version 3.
+## System Requirements
 
-### Acknowledgements
+- Processor: Intel/AMD/ARM
+- RAM: 4Gb
+- Operating System: Windows/macOS/Linux
+- Windows [Version]: 10/11
+- macOS [Version]: >14
+- Plugin Formats: VST3 / AU / AAX
+- DAW: Compatible with all major DAWs, tested on Cubase/Nuendo, ProTools, Reaper
+
+## Installation
+
+1. Run the installer and follow the on-screen instructions
+2. The plugin will be automatically installed to your system's default plugin folders
+3. Scan for new plugins in your DAW if necessary
+
+## Important Setup Note
+
+Please load the plugin in a stereo channel. The output configuration of the audio channel will be changed to mono.
+
+## Bug Reports & Feedback
+
+Your feedback helps improve this plugin!
+https://form.jotform.com/250343685398366
+
+## Acknowledgements
 
 PolarDesigner 3 makes use of the following projects:
 
@@ -17,3 +40,4 @@ PolarDesigner 3 makes use of the following projects:
 - [Apple vDSP (MacOS FFT backend)](https://developer.apple.com/accelerate/)
 - [Pamplejuce (Audio plugin template)](https://github.com/sudara/Pamplejuce)
 - [pluginval (VST Plugin validation tests)](https://github.com/Tracktion/pluginval)
+- [Catch2 (Unit testing framework)](https://github.com/catchorg/Catch2)
