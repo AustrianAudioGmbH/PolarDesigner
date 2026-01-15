@@ -24,6 +24,7 @@
 #include "Constants.hpp"
 
 #include <cstddef>
+#include <juce_core/juce_core.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #ifdef AA_INCLUDE_MELATONIN
@@ -1623,15 +1624,45 @@ void PolarDesignerAudioProcessorEditor::sliderValueChanged (juce::Slider* slider
     }
 }
 
+juce::File PolarDesignerAudioProcessorEditor::getFactoryPresetPath()
+{
+    using namespace juce;
+
+    if (SystemStats::getOperatingSystemType() == SystemStats::OperatingSystemType::Linux)
+        return File::getSpecialLocation (File::currentExecutableFile)
+            .getParentDirectory()
+            .getParentDirectory()
+            .getParentDirectory()
+            .getChildFile ("Presets");
+    else
+        return File::getSpecialLocation (File::commonDocumentsDirectory)
+            .getChildFile ("PolarDesigner3");
+}
+
+juce::File PolarDesignerAudioProcessorEditor::getUserPresetPath()
+{
+    using namespace juce;
+
+    File path;
+
+    if ((SystemStats::getOperatingSystemType() & SystemStats::OperatingSystemType::MacOSX) != 0)
+        return File::getSpecialLocation (File::userHomeDirectory)
+            .getChildFile ("Documents")
+            .getChildFile ("PolarDesigner3");
+    else
+        return getFactoryPresetPath();
+}
+
 void PolarDesignerAudioProcessorEditor::loadFile()
 {
     using namespace juce;
 
-    FileChooser myChooser ("Select Preset File",
-                           polarDesignerProcessor.getLastDir().exists()
-                               ? polarDesignerProcessor.getLastDir()
-                               : File::getSpecialLocation (File::userHomeDirectory),
-                           "*.json");
+    const auto path = polarDesignerProcessor.getLastDir().exists()
+                          ? polarDesignerProcessor.getLastDir()
+                          : getUserPresetPath();
+
+    FileChooser myChooser ("Select Preset File", path, "*.json");
+
     if (myChooser.browseForFileToOpen())
     {
         loadingFile = true;
@@ -1670,11 +1701,12 @@ void PolarDesignerAudioProcessorEditor::saveFile()
 {
     using namespace juce;
 
-    FileChooser myChooser ("Save Preset File",
-                           polarDesignerProcessor.getLastDir().exists()
-                               ? polarDesignerProcessor.getLastDir()
-                               : File::getSpecialLocation (File::userHomeDirectory),
-                           "*.json");
+    const auto path = polarDesignerProcessor.getLastDir().exists()
+                          ? polarDesignerProcessor.getLastDir()
+                          : getUserPresetPath();
+
+    FileChooser myChooser ("Save Preset File", path, "*.json");
+
     if (myChooser.browseForFileToSave (true))
     {
         File presetFile (myChooser.getResult());
@@ -1697,12 +1729,16 @@ void PolarDesignerAudioProcessorEditor::loadSavedPresetsToList()
 {
     using namespace juce;
 
-    File presetDir (polarDesignerProcessor.getLastDir().exists()
-                        ? polarDesignerProcessor.getLastDir()
-                        : File::getSpecialLocation (File::userHomeDirectory));
-    auto presetsArray = presetDir.findChildFiles (File::findFiles, false, "*.json");
+    const auto factoryPresetPath = getFactoryPresetPath();
+    const auto userPresetPath = getUserPresetPath();
+
+    Array<File> presetsArray;
+
+    presetsArray.addArray (userPresetPath.findChildFiles (File::findFiles, false, "*.json"));
+    presetsArray.addArray (factoryPresetPath.findChildFiles (File::findFiles, false, "*.json"));
 
     String jsonString;
+
     for (File preset : presetsArray)
     {
         jsonString = preset.loadFileAsString();
@@ -1710,13 +1746,9 @@ void PolarDesignerAudioProcessorEditor::loadSavedPresetsToList()
         if (jsonString.contains ("Austrian Audio PolarDesigner"))
         {
             if (jsonString.contains ("Factory Preset"))
-            {
                 lbFactoryPresets.AddNewPresetToList (preset.getFileNameWithoutExtension());
-            }
             else
-            {
                 lbUserPresets.AddNewPresetToList (preset.getFileNameWithoutExtension());
-            }
         }
     }
 }
@@ -2131,12 +2163,13 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback (juce::ChangeBroa
 
     if (source == &lbUserPresets)
     {
-        File presetDir (polarDesignerProcessor.getLastDir().exists()
-                            ? polarDesignerProcessor.getLastDir()
-                            : File::getSpecialLocation (File::userHomeDirectory));
+        const auto path = polarDesignerProcessor.getLastDir().exists()
+                              ? polarDesignerProcessor.getLastDir()
+                              : getUserPresetPath();
+
         auto selectedPreset = lbUserPresets.getSelectedPresetName();
         auto presetFile =
-            presetDir.findChildFiles (File::findFiles, false, String (selectedPreset + ".json"));
+            path.findChildFiles (File::findFiles, false, String (selectedPreset + ".json"));
 
         if (presetFile.size() == 1)
         {
@@ -2161,18 +2194,14 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback (juce::ChangeBroa
     }
     else if (source == &lbFactoryPresets)
     {
-        File presetDir (polarDesignerProcessor.getLastDir().exists()
-                            ? polarDesignerProcessor.getLastDir()
-                            : File::getSpecialLocation (File::userHomeDirectory));
+        const auto path = getFactoryPresetPath();
+
         auto selectedPreset = lbFactoryPresets.getSelectedPresetName();
         auto presetFile =
-            presetDir.findChildFiles (File::findFiles, false, String (selectedPreset + ".json"));
+            path.findChildFiles (File::findFiles, false, String (selectedPreset + ".json"));
 
         if (presetFile.size() == 1)
         {
-            // Reset saved states
-            //            ScopedLock lock(polarDesignerProcessor.abLayerLock);
-
             isStateSaved.fill (false);
 
             polarDesignerProcessor.loadPreset (presetFile.getFirst());

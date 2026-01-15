@@ -1,5 +1,5 @@
 {
-  "Description": "This preset file was created with the Austrian Audio PolarDesigner plugin v3.0.0, for more information see www.austrian.audio .",
+  "Description": "This Factory Preset file was created with the Austrian Audio PolarDesigner plugin v3.0.0, for more information see www.austrian.audio .",
   "nrActiveBands": 5,
   "zeroLatencyMode": 0.0,
   "trimPosition": 0.0,
@@ -31,3 +31,4 @@
   "proximity": 0.0,
   "proximityOnOff": 0.0
 }
+

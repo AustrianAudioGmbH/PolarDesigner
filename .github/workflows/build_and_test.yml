@@ -170,7 +170,7 @@ jobs:
           pkgbuild --identifier "${{ env.BUNDLE_ID }}.au.pkg" --version $VERSION --component "${{ env.AU_PATH }}" --install-location "/Library/Audio/Plug-Ins/Components" "packaging/${{ env.PRODUCT_NAME }}.au.pkg"
           pkgbuild --identifier "${{ env.BUNDLE_ID }}.vst3.pkg" --version $VERSION --component "${{ env.VST3_PATH }}" --install-location "/Library/Audio/Plug-Ins/VST3" "packaging/${{ env.PRODUCT_NAME }}.vst3.pkg"
           pkgbuild --identifier "${{ env.BUNDLE_ID }}.aax.pkg" --version $VERSION --component "${{ env.AAX_PATH }}" --install-location "/Library/Application Support/Avid/Audio/Plug-Ins" "packaging/${{ env.PRODUCT_NAME }}.aax.pkg"
-          pkgbuild --identifier "${{ env.BUNDLE_ID }}.presets.pkg" --version $VERSION --root "presets" --install-location "/Library/Application Support/${{ env.PRODUCT_NAME }}" "packaging/${{ env.PRODUCT_NAME }}.presets.pkg"
+          pkgbuild --identifier "${{ env.BUNDLE_ID }}.presets.pkg" --version $VERSION --root "presets" --install-location "/Users/Shared/${{ env.PRODUCT_NAME }}" "packaging/${{ env.PRODUCT_NAME }}.presets.pkg"
 
           cd packaging
           envsubst < distribution.xml.template > distribution.xml

@@ -110,6 +110,10 @@ public:
 
     void AddNewPresetToList (const juce::String& presetName)
     {
+        for (auto& d : data)
+            if (*d == presetName)
+                return;
+
         data.add (std::make_unique<juce::String> (presetName));
         presets.updateContent();
     }

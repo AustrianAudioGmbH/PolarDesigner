@@ -233,6 +233,9 @@ private:
 
     void updateABButtonState();
 
+    static juce::File getFactoryPresetPath();
+    static juce::File getUserPresetPath();
+
 #ifdef USE_MELATONIN_INSPECTOR
     #if defined(_MSC_VER)
         #pragma message("MELATONIN INSPECTOR IS CONFIGURED TO BE INCLUDED IN BUILD")

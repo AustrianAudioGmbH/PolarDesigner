@@ -36,7 +36,7 @@ Type: filesandordirs; Name: "{commoncf64}\VST3\{#ProductName}Data"
 ; MSVC adds a .ilk when building the plugin. Let's not include that.
 [Files]
 Source: "..\Builds\{#ProjectName}_artefacts\Release\VST3\{#ProductName}.vst3\*"; DestDir: "{commoncf64}\VST3\{#ProductName}.vst3\"; Excludes: *.ilk; Flags: ignoreversion recursesubdirs; Components: vst3
-Source: "..\presets\*"; Flags: ignoreversion recursesubdirs; DestDir: "{userdocs}\{#ProductName}\Presets\"; Components: presets
+Source: "..\presets\*"; Flags: ignoreversion recursesubdirs; DestDir: "{commondocs}\{#ProductName}\"; Components: presets
 ; Source: "..\Builds\{#ProjectName}_artefacts\Release\Standalone\{#ProductName}.exe"; DestDir: "{commonpf64}\{#Publisher}\{#ProductName}"; Flags: ignoreversion; Components: standalone
 
 [Icons]
