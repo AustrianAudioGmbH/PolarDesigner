@@ -12,7 +12,7 @@ PolarDesigner gives engineers and producers more creative freedom and control th
 - RAM: 4Gb
 - Operating System: Windows/macOS/Linux
 - Windows [Version]: 10/11
-- macOS [Version]: >14
+- macOS [Version]: 10.14 and later
 - Plugin Formats: VST3 / AU / AAX
 - DAW: Compatible with all major DAWs, tested on Cubase/Nuendo, ProTools, Reaper
 
