@@ -1330,6 +1330,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     else if (button == &tbOpenFromFile)
     {
         loadFile();
+        return;
     }
     else if (button == &tbClosePresetList)
     {
@@ -1643,12 +1644,17 @@ juce::File PolarDesignerAudioProcessorEditor::getUserPresetPath()
 {
     using namespace juce;
 
-    File path;
-
     if ((SystemStats::getOperatingSystemType() & SystemStats::OperatingSystemType::MacOSX) != 0)
-        return File::getSpecialLocation (File::userHomeDirectory)
-            .getChildFile ("Documents")
-            .getChildFile ("PolarDesigner3");
+    {
+        auto path = File::getSpecialLocation (File::userHomeDirectory)
+                        .getChildFile ("Documents")
+                        .getChildFile ("PolarDesigner3");
+
+        if (! path.exists())
+            path.createDirectory();
+
+        return path;
+    }
     else
         return getFactoryPresetPath();
 }
@@ -1657,9 +1663,7 @@ void PolarDesignerAudioProcessorEditor::loadFile()
 {
     using namespace juce;
 
-    const auto path = polarDesignerProcessor.getLastDir().exists()
-                          ? polarDesignerProcessor.getLastDir()
-                          : getUserPresetPath();
+    const auto path = getUserPresetPath();
 
     FileChooser myChooser ("Select Preset File", path, "*.json");
 
@@ -1667,7 +1671,6 @@ void PolarDesignerAudioProcessorEditor::loadFile()
     {
         loadingFile = true;
         File presetFile (myChooser.getResult());
-        polarDesignerProcessor.setLastDir (presetFile.getParentDirectory());
 
         // Reset saved states
         //        ScopedLock lock(polarDesignerProcessor.abLayerLock);
@@ -1688,8 +1691,16 @@ void PolarDesignerAudioProcessorEditor::loadFile()
         {
             setEqMode();
             // Save current state for the active layer
+
+            titlePreset.setTitle (String ("Preset: " + presetFile.getFileNameWithoutExtension()));
+            lbFactoryPresets.deselectAll();
+            lbUserPresets.deselectAll();
+            showPresetList (false);
+            titlePresetUndoButton.setVisible (true);
+
             int currentLayer = polarDesignerProcessor.abLayerState;
             saveLayerState (currentLayer);
+            presetLoaded = true;
         }
         loadingFile = false;
 
@@ -1701,16 +1712,13 @@ void PolarDesignerAudioProcessorEditor::saveFile()
 {
     using namespace juce;
 
-    const auto path = polarDesignerProcessor.getLastDir().exists()
-                          ? polarDesignerProcessor.getLastDir()
-                          : getUserPresetPath();
+    const auto path = getUserPresetPath();
 
     FileChooser myChooser ("Save Preset File", path, "*.json");
 
     if (myChooser.browseForFileToSave (true))
     {
         File presetFile (myChooser.getResult());
-        polarDesignerProcessor.setLastDir (presetFile.getParentDirectory());
         Result result = polarDesignerProcessor.savePreset (presetFile);
         if (! result.wasOk())
         {
@@ -2163,9 +2171,7 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback (juce::ChangeBroa
 
     if (source == &lbUserPresets)
     {
-        const auto path = polarDesignerProcessor.getLastDir().exists()
-                              ? polarDesignerProcessor.getLastDir()
-                              : getUserPresetPath();
+        const auto path = getUserPresetPath();
 
         auto selectedPreset = lbUserPresets.getSelectedPresetName();
         auto presetFile =

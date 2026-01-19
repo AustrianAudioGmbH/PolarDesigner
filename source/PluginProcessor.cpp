@@ -231,7 +231,6 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     playHeadPosition(),
     playHeadState(), // Deprecated, but included as per declaration
     undoManager(),
-    properties(),
     nProcessorBands (MAX_NUM_EQS),
     vtsParams (*this, &undoManager, "AAPolarDesigner", createParameterLayout (*this)),
     firLen (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE),
@@ -288,9 +287,6 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     options.filenameSuffix = "settings";
     options.folderName = "AustrianAudio";
     options.osxLibrarySubFolder = "Preferences";
-
-    properties = std::make_unique<PropertiesFile> (options);
-    lastDir = File (properties->getValue ("presetFolder"));
 
     registerParameterListeners();
 
@@ -1736,13 +1732,6 @@ void PolarDesignerAudioProcessor::createPolarPatterns (juce::AudioBuffer<float>&
     {
         LOG_ERROR ("Unexpected output channel configuration: " + String (numOutputChannels));
     }
-}
-
-void PolarDesignerAudioProcessor::setLastDir (juce::File newLastDir)
-{
-    lastDir = newLastDir;
-    const juce::var v (lastDir.getFullPathName());
-    properties->setValue ("presetFolder", v);
 }
 
 juce::Result PolarDesignerAudioProcessor::loadPreset (const juce::File& presetFile)
