@@ -1,37 +1,42 @@
-# PolarDesigner3 - ReadMe
+# PolarDesigner
 
-Version: 3.0.0 Release Date: [21.1.2026]
+This is PolarDesigner Version 3
 
-## About
+Our open-source plug-in developed by [Thomas](github.com/thomasdeppisch),
+[Simon](github.com/becksimon), [IEM](iem.kug.ac.at) and [Austrian Audio](austrian.audio).
 
-PolarDesigner gives engineers and producers more creative freedom and control than they’ve ever had before.
+PolarDesigner allows you to control the polar pattern of your OC818 microphone in up to five frequency bands.
+Available as VST3, AAX and AU. Get installers for Windows and Mac at [austrian.audio](austrian.audio).
 
-## System Requirements
+<img width="762" alt="PolarDesigner Screenshot" src="https://raw.githubusercontent.com/AustrianAudioGmbH/PolarDesigner/main/docs/PolarDesigner3.png">
 
-- Processor: Intel/AMD/ARM
-- RAM: 4Gb
-- Operating System: Windows/macOS/Linux
-- Windows [Version]: 10/11
-- macOS [Version]: 10.14 and later
-- Plugin Formats: VST3 / AU / AAX
-- DAW: Compatible with all major DAWs, tested on Cubase/Nuendo, ProTools, Reaper
+## Downloads
 
-## Installation
+https://austrian.audio/polardesigner
 
-1. Run the installer and follow the on-screen instructions
-2. The plugin will be automatically installed to your system's default plugin folders
-3. Scan for new plugins in your DAW if necessary
+## Building PolarDesigner3 from source
 
-## Important Setup Note
+Requirements:
 
-Please load the plugin in a stereo channel. The output configuration of the audio channel will be changed to mono.
+- cmake
+- a C++20 compatible compiler (GCC, clang, MSVC)
 
-## Bug Reports & Feedback
+To build from source, you need to clone the repo and its submodules
 
-Your feedback helps improve this plugin!
-https://form.jotform.com/250343685398366
+```bash
+git clone https://github.com/AustrianAudioGmbH/PolarDesigner.git
+git submodule update --init --recursive
+```
 
-## Acknowledgements
+After that, create a build directory, configure & compile with
+
+```bash
+cd PolarDesigner && mkdir build && cd build
+cmake ..
+cmake --build . --config Release
+```
+
+## Acknowledgements:
 
 PolarDesigner 3 makes use of the following projects:
 
