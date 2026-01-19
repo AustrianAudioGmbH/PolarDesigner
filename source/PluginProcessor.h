@@ -29,7 +29,6 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <math.h>
-#include <memory>
 
 // these params can be synced between plugin instances
 struct ParamsToSync
@@ -135,8 +134,6 @@ public:
     //==============================================================================
     juce::Result loadPreset (const juce::File& presetFile);
     juce::Result savePreset (juce::File destination);
-    juce::File getLastDir() { return lastDir; }
-    void setLastDir (juce::File newLastDir);
 
     void startTracking (bool trackDisturber);
     void stopTracking (int applyOptimalPattern);
@@ -228,8 +225,6 @@ public:
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarDesignerAudioProcessor)
-
-    std::unique_ptr<juce::PropertiesFile> properties;
 
     std::atomic<unsigned int> nProcessorBands;
 
