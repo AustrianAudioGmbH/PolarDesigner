@@ -13,6 +13,7 @@ Name: "custom"; Description: "Custom installation"; Flags: iscustom
 [Components]
 ; Name: "standalone"; Description: "Standalone application"; Types: full custom
 Name: "vst3"; Description: "VST3 plugin"; Types: full custom
+Name: "aax"; Description: "AAX plugin"; Types: full custom
 Name: "presets"; Description: "Presets"; Types: full custom
 
 [Setup]
@@ -36,6 +37,7 @@ Type: filesandordirs; Name: "{commoncf64}\VST3\{#ProductName}Data"
 ; MSVC adds a .ilk when building the plugin. Let's not include that.
 [Files]
 Source: "..\Builds\{#ProjectName}_artefacts\Release\VST3\{#ProductName}.vst3\*"; DestDir: "{commoncf64}\VST3\{#ProductName}.vst3\"; Excludes: *.ilk; Flags: ignoreversion recursesubdirs; Components: vst3
+Source: "..\Builds\{#ProjectName}_artefacts\Release\AAX\{#ProductName}.aaxplugin\*"; DestDir: "{commoncf64}\Avid\Audio\Plug-Ins\{#ProductName}.aaxplugin\"; Excludes: *.ilk; Flags: ignoreversion recursesubdirs; Components: aax
 Source: "..\presets\*"; Flags: ignoreversion recursesubdirs; DestDir: "{commondocs}\{#ProductName}\"; Components: presets
 ; Source: "..\Builds\{#ProjectName}_artefacts\Release\Standalone\{#ProductName}.exe"; DestDir: "{commonpf64}\{#Publisher}\{#ProductName}"; Flags: ignoreversion; Components: standalone
 
