@@ -125,7 +125,7 @@ jobs:
           ${{ matrix.pluginval-binary }} --strictness-level 10 --verbose --validate "${{ env.VST3_PATH }}"
 
       - name: Import Certificates (macOS)
-        uses: apple-actions/import-codesign-certs@v3
+        uses: apple-actions/import-codesign-certs@v6
         id: keychain
         if: ${{ matrix.name == 'macOS'}}
         with:
