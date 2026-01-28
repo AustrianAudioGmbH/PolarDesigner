@@ -156,7 +156,6 @@ public:
 
     std::atomic<bool> repaintDEQ = true;
     std::atomic<bool> zeroLatencyModeChanged = true;
-    std::atomic<bool> ffDfEqChanged = true;
     std::array<std::atomic<bool>, MAX_NUM_EQS> recomputeFilterCoefficients;
     std::atomic<bool> recomputeAllFilterCoefficients;
 
@@ -176,9 +175,6 @@ public:
     juce::ValueTree layerA;
     juce::ValueTree layerB;
     juce::ValueTree saveStates;
-    int doEq;
-    int doEqA;
-    int doEqB;
 
     // when the A/B buttons are pressed, the proximity values are remembered
     std::atomic<float> oldProxDistance;
@@ -203,9 +199,6 @@ public:
     juce::AudioPlayHead::CurrentPositionInfo playHeadState;
 
     juce::UndoManager undoManager;
-
-    int getEqState() { return doEq; }
-    void setEqState (int idx);
 
 #if PERFETTO
     // perfetto
@@ -249,13 +242,13 @@ private:
     juce::AudioBuffer<float> delayBuffer;
 
     std::atomic<float>* nProcessorBandsPtr;
-    std::atomic<float>* syncChannelPtr;
-    //    float oldSyncChannelPtr;
     std::atomic<float>* xOverFreqsPtr[MAX_NUM_EQS - 1];
     std::atomic<float>* dirFactorsPtr[MAX_NUM_EQS];
     float oldDirFactors[MAX_NUM_EQS];
     std::atomic<float>* bandGainsPtr[MAX_NUM_EQS];
     float oldBandGains[MAX_NUM_EQS];
+    std::atomic<float>* syncChannelPtr;
+    std::atomic<float>* ffDfEqPtr;
     std::atomic<float>* allowBackwardsPatternPtr;
     // !J! Note: allowBackwardsPatternPtr is being maintained, even though the UI for changing its value has been removed
     // in PolarDesigner3.  The reason for maintenance is for compatability purposes, even though it should ALWAYS be
@@ -277,6 +270,7 @@ private:
     bool trackingActive;
     bool trackingDisturber;
     int nrBlocksRecorded;
+    int ffDfEq;
 
     int eqLatency;
 
