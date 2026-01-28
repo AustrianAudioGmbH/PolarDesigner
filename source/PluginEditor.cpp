@@ -67,9 +67,9 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
 
     addAndMakeVisible (&tbLogoAA);
     tbLogoAA.setButtonText ("Austrian Audio Logo");
-    tbLogoAA.setTooltip (String (AA_BUILD_TAG) + String ("-") + String (AA_BUILD_COMMIT_HASH)
-                         + String::formatted (" (JUCE:%s)", AA_BUILD_JUCE_VERSION)
-                         + String::formatted (" (%p)", this));
+    tbLogoAA.setTooltip (std::string (AA_BUILD_TAG) + "-" + std::string (AA_BUILD_COMMIT_HASH)
+                         + " (JUCE: " + std::string (AA_BUILD_JUCE_VERSION) + ") ("
+                         + std::to_string (reinterpret_cast<unsigned long long> (this)) + ")");
     Logger::writeToLog ("PolarDesigner3 Build:" + String (AA_BUILD_TAG) + String ("-")
                         + String (AA_BUILD_COMMIT_HASH)
                         + String::formatted (" (JUCE:%s)", AA_BUILD_JUCE_VERSION));
