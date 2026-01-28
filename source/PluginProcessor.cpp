@@ -192,6 +192,18 @@ static juce::AudioProcessorValueTreeState::ParameterLayout
                                           { return value == 0 ? "none" : String (value); })
             .withAutomatable (false)));
 
+    layout.add (std::make_unique<API> (
+        ParameterID { "ffDfEq", PD_PARAMETER_V1 },
+        "Free/diffuse field EQ",
+        0,
+        2,
+        0,
+        AudioParameterIntAttributes()
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction ([] (int value, [[maybe_unused]] int maximumStringLength)
+                                          { return value == 0 ? "none" : String (value); })
+            .withAutomatable (false)));
+
     return layout;
 }
 
@@ -202,7 +214,6 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
                         .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
     repaintDEQ (true),
     zeroLatencyModeChanged (true),
-    ffDfEqChanged (true),
     recomputeAllFilterCoefficients (true),
     disturberRecorded (false),
     signalRecorded (false),
@@ -214,9 +225,6 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     layerA (nodeA),
     layerB (nodeB),
     saveStates (saveTree),
-    doEq (0),
-    doEqA (0),
-    doEqB (0),
     oldProxDistance (0.0f),
     oldProxDistanceA (0.0f),
     oldProxDistanceB (0.0f),
@@ -279,6 +287,7 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     proxDistancePtr = vtsParams.getRawParameterValue ("proximity");
     proxOnOffPtr = vtsParams.getRawParameterValue ("proximityOnOff");
     zeroLatencyModePtr = vtsParams.getRawParameterValue ("zeroLatencyMode");
+    ffDfEqPtr = vtsParams.getRawParameterValue ("ffDfEq");
     syncChannelPtr = vtsParams.getRawParameterValue ("syncChannel");
 
     // properties file: saves user preset folder location
@@ -319,7 +328,7 @@ void PolarDesignerAudioProcessor::registerParameterListeners()
         "gain2",        "gain3",          "gain4",
         "gain5",        "nrBands",        "allowBackwardsPattern",
         "proximity",    "proximityOnOff", "zeroLatencyMode",
-        "syncChannel",
+        "ffDfEq",       "syncChannel",
     };
     for (const auto& id : params)
     {
@@ -593,15 +602,15 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 
     // Proximity compensation
     auto proximity =
-        juce::approximatelyEqual (proxOnOffPtr->load(), 1.0f) ? proxDistancePtr->load() : 0.f;
-    if (! juce::approximatelyEqual (zeroLatencyModePtr->load(), 1.0f) && (proximity < -0.05))
+        approximatelyEqual (proxOnOffPtr->load(), 1.0f) ? proxDistancePtr->load() : 0.f;
+    if (! approximatelyEqual (zeroLatencyModePtr->load(), 1.0f) && (proximity < -0.05))
     {
         float* writePointerEight = omniEightBuffer.getWritePointer (1);
         dsp::AudioBlock<float> eightBlock (&writePointerEight, 1, numSamples);
         dsp::ProcessContextReplacing<float> contextProxEight (eightBlock);
         proxCompIIR.process (contextProxEight);
     }
-    else if (! juce::approximatelyEqual (zeroLatencyModePtr->load(), 1.0f) && (proximity > 0.05))
+    else if (! approximatelyEqual (zeroLatencyModePtr->load(), 1.0f) && (proximity > 0.05))
     {
         float* writePointerOmni = omniEightBuffer.getWritePointer (0);
         dsp::AudioBlock<float> omniBlock (&writePointerOmni, 1, numSamples);
@@ -610,29 +619,32 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     }
 
     // EQ processing
-    if ((doEq == 1) && ! juce::approximatelyEqual (zeroLatencyModePtr->load(), 1.0f))
+    if (! approximatelyEqual (zeroLatencyModePtr->load (std::memory_order_relaxed), 1.0f))
     {
-        float* writePointerOmni = omniEightBuffer.getWritePointer (0);
-        dsp::AudioBlock<float> ffEqOmniBlk (&writePointerOmni, 1, numSamples);
-        dsp::ProcessContextReplacing<float> ffEqOmniCtx (ffEqOmniBlk);
-        ffEqOmniConv.process (ffEqOmniCtx);
+        if (ffDfEq == 1)
+        {
+            float* writePointerOmni = omniEightBuffer.getWritePointer (0);
+            dsp::AudioBlock<float> ffEqOmniBlk (&writePointerOmni, 1, numSamples);
+            dsp::ProcessContextReplacing<float> ffEqOmniCtx (ffEqOmniBlk);
+            ffEqOmniConv.process (ffEqOmniCtx);
 
-        float* writePointerEight = omniEightBuffer.getWritePointer (1);
-        dsp::AudioBlock<float> ffEqEightBlk (&writePointerEight, 1, numSamples);
-        dsp::ProcessContextReplacing<float> ffEqEightCtx (ffEqEightBlk);
-        ffEqEightConv.process (ffEqEightCtx);
-    }
-    else if ((doEq == 2) && ! juce::approximatelyEqual (zeroLatencyModePtr->load(), 1.0f))
-    {
-        float* writePointerOmni = omniEightBuffer.getWritePointer (0);
-        dsp::AudioBlock<float> dfEqOmniBlk (&writePointerOmni, 1, numSamples);
-        dsp::ProcessContextReplacing<float> dfEqOmniCtx (dfEqOmniBlk);
-        dfEqOmniConv.process (dfEqOmniCtx);
+            float* writePointerEight = omniEightBuffer.getWritePointer (1);
+            dsp::AudioBlock<float> ffEqEightBlk (&writePointerEight, 1, numSamples);
+            dsp::ProcessContextReplacing<float> ffEqEightCtx (ffEqEightBlk);
+            ffEqEightConv.process (ffEqEightCtx);
+        }
+        else if (ffDfEq == 2)
+        {
+            float* writePointerOmni = omniEightBuffer.getWritePointer (0);
+            dsp::AudioBlock<float> dfEqOmniBlk (&writePointerOmni, 1, numSamples);
+            dsp::ProcessContextReplacing<float> dfEqOmniCtx (dfEqOmniBlk);
+            dfEqOmniConv.process (dfEqOmniCtx);
 
-        float* writePointerEight = omniEightBuffer.getWritePointer (1);
-        dsp::AudioBlock<float> dfEqEightBlk (&writePointerEight, 1, numSamples);
-        dsp::ProcessContextReplacing<float> dfEqEightCtx (dfEqEightBlk);
-        dfEqEightConv.process (dfEqEightCtx);
+            float* writePointerEight = omniEightBuffer.getWritePointer (1);
+            dsp::AudioBlock<float> dfEqEightBlk (&writePointerEight, 1, numSamples);
+            dsp::ProcessContextReplacing<float> dfEqEightCtx (dfEqEightBlk);
+            dfEqEightConv.process (dfEqEightCtx);
+        }
     }
 
     auto nActiveBands = static_cast<int> (nProcessorBands);
@@ -723,7 +735,6 @@ void PolarDesignerAudioProcessor::getStateInformation (juce::MemoryBlock& destDa
     using namespace juce;
 
     // Update vtsParams.state properties
-    vtsParams.state.setProperty ("ffDfEq", var (doEq), nullptr);
     vtsParams.state.setProperty ("oldProxDistance", var (oldProxDistance), nullptr);
     vtsParams.state.setProperty ("ABLayer", abLayerState, nullptr);
     vtsParams.state.setProperty ("oldNrBands", var (oldNrBands), nullptr);
@@ -732,7 +743,6 @@ void PolarDesignerAudioProcessor::getStateInformation (juce::MemoryBlock& destDa
     if (abLayerState == COMPARE_LAYER_A)
     {
         layerA = vtsParams.copyState();
-        doEqA = doEq;
         if (proxDistancePtr && ! exactlyEqual (std::round (proxDistancePtr->load()), 0.0f))
         {
             oldProxDistanceA = proxDistancePtr->load();
@@ -745,7 +755,6 @@ void PolarDesignerAudioProcessor::getStateInformation (juce::MemoryBlock& destDa
     else if (abLayerState == COMPARE_LAYER_B)
     {
         layerB = vtsParams.copyState();
-        doEqB = doEq;
         if (proxDistancePtr && ! exactlyEqual (std::round (proxDistancePtr->load()), 0.0f))
         {
             oldProxDistanceB = proxDistancePtr->load();
@@ -757,12 +766,10 @@ void PolarDesignerAudioProcessor::getStateInformation (juce::MemoryBlock& destDa
     }
 
     // Update layer properties
-    layerA.setProperty ("ffDfEq", var (doEqA), nullptr);
     layerA.setProperty ("oldProxDistance", var (oldProxDistanceA), nullptr);
     layerA.setProperty ("ABLayer", COMPARE_LAYER_A, nullptr);
     layerA.setProperty ("oldNrBands", var (oldNrBandsA), nullptr);
 
-    layerB.setProperty ("ffDfEq", var (doEqB), nullptr);
     layerB.setProperty ("oldProxDistance", var (oldProxDistanceB), nullptr);
     layerB.setProperty ("ABLayer", COMPARE_LAYER_B, nullptr);
     layerB.setProperty ("oldNrBands", var (oldNrBandsB), nullptr);
@@ -787,19 +794,6 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
 {
     using namespace juce;
 
-    // FIXME: this makes no sense
-    if (approximatelyEqual (currentSampleRate, static_cast<double> (FILTER_BANK_NATIVE_SAMPLE_RATE))
-        && currentBlockSize == PD_DEFAULT_BLOCK_SIZE)
-
-    {
-        LOG_WARN ("Plugin not prepared, initializing with defaults");
-        firLen = FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE;
-        if (firLen % 2 == 0)
-            firLen++;
-        resizeBuffersIfNeeded();
-        //        prepareToPlay(currentSampleRate, currentBlockSize);
-    }
-
     // Reinitialize ValueTree state
     vtsParams.state = ValueTree ("AAPolarDesigner");
     layerA = vtsParams.copyState();
@@ -807,7 +801,6 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
     abLayerState = COMPARE_LAYER_A;
 
     // Reset non-parameter state variables
-    doEq = doEqA = doEqB = 0;
     oldProxDistance = oldProxDistanceA = oldProxDistanceB = 0.0f;
     oldNrBands = oldNrBandsA = oldNrBandsB = 4.0f;
     nProcessorBands = static_cast<unsigned int> (nProcessorBandsPtr ? nProcessorBandsPtr->load() + 1
@@ -821,7 +814,6 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
     for (auto& flag : recomputeFilterCoefficients)
         flag = false;
     zeroLatencyModeChanged = true;
-    ffDfEqChanged = true;
     repaintDEQ.store (true, std::memory_order_relaxed);
 
     // Reset tracking state
@@ -882,6 +874,7 @@ void PolarDesignerAudioProcessor::initializeDefaultState()
         { "proximity", 0.0f }, // Default from constructor: 0.0f
         { "proximityOnOff", 0.0f }, // Default from constructor: false (0.0f)
         { "zeroLatencyMode", 0.0f }, // Default from constructor: false (0.0f)
+        { "ffDfEq", 0.0f }, // Default from constructor: 0 (none)
         { "syncChannel", 0.0f } // Default from constructor: 0
     };
 
@@ -978,22 +971,6 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
 {
     using namespace juce;
 
-    updateFirLen();
-
-    // Initialize if unprepared
-    if (juce::approximatelyEqual (currentSampleRate,
-                                  static_cast<double> (FILTER_BANK_NATIVE_SAMPLE_RATE))
-        && currentBlockSize == PD_DEFAULT_BLOCK_SIZE)
-    {
-        LOG_WARN ("Plugin not prepared, initializing with defaults");
-        prepareToPlay (currentSampleRate, currentBlockSize);
-    }
-    else
-    {
-        // Ensure buffers are resized for current sample rate
-        resizeBuffersIfNeeded();
-    }
-
     std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (! xmlState)
     {
@@ -1057,14 +1034,6 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
     }
 
     // Restore non-parameter state
-    if (vtsParams.state.hasProperty ("ffDfEq"))
-    {
-        Value val = vtsParams.state.getPropertyAsValue ("ffDfEq", nullptr);
-        if (val.getValue().toString() != "")
-        {
-            doEq = static_cast<int> (val.getValue());
-        }
-    }
     if (vtsParams.state.hasProperty ("oldProxDistance"))
     {
         Value val = vtsParams.state.getPropertyAsValue ("oldProxDistance", nullptr);
@@ -1089,38 +1058,27 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
 
     auto* layerAPtr = &layerA;
     auto* layerBPtr = &layerB;
-    auto* doEqAPtr = &doEqA;
-    auto* doEqBPtr = &doEqB;
 
     // Restore layer properties
-    for (auto& layer :
-         { std::make_pair (layerAPtr, doEqAPtr), std::make_pair (layerBPtr, doEqBPtr) })
+    for (auto& layer : { layerAPtr, layerBPtr })
     {
-        if (layer.first->hasProperty ("ffDfEq"))
+        if (layer->hasProperty ("oldProxDistance"))
         {
-            Value val = layer.first->getPropertyAsValue ("ffDfEq", nullptr);
+            Value val = layer->getPropertyAsValue ("oldProxDistance", nullptr);
             if (val.getValue().toString() != "")
             {
-                *layer.second = static_cast<int> (val.getValue());
-            }
-        }
-        if (layer.first->hasProperty ("oldProxDistance"))
-        {
-            Value val = layer.first->getPropertyAsValue ("oldProxDistance", nullptr);
-            if (val.getValue().toString() != "")
-            {
-                if (layer.first == &layerA)
+                if (layer == &layerA)
                     oldProxDistanceA = static_cast<float> (val.getValue());
                 else
                     oldProxDistanceB = static_cast<float> (val.getValue());
             }
         }
-        if (layer.first->hasProperty ("oldNrBands"))
+        if (layer->hasProperty ("oldNrBands"))
         {
-            Value val = layer.first->getPropertyAsValue ("oldNrBands", nullptr);
+            Value val = layer->getPropertyAsValue ("oldNrBands", nullptr);
             if (val.getValue().toString() != "")
             {
-                if (layer.first == &layerA)
+                if (layer == &layerA)
                     oldNrBandsA = static_cast<float> (val.getValue());
                 else
                     oldNrBandsB = static_cast<float> (val.getValue());
@@ -1150,7 +1108,6 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
     recomputeAllFilterCoefficients.store (true, std::memory_order_relaxed);
     recomputeFilterCoefficientsIfNeeded();
     zeroLatencyModeChanged.store (true, std::memory_order_release);
-    ffDfEqChanged.store (true, std::memory_order_release);
     repaintDEQ.store (true, std::memory_order_relaxed);
 }
 
@@ -1285,9 +1242,13 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
             zeroLatencyModeChanged.store (true, std::memory_order_release);
         }
     }
+    else if (parameterID == "ffDfEq")
+    {
+        ffDfEq = roundToInt (newValue);
+    }
     else if (parameterID == "syncChannel")
     {
-        const int ch = static_cast<int> (syncChannelPtr->load (std::memory_order_acquire)) - 1;
+        const int ch = static_cast<int> (syncChannelPtr->load (std::memory_order_relaxed)) - 1;
 
         if (ch >= 0)
         {
@@ -1323,7 +1284,8 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
                 paramsToSync.zeroLatencyMode =
                     zeroLatencyModePtr
                     && juce::approximatelyEqual (zeroLatencyModePtr->load(), 1.0f);
-                paramsToSync.ffDfEq = doEq;
+
+                paramsToSync.ffDfEq = roundToInt (ffDfEqPtr->load (std::memory_order_relaxed));
             }
 
             paramsToSync.paramsValid = true;
@@ -1331,9 +1293,10 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
     }
 
     // Update shared parameters if synced
-    if ((syncChannelPtr->load() > 0) && ! readingSharedParams)
+    if ((syncChannelPtr->load (std::memory_order_relaxed) > 0)
+        && ! readingSharedParams.load (std::memory_order_relaxed))
     {
-        const auto ch = static_cast<int> (syncChannelPtr->load()) - 1;
+        const auto ch = static_cast<int> (syncChannelPtr->load (std::memory_order_relaxed)) - 1;
         ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (ch);
 
         if (parameterID.startsWith ("xOverF") && ! loadingFile)
@@ -1383,21 +1346,6 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
             paramsToSync.gains[idx] = bandGainsPtr[idx]->load();
         }
     }
-}
-
-// TODO: refactor: we should put this on the apvts
-void PolarDesignerAudioProcessor::setEqState (int idx)
-{
-    doEq = idx;
-
-    if ((syncChannelPtr->load() > 0) && ! readingSharedParams)
-    {
-        int ch = (int) syncChannelPtr->load() - 1;
-        ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (ch);
-        paramsToSync.ffDfEq = doEq;
-    }
-
-    updateLatency();
 }
 
 void PolarDesignerAudioProcessor::resetXoverFreqs()
@@ -1793,7 +1741,9 @@ juce::Result PolarDesignerAudioProcessor::loadPreset (const juce::File& presetFi
                 vtsParams.getParameter ("mute" + String (i + 1))->convertTo0to1 (x));
     }
 
-    doEq = parsedJson.getProperty ("ffDfEq", parsedJson);
+    x = parsedJson.getProperty ("ffDfEq", parsedJson);
+    vtsParams.getParameter ("ffDfEq")->setValueNotifyingHost (
+        vtsParams.getParameter ("ffDfEq")->convertTo0to1 (x));
 
     x = parsedJson.getProperty ("proximity", parsedJson);
     vtsParams.getParameter ("proximity")
@@ -1802,10 +1752,6 @@ juce::Result PolarDesignerAudioProcessor::loadPreset (const juce::File& presetFi
     x = parsedJson.getProperty ("proximityOnOff", parsedJson);
     vtsParams.getParameter ("proximityOnOff")
         ->setValueNotifyingHost (vtsParams.getParameter ("proximityOnOff")->convertTo0to1 (x));
-
-    //    x = parsedJson.getProperty("trimPosition", parsedJson);
-    //    vtsParams.getParameter("trimPosition")->setValueNotifyingHost(
-    //            vtsParams.getParameter("trimPosition")->convertTo0to1(x));
 
     x = parsedJson.getProperty ("zeroLatencyMode", parsedJson);
     vtsParams.getParameter ("zeroLatencyMode")
@@ -1833,44 +1779,53 @@ juce::Result PolarDesignerAudioProcessor::savePreset (juce::File destination)
         var ("This preset file was created with the Austrian Audio PolarDesigner plugin v"
              + String (JucePlugin_VersionString)
              + ", for more information see www.austrian.audio ."));
-    jsonObj->setProperty ("nrActiveBands", (int) nProcessorBands);
-    jsonObj->setProperty ("zeroLatencyMode", zeroLatencyModePtr->load());
-    jsonObj->setProperty ("trimPosition", trimPositionPtr->load());
+    jsonObj->setProperty ("nrActiveBands",
+                          static_cast<int> (nProcessorBands.load (std::memory_order_relaxed)));
+    jsonObj->setProperty ("zeroLatencyMode", zeroLatencyModePtr->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("trimPosition", trimPositionPtr->load (std::memory_order_relaxed));
     jsonObj->setProperty (
         "xOverF1",
-        static_cast<int> (hzFromZeroToOne (nProcessorBands, 0, xOverFreqsPtr[0]->load())));
+        static_cast<int> (hzFromZeroToOne (nProcessorBands,
+                                           0,
+                                           xOverFreqsPtr[0]->load (std::memory_order_relaxed))));
     jsonObj->setProperty (
         "xOverF2",
-        static_cast<int> (hzFromZeroToOne (nProcessorBands, 1, xOverFreqsPtr[1]->load())));
+        static_cast<int> (hzFromZeroToOne (nProcessorBands,
+                                           1,
+                                           xOverFreqsPtr[1]->load (std::memory_order_relaxed))));
     jsonObj->setProperty (
         "xOverF3",
-        static_cast<int> (hzFromZeroToOne (nProcessorBands, 2, xOverFreqsPtr[2]->load())));
+        static_cast<int> (hzFromZeroToOne (nProcessorBands,
+                                           2,
+                                           xOverFreqsPtr[2]->load (std::memory_order_relaxed))));
     jsonObj->setProperty (
         "xOverF4",
-        static_cast<int> (hzFromZeroToOne (nProcessorBands, 3, xOverFreqsPtr[3]->load())));
-    jsonObj->setProperty ("dirFactor1", dirFactorsPtr[0]->load());
-    jsonObj->setProperty ("dirFactor2", dirFactorsPtr[1]->load());
-    jsonObj->setProperty ("dirFactor3", dirFactorsPtr[2]->load());
-    jsonObj->setProperty ("dirFactor4", dirFactorsPtr[3]->load());
-    jsonObj->setProperty ("dirFactor5", dirFactorsPtr[4]->load());
-    jsonObj->setProperty ("gain1", bandGainsPtr[0]->load());
-    jsonObj->setProperty ("gain2", bandGainsPtr[1]->load());
-    jsonObj->setProperty ("gain3", bandGainsPtr[2]->load());
-    jsonObj->setProperty ("gain4", bandGainsPtr[3]->load());
-    jsonObj->setProperty ("gain5", bandGainsPtr[4]->load());
-    jsonObj->setProperty ("solo1", soloBandPtr[0]->load());
-    jsonObj->setProperty ("solo2", soloBandPtr[1]->load());
-    jsonObj->setProperty ("solo3", soloBandPtr[2]->load());
-    jsonObj->setProperty ("solo4", soloBandPtr[3]->load());
-    jsonObj->setProperty ("solo5", soloBandPtr[4]->load());
-    jsonObj->setProperty ("mute1", muteBandPtr[0]->load());
-    jsonObj->setProperty ("mute2", muteBandPtr[1]->load());
-    jsonObj->setProperty ("mute3", muteBandPtr[2]->load());
-    jsonObj->setProperty ("mute4", muteBandPtr[3]->load());
-    jsonObj->setProperty ("mute5", muteBandPtr[4]->load());
-    jsonObj->setProperty ("ffDfEq", doEq);
-    jsonObj->setProperty ("proximity", proxDistancePtr->load());
-    jsonObj->setProperty ("proximityOnOff", proxOnOffPtr->load());
+        static_cast<int> (hzFromZeroToOne (nProcessorBands,
+                                           3,
+                                           xOverFreqsPtr[3]->load (std::memory_order_relaxed))));
+    jsonObj->setProperty ("dirFactor1", dirFactorsPtr[0]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("dirFactor2", dirFactorsPtr[1]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("dirFactor3", dirFactorsPtr[2]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("dirFactor4", dirFactorsPtr[3]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("dirFactor5", dirFactorsPtr[4]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("gain1", bandGainsPtr[0]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("gain2", bandGainsPtr[1]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("gain3", bandGainsPtr[2]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("gain4", bandGainsPtr[3]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("gain5", bandGainsPtr[4]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("solo1", soloBandPtr[0]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("solo2", soloBandPtr[1]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("solo3", soloBandPtr[2]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("solo4", soloBandPtr[3]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("solo5", soloBandPtr[4]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("mute1", muteBandPtr[0]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("mute2", muteBandPtr[1]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("mute3", muteBandPtr[2]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("mute4", muteBandPtr[3]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("mute5", muteBandPtr[4]->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("ffDfEq", ffDfEqPtr->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("proximity", proxDistancePtr->load (std::memory_order_relaxed));
+    jsonObj->setProperty ("proximityOnOff", proxOnOffPtr->load (std::memory_order_relaxed));
 
     String jsonString = JSON::toString (var (jsonObj), false, 2);
     if (destination.replaceWithText (jsonString))
@@ -2259,13 +2214,14 @@ void PolarDesignerAudioProcessor::timerCallback()
     if (zeroLatencyModeChanged.exchange (false, std::memory_order_acquire))
         updateLatency();
 
-    if (syncChannelPtr->load (std::memory_order_acquire) > 0)
-    {
-        readingSharedParams.store (true, std::memory_order_release);
-        int ch = static_cast<int> (syncChannelPtr->load (std::memory_order_acquire)) - 1;
-        ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (ch);
+    const auto syncChannel = static_cast<int> (syncChannelPtr->load (std::memory_order_relaxed));
 
-        if (! exactlyEqual (nProcessorBandsPtr->load(),
+    if (syncChannel > 0)
+    {
+        readingSharedParams.store (true, std::memory_order_relaxed);
+        ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (syncChannel - 1);
+
+        if (! exactlyEqual (nProcessorBandsPtr->load (std::memory_order_relaxed),
                             static_cast<float> (paramsToSync.nrActiveBands)))
         {
             vtsParams.getParameter ("nrBands")->setValueNotifyingHost (
@@ -2276,35 +2232,41 @@ void PolarDesignerAudioProcessor::timerCallback()
 
         for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
         {
-            if (! exactlyEqual (dirFactorsPtr[i]->load(), paramsToSync.dirFactors[i]))
+            if (! exactlyEqual (dirFactorsPtr[i]->load (std::memory_order_relaxed),
+                                paramsToSync.dirFactors[i]))
             {
                 vtsParams.getParameter ("alpha" + String (i + 1))
                     ->setValueNotifyingHost (vtsParams.getParameterRange ("alpha" + String (i + 1))
                                                  .convertTo0to1 (paramsToSync.dirFactors[i]));
             }
 
-            if (! exactlyEqual (soloBandPtr[i]->load(), paramsToSync.solo[i] ? 1.0f : 0.0f))
+            if (! exactlyEqual (soloBandPtr[i]->load (std::memory_order_relaxed),
+                                paramsToSync.solo[i] ? 1.0f : 0.0f))
             {
                 vtsParams.getParameter ("solo" + String (i + 1))
                     ->setValueNotifyingHost (vtsParams.getParameterRange ("solo" + String (i + 1))
                                                  .convertTo0to1 (paramsToSync.solo[i]));
             }
 
-            if (! exactlyEqual (muteBandPtr[i]->load(), paramsToSync.mute[i] ? 1.0f : 0.0f))
+            if (! exactlyEqual (muteBandPtr[i]->load (std::memory_order_relaxed),
+                                paramsToSync.mute[i] ? 1.0f : 0.0f))
             {
                 vtsParams.getParameter ("mute" + String (i + 1))
                     ->setValueNotifyingHost (vtsParams.getParameterRange ("mute" + String (i + 1))
                                                  .convertTo0to1 (paramsToSync.mute[i]));
             }
 
-            if (! exactlyEqual (bandGainsPtr[i]->load(), paramsToSync.gains[i]))
+            if (! exactlyEqual (bandGainsPtr[i]->load (std::memory_order_relaxed),
+                                paramsToSync.gains[i]))
             {
                 vtsParams.getParameter ("gain" + String (i + 1))
                     ->setValueNotifyingHost (vtsParams.getParameterRange ("gain" + String (i + 1))
                                                  .convertTo0to1 (paramsToSync.gains[i]));
             }
 
-            if ((i < 4) && ! exactlyEqual (xOverFreqsPtr[i]->load(), paramsToSync.xOverFreqs[i]))
+            if ((i < 4)
+                && ! exactlyEqual (xOverFreqsPtr[i]->load (std::memory_order_relaxed),
+                                   paramsToSync.xOverFreqs[i]))
             {
                 vtsParams.getParameter ("xOverF" + String (i + 1))
                     ->setValueNotifyingHost (vtsParams.getParameterRange ("xOverF" + String (i + 1))
@@ -2312,55 +2274,52 @@ void PolarDesignerAudioProcessor::timerCallback()
             }
         }
 
-        if (! exactlyEqual (proxDistancePtr->load(), paramsToSync.proximity))
+        if (! exactlyEqual (proxDistancePtr->load (std::memory_order_relaxed),
+                            paramsToSync.proximity))
         {
             vtsParams.getParameter ("proximity")
                 ->setValueNotifyingHost (vtsParams.getParameterRange ("proximity")
                                              .convertTo0to1 (paramsToSync.proximity));
         }
 
-        /* !J! allowBackwardsPatternPtr should ALWAYS be true - it has been deprecated in the UI but may persist in saved settings/sessions:
-  if (!exactlyEqual (allowBackwardsPatternPtr->load(), paramsToSync.allowBackwardsPattern ? 1.0f : 0.0f) &&
-            std::round(allowBackwardsPatternPtr->load()) != (paramsToSync.allowBackwardsPattern ? 1.0f : 0.0f))
-        {
-            vtsParams.getParameter ("allowBackwardsPattern")->setValueNotifyingHost (vtsParams.getParameterRange ("allowBackwardsPattern").convertTo0to1 (paramsToSync.allowBackwardsPattern));
-        }
-*/
-
-        if (! exactlyEqual (proxOnOffPtr->load(), paramsToSync.proximityOnOff ? 1.0f : 0.0f))
+        if (! exactlyEqual (proxOnOffPtr->load (std::memory_order_relaxed),
+                            paramsToSync.proximityOnOff ? 1.0f : 0.0f))
         {
             vtsParams.getParameter ("proximityOnOff")
                 ->setValueNotifyingHost (vtsParams.getParameterRange ("proximityOnOff")
                                              .convertTo0to1 (paramsToSync.proximityOnOff));
         }
 
-        if (paramsToSync.ffDfEq != doEq)
-        {
-            setEqState (paramsToSync.ffDfEq);
-            ffDfEqChanged = true;
-        }
+        if (roundToInt (ffDfEqPtr->load (std::memory_order_relaxed)) != paramsToSync.ffDfEq)
+            vtsParams.getParameter ("ffDfEq")->setValueNotifyingHost (
+                vtsParams.getParameterRange ("ffDfEq").convertTo0to1 (
+                    static_cast<float> (paramsToSync.ffDfEq)));
 
-        if ((std::round (zeroLatencyModePtr->load()) > 0.5f ? true : false)
+        if ((std::round (zeroLatencyModePtr->load (std::memory_order_relaxed)) > 0.5f ? true
+                                                                                      : false)
             != paramsToSync.zeroLatencyMode)
         {
             vtsParams.getParameter ("zeroLatencyMode")
                 ->setValueNotifyingHost (vtsParams.getParameterRange ("zeroLatencyMode")
                                              .convertTo0to1 (paramsToSync.zeroLatencyMode));
 
-            paramsToSync.zeroLatencyMode = (std::round (zeroLatencyModePtr->load()) > 0.5f);
+            paramsToSync.zeroLatencyMode =
+                (std::round (zeroLatencyModePtr->load (std::memory_order_relaxed)) > 0.5f);
 
 #ifdef USE_EXTRA_DEBUG_DUMPS
             LOG_DEBUG (String::formatted ("PLUGINPROCESSOR %p: zeroLatencyModePtr update", this));
 #endif
         }
 
-        readingSharedParams.store (false, std::memory_order_release);
+        readingSharedParams.store (false, std::memory_order_relaxed);
     }
 }
 
 void PolarDesignerAudioProcessor::updateLatency()
 {
-    if (isBypassed || juce::approximatelyEqual (zeroLatencyModePtr->load(), 1.0f))
+    using namespace juce;
+    if (isBypassed
+        || approximatelyEqual (zeroLatencyModePtr->load (std::memory_order_relaxed), 1.0f))
     {
         setLatencySamples (0);
         return;
@@ -2369,7 +2328,7 @@ void PolarDesignerAudioProcessor::updateLatency()
     auto latency = (firLen - 1) / 2;
 
     // we are using free/diffuse field eq
-    if (doEq != 0)
+    if (! approximatelyEqual (ffDfEqPtr->load (std::memory_order_relaxed), 0.0f))
         latency += eqLatency;
 
     setLatencySamples (latency);
@@ -2382,7 +2341,6 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
 
     abLayerState = state;
     abLayerChanged.store (true, std::memory_order_release);
-    ffDfEqChanged.store (true, std::memory_order_release);
 
     resetTrackingState(); // Clear tracking data
 
@@ -2394,7 +2352,6 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
     if (abLayerState == COMPARE_LAYER_B)
     {
         layerA = vtsParams.copyState();
-        doEqA = doEq;
 
         if (! zeroLatencyModeActive() && proxDistancePtr && nProcessorBandsPtr)
         {
@@ -2406,10 +2363,9 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
                                    std::memory_order_release);
             }
         }
-        readingSharedParams.store (true, std::memory_order_release);
+        readingSharedParams.store (true, std::memory_order_relaxed);
 
         vtsParams.state = layerB.createCopy();
-        doEq = doEqB;
 
         if (zeroLatencyModeActive())
         {
@@ -2424,7 +2380,6 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
     else
     {
         layerB = vtsParams.copyState();
-        doEqB = doEq;
 
         if (! zeroLatencyModeActive())
         {
@@ -2436,10 +2391,9 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
                                    std::memory_order_release);
             }
         }
-        readingSharedParams.store (true, std::memory_order_release);
+        readingSharedParams.store (true, std::memory_order_relaxed);
 
         vtsParams.state = layerA.createCopy();
-        doEq = doEqA;
 
         if (zeroLatencyModeActive())
         {

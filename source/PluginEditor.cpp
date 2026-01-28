@@ -431,8 +431,12 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
 
 void PolarDesignerAudioProcessorEditor::initializeSavedStates()
 {
+    using namespace juce;
+
     nActiveBands = polarDesignerProcessor.getNProcessorBands();
     isStateSaved.fill (false);
+    const auto* ffDfEqParam = valueTreeState.getParameter ("ffDfEq");
+    const auto ffDfEq = roundToInt (ffDfEqParam->convertFrom0to1 (ffDfEqParam->getValue()));
     for (unsigned long layer = 0; layer < 2; ++layer)
     {
         savedStates[layer].nrBandsValue = nActiveBands;
@@ -443,7 +447,7 @@ void PolarDesignerAudioProcessorEditor::initializeSavedStates()
         savedStates[layer].crossoverValues.fill (1000.0f); // Safe default
         savedStates[layer].proxCtrState = false;
         savedStates[layer].proxValue = 0.0f;
-        savedStates[layer].eqState = polarDesignerProcessor.getEqState();
+        savedStates[layer].eqState = ffDfEq;
     }
     DBG ("Initialized savedStates: nrBands=" << std::to_string (nActiveBands));
 }
@@ -1347,9 +1351,9 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
         ibEqCtr[1].setToggleState (false, juce::NotificationType::dontSendNotification);
 
         if (! ibEqCtr[0].getToggleState() && ! ibEqCtr[1].getToggleState())
-            polarDesignerProcessor.setEqState (0);
+            valueTreeState.getParameter ("ffDfEq")->setValueNotifyingHost (0);
         else
-            polarDesignerProcessor.setEqState (1);
+            valueTreeState.getParameter ("ffDfEq")->setValueNotifyingHost (1);
     }
     else if (button == &ibEqCtr[1])
     {
@@ -1358,9 +1362,9 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
         ibEqCtr[0].setToggleState (false, juce::NotificationType::dontSendNotification);
 
         if (! ibEqCtr[0].getToggleState() && ! ibEqCtr[1].getToggleState())
-            polarDesignerProcessor.setEqState (0);
+            valueTreeState.getParameter ("ffDfEq")->setValueNotifyingHost (0);
         else
-            polarDesignerProcessor.setEqState (2);
+            valueTreeState.getParameter ("ffDfEq")->setValueNotifyingHost (2);
     }
     else if (button == &tbTerminateSpill)
     {
@@ -2255,7 +2259,9 @@ void PolarDesignerAudioProcessorEditor::setEqMode()
 {
     using namespace juce;
 
-    int activeIdx = polarDesignerProcessor.getEqState();
+    const auto* param = valueTreeState.getParameter ("ffDfEq");
+
+    const auto activeIdx = roundToInt (param->convertFrom0to1 (param->getValue()));
     if (activeIdx == 0)
     {
         ibEqCtr[0].setToggleState (false, NotificationType::dontSendNotification);
@@ -2337,7 +2343,7 @@ int PolarDesignerAudioProcessorEditor::getControlParameterIndex (Component& cont
 
 void PolarDesignerAudioProcessorEditor::saveLayerState (int layer)
 {
-    //    ScopedLock lock(polarDesignerProcessor.abLayerLock);
+    using namespace juce;
 
     LayerState& state = savedStates[static_cast<size_t> (layer)];
     state.nrBandsValue = polarDesignerProcessor.getNProcessorBands();
@@ -2356,7 +2362,9 @@ void PolarDesignerAudioProcessorEditor::saveLayerState (int layer)
 
     state.proxCtrState = tgbProxCtr.getToggleState();
     state.proxValue = static_cast<float> (slProximity.getValue());
-    state.eqState = polarDesignerProcessor.getEqState();
+
+    const auto* param = valueTreeState.getParameter ("ffDfEq");
+    state.eqState = roundToInt (param->convertFrom0to1 (param->getValue()));
 
     isStateSaved[static_cast<size_t> (layer)] = true;
     DBG ("Saved state for layer " << layer << ": nrBands=" << std::to_string (state.nrBandsValue));
@@ -2463,7 +2471,8 @@ void PolarDesignerAudioProcessorEditor::restoreLayerState (int layer)
     valueTreeState.getParameter ("proximity")->endChangeGesture();
 
     // Restore EQ mode
-    polarDesignerProcessor.setEqState (state.eqState);
+    valueTreeState.getParameter ("ffDfEq")->setValueNotifyingHost (
+        static_cast<float> (state.eqState));
     setEqMode();
 
     // Update UI

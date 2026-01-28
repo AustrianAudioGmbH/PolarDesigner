@@ -52,7 +52,8 @@ TEST_CASE ("Diffuse/free field EQ: IR correctness", "[EQ]")
     {
         buffer.setSample (0, 0, 1.0f);
 
-        proc.setEqState (1); // free field
+        auto* ffDfEqParam = vts.getParameter ("ffDfEq");
+        ffDfEqParam->setValueNotifyingHost (ffDfEqParam->convertTo0to1 (1)); // free field
 
         vts.getParameter ("alpha1")->setValueNotifyingHost (0.0f); // omni
         vts.getParameter ("alpha2")->setValueNotifyingHost (0.0f);
@@ -67,7 +68,8 @@ TEST_CASE ("Diffuse/free field EQ: IR correctness", "[EQ]")
     {
         buffer.setSample (0, 1, 1.0f);
 
-        proc.setEqState (1); // free field
+        auto* ffDfEqParam = vts.getParameter ("ffDfEq");
+        ffDfEqParam->setValueNotifyingHost (ffDfEqParam->convertTo0to1 (1)); // free field
 
         vts.getParameter ("alpha1")->setValueNotifyingHost (1.0f); // eight
         vts.getParameter ("alpha2")->setValueNotifyingHost (1.0f);
@@ -82,7 +84,8 @@ TEST_CASE ("Diffuse/free field EQ: IR correctness", "[EQ]")
     {
         buffer.setSample (0, 0, 1.0f);
 
-        proc.setEqState (2); // diffuse field
+        auto* ffDfEqParam = vts.getParameter ("ffDfEq");
+        ffDfEqParam->setValueNotifyingHost (ffDfEqParam->convertTo0to1 (2)); // diffuse field
 
         vts.getParameter ("alpha1")->setValueNotifyingHost (0.0f); // omni
         vts.getParameter ("alpha2")->setValueNotifyingHost (0.0f);
@@ -97,7 +100,8 @@ TEST_CASE ("Diffuse/free field EQ: IR correctness", "[EQ]")
     {
         buffer.setSample (0, 1, 1.0f);
 
-        proc.setEqState (2); // diffuse field
+        auto* ffDfEqParam = vts.getParameter ("ffDfEq");
+        ffDfEqParam->setValueNotifyingHost (ffDfEqParam->convertTo0to1 (2)); // diffuse field
 
         vts.getParameter ("alpha1")->setValueNotifyingHost (1.0f); // eight
         vts.getParameter ("alpha2")->setValueNotifyingHost (1.0f);
@@ -120,7 +124,10 @@ TEST_CASE ("Diffuse/free field EQ: IR correctness", "[EQ]")
 TEST_CASE ("Diffuse/free field EQ: correct latency", "[EQ]")
 {
     PolarDesignerAudioProcessor proc;
-    proc.setEqState (1); // free field EQ
+    auto& vts = proc.getValueTreeState();
+
+    auto* ffDfEqParam = vts.getParameter ("ffDfEq");
+    ffDfEqParam->setValueNotifyingHost (ffDfEqParam->convertTo0to1 (1)); // free field
 
     SECTION ("44.1kHz EQ on")
     {
