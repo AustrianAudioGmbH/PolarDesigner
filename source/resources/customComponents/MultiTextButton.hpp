@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    TextMultiButton.h
+    TextMultiButton.hpp
     Created: 30 May 2023 7:42:57pm
     Author:  Mikolaj Cikuj
 

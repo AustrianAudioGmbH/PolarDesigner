@@ -104,10 +104,10 @@ public:
 template <ButtonColor color>
 class MultiTextButtonComponent : public juce::TextButton
 {
-    static constexpr auto fillReduceMargin = 1.0f;
-    static constexpr auto textReduceMargin = 6.0f;
-    static constexpr auto buttonFrameReduceMargin = 3.0f;
-    static constexpr auto buttonFrameThickness = 2.0f;
+    static constexpr auto fillReduceMargin = 1;
+    static constexpr auto textReduceMargin = 6;
+    static constexpr auto buttonFrameReduceMargin = 3;
+    static constexpr auto buttonFrameThickness = 2;
 
 public:
     MultiTextButtonComponent()

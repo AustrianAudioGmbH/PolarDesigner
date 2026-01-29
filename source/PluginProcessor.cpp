@@ -1093,46 +1093,26 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
         nProcessorBands.store (
             std::min (
                 static_cast<unsigned int> (
-                    static_cast<int> (nProcessorBandsPtr->load (std::memory_order_acquire)) + 1),
+                    static_cast<int> (nProcessorBandsPtr->load (std::memory_order_relaxed)) + 1),
                 static_cast<unsigned int> (MAX_NUM_EQS)),
-            std::memory_order_release);
+            std::memory_order_relaxed);
         if (abLayerState == COMPARE_LAYER_A)
-            oldNrBandsA.store (nProcessorBandsPtr->load (std::memory_order_acquire),
-                               std::memory_order_release);
+            oldNrBandsA.store (nProcessorBandsPtr->load (std::memory_order_relaxed),
+                               std::memory_order_relaxed);
         else
-            oldNrBandsB.store (nProcessorBandsPtr->load (std::memory_order_acquire),
-                               std::memory_order_release);
-        oldNrBands.store (nProcessorBandsPtr->load (std::memory_order_acquire),
-                          std::memory_order_release);
+            oldNrBandsB.store (nProcessorBandsPtr->load (std::memory_order_relaxed),
+                               std::memory_order_relaxed);
+        oldNrBands.store (nProcessorBandsPtr->load (std::memory_order_relaxed),
+                          std::memory_order_relaxed);
     }
 
-    // Defer filter coefficient computation until buffers are ready
-    recomputeAllFilterCoefficients.store (true, std::memory_order_relaxed);
-    recomputeFilterCoefficientsIfNeeded();
-    zeroLatencyModeChanged.store (true, std::memory_order_release);
+    zeroLatencyModeChanged.store (true, std::memory_order_relaxed);
     repaintDEQ.store (true, std::memory_order_relaxed);
 }
 
-/* IMPORTANT: parameterChanged *will* be called by both the message thread AND the audio thread.
- * This varies by DAW, but in general means one should avoid doing anything expensive.
- * Instead:
- * * set atomic flags for the UI to pick up on a timer
- * * set atomic flags for processBlock to check at the start of each block
-*/
-
-// parameterChanged: Add thread-safety and consistent oldNrBands updates
-
-// In parameterChanged (around line 1050)
-void PolarDesignerAudioProcessor::parameterChanged (const juce::String& parameterID,
-                                                    [[maybe_unused]] float newValue)
+void PolarDesignerAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
     using namespace juce;
-
-    if (currentSampleRate <= 0.0 || currentBlockSize <= 0)
-    {
-        LOG_WARN ("Plugin not prepared in parameterChanged, initializing defaults");
-        prepareToPlay (currentSampleRate, currentBlockSize);
-    }
 
     if (parameterID.startsWith ("trimPosition"))
     {
@@ -1142,25 +1122,15 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
     {
         if (nProcessorBandsPtr)
         {
-            unsigned int newBands = static_cast<unsigned int> (
-                static_cast<int> (nProcessorBandsPtr->load (std::memory_order_acquire)) + 1);
-            nProcessorBands.store (std::min (newBands, static_cast<unsigned int> (MAX_NUM_EQS)),
-                                   std::memory_order_release);
-            if (abLayerState == COMPARE_LAYER_A)
-                oldNrBandsA.store (nProcessorBandsPtr->load (std::memory_order_acquire),
-                                   std::memory_order_release);
-            else
-                oldNrBandsB.store (nProcessorBandsPtr->load (std::memory_order_acquire),
-                                   std::memory_order_release);
-            oldNrBands.store (nProcessorBandsPtr->load (std::memory_order_acquire),
-                              std::memory_order_release);
+            const auto newBands = static_cast<unsigned int> (newValue + 1);
+            setNProcessorBands (newBands);
             recomputeAllFilterCoefficients.store (true, std::memory_order_relaxed);
         }
     }
     else if (parameterID.startsWith ("xOverF") && ! loadingFile)
     {
         unsigned int idx = static_cast<unsigned int> (parameterID.getTrailingIntValue() - 1);
-        recomputeFilterCoefficients[idx].store (true, std::memory_order_release);
+        recomputeFilterCoefficients[idx].store (true, std::memory_order_relaxed);
     }
     else if (parameterID.startsWith ("solo"))
     {
@@ -1178,12 +1148,12 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
     }
     else if (parameterID == "proximity")
     {
-        setProxCompCoefficients (proxDistancePtr->load());
+        setProxCompCoefficients (proxDistancePtr->load (std::memory_order_relaxed));
     }
     else if (parameterID == "zeroLatencyMode")
     {
         updateLatency();
-        if (zeroLatencyModePtr->load (std::memory_order_acquire) < 0.5f)
+        if (newValue < 0.5f)
         {
             // Zero Latency Mode turned off
             if (abLayerState == COMPARE_LAYER_B)
@@ -1191,57 +1161,59 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
                 vtsParams.getParameter ("proximity")
                     ->setValueNotifyingHost (
                         vtsParams.getParameter ("proximity")
-                            ->convertTo0to1 (oldProxDistanceB.load (std::memory_order_acquire)));
+                            ->convertTo0to1 (oldProxDistanceB.load (std::memory_order_relaxed)));
                 vtsParams.getParameter ("nrBands")->setValueNotifyingHost (
                     vtsParams.getParameter ("nrBands")->convertTo0to1 (
-                        oldNrBandsB.load (std::memory_order_acquire)));
+                        oldNrBandsB.load (std::memory_order_relaxed)));
             }
             else
             {
                 vtsParams.getParameter ("proximity")
                     ->setValueNotifyingHost (
                         vtsParams.getParameter ("proximity")
-                            ->convertTo0to1 (oldProxDistanceA.load (std::memory_order_acquire)));
+                            ->convertTo0to1 (oldProxDistanceA.load (std::memory_order_relaxed)));
                 vtsParams.getParameter ("nrBands")->setValueNotifyingHost (
                     vtsParams.getParameter ("nrBands")->convertTo0to1 (
-                        oldNrBandsA.load (std::memory_order_acquire)));
+                        oldNrBandsA.load (std::memory_order_relaxed)));
             }
             recomputeAllFilterCoefficients.store (true, std::memory_order_relaxed);
-            zeroLatencyModeChanged.store (true, std::memory_order_release);
+            zeroLatencyModeChanged.store (true, std::memory_order_relaxed);
         }
         else
         {
             // Zero Latency Mode turned on
-            if (! abLayerChanged.load (std::memory_order_acquire))
+            if (! abLayerChanged.load (std::memory_order_relaxed))
             {
                 if (abLayerState == COMPARE_LAYER_B)
                 {
-                    oldProxDistanceB.store (proxDistancePtr->load (std::memory_order_acquire),
-                                            std::memory_order_release);
-                    oldNrBandsB.store (nProcessorBandsPtr->load (std::memory_order_acquire),
-                                       std::memory_order_release);
+                    oldProxDistanceB.store (proxDistancePtr->load (std::memory_order_relaxed),
+                                            std::memory_order_relaxed);
+                    oldNrBandsB.store (nProcessorBandsPtr->load (std::memory_order_relaxed),
+                                       std::memory_order_relaxed);
                 }
                 else
                 {
-                    oldProxDistanceA.store (proxDistancePtr->load (std::memory_order_acquire),
-                                            std::memory_order_release);
-                    oldNrBandsA.store (nProcessorBandsPtr->load (std::memory_order_acquire),
-                                       std::memory_order_release);
+                    oldProxDistanceA.store (proxDistancePtr->load (std::memory_order_relaxed),
+                                            std::memory_order_relaxed);
+                    oldNrBandsA.store (nProcessorBandsPtr->load (std::memory_order_relaxed),
+                                       std::memory_order_relaxed);
                 }
             }
             vtsParams.getParameter ("nrBands")->setValueNotifyingHost (
-                vtsParams.getParameter ("nrBands")->convertTo0to1 (1));
+                vtsParams.getParameter ("nrBands")->convertTo0to1 (0));
+
             vtsParams.getParameter ("proximity")
                 ->setValueNotifyingHost (vtsParams.getParameter ("proximity")->convertTo0to1 (0));
-            zeroLatencyModeChanged.store (true, std::memory_order_release);
+
+            zeroLatencyModeChanged.store (true, std::memory_order_relaxed);
         }
-        if (zeroLatencyModeChanged.load (std::memory_order_acquire)
-            && zeroLatencyModePtr->load (std::memory_order_acquire) > 0.5f)
+        if (zeroLatencyModeChanged.load (std::memory_order_relaxed)
+            && zeroLatencyModePtr->load (std::memory_order_relaxed) > 0.5f)
         {
             vtsParams.state.setProperty ("oldZeroLatencyMode",
-                                         var (zeroLatencyModePtr->load (std::memory_order_acquire)),
+                                         var (zeroLatencyModePtr->load (std::memory_order_relaxed)),
                                          nullptr);
-            zeroLatencyModeChanged.store (true, std::memory_order_release);
+            zeroLatencyModeChanged.store (true, std::memory_order_relaxed);
         }
     }
     else if (parameterID == "syncChannel")
@@ -1272,18 +1244,17 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
                 paramsToSync.nrActiveBands =
                     nProcessorBandsPtr ? static_cast<int> (nProcessorBandsPtr->load()) : 0;
                 paramsToSync.proximity = proxDistancePtr ? proxDistancePtr->load() : 0.0f;
-                // CHANGED: Replaced std::round(proxOnOffPtr->load()) > 0.5f with juce::approximatelyEqual(proxOnOffPtr->load(), 1.0f)
                 paramsToSync.proximityOnOff =
                     proxOnOffPtr && juce::approximatelyEqual (proxOnOffPtr->load(), 1.0f);
 
                 paramsToSync.allowBackwardsPattern = true; // !J! ALWAYS TRUE
 
-                // CHANGED: Replaced std::round(zeroLatencyModePtr->load()) > 0.5f with juce::approximatelyEqual(zeroLatencyModePtr->load(), 1.0f)
                 paramsToSync.zeroLatencyMode =
                     zeroLatencyModePtr
                     && juce::approximatelyEqual (zeroLatencyModePtr->load(), 1.0f);
 
-                paramsToSync.ffDfEq = roundToInt (ffDfEqPtr->load (std::memory_order_relaxed));
+                paramsToSync.ffDfEq =
+                    static_cast<int> (ffDfEqPtr->load (std::memory_order_relaxed));
             }
 
             paramsToSync.paramsValid = true;
@@ -1345,7 +1316,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
         }
         else if (parameterID == "ffDfEq")
         {
-            paramsToSync.ffDfEq = roundToInt (ffDfEqPtr->load (std::memory_order_relaxed));
+            paramsToSync.ffDfEq = static_cast<int> (ffDfEqPtr->load (std::memory_order_relaxed));
         }
     }
 }
@@ -2213,7 +2184,7 @@ void PolarDesignerAudioProcessor::timerCallback()
 {
     using namespace juce;
 
-    if (zeroLatencyModeChanged.exchange (false, std::memory_order_acquire))
+    if (zeroLatencyModeChanged.exchange (false, std::memory_order_relaxed))
         updateLatency();
 
     const auto syncChannel = static_cast<int> (syncChannelPtr->load (std::memory_order_relaxed));
@@ -2292,7 +2263,7 @@ void PolarDesignerAudioProcessor::timerCallback()
                                              .convertTo0to1 (paramsToSync.proximityOnOff));
         }
 
-        if (roundToInt (ffDfEqPtr->load (std::memory_order_relaxed)) != paramsToSync.ffDfEq)
+        if (static_cast<int> (ffDfEqPtr->load (std::memory_order_relaxed)) != paramsToSync.ffDfEq)
             vtsParams.getParameter ("ffDfEq")->setValueNotifyingHost (
                 vtsParams.getParameterRange ("ffDfEq").convertTo0to1 (
                     static_cast<float> (paramsToSync.ffDfEq)));
@@ -2342,7 +2313,7 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
     jassert (state == COMPARE_LAYER_A || state == COMPARE_LAYER_B);
 
     abLayerState = state;
-    abLayerChanged.store (true, std::memory_order_release);
+    abLayerChanged.store (true, std::memory_order_relaxed);
 
     resetTrackingState(); // Clear tracking data
 
@@ -2359,10 +2330,10 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
         {
             if (proxDistancePtr && nProcessorBandsPtr)
             {
-                oldProxDistanceA.store (proxDistancePtr->load (std::memory_order_acquire),
-                                        std::memory_order_release);
-                oldNrBandsA.store (nProcessorBandsPtr->load (std::memory_order_acquire),
-                                   std::memory_order_release);
+                oldProxDistanceA.store (proxDistancePtr->load (std::memory_order_relaxed),
+                                        std::memory_order_relaxed);
+                oldNrBandsA.store (nProcessorBandsPtr->load (std::memory_order_relaxed),
+                                   std::memory_order_relaxed);
             }
         }
         readingSharedParams.store (true, std::memory_order_relaxed);
@@ -2375,8 +2346,10 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
         }
         else
         {
-            oldProxDistance.store (oldProxDistanceB.load());
-            oldNrBands.store (oldNrBandsB.load());
+            oldProxDistance.store (oldProxDistanceB.load (std::memory_order_relaxed),
+                                   std::memory_order_relaxed);
+            oldNrBands.store (oldNrBandsB.load (std::memory_order_relaxed),
+                              std::memory_order_relaxed);
         }
     }
     else
@@ -2387,10 +2360,10 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
         {
             if (proxDistancePtr && nProcessorBandsPtr)
             {
-                oldProxDistanceB.store (proxDistancePtr->load (std::memory_order_acquire),
-                                        std::memory_order_release);
-                oldNrBandsB.store (nProcessorBandsPtr->load (std::memory_order_acquire),
-                                   std::memory_order_release);
+                oldProxDistanceB.store (proxDistancePtr->load (std::memory_order_relaxed),
+                                        std::memory_order_relaxed);
+                oldNrBandsB.store (nProcessorBandsPtr->load (std::memory_order_relaxed),
+                                   std::memory_order_relaxed);
             }
         }
         readingSharedParams.store (true, std::memory_order_relaxed);
@@ -2403,8 +2376,8 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
         }
         else
         {
-            oldProxDistance.store (oldProxDistanceA.load());
-            oldNrBands.store (oldNrBandsA.load());
+            oldProxDistance.store (oldProxDistanceA.load (std::memory_order_relaxed));
+            oldNrBands.store (oldNrBandsA.load (std::memory_order_relaxed));
         }
     }
 
@@ -2412,11 +2385,12 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
         vtsParams.getParameter ("proximity")
             ->setValueNotifyingHost (
                 vtsParams.getParameter ("proximity")->convertTo0to1 (oldProxDistance));
+
     if (nProcessorBandsPtr)
         vtsParams.getParameter ("nrBands")->setValueNotifyingHost (
             vtsParams.getParameter ("nrBands")->convertTo0to1 (oldNrBands));
 
-    abLayerChanged.store (false, std::memory_order_release);
+    abLayerChanged.store (false, std::memory_order_relaxed);
 
     repaintDEQ.store (true, std::memory_order_relaxed);
 

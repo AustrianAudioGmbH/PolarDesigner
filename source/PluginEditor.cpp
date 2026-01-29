@@ -412,6 +412,8 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
     nEditorBandsChanged();
     activateEditingForZeroLatency();
 
+    valueTreeState.addParameterListener ("ffDfEq", this);
+
     startTimer (60);
 
     setEqMode();
@@ -484,6 +486,8 @@ PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
             slCrossoverAtt[i].reset();
     }
     setLookAndFeel (nullptr);
+
+    valueTreeState.removeParameterListener ("ffDfEq", this);
 }
 
 //==============================================================================
@@ -1294,29 +1298,35 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     }
     else if (button == &ibEqCtr[0])
     {
-        auto* param = valueTreeState.getParameter ("ffDfEq");
-
         ibEqCtr[0].setToggleState (! ibEqCtr[0].getToggleState(),
                                    NotificationType::dontSendNotification);
         ibEqCtr[1].setToggleState (false, juce::NotificationType::dontSendNotification);
 
+        float value;
+
         if (! ibEqCtr[0].getToggleState() && ! ibEqCtr[1].getToggleState())
-            param->setValueNotifyingHost (param->convertTo0to1 (0));
+            value = 0;
         else
-            param->setValueNotifyingHost (param->convertTo0to1 (1));
+            value = 1;
+
+        auto* param = valueTreeState.getParameter ("ffDfEq");
+        param->setValueNotifyingHost (param->convertTo0to1 (value));
     }
     else if (button == &ibEqCtr[1])
     {
-        auto* param = valueTreeState.getParameter ("ffDfEq");
-
         ibEqCtr[1].setToggleState (! ibEqCtr[1].getToggleState(),
                                    NotificationType::dontSendNotification);
         ibEqCtr[0].setToggleState (false, juce::NotificationType::dontSendNotification);
 
+        float value;
+
         if (! ibEqCtr[0].getToggleState() && ! ibEqCtr[1].getToggleState())
-            param->setValueNotifyingHost (param->convertTo0to1 (0));
+            value = 0;
         else
-            valueTreeState.getParameter ("ffDfEq")->setValueNotifyingHost (2);
+            value = 2;
+
+        auto* param = valueTreeState.getParameter ("ffDfEq");
+        param->setValueNotifyingHost (param->convertTo0to1 (value));
     }
     else if (button == &tbTerminateSpill)
     {
@@ -1404,11 +1414,11 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     }
     else if (button == &abButton[COMPARE_LAYER_A] && ! button->getToggleState())
     {
-        polarDesignerProcessor.changeABLayerState (COMPARE_LAYER_A);
+        polarDesignerProcessor.changeABLayerState (COMPARE_LAYER_B);
     }
     else if (button == &abButton[COMPARE_LAYER_B] && ! button->getToggleState())
     {
-        polarDesignerProcessor.changeABLayerState (COMPARE_LAYER_B);
+        polarDesignerProcessor.changeABLayerState (COMPARE_LAYER_A);
     }
     else if (button == &polarPatternVisualizers[0])
     {
@@ -1683,7 +1693,8 @@ void PolarDesignerAudioProcessorEditor::nEditorBandsChanged()
 {
     using namespace juce;
 
-    nActiveBands = polarDesignerProcessor.getNProcessorBands();
+    const auto param = valueTreeState.getParameter ("nrBands");
+    nActiveBands = static_cast<unsigned int> (param->convertFrom0to1 (param->getValue())) + 1;
 
     // Set nrbands button state when preset load
     tmbNrBandsButton[(static_cast<int> (nActiveBands - 1))].setToggleState (
@@ -1827,14 +1838,12 @@ void PolarDesignerAudioProcessorEditor::activateMainUI (bool shouldBeActive)
     {
         grpTerminatorControl.setEnabled (shouldBeActive);
         abButton.setEnabled (false);
-        abButton.setVisible (false);
         tbZeroLatency.setToggleState (true, NotificationType::sendNotification);
     }
     else
     {
         grpTerminatorControl.setEnabled (true);
         abButton.setEnabled (shouldBeActive);
-        abButton.setVisible (shouldBeActive);
         tbZeroLatency.setToggleState (false, NotificationType::sendNotification);
     }
 
@@ -1852,19 +1861,16 @@ void PolarDesignerAudioProcessorEditor::activateEditingForZeroLatency()
 {
     using namespace juce;
 
-    bool zlIsActive = polarDesignerProcessor.zeroLatencyModeActive();
+    bool zlIsActive = valueTreeState.getParameter ("zeroLatencyMode")->getValue() > 0.5f;
 
     if (! zlIsActive)
     {
         activateMainUI (true);
         abButton.setEnabled (tmbSyncChannelButton.getSelectedButton() == -1);
-        abButton.setVisible (true);
         updateABButtonState (polarDesignerProcessor.abLayerState);
+        nEditorBandsChanged();
         return;
     }
-
-    valueTreeState.getParameter ("nrBands")->setValueNotifyingHost (
-        valueTreeState.getParameter ("nrBands")->convertTo0to1 (0));
 
     nEditorBandsChanged();
 
@@ -1872,7 +1878,6 @@ void PolarDesignerAudioProcessorEditor::activateEditingForZeroLatency()
     directivityEqualiser.repaint();
     activateMainUI (false);
     abButton.setEnabled (false);
-    abButton.setVisible (false);
 }
 
 void PolarDesignerAudioProcessorEditor::showPresetList (bool shouldShow)
@@ -2127,10 +2132,7 @@ void PolarDesignerAudioProcessorEditor::parameterChanged (const juce::String& pa
     ignoreUnused (newValue);
 
     if (parameterID == "ffDfEq")
-    {
-        // Update EQ mode buttons
-        setEqMode (roundToInt (newValue));
-    }
+        setEqMode (static_cast<int> (newValue));
 }
 
 void PolarDesignerAudioProcessorEditor::setMainAreaEnabled (bool enable)
