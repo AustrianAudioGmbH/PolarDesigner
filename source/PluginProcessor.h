@@ -205,11 +205,7 @@ public:
     MelatoninPerfetto tracingSession;
 #endif
 
-    bool zeroLatencyModeActive()
-    {
-        bool _zd = (zeroLatencyModePtr->load() > 0.5f);
-        return (_zd);
-    }
+    bool zeroLatencyModeActive() { return zeroLatencyModePtr->load() > 0.5f; }
 
     void timerCallback() override;
 
@@ -308,11 +304,7 @@ private:
     void recomputeFilterCoefficientsIfNeeded();
     void resetTrackingState();
 
-    // Method to update A/B button states
     void updateABButtonState();
-
-    //    // ValueTree::Listener override
-    //    void valueTreePropertyChanged(ValueTree& treeWhosePropertyHasChanged, const Identifier& property);
 
     // file handling
     const juce::String presetProperties[27] = {

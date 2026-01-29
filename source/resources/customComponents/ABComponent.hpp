@@ -55,6 +55,8 @@ public:
         buttons[1].setRadioGroupId (1);
     }
 
+    ~ABComponent() override { setLookAndFeel (nullptr); }
+
     juce::TextButton& operator[] (int i) { return buttons[i]; }
 
     void resized() override
@@ -68,7 +70,7 @@ public:
 
     void setEnabled (bool isEnabled)
     {
-        const auto alpha = isEnabled ? 1.0f : 0.5f;
+        const auto alpha = isEnabled ? 1.0f : 0.3f;
 
         buttons.setEnabled (isEnabled);
         label.setEnabled (isEnabled);
