@@ -53,7 +53,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
     using namespace juce;
 
     nActiveBands = polarDesignerProcessor.getNProcessorBands();
-    syncChannelIdx = polarDesignerProcessor.getSyncChannelIdx();
 
     setResizable (true, true);
     setResizeLimits (EDITOR_MIN_WIDTH, EDITOR_MIN_HEIGHT, EDITOR_MAX_WIDTH, EDITOR_MAX_HEIGHT);
@@ -74,26 +73,16 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
                         + String (AA_BUILD_COMMIT_HASH)
                         + String::formatted (" (JUCE:%s)", AA_BUILD_JUCE_VERSION));
 
-    addAndMakeVisible (&titleCompare);
-    titleCompare.setTitle (String ("Compare"));
-    titleCompare.setFont (mainLaF.normalFont);
-
-    addAndMakeVisible (&tmbABButton);
-    tmbABButton.setButtonsNumber (2);
-    tmbABButton.setInterceptsMouseClicks (true, true);
-
-    tmbABButton[0].setClickingTogglesState (true);
-    tmbABButton[0].setRadioGroupId (3344);
-    tmbABButton[0].setButtonText ("A");
-    tmbABButton[0].addListener (this);
-
-    tmbABButton[1].setClickingTogglesState (true);
-    tmbABButton[1].setRadioGroupId (3344);
-    tmbABButton[1].setButtonText ("B");
-    tmbABButton[1].addListener (this);
+    addAndMakeVisible (abButton);
+    abButton[0].addListener (this);
+    abButton[1].addListener (this);
+    abButton[0].setToggleState (polarDesignerProcessor.abLayerState == COMPARE_LAYER_A,
+                                NotificationType::dontSendNotification);
+    abButton[1].setToggleState (polarDesignerProcessor.abLayerState == COMPARE_LAYER_B,
+                                NotificationType::dontSendNotification);
 
     // Initialize A/B button states
-    updateABButtonState();
+    updateABButtonState (polarDesignerProcessor.abLayerState);
 
     // Add listener for valueTreeState changes
     valueTreeState.state.addListener (this);
@@ -204,6 +193,11 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
     tmbSyncChannelButton.setButtonsNumber (4);
     tmbSyncChannelButton.setAlwaysOnTop (true);
 
+    const auto syncChannel = static_cast<int> (
+        valueTreeState.getParameterRange ("syncChannel")
+            .convertFrom0to1 (valueTreeState.getParameter ("syncChannel")->getValue()));
+    const auto syncChannelIdx = syncChannel - 1;
+
     for (int i = 0; i < 4; ++i)
     {
         tmbSyncChannelButton[i].setClickingTogglesState (true);
@@ -213,7 +207,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
         //Set ID manually for drawing colors purpose
         tmbSyncChannelButton[i].setComponentID (String ("552" + String (i + 1)));
 
-        if (i == (syncChannelIdx - 1))
+        if (i == syncChannelIdx)
         {
             tmbSyncChannelButton[i].setToggleState (true, NotificationType::dontSendNotification);
         }
@@ -414,12 +408,6 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
 
     loadSavedPresetsToList();
 
-    initializeSavedStates();
-
-    // Save initial state for the current layer
-    int currentLayer = polarDesignerProcessor.abLayerState;
-    saveLayerState (currentLayer);
-
     // Prime the UI
     nEditorBandsChanged();
     activateEditingForZeroLatency();
@@ -429,42 +417,14 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
     setEqMode();
 }
 
-void PolarDesignerAudioProcessorEditor::initializeSavedStates()
-{
-    using namespace juce;
-
-    nActiveBands = polarDesignerProcessor.getNProcessorBands();
-    isStateSaved.fill (false);
-    const auto* ffDfEqParam = valueTreeState.getParameter ("ffDfEq");
-    const auto ffDfEq = roundToInt (ffDfEqParam->convertFrom0to1 (ffDfEqParam->getValue()));
-    for (unsigned long layer = 0; layer < 2; ++layer)
-    {
-        savedStates[layer].nrBandsValue = nActiveBands;
-        savedStates[layer].dirValues.fill (0.0f);
-        savedStates[layer].bandGainValues.fill (0.0f);
-        savedStates[layer].soloStates.fill (false);
-        savedStates[layer].muteStates.fill (false);
-        savedStates[layer].crossoverValues.fill (1000.0f); // Safe default
-        savedStates[layer].proxCtrState = false;
-        savedStates[layer].proxValue = 0.0f;
-        savedStates[layer].eqState = ffDfEq;
-    }
-    DBG ("Initialized savedStates: nrBands=" << std::to_string (nActiveBands));
-}
-
 // Update A/B button states
-void PolarDesignerAudioProcessorEditor::updateABButtonState()
+void PolarDesignerAudioProcessorEditor::updateABButtonState (int newState)
 {
     using namespace juce;
 
-    //    ScopedLock lock(polarDesignerProcessor.abLayerLock); // Ensure thread-safety
-    bool isLayerB = (polarDesignerProcessor.abLayerState == COMPARE_LAYER_B);
-    tmbABButton[COMPARE_LAYER_A].setToggleState (! isLayerB,
-                                                 NotificationType::dontSendNotification);
-    tmbABButton[COMPARE_LAYER_A].setAlpha (getABButtonAlphaFromLayerState (! isLayerB));
-
-    tmbABButton[COMPARE_LAYER_B].setToggleState (isLayerB, NotificationType::dontSendNotification);
-    tmbABButton[COMPARE_LAYER_B].setAlpha (getABButtonAlphaFromLayerState (isLayerB));
+    bool isLayerB = (newState == COMPARE_LAYER_B);
+    abButton[COMPARE_LAYER_A].setToggleState (! isLayerB, NotificationType::dontSendNotification);
+    abButton[COMPARE_LAYER_B].setToggleState (isLayerB, NotificationType::dontSendNotification);
 }
 
 PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
@@ -477,9 +437,6 @@ PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
     directivityEqualiser.clearSliders();
 
     stopTimer();
-
-    for (int i = 0; i < 2; ++i)
-        tmbABButton[i].removeListener (this);
 
     for (int i = 0; i < MAX_EDITOR_BANDS; ++i)
     {
@@ -563,23 +520,14 @@ void PolarDesignerAudioProcessorEditor::resized()
     topComponent.justifyContent = juce::FlexBox::JustifyContent::center;
     topComponent.alignContent = juce::FlexBox::AlignContent::center;
 
-    //    const float marginFlex = 0.022f;
-    //    const float topComponentTitleFlex = 0.4f;
-    //    const float topComponentButtonsFlex = 0.035f;
-    //    const float topComponentSpacingFlex = topComponentButtonsFlex / 2;
-    //    const float topComponentButtonsMargin = 5;
-    //    const float radioButonsFlex = 0.18f;
-    //    const float radioButonsSpaceFlex = 0.025f;
-
     topComponent.items.add (juce::FlexItem().withFlex (0.022f));
     if (! presetListVisible)
     {
         topComponent.items.add (juce::FlexItem (tbLogoAA).withFlex (0.243f));
     }
 
-    topComponent.items.add (juce::FlexItem (titleCompare).withFlex (0.063f));
     topComponent.items.add (juce::FlexItem().withFlex (0.016f));
-    topComponent.items.add (juce::FlexItem (tmbABButton).withFlex (0.077f).withMargin (2));
+    topComponent.items.add (juce::FlexItem (abButton).withFlex (0.2f));
     topComponent.items.add (juce::FlexItem().withFlex (0.042f));
     topComponent.items.add (juce::FlexItem (tbZeroLatency).withFlex (0.1f).withMargin (2));
     topComponent.items.add (juce::FlexItem().withFlex (0.1f));
@@ -1283,7 +1231,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
 
     if ((button == &tmbSyncChannelButton[0]) && (button->getToggleState()))
     { // disable tmbABButton group if syncChannels are enabled, as AB is inapplicable in that case
-        tmbABButton.setEnabled (false);
+        abButton.setEnabled (false);
         tmbSyncChannelButton.disableAllButtonsExcept (0);
         valueTreeState.getParameter ("syncChannel")
             ->setValueNotifyingHost (
@@ -1291,7 +1239,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     }
     if ((button == &tmbSyncChannelButton[1]) && (button->getToggleState()))
     {
-        tmbABButton.setEnabled (false);
+        abButton.setEnabled (false);
         tmbSyncChannelButton.disableAllButtonsExcept (1);
         valueTreeState.getParameter ("syncChannel")
             ->setValueNotifyingHost (
@@ -1299,7 +1247,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     }
     if ((button == &tmbSyncChannelButton[2]) && (button->getToggleState()))
     {
-        tmbABButton.setEnabled (false);
+        abButton.setEnabled (false);
         tmbSyncChannelButton.disableAllButtonsExcept (2);
         valueTreeState.getParameter ("syncChannel")
             ->setValueNotifyingHost (
@@ -1307,7 +1255,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     }
     if ((button == &tmbSyncChannelButton[3]) && (button->getToggleState()))
     {
-        tmbABButton.setEnabled (false);
+        abButton.setEnabled (false);
         tmbSyncChannelButton.disableAllButtonsExcept (3);
         valueTreeState.getParameter ("syncChannel")
             ->setValueNotifyingHost (
@@ -1319,7 +1267,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
          || (button == &tmbSyncChannelButton[2]) || (button == &tmbSyncChannelButton[3]))
         && (! button->getToggleState()))
     {
-        tmbABButton.setEnabled (true);
+        abButton.setEnabled (true);
         tmbSyncChannelButton.disableAllButtons();
         valueTreeState.getParameter ("syncChannel")->setValueNotifyingHost (0);
     }
@@ -1346,23 +1294,27 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     }
     else if (button == &ibEqCtr[0])
     {
+        auto* param = valueTreeState.getParameter ("ffDfEq");
+
         ibEqCtr[0].setToggleState (! ibEqCtr[0].getToggleState(),
                                    NotificationType::dontSendNotification);
         ibEqCtr[1].setToggleState (false, juce::NotificationType::dontSendNotification);
 
         if (! ibEqCtr[0].getToggleState() && ! ibEqCtr[1].getToggleState())
-            valueTreeState.getParameter ("ffDfEq")->setValueNotifyingHost (0);
+            param->setValueNotifyingHost (param->convertTo0to1 (0));
         else
-            valueTreeState.getParameter ("ffDfEq")->setValueNotifyingHost (1);
+            param->setValueNotifyingHost (param->convertTo0to1 (1));
     }
     else if (button == &ibEqCtr[1])
     {
+        auto* param = valueTreeState.getParameter ("ffDfEq");
+
         ibEqCtr[1].setToggleState (! ibEqCtr[1].getToggleState(),
                                    NotificationType::dontSendNotification);
         ibEqCtr[0].setToggleState (false, juce::NotificationType::dontSendNotification);
 
         if (! ibEqCtr[0].getToggleState() && ! ibEqCtr[1].getToggleState())
-            valueTreeState.getParameter ("ffDfEq")->setValueNotifyingHost (0);
+            param->setValueNotifyingHost (param->convertTo0to1 (0));
         else
             valueTreeState.getParameter ("ffDfEq")->setValueNotifyingHost (2);
     }
@@ -1444,48 +1396,19 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     else if (button == &tbZeroLatency)
     {
         bool newState = button->getToggleState();
-        int currentLayer = polarDesignerProcessor.abLayerState;
-
-        if (newState && ! polarDesignerProcessor.zeroLatencyModeActive())
-        {
-            // Save state before enabling zero latency
-            saveLayerState (currentLayer);
-        }
         // Update the parameter to reflect the new state
         valueTreeState.getParameter ("zeroLatencyMode")->setValueNotifyingHost (newState);
         // Trigger UI update
         activateEditingForZeroLatency();
         directivityEqualiser.repaint();
     }
-    else if (button == &tmbABButton[COMPARE_LAYER_A] && button->getToggleState())
+    else if (button == &abButton[COMPARE_LAYER_A] && ! button->getToggleState())
     {
-        //        ScopedLock lock(polarDesignerProcessor.abLayerLock);
-        // Save current layer state (B) before switching to A
-        if (polarDesignerProcessor.abLayerState == COMPARE_LAYER_B)
-        {
-            saveLayerState (COMPARE_LAYER_B);
-        }
         polarDesignerProcessor.changeABLayerState (COMPARE_LAYER_A);
-        if (! polarDesignerProcessor.zeroLatencyModeActive())
-        {
-            restoreLayerState (COMPARE_LAYER_A);
-        }
-        updateABButtonState();
     }
-    else if (button == &tmbABButton[COMPARE_LAYER_B] && button->getToggleState())
+    else if (button == &abButton[COMPARE_LAYER_B] && ! button->getToggleState())
     {
-        //        ScopedLock lock(polarDesignerProcessor.abLayerLock);
-        // Save current layer state (A) before switching to B
-        if (polarDesignerProcessor.abLayerState == COMPARE_LAYER_A)
-        {
-            saveLayerState (COMPARE_LAYER_A);
-        }
         polarDesignerProcessor.changeABLayerState (COMPARE_LAYER_B);
-        if (! polarDesignerProcessor.zeroLatencyModeActive())
-        {
-            restoreLayerState (COMPARE_LAYER_B);
-        }
-        updateABButtonState();
     }
     else if (button == &polarPatternVisualizers[0])
     {
@@ -1676,11 +1599,6 @@ void PolarDesignerAudioProcessorEditor::loadFile()
         loadingFile = true;
         File presetFile (myChooser.getResult());
 
-        // Reset saved states
-        //        ScopedLock lock(polarDesignerProcessor.abLayerLock);
-
-        isStateSaved.fill (false);
-
         Result result = polarDesignerProcessor.loadPreset (presetFile);
         if (! result.wasOk())
         {
@@ -1702,13 +1620,9 @@ void PolarDesignerAudioProcessorEditor::loadFile()
             showPresetList (false);
             titlePresetUndoButton.setVisible (true);
 
-            int currentLayer = polarDesignerProcessor.abLayerState;
-            saveLayerState (currentLayer);
             presetLoaded = true;
         }
         loadingFile = false;
-
-        initializeSavedStates();
     }
 }
 
@@ -1912,25 +1826,24 @@ void PolarDesignerAudioProcessorEditor::activateMainUI (bool shouldBeActive)
     if (polarDesignerProcessor.zeroLatencyModeActive())
     {
         grpTerminatorControl.setEnabled (shouldBeActive);
-        tmbABButton.setEnabled (false);
-        tmbABButton.setVisible (false);
+        abButton.setEnabled (false);
+        abButton.setVisible (false);
         tbZeroLatency.setToggleState (true, NotificationType::sendNotification);
     }
     else
     {
         grpTerminatorControl.setEnabled (true);
-        tmbABButton.setEnabled (shouldBeActive);
-        tmbABButton.setVisible (shouldBeActive);
+        abButton.setEnabled (shouldBeActive);
+        abButton.setVisible (shouldBeActive);
         tbZeroLatency.setToggleState (false, NotificationType::sendNotification);
     }
 
     if (tmbSyncChannelButton.getSelectedButton() != -1)
     {
-        tmbABButton.setEnabled (false);
+        abButton.setEnabled (false);
     }
 
     titlePreset.setEnabled (shouldBeActive);
-    titleCompare.setEnabled (shouldBeActive);
 
     repaint();
 }
@@ -1939,26 +1852,15 @@ void PolarDesignerAudioProcessorEditor::activateEditingForZeroLatency()
 {
     using namespace juce;
 
-    //    ScopedLock lock(polarDesignerProcessor.abLayerLock); // Add lock
     bool zlIsActive = polarDesignerProcessor.zeroLatencyModeActive();
-    int currentLayer = polarDesignerProcessor.abLayerState;
 
     if (! zlIsActive)
     {
-        if (isStateSaved[static_cast<size_t> (currentLayer)])
-        {
-            restoreLayerState (currentLayer);
-        }
         activateMainUI (true);
-        tmbABButton.setEnabled (tmbSyncChannelButton.getSelectedButton() == -1);
-        tmbABButton.setVisible (true);
-        updateABButtonState();
+        abButton.setEnabled (tmbSyncChannelButton.getSelectedButton() == -1);
+        abButton.setVisible (true);
+        updateABButtonState (polarDesignerProcessor.abLayerState);
         return;
-    }
-
-    if (! isStateSaved[static_cast<size_t> (currentLayer)])
-    {
-        saveLayerState (currentLayer);
     }
 
     valueTreeState.getParameter ("nrBands")->setValueNotifyingHost (
@@ -1969,8 +1871,8 @@ void PolarDesignerAudioProcessorEditor::activateEditingForZeroLatency()
     directivityEqualiser.resetTooltipTexts();
     directivityEqualiser.repaint();
     activateMainUI (false);
-    tmbABButton.setEnabled (false);
-    tmbABButton.setVisible (false);
+    abButton.setEnabled (false);
+    abButton.setVisible (false);
 }
 
 void PolarDesignerAudioProcessorEditor::showPresetList (bool shouldShow)
@@ -2183,11 +2085,6 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback (juce::ChangeBroa
 
         if (presetFile.size() == 1)
         {
-            // Reset saved states
-            //            ScopedLock lock(polarDesignerProcessor.abLayerLock);
-
-            isStateSaved.fill (false);
-
             polarDesignerProcessor.loadPreset (presetFile.getFirst());
             lbFactoryPresets.deselectAll();
             if (lbUserPresets.isRowDoubleClicked())
@@ -2196,9 +2093,6 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback (juce::ChangeBroa
                 showPresetList (false);
                 presetLoaded = true;
                 titlePresetUndoButton.setVisible (true);
-                // Save current state for the active layer
-                int currentLayer = polarDesignerProcessor.abLayerState;
-                saveLayerState (currentLayer);
             }
         }
     }
@@ -2212,8 +2106,6 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback (juce::ChangeBroa
 
         if (presetFile.size() == 1)
         {
-            isStateSaved.fill (false);
-
             polarDesignerProcessor.loadPreset (presetFile.getFirst());
             lbUserPresets.deselectAll();
             if (lbFactoryPresets.isRowDoubleClicked())
@@ -2222,11 +2114,22 @@ void PolarDesignerAudioProcessorEditor::changeListenerCallback (juce::ChangeBroa
                 showPresetList (false);
                 presetLoaded = true;
                 titlePresetUndoButton.setVisible (true);
-                // Save current state for the active layer
-                int currentLayer = polarDesignerProcessor.abLayerState;
-                saveLayerState (currentLayer);
             }
         }
+    }
+}
+
+void PolarDesignerAudioProcessorEditor::parameterChanged (const juce::String& parameterID,
+                                                          float newValue)
+{
+    using namespace juce;
+
+    ignoreUnused (newValue);
+
+    if (parameterID == "ffDfEq")
+    {
+        // Update EQ mode buttons
+        setEqMode (roundToInt (newValue));
     }
 }
 
@@ -2255,13 +2158,16 @@ void PolarDesignerAudioProcessorEditor::setMainAreaEnabled (bool enable)
     repaint();
 }
 
-void PolarDesignerAudioProcessorEditor::setEqMode()
+void PolarDesignerAudioProcessorEditor::setEqMode (int activeIdx)
 {
     using namespace juce;
 
-    const auto* param = valueTreeState.getParameter ("ffDfEq");
+    if (activeIdx < 0)
+    {
+        const auto* param = valueTreeState.getParameter ("ffDfEq");
+        activeIdx = roundToInt (param->convertFrom0to1 (param->getValue()));
+    }
 
-    const auto activeIdx = roundToInt (param->convertFrom0to1 (param->getValue()));
     if (activeIdx == 0)
     {
         ibEqCtr[0].setToggleState (false, NotificationType::dontSendNotification);
@@ -2277,7 +2183,6 @@ void PolarDesignerAudioProcessorEditor::setEqMode()
         ibEqCtr[0].setToggleState (false, NotificationType::dontSendNotification);
         ibEqCtr[1].setToggleState (true, NotificationType::dontSendNotification);
     }
-    repaint();
 }
 
 // implement this for AAX automation shortchut
@@ -2339,149 +2244,4 @@ int PolarDesignerAudioProcessorEditor::getControlParameterIndex (Component& cont
         return 26;
 
     return -1;
-}
-
-void PolarDesignerAudioProcessorEditor::saveLayerState (int layer)
-{
-    using namespace juce;
-
-    LayerState& state = savedStates[static_cast<size_t> (layer)];
-    state.nrBandsValue = polarDesignerProcessor.getNProcessorBands();
-
-    for (unsigned int i = 0; i < MAX_EDITOR_BANDS; ++i)
-    {
-        state.dirValues[i] = static_cast<float> (slDir[i].getValue());
-        state.bandGainValues[i] = static_cast<float> (slBandGain[i].getValue());
-        state.soloStates[i] = tgbSolo[i].getToggleState();
-        state.muteStates[i] = tgbMute[i].getToggleState();
-        if (i < MAX_EDITOR_BANDS - 1)
-        {
-            state.crossoverValues[i] = static_cast<float> (slCrossoverPosition[i].getValue());
-        }
-    }
-
-    state.proxCtrState = tgbProxCtr.getToggleState();
-    state.proxValue = static_cast<float> (slProximity.getValue());
-
-    const auto* param = valueTreeState.getParameter ("ffDfEq");
-    state.eqState = roundToInt (param->convertFrom0to1 (param->getValue()));
-
-    isStateSaved[static_cast<size_t> (layer)] = true;
-    DBG ("Saved state for layer " << layer << ": nrBands=" << std::to_string (state.nrBandsValue));
-}
-
-void PolarDesignerAudioProcessorEditor::restoreLayerState (int layer)
-{
-    using namespace juce;
-
-    if (! isStateSaved[static_cast<size_t> (layer)])
-    {
-        DBG ("No state saved for layer " << layer);
-        return;
-    }
-
-    isRestoringState = true;
-    //    ScopedLock lock(polarDesignerProcessor.abLayerLock);
-    const LayerState& state = savedStates[static_cast<size_t> (layer)];
-
-    // Validate nrBandsValue
-    if (state.nrBandsValue < 1 || state.nrBandsValue > MAX_EDITOR_BANDS)
-    {
-        DBG ("Invalid nrBandsValue " << std::to_string (state.nrBandsValue) << " for layer "
-                                     << layer << "; resetting to default");
-        initializeSavedStates(); // Reset to safe state
-        isStateSaved[static_cast<size_t> (layer)] = false;
-        isRestoringState = false;
-        return;
-    }
-
-    DBG ("Restoring state for layer " << layer
-                                      << ": nrBands=" << std::to_string (state.nrBandsValue));
-
-    // Begin batch update
-    valueTreeState.getParameter ("nrBands")->beginChangeGesture();
-    for (unsigned int i = 0; i < MAX_EDITOR_BANDS; ++i)
-    {
-        valueTreeState.getParameter ("alpha" + String (i + 1))->beginChangeGesture();
-        valueTreeState.getParameter ("gain" + String (i + 1))->beginChangeGesture();
-        valueTreeState.getParameter ("solo" + String (i + 1))->beginChangeGesture();
-        valueTreeState.getParameter ("mute" + String (i + 1))->beginChangeGesture();
-        if (i < MAX_EDITOR_BANDS - 1)
-        {
-            valueTreeState.getParameter ("xOverF" + String (i + 1))->beginChangeGesture();
-        }
-    }
-    valueTreeState.getParameter ("proximityOnOff")->beginChangeGesture();
-    valueTreeState.getParameter ("proximity")->beginChangeGesture();
-
-    // Set number of bands
-    polarDesignerProcessor.setNProcessorBands (state.nrBandsValue);
-    valueTreeState.getParameter ("nrBands")->setValueNotifyingHost (
-        valueTreeState.getParameter ("nrBands")->convertTo0to1 (
-            static_cast<float> (state.nrBandsValue - 1)));
-    nActiveBands = state.nrBandsValue;
-
-    // Restore band parameters
-    for (unsigned int i = 0; i < MAX_EDITOR_BANDS; ++i)
-    {
-        if (i < state.nrBandsValue)
-        {
-            valueTreeState.getParameter ("alpha" + String (i + 1))
-                ->setValueNotifyingHost (valueTreeState.getParameter ("alpha" + String (i + 1))
-                                             ->convertTo0to1 (state.dirValues[i]));
-            valueTreeState.getParameter ("gain" + String (i + 1))
-                ->setValueNotifyingHost (valueTreeState.getParameter ("gain" + String (i + 1))
-                                             ->convertTo0to1 (state.bandGainValues[i]));
-            valueTreeState.getParameter ("solo" + String (i + 1))
-                ->setValueNotifyingHost (state.soloStates[i] ? 1.0f : 0.0f);
-            valueTreeState.getParameter ("mute" + String (i + 1))
-                ->setValueNotifyingHost (state.muteStates[i] ? 1.0f : 0.0f);
-            if (i < MAX_EDITOR_BANDS - 1)
-            {
-                valueTreeState.getParameter ("xOverF" + String (i + 1))
-                    ->setValueNotifyingHost (
-                        valueTreeState.getParameter ("xOverF" + String (i + 1))
-                            ->convertTo0to1 (state.crossoverValues[i]));
-            }
-            polarPatternVisualizers[i].setDirWeight (state.dirValues[i]);
-        }
-    }
-
-    // Restore proximity control
-    valueTreeState.getParameter ("proximityOnOff")
-        ->setValueNotifyingHost (state.proxCtrState ? 1.0f : 0.0f);
-    valueTreeState.getParameter ("proximity")
-        ->setValueNotifyingHost (
-            valueTreeState.getParameter ("proximity")->convertTo0to1 (state.proxValue));
-
-    // End batch update
-    valueTreeState.getParameter ("nrBands")->endChangeGesture();
-    for (unsigned int i = 0; i < MAX_EDITOR_BANDS; ++i)
-    {
-        valueTreeState.getParameter ("alpha" + String (i + 1))->endChangeGesture();
-        valueTreeState.getParameter ("gain" + String (i + 1))->endChangeGesture();
-        valueTreeState.getParameter ("solo" + String (i + 1))->endChangeGesture();
-        valueTreeState.getParameter ("mute" + String (i + 1))->endChangeGesture();
-        if (i < MAX_EDITOR_BANDS - 1)
-        {
-            valueTreeState.getParameter ("xOverF" + String (i + 1))->endChangeGesture();
-        }
-    }
-    valueTreeState.getParameter ("proximityOnOff")->endChangeGesture();
-    valueTreeState.getParameter ("proximity")->endChangeGesture();
-
-    // Restore EQ mode
-    valueTreeState.getParameter ("ffDfEq")->setValueNotifyingHost (
-        static_cast<float> (state.eqState));
-    setEqMode();
-
-    // Update UI
-    nEditorBandsChanged();
-    directivityEqualiser.resetTooltipTexts();
-    directivityEqualiser.repaint();
-    activateMainUI (true);
-
-    isRestoringState = false;
-    DBG (
-        "State restored: nrBands=" << std::to_string (polarDesignerProcessor.getNProcessorBands()));
 }

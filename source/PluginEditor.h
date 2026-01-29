@@ -25,6 +25,7 @@
 //#define AA_DO_DEBUG_PATH
 
 #include "PluginProcessor.h"
+#include "resources/customComponents/ABComponent.hpp"
 #include "resources/customComponents/AnimatedLabel.h"
 #include "resources/customComponents/DirSlider.h"
 #include "resources/customComponents/DirectivityEQ.h"
@@ -50,11 +51,12 @@ typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 /**
 */
 class PolarDesignerAudioProcessorEditor : public juce::AudioProcessorEditor,
+                                          private juce::AudioProcessorValueTreeState::Listener,
+                                          private juce::ValueTree::Listener,
                                           private juce::Button::Listener,
                                           private juce::Slider::Listener,
                                           private juce::Timer,
-                                          public juce::ChangeListener,
-                                          private juce::ValueTree::Listener
+                                          public juce::ChangeListener
 {
 private:
     //    LaF globalLaF;
@@ -73,8 +75,9 @@ public:
     void buttonStateChanged (juce::Button* button) override;
     void buttonClicked (juce::Button* button) override;
     void sliderValueChanged (juce::Slider* slider) override;
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
 
-    void setEqMode();
+    void setEqMode (int activeIdx = -1);
     void calculateLockedBands (int nBands, bool trimSliderIncr);
     float getABButtonAlphaFromLayerState (int layerState);
     // Helper method to calculate flex on the base of bandlimitPathComponents
@@ -86,11 +89,6 @@ public:
     void loadSavedPresetsToList();
 
     void changeListenerCallback (juce::ChangeBroadcaster* source) override;
-
-    void initializeSavedStates();
-
-    void saveLayerState (int layer);
-    void restoreLayerState (int layer);
 
     juce::TooltipWindow sharedTooltipWindow;
 
@@ -107,8 +105,6 @@ private:
 
     unsigned int nActiveBands;
 
-    int syncChannelIdx;
-
     bool loadingFile;
     //    bool recordingDisturber;
     bool presetListVisible;
@@ -116,7 +112,7 @@ private:
 
     juce::Colour eqColours[5];
 
-    TitleBarTextLabel titleCompare, titlePreset;
+    TitleBarTextLabel titlePreset;
     juce::TextButton titlePresetUndoButton;
 
     Footer footer;
@@ -150,7 +146,9 @@ private:
     juce::TextButton ibEqCtr[2], tbClosePresetList, tbCloseTerminatorControl,
         tbTrimSliderCenterPointer;
 
-    TextMultiButton tmbABButton, tmbNrBandsButton, tmbSyncChannelButton;
+    AAGuiComponents::ABComponent abButton;
+
+    TextMultiButton tmbNrBandsButton, tmbSyncChannelButton;
 
     PresetListBox lbUserPresets, lbFactoryPresets;
 
@@ -207,9 +205,6 @@ private:
 
     bool isRestoringState = false;
 
-    std::array<LayerState, 2> savedStates; // One for each A/B layer
-    std::array<bool, 2> isStateSaved = { false, false }; // Track if state is saved for each layer
-
 #ifdef AA_DO_DEBUG_PATH
     Path debugPath;
 #endif
@@ -231,7 +226,7 @@ private:
 
     void mouseDown (const juce::MouseEvent& event) override;
 
-    void updateABButtonState();
+    void updateABButtonState (int newState);
 
     static juce::File getFactoryPresetPath();
     static juce::File getUserPresetPath();

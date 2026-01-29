@@ -270,7 +270,6 @@ private:
     bool trackingActive;
     bool trackingDisturber;
     int nrBlocksRecorded;
-    int ffDfEq;
 
     int eqLatency;
 
