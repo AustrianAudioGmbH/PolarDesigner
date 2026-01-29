@@ -621,6 +621,8 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     // EQ processing
     if (! approximatelyEqual (zeroLatencyModePtr->load (std::memory_order_relaxed), 1.0f))
     {
+        const auto ffDfEq = static_cast<int> (ffDfEqPtr->load (std::memory_order_relaxed));
+
         if (ffDfEq == 1)
         {
             float* writePointerOmni = omniEightBuffer.getWritePointer (0);
@@ -726,7 +728,7 @@ juce::AudioProcessorEditor* PolarDesignerAudioProcessor::createEditor()
 
 int PolarDesignerAudioProcessor::getSyncChannelIdx()
 {
-    return static_cast<int> (*syncChannelPtr);
+    return static_cast<int> (syncChannelPtr->load (std::memory_order_relaxed)) - 1;
 }
 
 // getStateInformation: Ensure consistent updates for layerA and layerB
@@ -1242,10 +1244,6 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
             zeroLatencyModeChanged.store (true, std::memory_order_release);
         }
     }
-    else if (parameterID == "ffDfEq")
-    {
-        ffDfEq = roundToInt (newValue);
-    }
     else if (parameterID == "syncChannel")
     {
         const int ch = static_cast<int> (syncChannelPtr->load (std::memory_order_relaxed)) - 1;
@@ -1344,6 +1342,10 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
         {
             int idx = parameterID.getTrailingIntValue() - 1;
             paramsToSync.gains[idx] = bandGainsPtr[idx]->load();
+        }
+        else if (parameterID == "ffDfEq")
+        {
+            paramsToSync.ffDfEq = roundToInt (ffDfEqPtr->load (std::memory_order_relaxed));
         }
     }
 }
@@ -2415,6 +2417,8 @@ void PolarDesignerAudioProcessor::changeABLayerState (int state)
             vtsParams.getParameter ("nrBands")->convertTo0to1 (oldNrBands));
 
     abLayerChanged.store (false, std::memory_order_release);
+
+    repaintDEQ.store (true, std::memory_order_relaxed);
 
 #ifdef USE_EXTRA_DEBUG_DUMPS
     juce::String treeAsXmlString2 = vtsParams.state.toXmlString();
