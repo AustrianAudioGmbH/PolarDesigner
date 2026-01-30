@@ -13,6 +13,7 @@
 #include "../lookAndFeel/MainLookAndFeel.h"
 #include "BinaryData.h"
 
+#include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 class PresetListBox : public juce::Component,
@@ -61,7 +62,10 @@ public:
 
         g.setColour (mainLaF.mainTextColor);
 
-        float h = static_cast<float> (getTopLevelComponent()->getHeight()) * 0.023f;
+        const auto* editor = findParentComponentOfClass<AudioProcessorEditor>();
+        float h =
+            static_cast<float> (editor ? editor->getHeight() : getTopLevelComponent()->getHeight())
+            * 0.023f;
         float y = (static_cast<float> (height) - h) / 2;
 
         Font font (FontOptions (mainLaF.normalFont));
@@ -149,7 +153,10 @@ private:
 
             auto x = 0;
             auto w = static_cast<int> (buttonArea.getWidth() * 0.65f);
-            auto h = static_cast<float> (getTopLevelComponent()->getHeight()) * 0.023f;
+            const auto* editor = findParentComponentOfClass<AudioProcessorEditor>();
+            float h = static_cast<float> (editor ? editor->getHeight()
+                                                 : getTopLevelComponent()->getHeight())
+                      * 0.023f;
             auto y = static_cast<int> ((buttonArea.getHeight() - h) / 2);
 
             g.setColour (mainLaF.textButtonHoverBackgroundColor);
