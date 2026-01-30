@@ -12,6 +12,7 @@
 
 #include "../lookAndFeel/MainLookAndFeel.h"
 
+#include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 //==============================================================================
@@ -60,7 +61,12 @@ public:
 
     void paint (juce::Graphics& g) override
     {
-        fontHeight = static_cast<float> (getTopLevelComponent()->getHeight()) * 0.018f;
+        using namespace juce;
+
+        const auto* editor = findParentComponentOfClass<AudioProcessorEditor>();
+        fontHeight =
+            static_cast<float> (editor ? editor->getHeight() : getTopLevelComponent()->getHeight())
+            * 0.018f;
         textArea = getLocalBounds().reduced (
             static_cast<int> (static_cast<float> (getLocalBounds().getWidth()) * 0.06f),
             (getLocalBounds().getHeight() - static_cast<int> (fontHeight)) / 2);
@@ -81,7 +87,10 @@ public:
     {
         using namespace juce;
 
-        fontHeight = static_cast<float> (getTopLevelComponent()->getHeight()) * 0.018f;
+        const auto* editor = findParentComponentOfClass<AudioProcessorEditor>();
+        fontHeight =
+            static_cast<float> (editor ? editor->getHeight() : getTopLevelComponent()->getHeight())
+            * 0.018f;
 
         Font font (FontOptions { fontHeight });
         textArea = getLocalBounds().reduced (
