@@ -37,7 +37,7 @@ struct ParamsToSync
     float xOverFreqs[MAX_NUM_EQS - 1], dirFactors[MAX_NUM_EQS], gains[MAX_NUM_EQS], proximity;
     bool solo[MAX_NUM_EQS], mute[MAX_NUM_EQS], allowBackwardsPattern, proximityOnOff,
         zeroLatencyMode, abLayer;
-    bool paramsValid = false;
+    int numClients = 0;
 };
 
 // use several channels to be syncable
@@ -47,10 +47,8 @@ struct SharedParams
     {
         for (int i = 0; i < 4; ++i) // provide 4 channels to sync params between plugin instances
             syncParams.add (ParamsToSync());
-        instanceCount++;
     }
     juce::Array<ParamsToSync> syncParams;
-    unsigned int instanceCount;
 };
 
 // the A/B compare button layers
@@ -268,6 +266,8 @@ private:
     int nrBlocksRecorded;
 
     int eqLatency;
+
+    int lastSyncChannel = -1;
 
     float omniSqSumDist[MAX_NUM_EQS], eightSqSumDist[MAX_NUM_EQS], omniEightSumDist[MAX_NUM_EQS],
         omniSqSumSig[MAX_NUM_EQS], eightSqSumSig[MAX_NUM_EQS], omniEightSumSig[MAX_NUM_EQS];
