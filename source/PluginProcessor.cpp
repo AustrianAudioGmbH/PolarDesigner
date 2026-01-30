@@ -1184,21 +1184,23 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
             // Zero Latency Mode turned on
             if (! abLayerChanged.load (std::memory_order_relaxed))
             {
+                const auto oldNrBandsValue = nProcessorBandsPtr->load (std::memory_order_relaxed);
+                oldNrBands.store (oldNrBandsValue, std::memory_order_relaxed);
+
                 if (abLayerState == COMPARE_LAYER_B)
                 {
                     oldProxDistanceB.store (proxDistancePtr->load (std::memory_order_relaxed),
                                             std::memory_order_relaxed);
-                    oldNrBandsB.store (nProcessorBandsPtr->load (std::memory_order_relaxed),
-                                       std::memory_order_relaxed);
+                    oldNrBandsB.store (oldNrBandsValue, std::memory_order_relaxed);
                 }
                 else
                 {
                     oldProxDistanceA.store (proxDistancePtr->load (std::memory_order_relaxed),
                                             std::memory_order_relaxed);
-                    oldNrBandsA.store (nProcessorBandsPtr->load (std::memory_order_relaxed),
-                                       std::memory_order_relaxed);
+                    oldNrBandsA.store (oldNrBandsValue, std::memory_order_relaxed);
                 }
             }
+
             vtsParams.getParameter ("nrBands")->setValueNotifyingHost (
                 vtsParams.getParameter ("nrBands")->convertTo0to1 (0));
 
@@ -1207,6 +1209,7 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
 
             zeroLatencyModeChanged.store (true, std::memory_order_relaxed);
         }
+
         if (zeroLatencyModeChanged.load (std::memory_order_relaxed)
             && zeroLatencyModePtr->load (std::memory_order_relaxed) > 0.5f)
         {
@@ -1218,14 +1221,19 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
     }
     else if (parameterID == "syncChannel")
     {
-        const int ch = static_cast<int> (syncChannelPtr->load (std::memory_order_relaxed)) - 1;
+        if (lastSyncChannel > -1) // unsubscribe from last sync channel
+            --sharedParams.get().syncParams.getReference (lastSyncChannel).numClients;
 
-        if (ch >= 0)
+        const auto ch = static_cast<int> (newValue) - 1;
+
+        if (ch >= 0) // we are subscribed to a channel
         {
             ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (ch);
 
-            if (! paramsToSync.paramsValid) // Initialize all params
+            if (paramsToSync.numClients == 0) // we are subscribing to empty sync channel
             {
+                // copy our settings to channel
+
                 for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
                 {
                     paramsToSync.solo[i] = soloBandPtr[i] && soloBandPtr[i]->load() > 0.5f;
@@ -1256,9 +1264,10 @@ void PolarDesignerAudioProcessor::parameterChanged (const juce::String& paramete
                 paramsToSync.ffDfEq =
                     static_cast<int> (ffDfEqPtr->load (std::memory_order_relaxed));
             }
-
-            paramsToSync.paramsValid = true;
+            ++paramsToSync.numClients;
         }
+
+        lastSyncChannel = ch;
     }
 
     // Update shared parameters if synced
@@ -2191,99 +2200,108 @@ void PolarDesignerAudioProcessor::timerCallback()
 
     if (syncChannel > 0)
     {
-        readingSharedParams.store (true, std::memory_order_relaxed);
         ParamsToSync& paramsToSync = sharedParams.get().syncParams.getReference (syncChannel - 1);
 
-        if (! exactlyEqual (nProcessorBandsPtr->load (std::memory_order_relaxed),
-                            static_cast<float> (paramsToSync.nrActiveBands)))
+        if (paramsToSync.numClients > 1 // don't need to write back settings we ourselves set
+            && ! readingSharedParams.exchange (true, std::memory_order_relaxed))
         {
-            vtsParams.getParameter ("nrBands")->setValueNotifyingHost (
-                vtsParams.getParameterRange ("nrBands").convertTo0to1 (
-                    static_cast<float> (paramsToSync.nrActiveBands)));
-            repaintDEQ.store (true, std::memory_order_relaxed);
-        }
-
-        for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
-        {
-            if (! exactlyEqual (dirFactorsPtr[i]->load (std::memory_order_relaxed),
-                                paramsToSync.dirFactors[i]))
+            if (! exactlyEqual (nProcessorBandsPtr->load (std::memory_order_relaxed),
+                                static_cast<float> (paramsToSync.nrActiveBands)))
             {
-                vtsParams.getParameter ("alpha" + String (i + 1))
-                    ->setValueNotifyingHost (vtsParams.getParameterRange ("alpha" + String (i + 1))
-                                                 .convertTo0to1 (paramsToSync.dirFactors[i]));
+                vtsParams.getParameter ("nrBands")->setValueNotifyingHost (
+                    vtsParams.getParameterRange ("nrBands").convertTo0to1 (
+                        static_cast<float> (paramsToSync.nrActiveBands)));
+                repaintDEQ.store (true, std::memory_order_relaxed);
             }
 
-            if (! exactlyEqual (soloBandPtr[i]->load (std::memory_order_relaxed),
-                                paramsToSync.solo[i] ? 1.0f : 0.0f))
+            for (unsigned int i = 0; i < MAX_NUM_EQS; ++i)
             {
-                vtsParams.getParameter ("solo" + String (i + 1))
-                    ->setValueNotifyingHost (vtsParams.getParameterRange ("solo" + String (i + 1))
-                                                 .convertTo0to1 (paramsToSync.solo[i]));
+                if (! exactlyEqual (dirFactorsPtr[i]->load (std::memory_order_relaxed),
+                                    paramsToSync.dirFactors[i]))
+                {
+                    vtsParams.getParameter ("alpha" + String (i + 1))
+                        ->setValueNotifyingHost (
+                            vtsParams.getParameterRange ("alpha" + String (i + 1))
+                                .convertTo0to1 (paramsToSync.dirFactors[i]));
+                }
+
+                if (! exactlyEqual (soloBandPtr[i]->load (std::memory_order_relaxed),
+                                    paramsToSync.solo[i] ? 1.0f : 0.0f))
+                {
+                    vtsParams.getParameter ("solo" + String (i + 1))
+                        ->setValueNotifyingHost (
+                            vtsParams.getParameterRange ("solo" + String (i + 1))
+                                .convertTo0to1 (paramsToSync.solo[i]));
+                }
+
+                if (! exactlyEqual (muteBandPtr[i]->load (std::memory_order_relaxed),
+                                    paramsToSync.mute[i] ? 1.0f : 0.0f))
+                {
+                    vtsParams.getParameter ("mute" + String (i + 1))
+                        ->setValueNotifyingHost (
+                            vtsParams.getParameterRange ("mute" + String (i + 1))
+                                .convertTo0to1 (paramsToSync.mute[i]));
+                }
+
+                if (! exactlyEqual (bandGainsPtr[i]->load (std::memory_order_relaxed),
+                                    paramsToSync.gains[i]))
+                {
+                    vtsParams.getParameter ("gain" + String (i + 1))
+                        ->setValueNotifyingHost (
+                            vtsParams.getParameterRange ("gain" + String (i + 1))
+                                .convertTo0to1 (paramsToSync.gains[i]));
+                }
+
+                if ((i < 4)
+                    && ! exactlyEqual (xOverFreqsPtr[i]->load (std::memory_order_relaxed),
+                                       paramsToSync.xOverFreqs[i]))
+                {
+                    vtsParams.getParameter ("xOverF" + String (i + 1))
+                        ->setValueNotifyingHost (
+                            vtsParams.getParameterRange ("xOverF" + String (i + 1))
+                                .convertTo0to1 (paramsToSync.xOverFreqs[i]));
+                }
             }
 
-            if (! exactlyEqual (muteBandPtr[i]->load (std::memory_order_relaxed),
-                                paramsToSync.mute[i] ? 1.0f : 0.0f))
+            if (! exactlyEqual (proxDistancePtr->load (std::memory_order_relaxed),
+                                paramsToSync.proximity))
             {
-                vtsParams.getParameter ("mute" + String (i + 1))
-                    ->setValueNotifyingHost (vtsParams.getParameterRange ("mute" + String (i + 1))
-                                                 .convertTo0to1 (paramsToSync.mute[i]));
+                vtsParams.getParameter ("proximity")
+                    ->setValueNotifyingHost (vtsParams.getParameterRange ("proximity")
+                                                 .convertTo0to1 (paramsToSync.proximity));
             }
 
-            if (! exactlyEqual (bandGainsPtr[i]->load (std::memory_order_relaxed),
-                                paramsToSync.gains[i]))
+            if (! exactlyEqual (proxOnOffPtr->load (std::memory_order_relaxed),
+                                paramsToSync.proximityOnOff ? 1.0f : 0.0f))
             {
-                vtsParams.getParameter ("gain" + String (i + 1))
-                    ->setValueNotifyingHost (vtsParams.getParameterRange ("gain" + String (i + 1))
-                                                 .convertTo0to1 (paramsToSync.gains[i]));
+                vtsParams.getParameter ("proximityOnOff")
+                    ->setValueNotifyingHost (vtsParams.getParameterRange ("proximityOnOff")
+                                                 .convertTo0to1 (paramsToSync.proximityOnOff));
             }
 
-            if ((i < 4)
-                && ! exactlyEqual (xOverFreqsPtr[i]->load (std::memory_order_relaxed),
-                                   paramsToSync.xOverFreqs[i]))
+            if (static_cast<int> (ffDfEqPtr->load (std::memory_order_relaxed))
+                != paramsToSync.ffDfEq)
+                vtsParams.getParameter ("ffDfEq")->setValueNotifyingHost (
+                    vtsParams.getParameterRange ("ffDfEq").convertTo0to1 (
+                        static_cast<float> (paramsToSync.ffDfEq)));
+
+            if ((std::round (zeroLatencyModePtr->load (std::memory_order_relaxed)) > 0.5f ? true
+                                                                                          : false)
+                != paramsToSync.zeroLatencyMode)
             {
-                vtsParams.getParameter ("xOverF" + String (i + 1))
-                    ->setValueNotifyingHost (vtsParams.getParameterRange ("xOverF" + String (i + 1))
-                                                 .convertTo0to1 (paramsToSync.xOverFreqs[i]));
-            }
-        }
+                vtsParams.getParameter ("zeroLatencyMode")
+                    ->setValueNotifyingHost (vtsParams.getParameterRange ("zeroLatencyMode")
+                                                 .convertTo0to1 (paramsToSync.zeroLatencyMode));
 
-        if (! exactlyEqual (proxDistancePtr->load (std::memory_order_relaxed),
-                            paramsToSync.proximity))
-        {
-            vtsParams.getParameter ("proximity")
-                ->setValueNotifyingHost (vtsParams.getParameterRange ("proximity")
-                                             .convertTo0to1 (paramsToSync.proximity));
-        }
-
-        if (! exactlyEqual (proxOnOffPtr->load (std::memory_order_relaxed),
-                            paramsToSync.proximityOnOff ? 1.0f : 0.0f))
-        {
-            vtsParams.getParameter ("proximityOnOff")
-                ->setValueNotifyingHost (vtsParams.getParameterRange ("proximityOnOff")
-                                             .convertTo0to1 (paramsToSync.proximityOnOff));
-        }
-
-        if (static_cast<int> (ffDfEqPtr->load (std::memory_order_relaxed)) != paramsToSync.ffDfEq)
-            vtsParams.getParameter ("ffDfEq")->setValueNotifyingHost (
-                vtsParams.getParameterRange ("ffDfEq").convertTo0to1 (
-                    static_cast<float> (paramsToSync.ffDfEq)));
-
-        if ((std::round (zeroLatencyModePtr->load (std::memory_order_relaxed)) > 0.5f ? true
-                                                                                      : false)
-            != paramsToSync.zeroLatencyMode)
-        {
-            vtsParams.getParameter ("zeroLatencyMode")
-                ->setValueNotifyingHost (vtsParams.getParameterRange ("zeroLatencyMode")
-                                             .convertTo0to1 (paramsToSync.zeroLatencyMode));
-
-            paramsToSync.zeroLatencyMode =
-                (std::round (zeroLatencyModePtr->load (std::memory_order_relaxed)) > 0.5f);
+                paramsToSync.zeroLatencyMode =
+                    (std::round (zeroLatencyModePtr->load (std::memory_order_relaxed)) > 0.5f);
 
 #ifdef USE_EXTRA_DEBUG_DUMPS
-            LOG_DEBUG (String::formatted ("PLUGINPROCESSOR %p: zeroLatencyModePtr update", this));
+                LOG_DEBUG (
+                    String::formatted ("PLUGINPROCESSOR %p: zeroLatencyModePtr update", this));
 #endif
+            }
         }
-
         readingSharedParams.store (false, std::memory_order_relaxed);
     }
 }
