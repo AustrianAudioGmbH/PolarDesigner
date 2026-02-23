@@ -1,10 +1,10 @@
 #pragma once
 
-#include <juce_audio_processors_headless/juce_audio_processors_headless.h>
+#include <juce_audio_processors/juce_audio_processors.h>
 
 namespace AAExtensions
 {
-class PolarDesignerAAXClientExtensions : public juce::AAXClientExtensions
+struct PolarDesignerAAXClientExtensions : public juce::AAXClientExtensions
 {
     juce::String getPageFileName() const override { return "PolarDesigner3.xml"; }
 };
