@@ -84,9 +84,6 @@ public:
 
     void registerParameterListeners();
 
-    // This is the ProTools PageFile for PolarDesigner3
-    juce::String getPageFileName() const override { return "PolarDesigner3.xml"; }
-
     //==============================================================================
     void loadEqImpulseResponses();
 
