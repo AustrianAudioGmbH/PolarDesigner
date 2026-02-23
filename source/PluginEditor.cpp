@@ -1287,6 +1287,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     {
         if (! presetListVisible)
         {
+            loadSavedPresetsToList();
             showPresetList (! button->getToggleState());
         }
     }
