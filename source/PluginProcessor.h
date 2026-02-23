@@ -23,6 +23,7 @@
 #pragma once
 
 #include "Constants.hpp"
+#include "PDAAXClientExtensions.h"
 #include "resources/Delay.h"
 
 #include <atomic>
@@ -209,6 +210,8 @@ public:
 
     juce::AudioProcessorValueTreeState& getValueTreeState() { return vtsParams; }
 
+    juce::AAXClientExtensions& getAAXClientExtensions() override { return aaxClientExtensions; }
+
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarDesignerAudioProcessor)
@@ -283,6 +286,8 @@ private:
     // This is intentionally set to match Pro Tools expectations ...
     int currentBlockSize = PD_DEFAULT_BLOCK_SIZE;
     juce::File lastDir;
+
+    AAExtensions::PolarDesignerAAXClientExtensions aaxClientExtensions;
 
     //==============================================================================
     void updateFirLen();
