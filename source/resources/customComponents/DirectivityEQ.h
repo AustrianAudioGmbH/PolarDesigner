@@ -151,26 +151,6 @@ class DirectivityEQ : public juce::Component,
         juce::Path path;
     };
 
-    class RectangleComponent : public Component
-    {
-    public:
-        RectangleComponent() : Component()
-        {
-            setAlwaysOnTop (true);
-            setName ("RectangleComponent");
-        }
-        ~RectangleComponent() {}
-
-        void setBounds (float x, float y, float width, float height)
-        {
-            rectangle.setBounds (x, y, width, height);
-            Component::setBounds (rectangle.toNearestInt());
-        }
-
-    private:
-        juce::Rectangle<float> rectangle;
-    };
-
     class BandKnobComponent : public Component
     {
     public:
@@ -256,6 +236,26 @@ class DirectivityEQ : public juce::Component,
     };
 
 public:
+    class RectangleComponent : public Component
+    {
+    public:
+        RectangleComponent() : Component()
+        {
+            setAlwaysOnTop (true);
+            setName ("RectangleComponent");
+        }
+        ~RectangleComponent() {}
+
+        void setBounds (float x, float y, float width, float height)
+        {
+            rectangle.setBounds (x, y, width, height);
+            Component::setBounds (rectangle.toNearestInt());
+        }
+
+    private:
+        juce::Rectangle<float> rectangle;
+    };
+
     DirectivityEQ (PolarDesignerAudioProcessor& p) :
         Component(),
         processor (p),

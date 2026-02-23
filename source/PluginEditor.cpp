@@ -400,7 +400,9 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
     for (size_t i = 0; i < MAX_NUM_EQS; i++)
     {
         auto* param = valueTreeState.getParameter ("alpha" + String (i + 1));
-        trimSlider.setElement (i, param);
+        trimSlider.setElement (
+            i,
+            { param, &directivityEqualiser.getDirPathComponent (static_cast<int> (i)) });
     }
 
     addAndMakeVisible (&tbTrimSliderCenterPointer);
@@ -1236,6 +1238,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     if ((button == &tmbSyncChannelButton[0]) && (button->getToggleState()))
     { // disable tmbABButton group if syncChannels are enabled, as AB is inapplicable in that case
         abButton.setEnabled (false);
+        tbZeroLatency.setEnabled (false);
         tmbSyncChannelButton.disableAllButtonsExcept (0);
         valueTreeState.getParameter ("syncChannel")
             ->setValueNotifyingHost (
@@ -1244,6 +1247,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     if ((button == &tmbSyncChannelButton[1]) && (button->getToggleState()))
     {
         abButton.setEnabled (false);
+        tbZeroLatency.setEnabled (false);
         tmbSyncChannelButton.disableAllButtonsExcept (1);
         valueTreeState.getParameter ("syncChannel")
             ->setValueNotifyingHost (
@@ -1252,6 +1256,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     if ((button == &tmbSyncChannelButton[2]) && (button->getToggleState()))
     {
         abButton.setEnabled (false);
+        tbZeroLatency.setEnabled (false);
         tmbSyncChannelButton.disableAllButtonsExcept (2);
         valueTreeState.getParameter ("syncChannel")
             ->setValueNotifyingHost (
@@ -1260,6 +1265,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     if ((button == &tmbSyncChannelButton[3]) && (button->getToggleState()))
     {
         abButton.setEnabled (false);
+        tbZeroLatency.setEnabled (false);
         tmbSyncChannelButton.disableAllButtonsExcept (3);
         valueTreeState.getParameter ("syncChannel")
             ->setValueNotifyingHost (
@@ -1272,6 +1278,7 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
         && (! button->getToggleState()))
     {
         abButton.setEnabled (true);
+        tbZeroLatency.setEnabled (true);
         tmbSyncChannelButton.disableAllButtons();
         valueTreeState.getParameter ("syncChannel")->setValueNotifyingHost (0);
     }

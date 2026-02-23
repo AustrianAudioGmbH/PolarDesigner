@@ -15,8 +15,15 @@
 
 #include "../../Constants.hpp"
 #include "../lookAndFeel/MainLookAndFeel.h"
+#include "DirectivityEQ.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
+
+struct Element
+{
+    juce::RangedAudioParameter* param = nullptr;
+    DirectivityEQ::RectangleComponent* component = nullptr;
+};
 
 class EndlessSlider : public juce::Slider
 {
@@ -46,9 +53,9 @@ public:
         const auto sliderValue = -currentMoved / height * sensitivity;
 
         for (size_t i = 0; i < elements.size(); ++i)
-            if (elements[i] != nullptr)
-                elements[i]->setValueNotifyingHost (
-                    elements[i]->convertTo0to1 (startPositions[i] + sliderValue));
+            if (elements[i].param != nullptr && elements[i].component->isEnabled())
+                elements[i].param->setValueNotifyingHost (
+                    elements[i].param->convertTo0to1 (startPositions[i] + sliderValue));
     }
 
     void mouseWheelMove (const juce::MouseEvent& event,
@@ -65,12 +72,12 @@ public:
         repaint();
 
         for (size_t i = 0; i < elements.size(); ++i)
-            if (elements[i] != nullptr)
+            if (elements[i].param != nullptr && elements[i].component->isEnabled())
             {
                 auto& element = elements[i];
-                const auto oldValue = element->convertFrom0to1 (element->getValue());
+                const auto oldValue = element.param->convertFrom0to1 (element.param->getValue());
                 const auto newValue = oldValue - currentMoved / height;
-                element->setValueNotifyingHost (element->convertTo0to1 (newValue));
+                element.param->setValueNotifyingHost (element.param->convertTo0to1 (newValue));
             }
     }
 
@@ -168,7 +175,8 @@ public:
         repaint();
 
         for (auto& el : elements)
-            el->setValueNotifyingHost (el->convertTo0to1 (0.0f));
+            if (el.param != nullptr && el.component->isEnabled())
+                el.param->setValueNotifyingHost (el.param->convertTo0to1 (0.0f));
     }
 
     void mouseUp (const juce::MouseEvent& e) override
@@ -177,8 +185,9 @@ public:
         prevMoved = lastMoved;
 
         for (size_t i = 0; i < elements.size(); ++i)
-            if (elements[i] != nullptr)
-                startPositions[i] = elements[i]->convertFrom0to1 (elements[i]->getValue());
+            if (elements[i].param != nullptr)
+                startPositions[i] =
+                    elements[i].param->convertFrom0to1 (elements[i].param->getValue());
     }
 
     void mouseDown (const juce::MouseEvent& e) override
@@ -188,8 +197,9 @@ public:
         ignoreUnused (e);
 
         for (size_t i = 0; i < elements.size(); ++i)
-            if (elements[i] != nullptr)
-                startPositions[i] = elements[i]->convertFrom0to1 (elements[i]->getValue());
+            if (elements[i].param != nullptr)
+                startPositions[i] =
+                    elements[i].param->convertFrom0to1 (elements[i].param->getValue());
     }
 
     void resized() override
@@ -202,13 +212,10 @@ public:
         repaint();
     }
 
-    void setElement (size_t index, juce::RangedAudioParameter* elementToSet)
-    {
-        elements[index] = elementToSet;
-    }
+    void setElement (size_t index, Element elementToSet) { elements[index] = elementToSet; }
 
 private:
-    std::array<juce::RangedAudioParameter*, MAX_NUM_EQS> elements;
+    std::array<Element, MAX_NUM_EQS> elements;
     std::array<float, MAX_NUM_EQS> startPositions;
 
     float lastMoved;
