@@ -1237,8 +1237,6 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
 
     if ((button == &tmbSyncChannelButton[0]) && (button->getToggleState()))
     { // disable tmbABButton group if syncChannels are enabled, as AB is inapplicable in that case
-        abButton.setEnabled (false);
-        tbZeroLatency.setEnabled (false);
         tmbSyncChannelButton.disableAllButtonsExcept (0);
         valueTreeState.getParameter ("syncChannel")
             ->setValueNotifyingHost (
@@ -1246,8 +1244,6 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     }
     if ((button == &tmbSyncChannelButton[1]) && (button->getToggleState()))
     {
-        abButton.setEnabled (false);
-        tbZeroLatency.setEnabled (false);
         tmbSyncChannelButton.disableAllButtonsExcept (1);
         valueTreeState.getParameter ("syncChannel")
             ->setValueNotifyingHost (
@@ -1255,8 +1251,6 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     }
     if ((button == &tmbSyncChannelButton[2]) && (button->getToggleState()))
     {
-        abButton.setEnabled (false);
-        tbZeroLatency.setEnabled (false);
         tmbSyncChannelButton.disableAllButtonsExcept (2);
         valueTreeState.getParameter ("syncChannel")
             ->setValueNotifyingHost (
@@ -1264,8 +1258,6 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
     }
     if ((button == &tmbSyncChannelButton[3]) && (button->getToggleState()))
     {
-        abButton.setEnabled (false);
-        tbZeroLatency.setEnabled (false);
         tmbSyncChannelButton.disableAllButtonsExcept (3);
         valueTreeState.getParameter ("syncChannel")
             ->setValueNotifyingHost (
@@ -1277,8 +1269,6 @@ void PolarDesignerAudioProcessorEditor::buttonClicked (juce::Button* button)
          || (button == &tmbSyncChannelButton[2]) || (button == &tmbSyncChannelButton[3]))
         && (! button->getToggleState()))
     {
-        abButton.setEnabled (true);
-        tbZeroLatency.setEnabled (true);
         tmbSyncChannelButton.disableAllButtons();
         valueTreeState.getParameter ("syncChannel")->setValueNotifyingHost (0);
     }
@@ -1804,7 +1794,7 @@ void PolarDesignerAudioProcessorEditor::timerCallback()
     }
 }
 
-void PolarDesignerAudioProcessorEditor::activateMainUI (bool shouldBeActive)
+void PolarDesignerAudioProcessorEditor::activateMainUI (bool shouldBeActive, bool excludeSync)
 {
     using namespace juce;
 
@@ -1813,10 +1803,15 @@ void PolarDesignerAudioProcessorEditor::activateMainUI (bool shouldBeActive)
     tmbNrBandsButton[2].setEnabled (shouldBeActive);
     tmbNrBandsButton[3].setEnabled (shouldBeActive);
     tmbNrBandsButton[4].setEnabled (shouldBeActive);
-    tmbSyncChannelButton[0].setEnabled (shouldBeActive);
-    tmbSyncChannelButton[1].setEnabled (shouldBeActive);
-    tmbSyncChannelButton[2].setEnabled (shouldBeActive);
-    tmbSyncChannelButton[3].setEnabled (shouldBeActive);
+
+    if (! excludeSync)
+    {
+        grpSync.setEnabled (shouldBeActive);
+        tmbSyncChannelButton[0].setEnabled (shouldBeActive);
+        tmbSyncChannelButton[1].setEnabled (shouldBeActive);
+        tmbSyncChannelButton[2].setEnabled (shouldBeActive);
+        tmbSyncChannelButton[3].setEnabled (shouldBeActive);
+    }
 
     tbLoad.setEnabled (shouldBeActive);
     tbSave.setEnabled (shouldBeActive);
@@ -1838,7 +1833,6 @@ void PolarDesignerAudioProcessorEditor::activateMainUI (bool shouldBeActive)
     grpPreset.setEnabled (shouldBeActive);
     grpProxComp.setEnabled (shouldBeActive);
     grpBands.setEnabled (shouldBeActive);
-    grpSync.setEnabled (shouldBeActive);
     grpPresetList.setEnabled (shouldBeActive);
 
     if (polarDesignerProcessor.zeroLatencyModeActive())
@@ -1872,7 +1866,7 @@ void PolarDesignerAudioProcessorEditor::activateEditingForZeroLatency()
 
     if (! zlIsActive)
     {
-        activateMainUI (true);
+        activateMainUI (true, true);
         abButton.setEnabled (tmbSyncChannelButton.getSelectedButton() == -1);
         updateABButtonState (polarDesignerProcessor.abLayerState);
         nEditorBandsChanged();
@@ -1883,7 +1877,7 @@ void PolarDesignerAudioProcessorEditor::activateEditingForZeroLatency()
 
     directivityEqualiser.resetTooltipTexts();
     directivityEqualiser.repaint();
-    activateMainUI (false);
+    activateMainUI (false, true);
     abButton.setEnabled (false);
 }
 

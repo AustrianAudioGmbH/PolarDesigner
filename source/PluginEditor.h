@@ -216,7 +216,7 @@ private:
     void timerCallback() override;
     bool getSoloActive();
     void setMainAreaEnabled (bool enable);
-    void activateMainUI (bool shouldBeActive);
+    void activateMainUI (bool shouldBeActive, bool excludeSync = false);
     void activateEditingForZeroLatency();
     void showPresetList (bool shouldShow);
     void setBandEnabled (int bandNr, bool enable);
