@@ -45,7 +45,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout
 
     using APF = AudioParameterFloat;
     using APB = AudioParameterBool;
-    using API = AudioParameterInt;
+    using AP = AudioProcessorValueTreeState::Parameter;
 
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
@@ -63,7 +63,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout
                     return String (std::roundf (hzFromZeroToOne (MAX_NUM_EQS, 0, value)))
                            + " Hz trimPot";
                 })
-            .withAutomatable (false)));
+            .withAutomatable (true)));
 
     for (size_t i = 0; i < MAX_NUM_EQS - 1; ++i)
         layout.add (std::make_unique<APF> (
@@ -128,18 +128,39 @@ static juce::AudioProcessorValueTreeState::ParameterLayout
                     [] (float value, [[maybe_unused]] int maximumStringLength)
                     { return String (value, 1); })));
 
-    layout.add (std::make_unique<API> (
+    layout.add (std::make_unique<AP> (
         ParameterID { "nrBands", PD_PARAMETER_V1 },
         "Nr. of Bands",
-        0,
-        4,
-        4,
-        AudioParameterIntAttributes()
+        NormalisableRange<float> (0.0f, 4.0f, 1.0f),
+        4.0f,
+        AudioProcessorValueTreeStateParameterAttributes()
             .withLabel ("")
             .withCategory (AudioProcessorParameter::genericParameter)
-            .withStringFromValueFunction ([] (int value, [[maybe_unused]] int maximumStringLength)
+            .withStringFromValueFunction ([] (float value, [[maybe_unused]] int maximumStringLength)
                                           { return String (value + 1); })
-            .withAutomatable (false)));
+            .withDiscrete (true)));
+
+    layout.add (std::make_unique<AP> (
+        ParameterID { "syncChannel", PD_PARAMETER_V1 },
+        "Sync to Channel",
+        NormalisableRange<float> (0.0f, 4.0f, 1.0f),
+        0.0f,
+        AudioProcessorValueTreeStateParameterAttributes()
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction ([] (float value, [[maybe_unused]] int maximumStringLength)
+                                          { return value == 0.0f ? "none" : String (value); })
+            .withDiscrete (true)));
+
+    layout.add (std::make_unique<AP> (
+        ParameterID { "ffDfEq", PD_PARAMETER_V1 },
+        "Free/diffuse field EQ",
+        NormalisableRange<float> (0.0f, 2.0f, 1.0f),
+        0.0f,
+        AudioProcessorValueTreeStateParameterAttributes()
+            .withCategory (AudioProcessorParameter::genericParameter)
+            .withStringFromValueFunction ([] (float value, [[maybe_unused]] int maximumStringLength)
+                                          { return value == 0.0f ? "none" : String (value); })
+            .withDiscrete (true)));
 
     layout.add (std::make_unique<AudioParameterBool> (
         ParameterID { "allowBackwardsPattern", PD_PARAMETER_V1 },
@@ -179,30 +200,6 @@ static juce::AudioProcessorValueTreeState::ParameterLayout
             .withCategory (AudioProcessorParameter::genericParameter)
             .withStringFromValueFunction ([] (bool value, [[maybe_unused]] int maximumStringLength)
                                           { return value ? "on" : "off"; })));
-
-    layout.add (std::make_unique<API> (
-        ParameterID { "syncChannel", PD_PARAMETER_V1 },
-        "Sync to Channel",
-        0,
-        4,
-        0,
-        AudioParameterIntAttributes()
-            .withCategory (AudioProcessorParameter::genericParameter)
-            .withStringFromValueFunction ([] (int value, [[maybe_unused]] int maximumStringLength)
-                                          { return value == 0 ? "none" : String (value); })
-            .withAutomatable (false)));
-
-    layout.add (std::make_unique<API> (
-        ParameterID { "ffDfEq", PD_PARAMETER_V1 },
-        "Free/diffuse field EQ",
-        0,
-        2,
-        0,
-        AudioParameterIntAttributes()
-            .withCategory (AudioProcessorParameter::genericParameter)
-            .withStringFromValueFunction ([] (int value, [[maybe_unused]] int maximumStringLength)
-                                          { return value == 0 ? "none" : String (value); })
-            .withAutomatable (false)));
 
     return layout;
 }
