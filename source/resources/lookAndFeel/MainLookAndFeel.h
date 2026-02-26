@@ -1338,10 +1338,10 @@ public:
                     g.setColour (mainColour.withAlpha (0.1f));
                     g.fillRect (toggleButtonBounds);
                 }
-                g.setColour (mainColour.withAlpha (0.2f));
+                g.setColour (mainColour.withAlpha (0.5f));
                 g.fillRect (toggleButtonBounds);
 
-                g.setColour (mainColour.withAlpha (0.5f));
+                g.setColour (mainColour.withAlpha (0.7f));
                 g.drawRect (toggleButtonBounds, 1.f);
                 g.setColour (textColour);
                 g.drawFittedText (button.getButtonText(), x, y, w, h, Justification::centred, 1);
