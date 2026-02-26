@@ -405,6 +405,11 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
             { param, &directivityEqualiser.getDirPathComponent (static_cast<int> (i)) });
     }
 
+    for (size_t i = 0; i < MAX_NUM_EQS; i++)
+        setBandEnabled (
+            static_cast<int> (i),
+            polarDesignerProcessor.bandSelectedState[i].load (std::memory_order_relaxed));
+
     addAndMakeVisible (&tbTrimSliderCenterPointer);
     tbTrimSliderCenterPointer.setButtonText ("Trim Slider Pointer");
 
@@ -1904,6 +1909,9 @@ void PolarDesignerAudioProcessorEditor::setBandEnabled (int bandNr, bool enable)
     tgbSolo[bandNr].setEnabled (enable);
     tgbMute[bandNr].setEnabled (enable);
     slBandGain[bandNr].setEnabled (enable);
+    polarDesignerProcessor.bandSelectedState[static_cast<size_t> (bandNr)].store (
+        enable,
+        std::memory_order_relaxed);
     repaint();
 }
 

@@ -308,6 +308,9 @@ PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     termControlWaveform.setRepaintRate (30);
     termControlWaveform.setBufferSize (256);
 
+    for (auto& band : bandSelectedState)
+        band.store (true, std::memory_order_relaxed);
+
     updateLatency();
 
     resetTrackingState();
@@ -782,6 +785,12 @@ void PolarDesignerAudioProcessor::getStateInformation (juce::MemoryBlock& destDa
     saveStates.addChild (layerA.createCopy(), 1, nullptr);
     saveStates.addChild (layerB.createCopy(), 2, nullptr);
 
+    // persist band selected states
+    for (size_t i = 0; i < bandSelectedState.size(); ++i)
+        saveStates.setProperty ("bandSelected" + String (i),
+                                var (bandSelectedState[i].load (std::memory_order_relaxed)),
+                                nullptr);
+
     std::unique_ptr<XmlElement> xml (saveStates.createXml());
     copyXmlToBinary (*xml, destData);
 
@@ -1104,6 +1113,18 @@ void PolarDesignerAudioProcessor::setStateInformation (const void* data, int siz
                                std::memory_order_relaxed);
         oldNrBands.store (nProcessorBandsPtr->load (std::memory_order_relaxed),
                           std::memory_order_relaxed);
+    }
+
+    for (size_t i = 0; i < bandSelectedState.size(); ++i)
+    {
+        String propName = "bandSelected" + String (i);
+        if (saveStates.hasProperty (propName))
+        {
+            Value val = saveStates.getPropertyAsValue (propName, nullptr);
+            if (val.getValue().toString() != "")
+                bandSelectedState[i].store (static_cast<bool> (val.getValue()),
+                                            std::memory_order_relaxed);
+        }
     }
 
     zeroLatencyModeChanged.store (true, std::memory_order_relaxed);

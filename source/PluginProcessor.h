@@ -196,6 +196,8 @@ public:
 
     juce::UndoManager undoManager;
 
+    std::array<std::atomic<bool>, MAX_NUM_EQS> bandSelectedState;
+
 #if PERFETTO
     // perfetto
     MelatoninPerfetto tracingSession;
