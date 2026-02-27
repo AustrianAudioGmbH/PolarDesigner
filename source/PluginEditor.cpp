@@ -1873,7 +1873,7 @@ void PolarDesignerAudioProcessorEditor::activateEditingForZeroLatency()
     if (! zlIsActive)
     {
         activateMainUI (true, true);
-        abButton.setEnabled (tmbSyncChannelButton.getSelectedButton() == -1);
+        abButton.setEnabled (true);
         updateABButtonState (polarDesignerProcessor.abLayerState);
         nEditorBandsChanged();
         return;
