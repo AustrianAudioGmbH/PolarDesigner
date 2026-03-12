@@ -419,6 +419,7 @@ PolarDesignerAudioProcessorEditor::PolarDesignerAudioProcessorEditor (
     nEditorBandsChanged();
     activateEditingForZeroLatency();
 
+    valueTreeState.addParameterListener ("syncChannel", this);
     valueTreeState.addParameterListener ("ffDfEq", this);
 
     startTimer (60);
@@ -439,6 +440,9 @@ void PolarDesignerAudioProcessorEditor::updateABButtonState (int newState)
 PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
 {
     DBG ("PolarDesignerAudioProcessorEditor destructor called");
+
+    valueTreeState.removeParameterListener ("syncChannel", this);
+    valueTreeState.removeParameterListener ("ffDfEq", this);
 
     sharedTooltipWindow.setVisible (false);
 
@@ -493,8 +497,6 @@ PolarDesignerAudioProcessorEditor::~PolarDesignerAudioProcessorEditor()
             slCrossoverAtt[i].reset();
     }
     setLookAndFeel (nullptr);
-
-    valueTreeState.removeParameterListener ("ffDfEq", this);
 }
 
 //==============================================================================
@@ -2139,10 +2141,26 @@ void PolarDesignerAudioProcessorEditor::parameterChanged (const juce::String& pa
 {
     using namespace juce;
 
-    ignoreUnused (newValue);
+    if (parameterID == "syncChannel")
+    {
+        const auto syncChannelIdx = roundToInt (newValue - 1);
 
-    if (parameterID == "ffDfEq")
-        setEqMode (static_cast<int> (newValue));
+        MessageManager::callAsync (
+            [this, syncChannelIdx]()
+            {
+                if (syncChannelIdx >= 0)
+                {
+                    tmbSyncChannelButton[syncChannelIdx].setToggleState (
+                        true,
+                        NotificationType::dontSendNotification);
+                    tmbSyncChannelButton.disableAllButtonsExcept (syncChannelIdx);
+                }
+                else
+                    tmbSyncChannelButton.disableAllButtons();
+            });
+    }
+    else if (parameterID == "ffDfEq")
+        MessageManager::callAsync ([this, newValue]() { setEqMode (static_cast<int> (newValue)); });
 }
 
 void PolarDesignerAudioProcessorEditor::setMainAreaEnabled (bool enable)
