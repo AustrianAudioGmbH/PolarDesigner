@@ -36,10 +36,7 @@ TEST_CASE ("Processor: startup", "[Processor]")
     auto proc = PolarDesignerAudioProcessor();
     auto& vts = proc.getValueTreeState();
 
-    // FIX:uncommenting this causes a deadlock on atmoky macrunner1 when run through
-    // ci but not when run manually, suggesting this is a very specific race condition.
-    // Needs further investigation
-    // [[maybe_unused]] auto editor = proc.createEditor();
+    [[maybe_unused]] auto editor = proc.createEditor();
 
     vts.getParameter ("zeroLatencyMode")->setValueNotifyingHost (0.0f);
     proc.changeABLayerState (COMPARE_LAYER_B);
@@ -82,5 +79,40 @@ TEST_CASE ("Processor: base latency", "[Processor]")
     {
         proc.prepareToPlay (96000, 32);
         REQUIRE (proc.getLatencySamples() == 401);
+    }
+}
+
+TEST_CASE ("Processor: channel layout", "[Processor]")
+{
+    using namespace juce;
+
+    PolarDesignerAudioProcessor proc;
+
+    AudioProcessor::BusesLayout layout;
+    layout.inputBuses.clear();
+    layout.outputBuses.clear();
+
+    SECTION ("Stereo in, mono out (correct)")
+    {
+        layout.inputBuses.add (AudioChannelSet::stereo());
+        layout.outputBuses.add (AudioChannelSet::mono());
+
+        REQUIRE (proc.isBusesLayoutSupported (layout));
+    }
+
+    SECTION ("Stereo in, stereo out (incorrect)")
+    {
+        layout.inputBuses.add (AudioChannelSet::stereo());
+        layout.outputBuses.add (AudioChannelSet::stereo());
+
+        REQUIRE_FALSE (proc.isBusesLayoutSupported (layout));
+    }
+
+    SECTION ("Mono in, mono out (incorrect)")
+    {
+        layout.inputBuses.add (AudioChannelSet::mono());
+        layout.outputBuses.add (AudioChannelSet::mono());
+
+        REQUIRE_FALSE (proc.isBusesLayoutSupported (layout));
     }
 }
