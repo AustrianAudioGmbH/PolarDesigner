@@ -24,6 +24,7 @@
 #include "Conversions.hpp"
 #include "FilterCoefficients.hpp"
 #include "PluginEditor.h"
+#include "juce_audio_basics/juce_audio_basics.h"
 
 /* We use versionHint of ParameterID from now on - rigorously! */
 #define PD_PARAMETER_V1 1
@@ -570,18 +571,11 @@ bool PolarDesignerAudioProcessor::isBusesLayoutSupported (const BusesLayout& lay
 {
     using namespace juce;
 
-    if ((layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
-         && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
-        || layouts.getMainInputChannelSet() != AudioChannelSet::stereo())
-        return false;
+    if (layouts.getMainInputChannelSet() == AudioChannelSet::stereo()
+        && layouts.getMainOutputChannelSet() == AudioChannelSet::mono())
+        return true;
 
-    if (layouts.getMainInputChannelSet().isDisabled())
-        return false;
-
-    if (layouts.getMainOutputChannelSet().isDisabled())
-        return false;
-
-    return true;
+    return false;
 }
 
 void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
@@ -709,7 +703,7 @@ void PolarDesignerAudioProcessor::processBlockBypassed (
 
     jassert (getLatencySamples() == 0);
 
-    for (int ch = getMainBusNumInputChannels(); ch < getTotalNumOutputChannels(); ++ch)
+    for (int ch = getTotalNumOutputChannels(); ch < getTotalNumInputChannels(); ++ch)
         buffer.clear (ch, 0, buffer.getNumSamples());
 }
 
