@@ -1152,23 +1152,23 @@ public:
         if (! isKnobTooltip)
         {
             auto* toolTip = tooltipValueBox[tooltipIndex].get();
-            auto* parentComponent = toolTip->getParentComponent();
+            auto* lParentComponent = toolTip->getParentComponent();
             toolTip->setBounds (
                 xCoord,
                 yCoord,
-                static_cast<int> (static_cast<float> (parentComponent->getWidth()) * 0.1f),
-                static_cast<int> (static_cast<float> (parentComponent->getHeight()) * 0.1f));
+                static_cast<int> (static_cast<float> (lParentComponent->getWidth()) * 0.1f),
+                static_cast<int> (static_cast<float> (lParentComponent->getHeight()) * 0.1f));
             toolTip->setVisible (true);
         }
         else
         {
             auto* toolTip = tooltipValueKnobBox[tooltipIndex].get();
-            auto* parentComponent = toolTip->getParentComponent();
+            auto* lParentComponent = toolTip->getParentComponent();
             toolTip->setBounds (
                 xCoord,
                 yCoord,
-                static_cast<int> (static_cast<float> (parentComponent->getWidth()) * 0.1f),
-                static_cast<int> (static_cast<float> (parentComponent->getHeight()) * 0.1f));
+                static_cast<int> (static_cast<float> (lParentComponent->getWidth()) * 0.1f),
+                static_cast<int> (static_cast<float> (lParentComponent->getHeight()) * 0.1f));
             toolTip->setVisible (true);
         }
     }
