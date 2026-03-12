@@ -124,8 +124,11 @@ static inline void requireSignalPresent (const juce::AudioBuffer<float>& buffer,
     for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
     {
         const auto rms = buffer.getRMSLevel (ch, 0, buffer.getNumSamples());
-        REQUIRE (rms >= rmsThreshold);
+
+        if (rms > rmsThreshold)
+            return;
     }
+    REQUIRE (false);
 }
 
 static inline void

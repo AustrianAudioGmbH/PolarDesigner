@@ -36,7 +36,8 @@ TEST_CASE ("Processor: startup", "[Processor]")
     auto proc = PolarDesignerAudioProcessor();
     auto& vts = proc.getValueTreeState();
 
-    [[maybe_unused]] auto editor = proc.createEditor();
+    std::unique_ptr<juce::AudioProcessorEditor> editor = nullptr;
+    editor.reset (proc.createEditor());
 
     vts.getParameter ("zeroLatencyMode")->setValueNotifyingHost (0.0f);
     proc.changeABLayerState (COMPARE_LAYER_B);
