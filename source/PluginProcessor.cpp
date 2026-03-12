@@ -24,6 +24,7 @@
 #include "Conversions.hpp"
 #include "FilterCoefficients.hpp"
 #include "PluginEditor.h"
+#include "juce_core/juce_core.h"
 
 /* We use versionHint of ParameterID from now on - rigorously! */
 #define PD_PARAMETER_V1 1
@@ -147,8 +148,9 @@ static juce::AudioProcessorValueTreeState::ParameterLayout
         0.0f,
         AudioProcessorValueTreeStateParameterAttributes()
             .withCategory (AudioProcessorParameter::genericParameter)
-            .withStringFromValueFunction ([] (float value, [[maybe_unused]] int maximumStringLength)
-                                          { return value == 0.0f ? "none" : String (value); })
+            .withStringFromValueFunction (
+                [] (float value, [[maybe_unused]] int maximumStringLength)
+                { return juce::approximatelyEqual (value, 0.0f) ? "none" : String (value); })
             .withDiscrete (true)));
 
     layout.add (std::make_unique<AP> (
@@ -158,8 +160,9 @@ static juce::AudioProcessorValueTreeState::ParameterLayout
         0.0f,
         AudioProcessorValueTreeStateParameterAttributes()
             .withCategory (AudioProcessorParameter::genericParameter)
-            .withStringFromValueFunction ([] (float value, [[maybe_unused]] int maximumStringLength)
-                                          { return value == 0.0f ? "none" : String (value); })
+            .withStringFromValueFunction (
+                [] (float value, [[maybe_unused]] int maximumStringLength)
+                { return juce::approximatelyEqual (value, 0.0f) ? "none" : String (value); })
             .withDiscrete (true)));
 
     layout.add (std::make_unique<AudioParameterBool> (
