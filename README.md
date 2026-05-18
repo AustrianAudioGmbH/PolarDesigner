@@ -29,12 +29,11 @@ cd PolarDesigner
 git submodule update --init --recursive
 ```
 
-After that, create a build directory, configure & compile with
+After that, configure & compile with
 
 ```bash
-mkdir build && cd build
-cmake ..
-cmake --build . --config Release
+cmake -B build --fresh
+cmake --build build --config Release
 ```
 
 ## Acknowledgements:
@@ -47,3 +46,4 @@ PolarDesigner 3 makes use of the following projects:
 - [Pamplejuce (Audio plugin template)](https://github.com/sudara/Pamplejuce)
 - [pluginval (VST Plugin validation tests)](https://github.com/Tracktion/pluginval)
 - [Catch2 (Unit testing framework)](https://github.com/catchorg/Catch2)
+- [IEM Plugin Suite](https://git.iem.at/audioplugins/IEMPluginSuite)
