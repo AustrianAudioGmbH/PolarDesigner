@@ -101,12 +101,12 @@ TEST_CASE ("Processor: channel layout", "[Processor]")
         REQUIRE (proc.isBusesLayoutSupported (layout));
     }
 
-    SECTION ("Stereo in, stereo out (incorrect)")
+    SECTION ("Stereo in, stereo out (correct)")
     {
         layout.inputBuses.add (AudioChannelSet::stereo());
         layout.outputBuses.add (AudioChannelSet::stereo());
 
-        REQUIRE_FALSE (proc.isBusesLayoutSupported (layout));
+        REQUIRE (proc.isBusesLayoutSupported (layout));
     }
 
     SECTION ("Mono in, mono out (incorrect)")

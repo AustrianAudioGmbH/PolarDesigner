@@ -24,6 +24,7 @@
 #include "Conversions.hpp"
 #include "FilterCoefficients.hpp"
 #include "PluginEditor.h"
+#include "juce_audio_basics/juce_audio_basics.h"
 
 /* We use versionHint of ParameterID from now on - rigorously! */
 #define PD_PARAMETER_V1 1
@@ -210,7 +211,7 @@ static juce::AudioProcessorValueTreeState::ParameterLayout
 PolarDesignerAudioProcessor::PolarDesignerAudioProcessor() :
     AudioProcessor (BusesProperties()
                         .withInput ("Input", juce::AudioChannelSet::stereo(), true)
-                        .withOutput ("Output", juce::AudioChannelSet::mono(), true)),
+                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
     repaintDEQ (true),
     zeroLatencyModeChanged (true),
     recomputeAllFilterCoefficients (true),
