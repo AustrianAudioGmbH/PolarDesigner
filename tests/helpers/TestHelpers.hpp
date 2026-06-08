@@ -121,14 +121,13 @@ static inline void requireBuffersEqual (const juce::AudioBuffer<float>& buffer,
 static inline void requireSignalPresent (const juce::AudioBuffer<float>& buffer,
                                          float rmsThreshold = 0.1f)
 {
+    REQUIRE (buffer.getNumChannels() > 0);
+
     for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
     {
         const auto rms = buffer.getRMSLevel (ch, 0, buffer.getNumSamples());
-
-        if (rms > rmsThreshold)
-            return;
+        REQUIRE (rms >= rmsThreshold);
     }
-    REQUIRE (false);
 }
 
 static inline void
