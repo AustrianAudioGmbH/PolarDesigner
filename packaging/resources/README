@@ -1,6 +1,6 @@
 PolarDesigner3 - ReadMe
 
-Version: 3.0.0 Release Date: [21.1.2026]
+Version: 3.1.0
 
 
 About
@@ -47,3 +47,4 @@ PolarDesigner 3 makes use of the following projects:
 • [Pamplejuce (Audio plugin template)](https://github.com/sudara/Pamplejuce)
 • [pluginval (VST Plugin validation tests)](https://github.com/Tracktion/pluginval)
 • [Catch2 (Unit testing framework)](https://github.com/catchorg/Catch2)
+• [IEM Plugin Suite](https://git.iem.at/audioplugins/IEMPluginSuite)
