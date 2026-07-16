@@ -21,7 +21,7 @@
  */
 #pragma once
 
-#include "../lookAndFeel/BinaryFonts.h"
+#include "../lookAndFeel/BinaryFonts.hpp"
 #include "Colours.hpp"
 
 #include <juce_gui_basics/juce_gui_basics.h>

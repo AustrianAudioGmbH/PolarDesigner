@@ -51,7 +51,8 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
-#include "../lookAndFeel/MainLookAndFeel.h"
+#include "../lookAndFeel/MainLookAndFeel.hpp"
+#include <numbers>
 
 #ifdef AA_INCLUDE_MELATONIN
     #include "melatonin_inspector/melatonin/helpers/timing.h"

@@ -20,10 +20,10 @@
  ==============================================================================
  */
 
-#include "PluginProcessor.h"
+#include "PluginProcessor.hpp"
 #include "Conversions.hpp"
 #include "FilterCoefficients.hpp"
-#include "PluginEditor.h"
+#include "PluginEditor.hpp"
 #include "juce_audio_basics/juce_audio_basics.h"
 
 /* We use versionHint of ParameterID from now on - rigorously! */

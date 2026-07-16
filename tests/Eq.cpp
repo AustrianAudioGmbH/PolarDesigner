@@ -23,7 +23,7 @@
 
 #include "helpers/TestHelpers.hpp"
 
-#include <PluginProcessor.h>
+#include <PluginProcessor.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <juce_audio_basics/juce_audio_basics.h>
 

@@ -49,9 +49,9 @@
 
 #pragma once
 
-#include "../lookAndFeel/MainLookAndFeel.h"
-#include "ImgPaths.h"
-#include "TitleBarPaths.h"
+#include "../lookAndFeel/MainLookAndFeel.hpp"
+#include "ImgPaths.hpp"
+#include "TitleBarPaths.hpp"
 #include "juce_graphics/juce_graphics.h"
 
 #include <juce_gui_basics/juce_gui_basics.h>

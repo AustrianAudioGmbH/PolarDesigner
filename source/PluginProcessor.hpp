@@ -23,8 +23,8 @@
 #pragma once
 
 #include "Constants.hpp"
-#include "PDAAXClientExtensions.h"
-#include "resources/Delay.h"
+#include "PDAAXClientExtensions.hpp"
+#include "resources/Delay.hpp"
 
 #include <atomic>
 #include <juce_audio_processors/juce_audio_processors.h>

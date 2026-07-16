@@ -50,11 +50,12 @@
 #pragma once
 
 #include "../../Conversions.hpp"
-#include "../../PluginProcessor.h"
-#include "PolarPatternVisualizer.h"
+#include "../../PluginProcessor.hpp"
+#include "PolarPatternVisualizer.hpp"
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
+#include <numbers>
 
 #ifdef AA_INCLUDE_MELATONIN
     #include "melatonin_inspector/melatonin/helpers/timing.h"

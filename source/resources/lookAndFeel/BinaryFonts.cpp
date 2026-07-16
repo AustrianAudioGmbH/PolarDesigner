@@ -1,4 +1,4 @@
-#include "BinaryFonts.h"
+#include "BinaryFonts.hpp"
 
 //================== NunitoSans-Light.ttf ==================
 static const unsigned char temp_binary_data_0[] =

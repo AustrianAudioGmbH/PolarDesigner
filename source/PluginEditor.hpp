@@ -24,19 +24,19 @@
 
 //#define AA_DO_DEBUG_PATH
 
-#include "PluginProcessor.h"
+#include "PluginProcessor.hpp"
 #include "resources/customComponents/ABComponent.hpp"
-#include "resources/customComponents/AnimatedLabel.h"
-#include "resources/customComponents/DirSlider.h"
-#include "resources/customComponents/DirectivityEQ.h"
-#include "resources/customComponents/EndlessSlider.h"
-#include "resources/customComponents/GainSlider.h"
+#include "resources/customComponents/AnimatedLabel.hpp"
+#include "resources/customComponents/DirSlider.hpp"
+#include "resources/customComponents/DirectivityEQ.hpp"
+#include "resources/customComponents/EndlessSlider.hpp"
+#include "resources/customComponents/GainSlider.hpp"
 #include "resources/customComponents/MultiTextButton.h"
-#include "resources/customComponents/PolarPatternVisualizer.h"
-#include "resources/customComponents/PresetListBox.h"
-#include "resources/customComponents/ReverseSlider.h"
-#include "resources/customComponents/TitleBar.h"
-#include "resources/lookAndFeel/MainLookAndFeel.h"
+#include "resources/customComponents/PolarPatternVisualizer.hpp"
+#include "resources/customComponents/PresetListBox.hpp"
+#include "resources/customComponents/ReverseSlider.hpp"
+#include "resources/customComponents/TitleBar.hpp"
+#include "resources/lookAndFeel/MainLookAndFeel.hpp"
 
 #include <juce_audio_processors/juce_audio_processors.h>
 

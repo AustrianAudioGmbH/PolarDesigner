@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "../lookAndFeel/BinaryFonts.h"
+#include "../lookAndFeel/BinaryFonts.hpp"
 #include "../lookAndFeel/DefaultLookAndFeel.hpp"
 #include "MultiTextButton.hpp"
 
