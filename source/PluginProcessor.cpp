@@ -553,6 +553,7 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     // Load EQ and compute filter coefficients
     loadEqImpulseResponses();
     computeAllFilterCoefficients();
+    updateAllConvolvers();
 
     // Configure ProcessSpec
     ProcessSpec spec { currentSampleRate, static_cast<uint32> (currentBlockSize), 1 };
