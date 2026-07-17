@@ -17,12 +17,12 @@ public:
         static constexpr std::array iterations = { 5, 10, 3000 };
 
         for (auto i = 0; i < iterations[0]; ++i)
-            if (tryLock())
+            if (try_lock())
                 return;
 
         for (auto i = 0; i < iterations[1]; ++i)
         {
-            if (tryLock())
+            if (try_lock())
                 return;
 
             _mm_pause();
@@ -30,9 +30,9 @@ public:
 
         while (true)
         {
-            for (auto i = 0; i < iterations[1]; ++i)
+            for (auto i = 0; i < iterations[2]; ++i)
             {
-                if (tryLock())
+                if (try_lock())
                     return;
 
                 _mm_pause();
@@ -51,7 +51,7 @@ public:
         }
     }
 
-    bool tryLock() noexcept { return ! flag.test_and_set (std::memory_order_acquire); }
+    bool try_lock() noexcept { return ! flag.test_and_set (std::memory_order_acquire); }
 
     void unlock() noexcept { flag.clear (std::memory_order_relaxed); }
 
