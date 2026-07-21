@@ -26,6 +26,7 @@
 #include "PluginEditor.hpp"
 #include "juce_audio_basics/juce_audio_basics.h"
 #include <atomic>
+#include <chrono>
 #include <thread>
 
 /* We use versionHint of ParameterID from now on - rigorously! */
@@ -681,6 +682,7 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         if (newFilterCoefficientsReady.load (std::memory_order_relaxed))
             if (std::unique_lock lock (spinMutex, std::try_to_lock); lock.owns_lock())
                 updateAllConvolvers();
+        // lock goes out of scope -> unlock
 
         for (unsigned int i = 0;
              i < static_cast<size_t> (nActiveBands) && 2 * i + 1 < convolvers.size();
@@ -1463,7 +1465,7 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
     // !!danger zone!!
     // the spin mutex MUST BE HELD in the same thread while this function is executing, otherwhise
     // it might overwrite data the audio thread is reading
-    // do not call this on the audio thread as does a lot of processing and allocates
+    // do not call this on the audio thread as it does a lot of processing and allocates
     // an AudioBuffer to store the impulse response in
 
     using namespace juce;
