@@ -20,11 +20,14 @@
  ==============================================================================
  */
 
-#include "PluginProcessor.h"
+#include "PluginProcessor.hpp"
 #include "Conversions.hpp"
 #include "FilterCoefficients.hpp"
-#include "PluginEditor.h"
+#include "PluginEditor.hpp"
 #include "juce_audio_basics/juce_audio_basics.h"
+#include <atomic>
+#include <chrono>
+#include <thread>
 
 /* We use versionHint of ParameterID from now on - rigorously! */
 #define PD_PARAMETER_V1 1
@@ -349,6 +352,8 @@ PolarDesignerAudioProcessor::~PolarDesignerAudioProcessor()
             vtsParams.removeParameterListener (rangedParam->paramID, this);
         }
     }
+
+    stopConvolutionUpdater();
 }
 
 //==============================================================================
@@ -533,6 +538,7 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     using namespace dsp;
 
     jassert (FILTER_BANK_IR_LENGTH_AT_NATIVE_SAMPLE_RATE > 0);
+    stopConvolutionUpdater();
 
     // Validate inputs
     currentSampleRate = sampleRate > 0 ? sampleRate : FILTER_BANK_NATIVE_SAMPLE_RATE;
@@ -548,6 +554,7 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     // Load EQ and compute filter coefficients
     loadEqImpulseResponses();
     computeAllFilterCoefficients();
+    updateAllConvolvers();
 
     // Configure ProcessSpec
     ProcessSpec spec { currentSampleRate, static_cast<uint32> (currentBlockSize), 1 };
@@ -567,6 +574,8 @@ void PolarDesignerAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     updateLatency();
 
     previousSampleRate = currentSampleRate;
+
+    startConvolutionUpdater();
 }
 
 bool PolarDesignerAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
@@ -604,16 +613,19 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     createOmniAndEightSignals (buffer);
 
     // Proximity compensation
-    auto proximity =
-        approximatelyEqual (proxOnOffPtr->load(), 1.0f) ? proxDistancePtr->load() : 0.f;
-    if (! approximatelyEqual (zeroLatencyModePtr->load(), 1.0f) && (proximity < -0.05))
+    auto proximity = approximatelyEqual (proxOnOffPtr->load (std::memory_order_relaxed), 1.0f)
+                         ? proxDistancePtr->load (std::memory_order_relaxed)
+                         : 0.f;
+    if (! approximatelyEqual (zeroLatencyModePtr->load (std::memory_order_relaxed), 1.0f)
+        && (proximity < -0.05))
     {
         float* writePointerEight = omniEightBuffer.getWritePointer (1);
         dsp::AudioBlock<float> eightBlock (&writePointerEight, 1, numSamples);
         dsp::ProcessContextReplacing<float> contextProxEight (eightBlock);
         proxCompIIR.process (contextProxEight);
     }
-    else if (! approximatelyEqual (zeroLatencyModePtr->load(), 1.0f) && (proximity > 0.05))
+    else if (! approximatelyEqual (zeroLatencyModePtr->load (std::memory_order_relaxed), 1.0f)
+             && (proximity > 0.05))
     {
         float* writePointerOmni = omniEightBuffer.getWritePointer (0);
         dsp::AudioBlock<float> omniBlock (&writePointerOmni, 1, numSamples);
@@ -624,7 +636,7 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     // EQ processing
     if (! approximatelyEqual (zeroLatencyModePtr->load (std::memory_order_relaxed), 1.0f))
     {
-        const auto ffDfEq = static_cast<int> (ffDfEqPtr->load (std::memory_order_relaxed));
+        const auto ffDfEq = juce::roundToInt (ffDfEqPtr->load (std::memory_order_relaxed));
 
         if (ffDfEq == 1)
         {
@@ -653,7 +665,7 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     }
 
     auto nActiveBands = static_cast<int> (nProcessorBands);
-    if (zeroLatencyModePtr->load() > 0.5f)
+    if (zeroLatencyModePtr->load (std::memory_order_relaxed) > 0.5f)
         nActiveBands = 1;
 
     // Copy input to filter bank
@@ -664,9 +676,13 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     }
 
     // Process filter bank convolvers
-    if (zeroLatencyModePtr->load() < 0.5f && nActiveBands > 1)
+    if (zeroLatencyModePtr->load (std::memory_order_relaxed) < 0.5f && nActiveBands > 1)
     {
-        recomputeFilterCoefficientsIfNeeded();
+        // realtime safe convolution IR update
+        if (newFilterCoefficientsReady.load (std::memory_order_relaxed))
+            if (std::unique_lock lock (spinMutex, std::try_to_lock); lock.owns_lock())
+                updateAllConvolvers();
+        // lock goes out of scope -> unlock
 
         for (unsigned int i = 0;
              i < static_cast<size_t> (nActiveBands) && 2 * i + 1 < convolvers.size();
@@ -686,12 +702,8 @@ void PolarDesignerAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     }
 
     if (auto* playhead = getPlayHead())
-    {
         if (auto position = playhead->getPosition())
-        {
             playHeadPosition = *position;
-        }
-    }
 
     termControlWaveform.pushBuffer (buffer);
     if (trackingActive)
@@ -1404,35 +1416,58 @@ void PolarDesignerAudioProcessor::resetXoverFreqs()
 
 void PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded()
 {
-    if (recomputeAllFilterCoefficients.exchange (false, std::memory_order_relaxed))
-    {
-        resetXoverFreqs();
-        computeAllFilterCoefficients();
-        repaintDEQ.store (true, std::memory_order_relaxed);
-        return;
-    }
+    // do not call this on the audio thread, as it will spin until it can aquire the spinlock
 
-    for (unsigned int i = 0; i < MAX_NUM_EQS - 1; ++i)
+    while (updaterIsRunning.load (std::memory_order_relaxed))
     {
-        if (recomputeFilterCoefficients[i].exchange (false, std::memory_order_relaxed))
+        if (recomputeAllFilterCoefficients.exchange (false, std::memory_order_relaxed))
         {
-            computeFilterCoefficients (i);
-            updateConvolver (i);
+            resetXoverFreqs();
+            computeAllFilterCoefficients();
+            repaintDEQ.store (true, std::memory_order_relaxed);
+            continue;
         }
+
+        {
+            std::unique_lock lock (spinMutex, std::defer_lock);
+
+            for (unsigned int i = 0; i < MAX_NUM_EQS - 1; ++i)
+                if (recomputeFilterCoefficients[i].exchange (false, std::memory_order_relaxed))
+                {
+                    if (! lock.owns_lock())
+                        lock.lock(); // spin until we have it (with smart back off)
+
+                    computeFilterCoefficients (i);
+                }
+
+            if (lock.owns_lock())
+                newFilterCoefficientsReady.store (true, std::memory_order_relaxed);
+        }
+
+        std::this_thread::sleep_for (std::chrono::milliseconds (1));
     }
 }
 
 void PolarDesignerAudioProcessor::computeAllFilterCoefficients()
 {
+    // do not call this on the audio thread, as it will spin until it can aquire the spinlock
+
+    std::scoped_lock lock (spinMutex);
+
     for (unsigned int i = 0; i < MAX_NUM_EQS - 1; ++i)
-    {
         computeFilterCoefficients (i);
-    }
-    updateAllConvolvers();
+
+    newFilterCoefficientsReady.store (true, std::memory_order_relaxed);
 }
 
 void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crossoverNr)
 {
+    // !!danger zone!!
+    // the spin mutex MUST BE HELD in the same thread while this function is executing, otherwhise
+    // it might overwrite data the audio thread is reading
+    // do not call this on the audio thread as it does a lot of processing and allocates
+    // an AudioBuffer to store the impulse response in
+
     using namespace juce;
     using namespace dsp;
     if (nProcessorBands == 1)
@@ -1443,7 +1478,9 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
     {
         FilterDesign<float>::FIRCoefficientsPtr lowpass =
             FilterDesign<float>::designFIRLowpassWindowMethod (
-                hzFromZeroToOne (nProcessorBands, 0, xOverFreqsPtr[0]->load()),
+                hzFromZeroToOne (nProcessorBands,
+                                 0,
+                                 xOverFreqsPtr[0]->load (std::memory_order_relaxed)),
                 currentSampleRate,
                 static_cast<size_t> (firLen - 1),
                 WindowingFunction<float>::WindowingMethod::hamming);
@@ -1456,8 +1493,12 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
          ++i)
     {
         const float halfBandwidth =
-            (hzFromZeroToOne (nProcessorBands, i, xOverFreqsPtr[i]->load())
-             - hzFromZeroToOne (nProcessorBands, i - 1, xOverFreqsPtr[i - 1]->load()))
+            (hzFromZeroToOne (nProcessorBands,
+                              i,
+                              xOverFreqsPtr[i]->load (std::memory_order_relaxed))
+             - hzFromZeroToOne (nProcessorBands,
+                                i - 1,
+                                xOverFreqsPtr[i - 1]->load (std::memory_order_relaxed)))
             / 2;
         FilterDesign<float>::FIRCoefficientsPtr lp2bp =
             FilterDesign<float>::designFIRLowpassWindowMethod (
@@ -1469,7 +1510,10 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
         const auto* lp2bpCoeffs = lp2bp->getRawCoefficients();
         auto* filterBufferPointer = firFilterBuffer.getWritePointer (static_cast<int> (i));
         const auto fCenter =
-            halfBandwidth + hzFromZeroToOne (nProcessorBands, i - 1, xOverFreqsPtr[i - 1]->load());
+            halfBandwidth
+            + hzFromZeroToOne (nProcessorBands,
+                               i - 1,
+                               xOverFreqsPtr[i - 1]->load (std::memory_order_relaxed));
 
         for (int j = 0; j < firLen; j++)
         {
@@ -1505,82 +1549,60 @@ void PolarDesignerAudioProcessor::computeFilterCoefficients (unsigned int crosso
                             * (static_cast<float> (i) - (static_cast<float> (firLen) - 1.0f) / 2));
         }
     }
+
+    for (auto i = crossoverNr; i < crossoverNr + 2; ++i)
+    {
+        convolverIRHolder[2 * i] = AudioBuffer<float>();
+        convolverIRHolder[2 * i + 1] = AudioBuffer<float>();
+
+        convolverIRHolder[2 * i].setSize (1, firLen);
+        convolverIRHolder[2 * i + 1].setSize (1, firLen);
+
+        convolverIRHolder[2 * i].copyFrom (0, 0, firFilterBuffer, static_cast<int> (i), 0, firLen);
+        convolverIRHolder[2 * i + 1]
+            .copyFrom (0, 0, firFilterBuffer, static_cast<int> (i), 0, firLen);
+    }
 }
 
 void PolarDesignerAudioProcessor::updateAllConvolvers()
 {
     using namespace juce;
 
-    const auto nBands = nProcessorBands.load();
+    const auto nBands = nProcessorBands.load (std::memory_order_relaxed);
     for (unsigned int i = 0; i < nBands; ++i)
-    {
-        // Load impulse response only if coefficients changed
-        AudioBuffer<float> convSingleBuff (1, firLen);
-        convSingleBuff.copyFrom (0, 0, firFilterBuffer, static_cast<int> (i), 0, firLen);
+        updateConvolver (i);
 
-        convolvers[2 * i].loadImpulseResponse (std::move (convSingleBuff),
-                                               currentSampleRate,
-                                               dsp::Convolution::Stereo::no,
-                                               dsp::Convolution::Trim::no,
-                                               dsp::Convolution::Normalise::no);
-
-        // Re-create convSingleBuff for second copy since previous was moved
-        convSingleBuff = AudioBuffer<float> (1, firLen);
-        convSingleBuff.copyFrom (0,
-                                 0,
-                                 firFilterBuffer,
-                                 static_cast<int> (i),
-                                 0,
-                                 firLen); // Re-copy for Eight convolver
-        convolvers[2 * i + 1].loadImpulseResponse (std::move (convSingleBuff),
-                                                   currentSampleRate,
-                                                   dsp::Convolution::Stereo::no,
-                                                   dsp::Convolution::Trim::no,
-                                                   dsp::Convolution::Normalise::no);
-    }
+    newFilterCoefficientsReady.store (false, std::memory_order_relaxed);
 }
 
 void PolarDesignerAudioProcessor::updateConvolver (size_t convNr)
 {
+    // !!danger zone!!
+    // do not call this without holding the spin mutex
+    // another thread might write to the IR holder while this is reading it
+    // this must only ever be called by the audio thread, as it is not safe to simultaneously
+    // load an impulse response while processing
+
     using namespace juce;
     using namespace dsp;
 
-    if (currentBlockSize == 0 || currentSampleRate <= 0.0)
+    for (auto i = convNr; i < convNr + 1; ++i)
     {
-        LOG_ERROR ("Cannot initialize convolver: invalid block size or sample rate");
-        return;
-    }
+        const auto nSamples = std::min (convolverIRHolder[2 * i].getNumSamples(),
+                                        convolverIRHolder[2 * i + 1].getNumSamples());
 
-    // TODO: ideally we should not allocate the IR holders on the audio thread
-    // prepare impulse response holders
-    std::array<AudioBuffer<float>, 4> convBuffers;
-
-    for (auto i = convNr; i < convNr + 2; ++i)
-    {
-        const auto j = i - convNr;
-        const auto k = j + 2;
-
-        convBuffers[j].setSize (1, firLen);
-        convBuffers[k].setSize (1, firLen);
-
-        convBuffers[j].copyFrom (0, 0, firFilterBuffer, static_cast<int> (i), 0, firLen);
-        convBuffers[k].copyFrom (0, 0, firFilterBuffer, static_cast<int> (i), 0, firLen);
-    }
-
-    for (auto i = convNr; i < convNr + 2; ++i)
-    {
-        const auto j = i - convNr;
-        const auto k = j + 2;
+        if (nSamples <= 0)
+            continue;
 
         // Omni convolver
-        convolvers[2 * i].loadImpulseResponse (std::move (convBuffers[j]),
+        convolvers[2 * i].loadImpulseResponse (std::move (convolverIRHolder[2 * i]),
                                                currentSampleRate,
                                                Convolution::Stereo::no, // isStereo
                                                Convolution::Trim::no, // trim
                                                Convolution::Normalise::no); // normalise
 
         // Eight convolver
-        convolvers[2 * i + 1].loadImpulseResponse (std::move (convBuffers[k]),
+        convolvers[2 * i + 1].loadImpulseResponse (std::move (convolverIRHolder[2 * i + 1]),
                                                    currentSampleRate,
                                                    Convolution::Stereo::no, // isStereo
                                                    Convolution::Trim::no, // trim
@@ -2449,6 +2471,22 @@ void PolarDesignerAudioProcessor::updateFirLen()
         newFirLen++;
     jassert (newFirLen % 2 == 1);
     firLen = newFirLen;
+}
+
+void PolarDesignerAudioProcessor::startConvolutionUpdater()
+{
+    updaterIsRunning.store (true, std::memory_order_release);
+
+    convolutionUpdater =
+        std::thread (&PolarDesignerAudioProcessor::recomputeFilterCoefficientsIfNeeded, this);
+}
+
+void PolarDesignerAudioProcessor::stopConvolutionUpdater()
+{
+    updaterIsRunning.store (false, std::memory_order_relaxed);
+
+    if (convolutionUpdater.joinable())
+        convolutionUpdater.join();
 }
 
 //==============================================================================

@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "../lookAndFeel/MainLookAndFeel.h"
+#include "../lookAndFeel/MainLookAndFeel.hpp"
 
 #include <juce_gui_basics/juce_gui_basics.h>
 

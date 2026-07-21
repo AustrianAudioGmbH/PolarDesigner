@@ -22,7 +22,7 @@
 
 #include "helpers/TestHelpers.hpp"
 
-#include <PluginProcessor.h>
+#include <PluginProcessor.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 /* Make sure that all filters get updated when changing a crossover frequency to 

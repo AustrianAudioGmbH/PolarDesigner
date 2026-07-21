@@ -14,8 +14,8 @@
 #pragma once
 
 #include "../../Constants.hpp"
-#include "../lookAndFeel/MainLookAndFeel.h"
-#include "DirectivityEQ.h"
+#include "../lookAndFeel/MainLookAndFeel.hpp"
+#include "DirectivityEQ.hpp"
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 

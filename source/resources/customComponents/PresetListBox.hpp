@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "../lookAndFeel/MainLookAndFeel.h"
+#include "../lookAndFeel/MainLookAndFeel.hpp"
 #include "BinaryData.h"
 
 #include <juce_audio_processors/juce_audio_processors.h>

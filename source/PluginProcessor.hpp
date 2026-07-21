@@ -23,13 +23,15 @@
 #pragma once
 
 #include "Constants.hpp"
-#include "PDAAXClientExtensions.h"
-#include "resources/Delay.h"
+#include "PDAAXClientExtensions.hpp"
+#include "SpinLock.hpp"
+#include "resources/Delay.hpp"
 
 #include <atomic>
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <math.h>
+#include <thread>
 
 // these params can be synced between plugin instances
 struct ParamsToSync
@@ -140,7 +142,7 @@ public:
         {
             nProcessorBands.store (numBands, std::memory_order_relaxed);
             // Update any internal state as needed
-            recomputeAllFilterCoefficients = true;
+            recomputeAllFilterCoefficients.store (true, std::memory_order_relaxed);
             repaintDEQ.store (true, std::memory_order_relaxed);
         }
     }
@@ -154,6 +156,7 @@ public:
     std::atomic<bool> zeroLatencyModeChanged = true;
     std::array<std::atomic<bool>, MAX_NUM_EQS> recomputeFilterCoefficients;
     std::atomic<bool> recomputeAllFilterCoefficients;
+    std::atomic<bool> newFilterCoefficientsReady;
 
     bool getDisturberRecorded() { return disturberRecorded; }
     bool getSignalRecorded() { return signalRecorded; }
@@ -259,6 +262,8 @@ private:
 
     std::atomic<float>* trimPositionPtr;
 
+    threadsafety::SpinLock spinMutex; // lock free
+
     bool isBypassed;
     bool soloActive;
     bool loadingFile;
@@ -278,6 +283,9 @@ private:
     juce::AudioBuffer<float> firFilterBuffer; // holds filter coefficients, size: 5
     juce::AudioBuffer<float> omniEightBuffer; // holds omni and fig-of-eight signals, size: 2
     std::array<juce::dsp::Convolution, 2 * MAX_NUM_EQS> convolvers;
+    std::array<juce::AudioBuffer<float>, 2 * MAX_NUM_EQS> convolverIRHolder;
+    std::thread convolutionUpdater;
+    std::atomic<bool> updaterIsRunning = true;
 
     double currentSampleRate = 0.0f;
     double previousSampleRate = 0.0f;
@@ -309,6 +317,9 @@ private:
     void resetTrackingState();
 
     void updateABButtonState();
+
+    void startConvolutionUpdater();
+    void stopConvolutionUpdater();
 
     // file handling
     const juce::String presetProperties[27] = {

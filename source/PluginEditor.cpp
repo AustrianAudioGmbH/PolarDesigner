@@ -20,7 +20,7 @@
  ==============================================================================
  */
 
-#include "PluginEditor.h"
+#include "PluginEditor.hpp"
 #include "Constants.hpp"
 
 #include <cstddef>

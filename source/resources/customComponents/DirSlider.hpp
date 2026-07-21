@@ -51,7 +51,7 @@
  https://gist.github.com/yairchu */
 
 #pragma once
-#include "ImgPaths.h"
+#include "ImgPaths.hpp"
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <numbers>

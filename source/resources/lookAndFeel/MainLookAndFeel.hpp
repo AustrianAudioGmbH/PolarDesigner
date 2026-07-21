@@ -10,7 +10,7 @@
 #pragma once
 
 #include "BinaryData.h"
-#include "BinaryFonts.h"
+#include "BinaryFonts.hpp"
 
 #include <juce_graphics/juce_graphics.h>
 #include <juce_gui_basics/juce_gui_basics.h>
